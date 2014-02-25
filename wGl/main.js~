@@ -1,0 +1,131 @@
+
+
+function degToRad(degrees) {
+	return degrees * Math.PI / 180;
+}
+
+var rPyramid = 0;
+var rCube = 0;
+
+var lastTime = 0;
+
+function animate() {
+	/*
+	var timeNow = new Date().getTime();
+	if (lastTime != 0) {
+		var elapsed = timeNow - lastTime;
+
+		rPyramid += (90 * elapsed) / 1000.0;
+		rCube -= (75 * elapsed) / 1000.0;
+	}
+	lastTime = timeNow;
+	
+	var mvMatrix = mat4.create();
+	mat4.identity(mvMatrix);
+	mat4.translate(mvMatrix, mvMatrix, [-1.5, 0.0, 0.0]);
+	mat4.rotate(mvMatrix, mvMatrix, degToRad(rPyramid), [0, 1, 0]);
+	pyramid.setMvMatrix(mvMatrix);
+	
+	mat4.identity(mvMatrix);
+	mat4.translate(mvMatrix, mvMatrix, [1.5, 0.0, 0.0]);
+	mat4.rotate(mvMatrix, mvMatrix, degToRad(rCube), [1, 1, 1]);
+	cube.setMvMatrix(mvMatrix);
+	*/
+    _eyePos[0] += _moveSize;
+    camera.setEye(_eyePos[0], _eyePos[1], _eyePos[2]);
+}
+
+
+function tick() {
+	requestAnimFrame(tick);
+	animate();
+	context.draw();
+}
+
+window.requestAnimFrame = (function() {
+  return window.requestAnimationFrame ||
+         window.webkitRequestAnimationFrame ||
+         window.mozRequestAnimationFrame ||
+         window.oRequestAnimationFrame ||
+         window.msRequestAnimationFrame ||
+         function(/* function FrameRequestCallback */ callback, /* DOMElement Element */ element) {
+           window.setTimeout(callback, 1000/60);
+         };
+})();
+
+var context;
+var scene;
+
+var _eyePos = [-10, 4, 6];
+var _moveSize = .1;
+
+function GCameraController()
+{
+    var _dEyePos = vec3.create();
+    var _dPitch = 0;
+    var _dRoll = 0;
+    var _dYaw = 0;
+    
+    var _eyePos = vec3.create();
+    
+    var _moveSize = .1;
+    var _rotSize = .1;
+    
+    var _cUp, _cDown, _cLeft, cRight = 0;
+    var _cPitch, _cRoll, _cYaw = 0;
+    
+    this.onKeyDown = function(e)
+    {
+        
+    }
+    
+    this.onKeyUp = function(e)
+    {
+        
+    }
+}
+
+function keyboardListener(e)
+{
+    //console.debug(e.keyCode);
+    
+    switch(e.keyCode)
+    {
+        case 65: // left
+            _eyePos[0] += _moveSize;
+            break;
+        case 83: // down
+            _eyePos[2] -= _moveSize;
+            break;
+        case 68: // right
+            _eyePos[0] -= _moveSize;
+            break;
+        case 87: // up
+            _eyePos[2] += _moveSize;
+            break;
+    }
+    
+    camera.setEye(_eyePos[0], _eyePos[1], _eyePos[2]);
+
+}
+
+function start() {
+	context = new GContext(document.getElementById("glcanvas"));
+	scene   = new GScene();
+	camera  = new GCamera();
+	
+	scene.setCamera(camera);
+	
+	camera.setLookAt(0, 0, 0);
+	camera.setUp(0, 1, 0);
+	camera.setEye(_eyePos[0], _eyePos[1], _eyePos[2]);
+    
+    window.addEventListener('keydown',keyboardListener,false);
+	
+	context.setScene(scene);
+	
+	tick();
+	
+	var ldr = new GObjLoader(scene);
+	ldr.loadObj("office3d/18361-obj-3/", "OfficeOBJ.obj");
+}

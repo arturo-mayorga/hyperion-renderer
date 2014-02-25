@@ -1,0 +1,56 @@
+# Blender3D MTL File: BlueFalcon.blend
+# Material Count: 5
+newmtl bluefalcon_bluefalcon.tga
+Ns 90.196078
+Ka 0.000000 0.000000 0.000000
+Kd 0.409600 0.409600 0.409600
+Ks 0.125000 0.125000 0.125000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd bluefalcon.tga
+
+
+newmtl Material
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.639936 0.639936
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 0.800000
+illum 2
+
+
+newmtl Material_bluefalcon.tga
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.639936 0.639936
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 0.800000
+illum 2
+map_Kd bluefalcon.tga
+
+
+newmtl Black_bluefalcon.tga
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.291244 0.291244 0.291244
+Ks 0.182028 0.182028 0.182028
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd bluefalcon.tga
+
+
+newmtl back_back.tga
+Ns 90.196078
+Ka 0.000000 0.000000 0.000000
+Kd 0.409600 0.409600 0.409600
+Ks 0.125000 0.125000 0.125000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd back.tga
+
+

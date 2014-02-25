@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	<script id="shader-fs" type="x-shader/x-fragment">
+    precision mediump float;
+
+    varying vec4 vColor;
+
+    void main(void) {
+        gl_FragColor = vColor;
+    }
+</script>
+
+<script id="shader-vs" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+    attribute vec3 aVertexNormal;
+	//attribute vec2 aVertexTexture;
+
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+	uniform vec4 Kd;
+
+    varying vec4 vColor;
+
+    void main(void) {
+		float zr = 10.0;
+		float z = gl_Position.z;
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+		vColor = Kd;// * vec4(zr/(gl_Position.z*gl_Position.z), zr/(gl_Position.z*gl_Position.z), zr/(gl_Position.z*gl_Position.z), 1);
+    }
+</script>
+
+<script id="fullscreen-fs" type="x-shader/x-fragment">
+precision mediump float;
+
+varying vec2 texCoordinate;
+uniform sampler2D texture0;
+
+void main(void)
+{
+	vec3 color = texture2D(texture0, texCoordinate).xyz;
+	gl_FragColor = vec4(color, 1.0);
+}
+</script>
+
+<script id="fullscreen-vs" type="x-shader/x-vertex">
+attribute vec4 aVertexPosition;
+attribute vec2 aVertexTexture;
+
+varying vec2 texCoordinate;
+
+void main(void)
+{
+	texCoordinate = aVertexTexture;
+	gl_Position = aVertexPosition;
+}
+</script>
+	<script src="glmatrix.js"></script>
+	<script src="gcontext.js"></script>
+	<script src="gobject.js"></script>
+	<script src="gscene.js"></script>
+	<script src="gmtlloader.js"></script>
+	<script src="gobjloader.js"></script> 
+	<script src="gcameracontroller.js"></script>
+	<script src="gtexture.js"></script>	
+	<script src="main.js"></script>  
+    </head>
+    <title></title><body onload="start()">
+  <canvas id="glcanvas" width="512" height="512">
+    Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
+  </canvas>
+</body>
+</html>

@@ -1,7 +1,8 @@
 function GMtlLoader( scene_ )
 {
-	function GMtlReader( mtlStrA )
+	function GMtlReader( mtlStrA, path )
 	{
+	    var _path = path;
 		var _materials = {};
 		var _currentMtl = undefined;
 		
@@ -60,6 +61,20 @@ function GMtlLoader( scene_ )
 			                    parseFloat(lineA[3])] );
 		}
 		
+		var process_mapKd = function( lineA )
+		{
+		    var texArgs = [];
+		    
+		    for (var i = 1; i < lineA.length; ++i)
+		    {
+		        texArgs.push(lineA[i]);
+		    }
+		    
+		    var texture = new GTexture(texArgs, _path);
+		    
+		    _currentMtl.setMapKd(texture);
+		}
+		
 		var lineHandlerMap = 
 		{
 			"#":    process_comment,
@@ -67,6 +82,7 @@ function GMtlLoader( scene_ )
 			ka:     process_ka,
 			kd:     process_kd,
 			ks:     process_ks,
+			map_kd: process_mapKd,
 		}
 		
 		init_GMtlReader ( mtlStrA );
@@ -86,7 +102,7 @@ function GMtlLoader( scene_ )
 				var i = 0;
 				var mtlFile = _client.responseText.split("\n");
 				
-				var mtlReader = new GMtlReader (mtlFile);
+				var mtlReader = new GMtlReader (mtlFile, path);
 				
 				var mtls = mtlReader.getMaterials();
 				

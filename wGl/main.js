@@ -65,6 +65,6 @@ function start() {
 	tick();
 	
 	var ldr = new GObjLoader(scene);
-	ldr.loadObj("office3d/18361-obj-4/", "OfficeOBJ.obj");
+	ldr.loadObj("office3d/18361-obj-1/", "OfficeOBJ.obj");
 	//ldr.loadObj("office3d/18361-50509/", "OfficeOBJ.obj");
 }

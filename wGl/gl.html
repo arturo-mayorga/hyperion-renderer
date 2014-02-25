@@ -3,11 +3,14 @@
     <head>
 	<script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
+    
+    ///uniform sampler2D texture0;
 
     varying vec4 vColor;
+    varying vec2 vTextureCoord;
 
     void main(void) {
-        gl_FragColor = vColor;
+        gl_FragColor = vColor;// * texture2D(texture0, vec2(vTextureCoord.s, vTextureCoord.t));;
     }
 </script>
 
@@ -21,13 +24,15 @@
 	uniform vec4 Kd;
 
     varying vec4 vColor;
+    //varying vec2 vTextureCoord;
 
     void main(void) {
 		float zr = 10.0;
 		float z = gl_Position.z;
         gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 		vColor = Kd;// * vec4(zr/(gl_Position.z*gl_Position.z), zr/(gl_Position.z*gl_Position.z), zr/(gl_Position.z*gl_Position.z), 1);
-    }
+		//vTextureCoord = aVertexTexture;
+	}
 </script>
 
 <script id="fullscreen-fs" type="x-shader/x-fragment">
@@ -63,6 +68,7 @@ void main(void)
 	<script src="gobjloader.js"></script> 
 	<script src="gcameracontroller.js"></script>
 	<script src="gtexture.js"></script>	
+	<script src="gmaterial.js"></script>
 	<script src="main.js"></script>  
     </head>
     <title></title><body onload="start()">

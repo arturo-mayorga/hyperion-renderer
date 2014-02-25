@@ -44,13 +44,15 @@ function GTexture( mtlargs, path )
 		_gl = gl_;
 		_glHandle = _gl.createTexture();
 		
-		if (_image.loaded == true)
-		{
-			sendTextureToGl();
-		}
+		loadTexture();
 	}
 	
-	function initTextures() 
+	this.getName = function()
+	{
+	    return _name;
+	}
+	
+	function loadTexture() 
 	{
 		_image = new Image();
 		_image.onload = handleTextureLoaded;
@@ -69,13 +71,13 @@ function GTexture( mtlargs, path )
 	
 	function sendTextureToGl()
 	{
-		_gl.bindTexture(gl.TEXTURE_2D, _glHandle);
-		_gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, _image);
-		_gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-		_gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-		_gl.generateMipmap(gl.TEXTURE_2D);
-		_gl.bindTexture(gl.TEXTURE_2D, null);
+		_gl.bindTexture(_gl.TEXTURE_2D, _glHandle);
+		_gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, _gl.RGBA, _gl.UNSIGNED_BYTE, _image);
+		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
+		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR_MIPMAP_NEAREST);
+		_gl.generateMipmap(_gl.TEXTURE_2D);
+		_gl.bindTexture(_gl.TEXTURE_2D, null);
 	}
 	
-	init_GTexture( mtlargs );
+	init_GTexture( mtlargs, path );
 }

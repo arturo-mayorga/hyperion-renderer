@@ -28,12 +28,25 @@ function GMaterial ( name )
 		
 		if ( null != gl.shaderProgram.Kd )
 		{
+		    _Kd[3] = (_mapKd==undefined)?1.0:0.0;
 			gl.uniform4fv(gl.shaderProgram.Kd, _Kd);
 		}
 		
 		if ( null != gl.shaderProgram.Ks )
 		{
 			gl.uniform4fv(gl.shaderProgram.Ks, _Ks);
+		}
+		
+		if ( _mapKd != undefined)
+		{
+            gl.activeTexture(gl.TEXTURE0);
+            _mapKd.bind();
+            gl.uniform1i(gl.shaderProgram.texture0, 0);
+		}
+		else
+		{
+		    gl.whiteTexture.bind();
+		    //gl.bindTexture(gl.TEXTURE_2D, null);
 		}
 	}
 	

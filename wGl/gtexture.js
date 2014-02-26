@@ -31,18 +31,20 @@ function GTexture( mtlargs, path )
 	
 	this.bind = function()
 	{
-		_gl.bindTexture(gl.TEXTURE_2D, _glHandle);
+	    if (_glTHandle != undefined)
+	    {
+	        _gl.bindTexture(_gl.TEXTURE_2D, _glTHandle);
+		}
 	}
 	
 	this.release = function()
 	{
-		_gl.bindTexture(gl.TEXTURE_2D, null);
+		_gl.bindTexture(_gl.TEXTURE_2D, null);
 	}
 	
 	this.bindToContext = function( gl_ )
 	{
 		_gl = gl_;
-		_glHandle = _gl.createTexture();
 		
 		loadTexture();
 	}
@@ -71,7 +73,10 @@ function GTexture( mtlargs, path )
 	
 	function sendTextureToGl()
 	{
-		_gl.bindTexture(_gl.TEXTURE_2D, _glHandle);
+	    
+		_glTHandle = _gl.createTexture();
+	   // console.debug("binding: " + _glTHandle + " to " + _name);
+		_gl.bindTexture(_gl.TEXTURE_2D, _glTHandle);
 		_gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, _gl.RGBA, _gl.UNSIGNED_BYTE, _image);
 		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
 		_gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR_MIPMAP_NEAREST);

@@ -9,6 +9,8 @@ function GContext(canvas)
 	var screenTextBuffer;
 	var screenIndxBuffer;
 	
+	var whiteTexture = new GTexture(["white.jpg"], "");
+	
 	this.setScene = function (scene_)
 	{
 		scene = scene_;
@@ -24,23 +26,7 @@ function GContext(canvas)
 		scene.draw();
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 		
-		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-		
-		bindShader(gl.fullscreenProgram);
-		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, rttTexture);
-		gl.uniform1i(gl.fullscreenProgram.samplerUniform, gl.fullscreenProgram.texture0);
-		
-		gl.bindBuffer(gl.ARRAY_BUFFER, screenVertBuffer);
-		gl.vertexAttribPointer(gl.fullscreenProgram.vertexPositionAttribute, screenVertBuffer.itemSize, gl.FLOAT, false, 0, 0);
-		
-		gl.bindBuffer(gl.ARRAY_BUFFER, screenTextBuffer);
-		gl.vertexAttribPointer(gl.fullscreenProgram.vertexTextureAttribute, screenTextBuffer.itemSize, gl.FLOAT, false, 0, 0);
-	
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenIndxBuffer);
-		gl.drawElements(gl.TRIANGLES, screenIndxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-        gl.bindTexture(gl.TEXTURE_2D, null);
+	    drawScreenBuffer();	
 	}
 
     function init_GContext(canvas)
@@ -87,6 +73,32 @@ function GContext(canvas)
 					  gl.STATIC_DRAW);
 		screenIndxBuffer.itemSize = 1;
 		screenIndxBuffer.numItems = 6;
+		
+		whiteTexture.bindToContext(gl);
+		gl.whiteTexture = whiteTexture;
+	}
+	
+	function drawScreenBuffer()
+	{
+	    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+		
+		bindShader(gl.fullscreenProgram);
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, rttTexture);
+		gl.uniform1i(gl.fullscreenProgram.map_Kd, 0);
+		
+		gl.bindBuffer(gl.ARRAY_BUFFER, screenVertBuffer);
+		gl.vertexAttribPointer(gl.fullscreenProgram.positionVertexAttribute, 
+		                       screenVertBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		
+		gl.bindBuffer(gl.ARRAY_BUFFER, screenTextBuffer);
+		gl.vertexAttribPointer(gl.fullscreenProgram.textureVertexAttribute, 
+		                       screenTextBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenIndxBuffer);
+		gl.drawElements(gl.TRIANGLES, screenIndxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+        gl.bindTexture(gl.TEXTURE_2D, null);
 	}
 	
 	function initTextureFramebuffer()
@@ -123,52 +135,33 @@ function GContext(canvas)
 	var _currentProgram;
 	function bindShader(shaderProgram)
 	{
-		if ( _currentProgram != undefined )
-		{
-			/*if ( -1 < shaderProgram.vertexPositionAttribute )
-			{
-				gl.disableVertexAttribArray(shaderProgram.vertexPositionAttribute);
-			}
-			
-			if ( -1 < shaderProgram.vertexTextureAttribute )
-			{
-				gl.disableVertexAttribArray(shaderProgram.vertexTextureAttribute);
-			}
-
-			if ( -1 < shaderProgram.vertexNormalAttribute )
-			{
-				gl.disableVertexAttribArray(shaderProgram.vertexNormalAttribute);
-			}*/
-		}
-
-	
 		gl.useProgram(shaderProgram);
 		_currentProgram = shaderProgram;
 
-		if ( -1 < (shaderProgram.vertexPositionAttribute = 
-		     gl.getAttribLocation(shaderProgram, "aVertexPosition")))
+		if ( -1 < (shaderProgram.positionVertexAttribute = 
+		     gl.getAttribLocation(shaderProgram, "aPositionVertex")))
 		{
-			gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+			gl.enableVertexAttribArray(shaderProgram.positionVertexAttribute);
 		}
 		
-		if ( -1 < (shaderProgram.vertexTextureAttribute = 
-		     gl.getAttribLocation(shaderProgram, "aVertexTexture")))
+		if ( -1 < (shaderProgram.textureVertexAttribute = 
+		     gl.getAttribLocation(shaderProgram, "aTextureVertex")))
 		{
-			gl.enableVertexAttribArray(shaderProgram.vertexTextureAttribute);
+			gl.enableVertexAttribArray(shaderProgram.textureVertexAttribute);
 		}
 
-		if ( -1 < (shaderProgram.vertexNormalAttribute = 
-		     gl.getAttribLocation(shaderProgram, "aVertexNormal")))
+		if ( -1 < (shaderProgram.normalVertexAttribute = 
+		     gl.getAttribLocation(shaderProgram, "aNormalVertex")))
 		{
-			gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
+			gl.enableVertexAttribArray(shaderProgram.normalVertexAttribute);
 		}
 			
-		shaderProgram.texture0 = gl.getUniformLocation(shaderProgram, "texture0");
+		shaderProgram.map_Kd = gl.getUniformLocation(shaderProgram, "uMap_Kd");
 		shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
 		shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-		shaderProgram.Ka = gl.getUniformLocation(shaderProgram, "Ka");
-		shaderProgram.Kd = gl.getUniformLocation(shaderProgram, "Kd");
-		shaderProgram.Ks = gl.getUniformLocation(shaderProgram, "Ks");
+		shaderProgram.Ka = gl.getUniformLocation(shaderProgram, "uKa");
+		shaderProgram.Kd = gl.getUniformLocation(shaderProgram, "uKd");
+		shaderProgram.Ks = gl.getUniformLocation(shaderProgram, "uKs");
 		
 	}
 	

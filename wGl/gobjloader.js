@@ -26,6 +26,29 @@ function GObjLoader( scene_ )
 			return _name;
 		}
 		
+		this.getTVerBuffer = function()
+		{
+		    var len = this.gVerts.length;
+			var ret = [];
+			for (var i = 0; i < len; ++i)
+			{
+				var _this = this.tVerts[i];
+				if ( _this != undefined )
+				{
+					for( var j = 0; j < 2; ++j)
+					{
+						ret.push(_this[j]); 
+					}
+				}
+				else
+				{
+					ret.push(0);
+				}
+			}
+			
+			return ret;
+		}
+		
 		this.getVertBuffer = function()
 		{
 			var len = this.gVerts.length;
@@ -152,7 +175,7 @@ function GObjLoader( scene_ )
 			}
 			
 			_currentMesh = new VboMesh(name);
-			_currentIndex = 0;			
+			_currentIndex = 0;	
 			
 			//console.debug("adding group: " + name);
 		}
@@ -190,14 +213,21 @@ function GObjLoader( scene_ )
 				var vert = _objGVerts[idxs.vertIdx];
 				//_objTVerts[idxs0.];
 				var norm = _objNormals[idxs.normIdx];
+				var vtex = _objTVerts[idxs.textIdx];
 				
 				if ( vert == undefined || norm == undefined )
 				{
 					var wtf = 0;
 				}
 				
+				if (vtex == undefined)
+				{
+				    vtex = [0,0];
+				}
+				
 				_currentMesh.gVerts.push(vert);
 				_currentMesh.nVerts.push(norm);
+				_currentMesh.tVerts.push(vtex);
 				_currentMesh.indices.push(_currentIndex++);
 			}
 		}
@@ -250,8 +280,10 @@ function GObjLoader( scene_ )
 				{
 					var thisMesh = meshList[key];
 					var obj = new GObject(thisMesh.getVertBuffer(),
+					                      thisMesh.getTVerBuffer(),
 										  thisMesh.getNormBuffer(),
-										  thisMesh.indices);
+										  thisMesh.indices,
+										  key);
 										  
 					obj.setMtlName(thisMesh.getMtlName());
 					_target.addChild(obj);

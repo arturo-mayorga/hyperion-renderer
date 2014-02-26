@@ -1,10 +1,12 @@
-function GObject(verts, colors, indices, name)
+function GObject(verts, tverts, normals, indices, name)
 {
    var vertBuffer;
-   var colorBuffer;
+   var tverBuffer;
+   var normlBuffer;
    var indexBuffer;
    var vertA = verts;
-   var coloA = colors;
+   var tverA = tverts;
+   var normA = normals;
    var indxA = indices; 
    var mvMatrix = mat4.create(); 
    mat4.identity(mvMatrix);
@@ -28,46 +30,66 @@ function GObject(verts, colors, indices, name)
    {
 		if (gl_ == undefined) return;
 		gl = gl_;
+		
 		vertBuffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, vertBuffer);
-
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertBuffer); 
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertA), gl.STATIC_DRAW);
 		vertBuffer.itemSize = 3;
 		vertBuffer.numItems = vertA.length/3;
+		
+		tverBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, tverBuffer); 
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tverA), gl.STATIC_DRAW);
+		tverBuffer.itemSize = 2;
+		tverBuffer.numItems = tverA.length/2;
 
-		colorBuffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coloA), gl.STATIC_DRAW);
-		colorBuffer.itemSize = 3;
-		colorBuffer.numItems = coloA.length/3;
+		normlBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, normlBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normA), gl.STATIC_DRAW);
+		normlBuffer.itemSize = 3;
+		normlBuffer.numItems = normA.length/3;
 		
 		indexBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-	
 		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indxA), gl.STATIC_DRAW);
 		indexBuffer.itemSize = 1;
 		indexBuffer.numItems = indxA.length;
-
-		vertA = undefined;
-		coloA = undefined;
-		indxA = indxA;
+		
+		if (indexBuffer.numItems !=  normlBuffer.numItems  ||
+		    indexBuffer.numItems !=  tverBuffer.numItems || 
+		    indexBuffer.numItems != vertBuffer.numItems)
+		{
+		    console.debug("gObject: index missmatch [" + _name + "]");
+		    _valid = false;
+		}
    }
    
+   var _valid = true;
    var _drawMvMatrix = mat4.create();
    
    this.draw = function(parentMvMat, materials)
    {
-		if (gl.shaderProgram.vertexPositionAttribute > -1)
+       if ( !_valid ) return;
+       
+		if (gl.shaderProgram.positionVertexAttribute > -1)
 		{
 			gl.bindBuffer(gl.ARRAY_BUFFER, vertBuffer);
-			gl.vertexAttribPointer(gl.shaderProgram.vertexPositionAttribute, vertBuffer.itemSize, gl.FLOAT, false, 0, 0);
+			gl.vertexAttribPointer(gl.shaderProgram.positionVertexAttribute, 
+			                       vertBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		}
 
-		if (gl.shaderProgram.vertexNormalAttribute > -1)
+		if (gl.shaderProgram.normalVertexAttribute > -1)
 		{
-			gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-			gl.vertexAttribPointer(gl.shaderProgram.vertexNormalAttribute, colorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+			gl.bindBuffer(gl.ARRAY_BUFFER, normlBuffer);
+			gl.vertexAttribPointer(gl.shaderProgram.normalVertexAttribute, 
+			                       normlBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		}
+		
+		if (gl.shaderProgram.textureVertexAttribute > -1)
+		{
+			gl.bindBuffer(gl.ARRAY_BUFFER, tverBuffer);
+			gl.vertexAttribPointer(gl.shaderProgram.textureVertexAttribute, 
+			                       tverBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		}
 		
 		if ( null != gl.shaderProgram.mvMatrixUniform )
@@ -85,6 +107,14 @@ function GObject(verts, colors, indices, name)
 		if ( _material != undefined )
 		{
 			_material.draw();
+		}
+		
+		if (indexBuffer.numItems !=  normlBuffer.numItems  ||
+		    indexBuffer.numItems !=  tverBuffer.numItems || 
+		    indexBuffer.numItems != vertBuffer.numItems)
+		{
+		    console.debug("gObject: index missmatch [" + _name + "]");
+		    _valid = false;
 		}
 		
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);

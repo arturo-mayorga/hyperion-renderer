@@ -2,7 +2,7 @@
 # (assimp v3.0.1270)
 
 newmtl DefaultMaterial
-kd 0.6 0.6 0.6
+kd 0.8 0.8 0.8
 ka 0 0 0
 ks 0 0 0
 d 1
@@ -31,14 +31,14 @@ d 1
 illum 1
 
 newmtl initialShadingGroup
-kd 0.14 0.14 0.14
+kd 0.614 0.6514 0.614
 ka 0 0 0
 ks 0 0 0
 d 1
 illum 1
 
 newmtl lambert3SG
-kd 0.14 0.14 0.14
+kd 0.214 0.214 0.14
 ka 0 0 0
 ks 0 0 0
 d 1
@@ -53,7 +53,7 @@ illum 1
 map_kd -o 1 1 Gen13.jpg
 
 newmtl layeredShader1SG
-kd 0 0 0
+kd 0.2 0.2 0.05
 ka 0 0 0
 ks 0 0 0
 d 1
@@ -74,7 +74,7 @@ d 1
 illum 1
 
 newmtl pasted__layeredShader1SG
-kd 0 0 0
+kd 0.9 0.4 0
 ka 0 0 0
 ks 0 0 0
 d 1
@@ -95,7 +95,7 @@ d 1
 illum 1
 
 newmtl surfaceShader1SG
-kd 0 0 0
+kd 0.8 0.8 1
 ka 0 0 0
 ks 0 0 0
 d 1

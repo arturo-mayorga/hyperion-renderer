@@ -11,7 +11,14 @@ function GMaterial ( name )
 	{
 		gl = gl_;
 		
-		if (_mapKd != undefined) {_mapKd.bindToContext(gl);}
+		if (_mapKd != undefined) 
+		{
+		    _mapKd.bindToContext(gl);
+		}
+		else
+		{
+		    _mapKd = gl.whiteTexture;
+		}
 	}
 	
 	this.getName = function()
@@ -28,26 +35,20 @@ function GMaterial ( name )
 		
 		if ( null != gl.shaderProgram.Kd )
 		{
-		    _Kd[3] = (_mapKd==undefined)?1.0:0.0;
+		    _Kd[3] = (_mapKd===gl.whiteTexture)?1.0:0.0;
 			gl.uniform4fv(gl.shaderProgram.Kd, _Kd);
 		}
+		
+        _mapKd.draw(gl.TEXTURE0, 
+                    gl.shaderProgram.mapKd,
+                    gl.shaderProgram.mapKdScale);
 		
 		if ( null != gl.shaderProgram.Ks )
 		{
 			gl.uniform4fv(gl.shaderProgram.Ks, _Ks);
 		}
 		
-		if ( _mapKd != undefined)
-		{
-            gl.activeTexture(gl.TEXTURE0);
-            _mapKd.bind();
-            gl.uniform1i(gl.shaderProgram.texture0, 0);
-		}
-		else
-		{
-		    gl.whiteTexture.bind();
-		    //gl.bindTexture(gl.TEXTURE_2D, null);
-		}
+		
 	}
 	
 	this.setKd = function( Kd_ )

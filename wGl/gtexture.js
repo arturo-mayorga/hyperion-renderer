@@ -1,26 +1,23 @@
 function GTexture( mtlargs, path ) 
 {
-    var _scale;
 	var _name;
 	var _gl;
 	var _glTHandle;
 	var _image;
 	var _path;
-	var _xScale;
-	var _yScale;
+	var _scale = vec2.fromValues(1, 1);
 	
 	function init_GTexture( a, path )
 	{
 		_path = path;
-		_scale = 1;
 		
 		var aLen = a.length;
 		for (var i = 0; i < aLen; ++i)
 		{
-			if ( a[i] == "s" )
+			if ( a[i] == "-s" )
 			{
-				_xScale = parseFloat(a[++i]);
-				_yScale = parseFloat(a[++i]);
+				_scale[0] = parseFloat(a[++i]);
+				_scale[1] = parseFloat(a[++i]);
 			}
 			else
 			{
@@ -29,11 +26,21 @@ function GTexture( mtlargs, path )
 		}
 	}
 	
-	this.bind = function()
-	{
+	this.draw = function(glTextureTarget, textureUniform, scaleUniform)
+	{    
 	    if (_glTHandle != undefined)
 	    {
-	        _gl.bindTexture(_gl.TEXTURE_2D, _glTHandle);
+	        if ( null != textureUniform )
+	        {
+                _gl.activeTexture(glTextureTarget);
+                _gl.bindTexture(_gl.TEXTURE_2D, _glTHandle);
+                _gl.uniform1i(textureUniform, 0);
+	        }
+	        
+	        if ( null != scaleUniform )
+	        {
+	            _gl.uniform2fv(scaleUniform, _scale);
+	        }
 		}
 	}
 	

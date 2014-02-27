@@ -132,6 +132,7 @@ function GContext(canvas)
         gl.bindRenderbuffer(gl.RENDERBUFFER, null);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	}
+	
 	var _currentProgram;
 	function bindShader(shaderProgram)
 	{
@@ -156,12 +157,14 @@ function GContext(canvas)
 			gl.enableVertexAttribArray(shaderProgram.normalVertexAttribute);
 		}
 			
-		shaderProgram.map_Kd = gl.getUniformLocation(shaderProgram, "uMap_Kd");
+		
 		shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
 		shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-		shaderProgram.Ka = gl.getUniformLocation(shaderProgram, "uKa");
-		shaderProgram.Kd = gl.getUniformLocation(shaderProgram, "uKd");
-		shaderProgram.Ks = gl.getUniformLocation(shaderProgram, "uKs");
+		shaderProgram.Ka         = gl.getUniformLocation(shaderProgram, "uKa");
+		shaderProgram.Kd         = gl.getUniformLocation(shaderProgram, "uKd");
+		shaderProgram.mapKd      = gl.getUniformLocation(shaderProgram, "uMapKd");
+		shaderProgram.mapKdScale = gl.getUniformLocation(shaderProgram, "uMapKdScale");
+		shaderProgram.Ks         = gl.getUniformLocation(shaderProgram, "uKs");
 		
 	}
 	

@@ -46,8 +46,55 @@ var context;
 var scene;
 var camController;
 
-function start() {
-	context = new GContext(document.getElementById("glcanvas"));
+var shaderSrcMap =
+{
+    "phong.vs":undefined,
+    "phong.fs":undefined,
+    "fullscr.vs":undefined,
+    "fullscr.fs":undefined,
+};
+
+function start() 
+{
+    for (var key in shaderSrcMap)
+    {
+        loadShader(key);
+    }
+}
+
+function loadShader(srcName)
+{
+    var client = new XMLHttpRequest();
+    client.open('GET', "shaders/" + srcName);
+    client.onreadystatechange = function() 
+    {
+        if ( client.readyState == 4 )
+        {
+            shaderSrcMap[srcName] = client.responseText; 
+            checkShaderDependencies();
+        }
+    }
+    client.send();
+}
+
+function checkShaderDependencies()
+{
+    for (var key in shaderSrcMap)
+    {
+        if (shaderSrcMap[key] == undefined)
+        {
+            return;
+        }
+    }
+    
+    // if all the shaders are loaded move on
+    // to the main loop
+    mainLoop();
+}
+
+function mainLoop()
+{
+	context = new GContext(document.getElementById("glcanvas"), shaderSrcMap);
 	scene   = new GScene();
 	camera  = new GCamera();
 	

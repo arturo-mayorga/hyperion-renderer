@@ -1,4 +1,4 @@
-function GContext(canvas)
+function GContext(canvas, shaderSrcMap)
 {
 	var scene;
 	var gl;
@@ -29,14 +29,14 @@ function GContext(canvas)
 	    drawScreenBuffer();	
 	}
 
-    function init_GContext(canvas)
+    function init_GContext(canvas, shaderSrcMap)
 	{
 		gl = canvas.getContext("experimental-webgl", { antialias: true } );
 		gl.viewportWidth = canvas.width;
 		gl.viewportHeight = canvas.height;
 		
 		initTextureFramebuffer();
-		initShaders();
+		initShaders(shaderSrcMap);
 		
 		gl.clearColor(0.5, 0.7, 0.5, 1.0);
 		gl.enable(gl.DEPTH_TEST);
@@ -170,8 +170,8 @@ function GContext(canvas)
 	
 	function createShaderProgram(vertex, fragment)
 	{
-		var fragmentShader = getShader(gl, fragment);
-		var vertexShader = getShader(gl, vertex);
+		var fragmentShader = getShader(fragment, gl.FRAGMENT_SHADER);
+		var vertexShader = getShader(vertex, gl.VERTEX_SHADER);
 
 		var shaderProgram = gl.createProgram();
 		gl.attachShader(shaderProgram, vertexShader);
@@ -187,50 +187,32 @@ function GContext(canvas)
 		return shaderProgram;
 	}
 	
-	function initShaders() 
+	function initShaders(shaderSrcMap) 
 	{
 		
-		gl.shaderProgram = createShaderProgram("shader-vs", "shader-fs");
+		gl.shaderProgram = createShaderProgram(shaderSrcMap["phong.vs"], shaderSrcMap["phong.fs"]);
 		
-		gl.fullscreenProgram = createShaderProgram("fullscreen-vs", "fullscreen-fs");
+		gl.fullscreenProgram = createShaderProgram(shaderSrcMap["fullscr.vs"], shaderSrcMap["fullscr.fs"]);
 	}
 	
-	function getShader(gl, id) 
+	function getShader(shaderScript, shaderType) 
 	{
-		var shaderScript = document.getElementById(id);
-		if (!shaderScript) {
-			return null;
-		}
-
-		var str = "";
-		var k = shaderScript.firstChild;
-		while (k) {
-			if (k.nodeType == 3) {
-				str += k.textContent;
-			}
-			k = k.nextSibling;
-		}
-
 		var shader;
-		if (shaderScript.type == "x-shader/x-fragment") {
-			shader = gl.createShader(gl.FRAGMENT_SHADER);
-		} else if (shaderScript.type == "x-shader/x-vertex") {
-			shader = gl.createShader(gl.VERTEX_SHADER);
-		} else {
-			return null;
-		}
+		shader = gl.createShader(shaderType);
 
-		gl.shaderSource(shader, str);
+		gl.shaderSource(shader, shaderScript);
 		gl.compileShader(shader);
 
 		if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
 			alert(gl.getShaderInfoLog(shader));
 			return null;
 		}
+		
+		console.debug(gl.getShaderInfoLog(shader));
 
 		return shader;
 	}
 	
-	init_GContext(canvas);
+	init_GContext(canvas, shaderSrcMap);
 }
 

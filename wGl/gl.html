@@ -1,90 +1,21 @@
 <!DOCTYPE html>
 <html>
     <head>
-	<script id="shader-fs" type="x-shader/x-fragment">
-    precision mediump float;
-    
-    ///uniform sampler2D texture0;
-
-    varying vec4 vColor;
-    varying vec2 vTextureCoord;
-    
-    uniform sampler2D uMapKd;
-    uniform vec2 uMapKdScale;
-
-    void main(void) {
-    gl_FragColor = vColor;
-        gl_FragColor = mix(texture2D(uMapKd, 
-                                     vec2(vTextureCoord.s / uMapKdScale.s, 
-                                          vTextureCoord.t / uMapKdScale.t)), 
-                           vColor, 
-                           vColor.a);
-       // gl_FragColor = vColor;
-        
-    }
-</script>
-
-<script id="shader-vs" type="x-shader/x-vertex">
-    attribute vec3 aPositionVertex;
-    attribute vec3 aNormalVertex;
-	attribute vec2 aTextureVertex;
-
-    uniform mat4 uMVMatrix;
-    uniform mat4 uPMatrix;
-	uniform vec4 uKd;
-
-    varying vec4 vColor;
-    varying vec2 vTextureCoord;
-
-    void main(void) {
-		float zr = 10.0;
-		float z = gl_Position.z;
-        gl_Position = uPMatrix * uMVMatrix * vec4(aPositionVertex, 1.0);
-        vTextureCoord = aTextureVertex;
-		vColor = uKd;// * vec4(zr/(gl_Position.z*gl_Position.z), zr/(gl_Position.z*gl_Position.z), zr/(gl_Position.z*gl_Position.z), 1);
-		//vTextureCoord = aVertexTexture;
-	}
-</script>
-
-<script id="fullscreen-fs" type="x-shader/x-fragment">
-precision mediump float;
-
-varying vec2 vTexCoordinate;
-uniform sampler2D uMap_Kd;
-
-void main(void)
-{
-	vec3 color = texture2D(uMap_Kd, vTexCoordinate).xyz;
-	gl_FragColor = vec4(color, 1.0);
-}
-</script>
-
-<script id="fullscreen-vs" type="x-shader/x-vertex">
-attribute vec4 aPositionVertex;
-attribute vec2 aTextureVertex;
-
-varying vec2 vTexCoordinate;
-
-void main(void)
-{
-	vTexCoordinate = aTextureVertex;
-	gl_Position = aPositionVertex;
-}
-</script>
-	<script src="glmatrix.js"></script>
-	<script src="gcontext.js"></script>
-	<script src="gobject.js"></script>
-	<script src="gscene.js"></script>
-	<script src="gmtlloader.js"></script>
-	<script src="gobjloader.js"></script> 
-	<script src="gcameracontroller.js"></script>
-	<script src="gtexture.js"></script>	
-	<script src="gmaterial.js"></script>
-	<script src="main.js"></script>  
+        <script src="glmatrix.js"></script>
+        <script src="gcontext.js"></script>
+        <script src="gobject.js"></script>
+        <script src="gscene.js"></script>
+        <script src="gmtlloader.js"></script>
+        <script src="gobjloader.js"></script> 
+        <script src="gcameracontroller.js"></script>
+        <script src="gtexture.js"></script>	
+        <script src="gmaterial.js"></script>
+        <script src="main.js"></script>  
     </head>
-    <title></title><body onload="start()">
-  <canvas id="glcanvas" width="512" height="512">
-    Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
-  </canvas>
-</body>
+    <title></title>
+    <body onload="start()">
+        <canvas id="glcanvas" width="512" height="512">
+            Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
+        </canvas>
+    </body>
 </html>

@@ -160,6 +160,7 @@ function GContext(canvas, shaderSrcMap)
 		
 		shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
 		shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+		shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
 		shaderProgram.Ka         = gl.getUniformLocation(shaderProgram, "uKa");
 		shaderProgram.Kd         = gl.getUniformLocation(shaderProgram, "uKd");
 		shaderProgram.mapKd      = gl.getUniformLocation(shaderProgram, "uMapKd");
@@ -190,9 +191,9 @@ function GContext(canvas, shaderSrcMap)
 	function initShaders(shaderSrcMap) 
 	{
 		
-		gl.shaderProgram = createShaderProgram(shaderSrcMap["phong.vs"], shaderSrcMap["phong.fs"]);
+		gl.shaderProgram = createShaderProgram(shaderSrcMap["phong-vs.c"], shaderSrcMap["phong-fs.c"]);
 		
-		gl.fullscreenProgram = createShaderProgram(shaderSrcMap["fullscr.vs"], shaderSrcMap["fullscr.fs"]);
+		gl.fullscreenProgram = createShaderProgram(shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
 	}
 	
 	function getShader(shaderScript, shaderType) 
@@ -207,8 +208,6 @@ function GContext(canvas, shaderSrcMap)
 			alert(gl.getShaderInfoLog(shader));
 			return null;
 		}
-		
-		console.debug(gl.getShaderInfoLog(shader));
 
 		return shader;
 	}

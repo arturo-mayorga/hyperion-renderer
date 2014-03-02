@@ -48,10 +48,10 @@ var camController;
 
 var shaderSrcMap =
 {
-    "phong.vs":undefined,
-    "phong.fs":undefined,
-    "fullscr.vs":undefined,
-    "fullscr.fs":undefined,
+    "phong-vs.c":undefined,
+    "phong-fs.c":undefined,
+    "fullscr-vs.c":undefined,
+    "fullscr-fs.c":undefined,
 };
 
 function start() 
@@ -100,9 +100,9 @@ function mainLoop()
 	
 	scene.setCamera(camera);
 	
-	camera.setLookAt(0, 2, 0);
-	camera.setUp(0, 1, 0);
-	camera.setEye(1, 2, 1);
+	camera.setLookAt(4.232629776000977, 2.6432266235351562, 0.2486426830291748);
+	camera.setUp(-0.09341227263212204, 0.9805285334587097, 0.17273758351802826);
+	camera.setEye(9.44430160522461, 4.382470607757568, -3.9111077785491943);
 	
 	camController = new GCameraController();
 	camController.bindCamera(camera);

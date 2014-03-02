@@ -66,6 +66,7 @@ function GObject(verts, tverts, normals, indices, name)
    
    var _valid = true;
    var _drawMvMatrix = mat4.create();
+   var _normalMatrix = mat4.create();
    
    this.draw = function(parentMvMat, materials)
    {
@@ -92,10 +93,26 @@ function GObject(verts, tverts, normals, indices, name)
 			                       tverBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		}
 		
+		var isDrawMvMatrixReady = false;
 		if ( null != gl.shaderProgram.mvMatrixUniform )
 		{
 			mat4.multiply(_drawMvMatrix, parentMvMat, mvMatrix);
+			isDrawMvMatrixReady = true;
 			gl.uniformMatrix4fv(gl.shaderProgram.mvMatrixUniform, false, _drawMvMatrix);
+		}
+		
+		if ( null != gl.shaderProgram.nMatrixUniform )
+		{
+			if ( !isDrawMvMatrixReady )
+			{
+				mat4.multiply(_drawMvMatrix, parentMvMat, mvMatrix);
+			}
+			
+			// mat4 normalMatrix = transpose(inverse(modelView));
+			mat4.invert(_normalMatrix, _drawMvMatrix);
+			mat4.transpose(_normalMatrix, _normalMatrix);
+			
+			gl.uniformMatrix4fv(gl.shaderProgram.nMatrixUniform, false, _normalMatrix);
 		}
 		
 		if ( _material == undefined &&

@@ -115,8 +115,8 @@ function GObjLoader( scene_ )
 			for ( var i = 0; i < size; ++i )
 			{
 				var stra = scrub(objStrA[i].split(" "));
-				
-                if (stra.length > 0)
+								
+                if ( stra.length > 1 )
                 {
                     var handler = lineHandlerMap[stra[0]];
                     if (handler != undefined)
@@ -150,8 +150,11 @@ function GObjLoader( scene_ )
 		{
 		}
 		
+		var _invertNormals = false;
 		function process_group(lineA)
 		{
+			_invertNormals = false;
+			
 			if ( _currentMesh != undefined )
 			{
 				_groupList[_currentMesh.getName()] = _currentMesh;
@@ -177,7 +180,7 @@ function GObjLoader( scene_ )
 			_currentMesh = new VboMesh(name);
 			_currentIndex = 0;	
 			
-			//console.debug("adding group: " + name);
+			console.debug("adding group: " + name);
 		}
 		
 		function process_vert ( lineA )
@@ -211,18 +214,19 @@ function GObjLoader( scene_ )
 				var idxs = new IndexRecord( lineA[i] );
 				
 				var vert = _objGVerts[idxs.vertIdx];
-				//_objTVerts[idxs0.];
 				var norm = _objNormals[idxs.normIdx];
 				var vtex = _objTVerts[idxs.textIdx];
-				
-				if ( vert == undefined || norm == undefined )
-				{
-					var wtf = 0;
-				}
 				
 				if (vtex == undefined)
 				{
 				    vtex = [0,0];
+				}
+				
+				if ( _invertNormals )
+				{
+					norm[0] *= -1;
+					norm[1] *= -1;
+					norm[2] *= -1;
 				}
 				
 				_currentMesh.gVerts.push(vert);
@@ -243,6 +247,11 @@ function GObjLoader( scene_ )
 			_currentMesh.setMtlName( lineA[1] );
 		}
 		
+		function process_invnv( lineA )
+		{
+			_invertNormals = true;
+		}
+		
 		var lineHandlerMap = 
 		{
 			"#":process_comment,
@@ -251,8 +260,9 @@ function GObjLoader( scene_ )
 			vt :process_texVert,
 			vn :process_normal,
 			f  :process_face,
-			mtllib: process_mtllib,
-			usemtl: process_usemtl,
+			mtllib :process_mtllib,
+			usemtl :process_usemtl,
+			invnv  :process_invnv,
 		}
 		
 		init_GObjReader ( objStrA );
@@ -288,6 +298,8 @@ function GObjLoader( scene_ )
 					obj.setMtlName(thisMesh.getMtlName());
 					_target.addChild(obj);
 				}
+				
+				console.debug("finished loading OBJ");
 			}
 		}
 		_client.send();

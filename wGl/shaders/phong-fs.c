@@ -15,7 +15,7 @@ uniform highp vec3 uKs;
 
 varying highp vec4 lightPosition; 
 
-void main(void) 
+/*void main(void) 
 {
 
     gl_FragColor = mix(texture2D(uMapKd, 
@@ -26,11 +26,11 @@ void main(void)
 					   
 	gl_FragColor = vec4(vNormal.xyz, 1.0);
     
-} 
+} */
 
 
 
-/*
+
 void main(void)
 {
 //temp
@@ -69,7 +69,7 @@ float uKsExponent = 3.0;
 
     gl_FragColor = vec4(color, 1); 
 }
-*/
+
 
 
 

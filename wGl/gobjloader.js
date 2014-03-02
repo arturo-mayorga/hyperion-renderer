@@ -224,9 +224,11 @@ function GObjLoader( scene_ )
 				
 				if ( _invertNormals )
 				{
-					norm[0] *= -1;
-					norm[1] *= -1;
-					norm[2] *= -1;
+				    var temp = norm;
+				    norm = vec3.create();
+					norm[0] = -1*temp[0];
+					norm[1] = -1*temp[1];
+					norm[2] = -1*temp[2];
 				}
 				
 				_currentMesh.gVerts.push(vert);

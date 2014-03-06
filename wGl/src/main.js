@@ -51,8 +51,9 @@ var shaderSrcMap =
     "phong-vs.c":undefined,
     "phong-fs.c":undefined,
     "fullscr-vs.c":undefined,
-    "fullscr-fs.c":undefined,
+    "fullscr-fs.c":undefined
 };
+
 
 function start() 
 {
@@ -61,6 +62,8 @@ function start()
         loadShader(key);
     }
 }
+
+window.onload=start;
 
 function loadShader(srcName)
 {

@@ -82,7 +82,7 @@ function GMtlLoader( scene_ )
 			ka:     process_ka,
 			kd:     process_kd,
 			ks:     process_ks,
-			map_kd: process_mapKd,
+			map_kd: process_mapKd
 		}
 		
 		init_GMtlReader ( mtlStrA );

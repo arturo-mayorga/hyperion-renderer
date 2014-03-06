@@ -264,7 +264,7 @@ function GObjLoader( scene_ )
 			f  :process_face,
 			mtllib :process_mtllib,
 			usemtl :process_usemtl,
-			invnv  :process_invnv,
+			invnv  :process_invnv
 		}
 		
 		init_GObjReader ( objStrA );

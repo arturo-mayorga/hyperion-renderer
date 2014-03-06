@@ -68,7 +68,7 @@ window.onload=start;
 function loadShader(srcName)
 {
     var client = new XMLHttpRequest();
-    client.open('GET', "shaders/" + srcName);
+    client.open('GET', "assets/shaders/" + srcName);
     client.onreadystatechange = function() 
     {
         if ( client.readyState == 4 )
@@ -115,6 +115,6 @@ function mainLoop()
 	tick();
 	
 	var ldr = new GObjLoader(scene);
-	ldr.loadObj("office3d/18361-obj-4/", "OfficeOBJ.obj");
+	ldr.loadObj("assets/3d/office3d/18361-obj-4/", "OfficeOBJ.obj");
 	//ldr.loadObj("office3d/18361-50509/", "OfficeOBJ.obj");
 }

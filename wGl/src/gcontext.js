@@ -9,7 +9,7 @@ function GContext(canvas, shaderSrcMap)
 	var screenTextBuffer;
 	var screenIndxBuffer;
 	
-	var whiteTexture = new GTexture(["white.jpg"], "");
+	var whiteTexture = new GTexture(["white.jpg"], "assets/2d/");
 	
 	this.setScene = function (scene_)
 	{

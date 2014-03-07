@@ -14,12 +14,12 @@ function GMtlLoader( scene_ )
 		
 		var lineHandlerMap = 
 		{
-			"#":    this.process_comment,
-			newmtl: this.process_newmtl,
-			ka:     this.process_ka,
-			kd:     this.process_kd,
-			ks:     this.process_ks,
-			map_kd: this.process_mapKd
+			"#":      this.process_comment,
+			"newmtl": this.process_newmtl,
+			"ka":     this.process_ka,
+			"kd":     this.process_kd,
+			"ks":     this.process_ks,
+			"map_kd": this.process_mapKd
 		}
 		
 		

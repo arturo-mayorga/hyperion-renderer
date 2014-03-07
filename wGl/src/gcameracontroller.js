@@ -55,7 +55,7 @@ function GCameraController()
 	this.dEyePos[0] = this.dEyePos[1] = this.dEyePos[2] = 0;
     this.dX = this.dY = this.dZ = 0;
     this.dPitch = this.dRoll = this.dYaw = 0;
-    thisCam = this;
+    
     window.addEventListener('keydown',this.onKeyDown.bind(this),false);
     window.addEventListener("keyup",this.onKeyUp.bind(this),false);
 }

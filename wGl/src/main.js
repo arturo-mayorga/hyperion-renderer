@@ -26,7 +26,7 @@ function animate() {
 
 
 function tick() {
-	requestAnimFrame(tick);
+	window.requestAnimFrame(tick);
 	animate();
 	context.draw();
 }
@@ -45,6 +45,7 @@ window.requestAnimFrame = (function() {
 var context;
 var scene;
 var camController;
+var camera;
 
 var shaderSrcMap =
 {

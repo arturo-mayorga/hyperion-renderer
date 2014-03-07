@@ -120,15 +120,15 @@ function GObjLoader( scene_ )
 		
 		var lineHandlerMap = 
 		{
-			"#"    :this.process_comment,
-			g      :this.process_group,
-			v      :this.process_vert,
-			vt     :this.process_texVert,
-			vn     :this.process_normal,
-			f      :this.process_face,
-			mtllib :this.process_mtllib,
-			usemtl :this.process_usemtl,
-			invnv  :this.process_invnv
+			"#"      :this.process_comment,
+			"g"      :this.process_group,
+			"v"      :this.process_vert,
+			"vt"     :this.process_texVert,
+			"vn"     :this.process_normal,
+			"f"      :this.process_face,
+			"mtllib" :this.process_mtllib,
+			"usemtl" :this.process_usemtl,
+			"invnv"  :this.process_invnv
 		}
 		
 		
@@ -299,7 +299,7 @@ GObjLoader.prototype.loadObj = function ( path, source )
             var i = 0;
             var obj = this.client.responseText.split("\n");
             
-            testReader = new this.GObjReader (path, obj, this.target);
+            var testReader = new this.GObjReader (path, obj, this.target);
             var meshList = testReader.getMesh();
             var meshCnt = meshList.lenght;
             

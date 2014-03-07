@@ -1,156 +1,152 @@
+/**
+ * @constructor
+ */
 function GCameraController()
 {
-    var _dEyePos = vec3.create();
-    var _dX, _dY, _dZ;
-    var _dPitch, _dRoll, _dYaw;
+    this.dEyePos = vec3.create();
+    this.dX = this.dY = this.dZ = undefined;
+    this.dPitch = this.dRoll = this.dYaw = undefined;
     
-    var _eyePos = vec3.create();
-	var _eyeLookAtDir = vec3.create();
-	var _eyeUp = vec3.create();
-	var _eyeLookAt = vec3.create();
-	var _eyeRight = vec3.create();
+    this.eyePos = vec3.create();
+	this.eyeLookAtDir = vec3.create();
+	this.eyeUp = vec3.create();
+	this.eyeLookAt = vec3.create();
+	this.eyeRight = vec3.create();
+	this.tempDEyePos = vec3.create();
     
-    var _moveSize = .1;
-    var _rotSize = .05;
+    this.moveSize = .1;
+    this.rotSize = .05;
     
-    var _cUp, _cDown, _cLeft, cRight = 0;
-    var _cPitch, _cRoll, _cYaw = 0;
-    
-    var _camera;
-    
-    function init_GCameraController()
-    {
-        _dEyePos[0] = _dEyePos[1] = _dEyePos[2] = 0;
-		_dX = _dY = _dZ = 0;
-		_dPitch = _dRoll = _dYaw = 0;
-		var thisCam = this;
-        window.addEventListener('keydown',onKeyDown,false);
-        window.addEventListener("keyup",onKeyUp,false);
-    }
+    this.camera = undefined;
 	
 	var KEY_CODES = 
 	{
 		LEFT:65, BACK:83, RIGHT:68, FORWARD:87, YAW_LEFT:74,
-		YAW_RIGHT:76, PITCH_UP:73, PITCH_DOWN:75, MOVE_UP:82,
+		YAW_RIGHT:76, PITCH_UP:75, PITCH_DOWN:73, MOVE_UP:82,
 		MOVE_DOWN:70, ROLL_LEFT:85, ROLL_RIGHT:79	
 	};
 	
-	var _keydownMap = {}; var _keyupMap = {};
-	_keydownMap[KEY_CODES.LEFT]       = function() { _dX = -1 };
-	_keyupMap  [KEY_CODES.LEFT]       = function() { if (_dX == -1) {_dX = 0;} };
-	_keydownMap[KEY_CODES.BACK]       = function() { _dZ = -1 };
-	_keyupMap  [KEY_CODES.BACK]       = function() { if (_dZ == -1) {_dZ = 0;} };
-	_keydownMap[KEY_CODES.RIGHT]      = function() { _dX = 1 };
-	_keyupMap  [KEY_CODES.RIGHT]      = function() { if (_dX == 1) {_dX = 0;} };
-	_keydownMap[KEY_CODES.FORWARD]    = function() { _dZ = 1 };
-	_keyupMap  [KEY_CODES.FORWARD]    = function() { if (_dZ == 1) {_dZ = 0;} };
-	_keydownMap[KEY_CODES.YAW_LEFT]   = function() { _dYaw = 1 };
-	_keyupMap  [KEY_CODES.YAW_LEFT]   = function() { if (_dYaw == 1) {_dYaw = 0;} };
-	_keydownMap[KEY_CODES.YAW_RIGHT]  = function() { _dYaw = -1 };
-	_keyupMap  [KEY_CODES.YAW_RIGHT]  = function() { if (_dYaw == -1) {_dYaw = 0;} };
-	_keydownMap[KEY_CODES.PITCH_UP]   = function() { _dPitch = 1 };
-	_keyupMap  [KEY_CODES.PITCH_UP]   = function() { if (_dPitch == 1) {_dPitch = 0;} };
-	_keydownMap[KEY_CODES.PITCH_DOWN] = function() { _dPitch = -1 };
-	_keyupMap  [KEY_CODES.PITCH_DOWN] = function() { if (_dPitch == -1) {_dPitch = 0;} };
-	_keydownMap[KEY_CODES.MOVE_UP]    = function() { _dY = 1 };
-	_keyupMap  [KEY_CODES.MOVE_UP]    = function() { if (_dY == 1) {_dY = 0;} };
-	_keydownMap[KEY_CODES.MOVE_DOWN]  = function() { _dY = -1 };
-	_keyupMap  [KEY_CODES.MOVE_DOWN]  = function() { if (_dY == -1) {_dY = 0;} };
-	_keydownMap[KEY_CODES.ROLL_LEFT]  = function() { _dRoll = -1 };
-	_keyupMap  [KEY_CODES.ROLL_LEFT]  = function() { if (_dRoll == -1) {_dRoll = 0;} };
-	_keydownMap[KEY_CODES.ROLL_RIGHT] = function() { _dRoll = 1 };
-	_keyupMap  [KEY_CODES.ROLL_RIGHT] = function() { if (_dRoll == 1) {_dRoll = 0;} };
+	this.keydownMap = {}; this.keyupMap = {};
+	this.keydownMap[KEY_CODES.LEFT]       = function() { this.dX = -1 };
+	this.keyupMap  [KEY_CODES.LEFT]       = function() { if (this.dX == -1) {this.dX = 0;} };
+	this.keydownMap[KEY_CODES.BACK]       = function() { this.dZ = -1 };
+	this.keyupMap  [KEY_CODES.BACK]       = function() { if (this.dZ == -1) {this.dZ = 0;} };
+	this.keydownMap[KEY_CODES.RIGHT]      = function() { this.dX = 1 };
+	this.keyupMap  [KEY_CODES.RIGHT]      = function() { if (this.dX == 1) {this.dX = 0;} };
+	this.keydownMap[KEY_CODES.FORWARD]    = function() { this.dZ = 1 };
+	this.keyupMap  [KEY_CODES.FORWARD]    = function() { if (this.dZ == 1) {this.dZ = 0;} };
+	this.keydownMap[KEY_CODES.YAW_LEFT]   = function() { this.dYaw = 1 };
+	this.keyupMap  [KEY_CODES.YAW_LEFT]   = function() { if (this.dYaw == 1) {this.dYaw = 0;} };
+	this.keydownMap[KEY_CODES.YAW_RIGHT]  = function() { this.dYaw = -1 };
+	this.keyupMap  [KEY_CODES.YAW_RIGHT]  = function() { if (this.dYaw == -1) {this.dYaw = 0;} };
+	this.keydownMap[KEY_CODES.PITCH_UP]   = function() { this.dPitch = 1 };
+	this.keyupMap  [KEY_CODES.PITCH_UP]   = function() { if (this.dPitch == 1) {this.dPitch = 0;} };
+	this.keydownMap[KEY_CODES.PITCH_DOWN] = function() { this.dPitch = -1 };
+	this.keyupMap  [KEY_CODES.PITCH_DOWN] = function() { if (this.dPitch == -1) {this.dPitch = 0;} };
+	this.keydownMap[KEY_CODES.MOVE_UP]    = function() { this.dY = 1 };
+	this.keyupMap  [KEY_CODES.MOVE_UP]    = function() { if (this.dY == 1) {this.dY = 0;} };
+	this.keydownMap[KEY_CODES.MOVE_DOWN]  = function() { this.dY = -1 };
+	this.keyupMap  [KEY_CODES.MOVE_DOWN]  = function() { if (this.dY == -1) {this.dY = 0;} };
+	this.keydownMap[KEY_CODES.ROLL_LEFT]  = function() { this.dRoll = -1 };
+	this.keyupMap  [KEY_CODES.ROLL_LEFT]  = function() { if (this.dRoll == -1) {this.dRoll = 0;} };
+	this.keydownMap[KEY_CODES.ROLL_RIGHT] = function() { this.dRoll = 1 };
+	this.keyupMap  [KEY_CODES.ROLL_RIGHT] = function() { if (this.dRoll == 1) {this.dRoll = 0;} };
     
-    function onKeyDown(e)
+	this.dEyePos[0] = this.dEyePos[1] = this.dEyePos[2] = 0;
+    this.dX = this.dY = this.dZ = 0;
+    this.dPitch = this.dRoll = this.dYaw = 0;
+    thisCam = this;
+    window.addEventListener('keydown',this.onKeyDown.bind(this),false);
+    window.addEventListener("keyup",this.onKeyUp.bind(this),false);
+}
+	
+GCameraController.prototype.onKeyDown = function (e)
+{
+    this.handler = this.keydownMap[e.keyCode];
+    if (this.handler) { this.handler(); }
+}
+
+GCameraController.prototype.onKeyUp = function (e)
+{
+    this.handler = this.keyupMap[e.keyCode];
+    if (this.handler) { this.handler(); }
+}
+
+GCameraController.prototype.bindCamera = function( camera )
+{
+    var lookAt = vec3.create();
+    this.camera = camera;
+    this.camera.getEye(this.eyePos);
+    this.camera.getLookAt(lookAt);
+    this.camera.getUp(this.eyeUp);
+    vec3.subtract( this.eyeLookAtDir,
+                   lookAt, this.eyePos );
+}
+
+
+GCameraController.prototype.update = function(elapsedTime)
+{
+    if ( this.camera == undefined ) return;
+    
+    vec3.cross(this.eyeRight, this.eyeLookAtDir, this.eyeUp);
+    
+    var r = this.dYaw*this.rotSize;
+    
+    var mvMatrix = mat4.create();
+    mat4.identity(mvMatrix);
+    mat4.rotate(mvMatrix, mvMatrix, this.dYaw*this.rotSize,   this.eyeUp);
+    mat4.rotate(mvMatrix, mvMatrix, this.dPitch*this.rotSize, this.eyeRight);
+    mat4.rotate(mvMatrix, mvMatrix, this.dRoll*this.rotSize,  this.eyeLookAtDir);
+    
+    var tVec = vec4.create();
+    vec4.set(tVec, this.eyeUp[0], this.eyeUp[1], this.eyeUp[2], 0);
+    vec4.transformMat4(tVec, tVec, mvMatrix);
+    vec3.set(this.eyeUp, tVec[0], tVec[1], tVec[2]);
+    
+    vec4.set(tVec, this.eyeRight[0], this.eyeRight[1], this.eyeRight[2], 0);
+    vec4.transformMat4(tVec, tVec, mvMatrix);
+    vec3.set(this.eyeRight, tVec[0], tVec[1], tVec[2]);
+    
+    vec4.set(tVec, this.eyeLookAtDir[0], this.eyeLookAtDir[1], this.eyeLookAtDir[2], 0);
+    vec4.transformMat4(tVec, tVec, mvMatrix);
+    vec3.set(this.eyeLookAtDir, tVec[0], tVec[1], tVec[2]);
+
+    vec3.set(this.tempDEyePos, 0,0,0);
+    
+    if (this.dZ == 1)
     {
-		var handler = _keydownMap[e.keyCode];
-		if (handler) { handler(); }
+        vec3.add(this.tempDEyePos, this.tempDEyePos, this.eyeLookAtDir);
+    }
+    else if (this.dZ == -1)
+    {
+        vec3.subtract(this.tempDEyePos, this.tempDEyePos, this.eyeLookAtDir);
     }
     
-    function onKeyUp(e)
+    if (this.dX == 1)
     {
-		var handler = _keyupMap[e.keyCode];
-		if (handler) { handler(); }
+        vec3.add(this.tempDEyePos, this.tempDEyePos, this.eyeRight);
+    }
+    else if (this.dX == -1)
+    {
+        vec3.subtract(this.tempDEyePos, this.tempDEyePos, this.eyeRight);
     }
     
-    this.bindCamera = function( camera )
+    if (this.dY == 1)
     {
-		var lookAt = vec3.create();
-        _camera = camera;
-        _camera.getEye(_eyePos);
-		_camera.getLookAt(lookAt);
-		_camera.getUp(_eyeUp);
-		vec3.subtract( _eyeLookAtDir,
-					   lookAt, _eyePos );
+        vec3.add(this.tempDEyePos, this.tempDEyePos, this.eyeUp);
+    }
+    else if (this.dY == -1)
+    {
+        vec3.subtract(this.tempDEyePos, this.tempDEyePos, this.eyeUp);
     }
     
-	var _tempDEyePos = vec3.create();
-    this.update = function(elapsedTime)
-    {
-        if ( _camera == undefined ) return;
-		
-		vec3.cross(_eyeRight, _eyeLookAtDir, _eyeUp);
-		
-		var r = _dYaw*_rotSize;
-		
-		var mvMatrix = mat4.create();
-		mat4.identity(mvMatrix);
-		mat4.rotate(mvMatrix, mvMatrix, _dYaw*_rotSize,   _eyeUp);
-		mat4.rotate(mvMatrix, mvMatrix, _dPitch*_rotSize, _eyeRight);
-		mat4.rotate(mvMatrix, mvMatrix, _dRoll*_rotSize,  _eyeLookAtDir);
-		
-		var tVec = vec4.create();
-		vec4.set(tVec, _eyeUp[0], _eyeUp[1], _eyeUp[2], 0);
-		vec4.transformMat4(tVec, tVec, mvMatrix);
-		vec3.set(_eyeUp, tVec[0], tVec[1], tVec[2]);
-		
-		vec4.set(tVec, _eyeRight[0], _eyeRight[1], _eyeRight[2], 0);
-		vec4.transformMat4(tVec, tVec, mvMatrix);
-		vec3.set(_eyeRight, tVec[0], tVec[1], tVec[2]);
-		
-		vec4.set(tVec, _eyeLookAtDir[0], _eyeLookAtDir[1], _eyeLookAtDir[2], 0);
-		vec4.transformMat4(tVec, tVec, mvMatrix);
-		vec3.set(_eyeLookAtDir, tVec[0], tVec[1], tVec[2]);
- 
-		vec3.set(_tempDEyePos, 0,0,0);
-		
-		if (_dZ == 1)
-		{
-			vec3.add(_tempDEyePos, _tempDEyePos, _eyeLookAtDir);
-		}
-		else if (_dZ == -1)
-		{
-			vec3.subtract(_tempDEyePos, _tempDEyePos, _eyeLookAtDir);
-		}
-		
-		if (_dX == 1)
-		{
-			vec3.add(_tempDEyePos, _tempDEyePos, _eyeRight);
-		}
-		else if (_dX == -1)
-		{
-			vec3.subtract(_tempDEyePos, _tempDEyePos, _eyeRight);
-		}
-		
-		if (_dY == 1)
-		{
-			vec3.add(_tempDEyePos, _tempDEyePos, _eyeUp);
-		}
-		else if (_dY == -1)
-		{
-			vec3.subtract(_tempDEyePos, _tempDEyePos, _eyeUp);
-		}
-		
-		vec3.normalize(_tempDEyePos,_tempDEyePos);
-		vec3.scale(_tempDEyePos, _tempDEyePos, _moveSize);
-		vec3.add(_eyePos, _eyePos, _tempDEyePos);
-		
-		vec3.add(_eyeLookAt, _eyePos, _eyeLookAtDir);
-        
-        camera.setEye(_eyePos[0], _eyePos[1], _eyePos[2]);
-		camera.setLookAt(_eyeLookAt[0], _eyeLookAt[1], _eyeLookAt[2]);
-		camera.setUp(_eyeUp[0], _eyeUp[1], _eyeUp[2]);
-    }
+    vec3.normalize(this.tempDEyePos,this.tempDEyePos);
+    vec3.scale(this.tempDEyePos, this.tempDEyePos, this.moveSize);
+    vec3.add(this.eyePos, this.eyePos, this.tempDEyePos);
     
-    init_GCameraController();
+    vec3.add(this.eyeLookAt, this.eyePos, this.eyeLookAtDir);
+    
+    camera.setEye(this.eyePos[0], this.eyePos[1], this.eyePos[2]);
+    camera.setLookAt(this.eyeLookAt[0], this.eyeLookAt[1], this.eyeLookAt[2]);
+    camera.setUp(this.eyeUp[0], this.eyeUp[1], this.eyeUp[2]);
 }

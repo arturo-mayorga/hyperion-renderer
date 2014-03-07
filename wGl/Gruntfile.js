@@ -25,6 +25,7 @@ module.exports = function(grunt) {
                     'src/gmaterial.js',
                     'src/gobject.js',
                     'src/gtexture.js',
+                    'src/gcamera.js',
                     'src/gscene.js',
                     'src/gcontext.js',
                     'src/gmtlloader.js',
@@ -34,12 +35,12 @@ module.exports = function(grunt) {
                 ],
                 jsOutputFile: 'build/main.min.js',
                 options: {
-                    compilation_level: 'SIMPLE_OPTIMIZATIONS',
-                    //language_in: 'ECMASCRIPT5_STRICT',
+                    compilation_level: 'ADVANCED_OPTIMIZATIONS',
+                    language_in: 'ECMASCRIPT5_STRICT'/*,
                     define: [
                         '"DEBUG=false"',
                         '"UI_DELAY=500"'
-                    ],
+                    ],*/
                 }
             }
         }

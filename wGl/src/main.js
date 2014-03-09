@@ -21,6 +21,7 @@ function animate() {
 	}
 	lastTime = timeNow;
 
+	lesson.update(elapsed);
 	camController.update(elapsed);
 }
 
@@ -46,6 +47,7 @@ var context;
 var scene;
 var camController;
 var camera;
+var lesson;
 
 var shaderSrcMap =
 {
@@ -101,6 +103,7 @@ function mainLoop()
 	context = new GContext(document.getElementById("glcanvas"), shaderSrcMap);
 	scene   = new GScene();
 	camera  = new GCamera();
+	lesson = createLesson();
 	
 	scene.setCamera(camera);
 	

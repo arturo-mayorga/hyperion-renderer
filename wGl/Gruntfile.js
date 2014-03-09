@@ -22,10 +22,10 @@ module.exports = function(grunt) {
             frontend: {
                 js: [
                     'src/glmatrix.js',
+                    'src/gcamera.js',
                     'src/gmaterial.js',
                     'src/gobject.js',
                     'src/gtexture.js',
-                    'src/gcamera.js',
                     'src/gscene.js',
                     'src/gcontext.js',
                     'src/gmtlloader.js',

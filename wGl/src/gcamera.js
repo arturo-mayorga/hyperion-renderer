@@ -17,7 +17,6 @@ function GCamera()
 	this.lookAt = vec3.fromValues(0, 0, 1);
 	
 	this.mvMatrix = mat4.create();
-	mat4.identity(this.mvMatrix);
 }
 	
 GCamera.prototype.draw = function(ouMvMatrix)

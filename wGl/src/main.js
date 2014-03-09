@@ -1,9 +1,5 @@
 
 
-function degToRad(degrees) {
-	return degrees * Math.PI / 180;
-}
-
 var rPyramid = 0;
 var rCube = 0;
 
@@ -23,13 +19,13 @@ function animate() {
 
 	lesson.update(elapsed);
 	camController.update(elapsed);
+	context.draw(elapsed);
 }
 
 
 function tick() {
 	window.requestAnimFrame(tick);
 	animate();
-	context.draw();
 }
 
 window.requestAnimFrame = (function() {

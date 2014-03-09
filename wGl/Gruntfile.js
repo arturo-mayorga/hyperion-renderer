@@ -21,6 +21,8 @@ module.exports = function(grunt) {
         'closure-compiler': {
             frontend: {
                 js: [
+                    'src/fsm.js',
+                    'src/lessonfsm.js',
                     'src/glmatrix.js',
                     'src/gcamera.js',
                     'src/gmaterial.js',

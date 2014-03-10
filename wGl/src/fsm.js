@@ -74,6 +74,7 @@ function FsmMachine()
  */
 FsmMachine.prototype.addState = function ( name, state ) 
 {
+	state.setSignalObserver(this);
 	var transitions = new FsmStateTransitions(state);
 	this.nameStateMap[name] = transitions;
 };

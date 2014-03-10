@@ -208,7 +208,7 @@ function GObjLoader( scene_ )
         this.currentMesh = new VboMesh(name);
         this.currentIndex = 0;	
         
-        console.debug("adding group: " + name);
+        //console.debug("adding group: " + name);
     }
     
     this.GObjReader.prototype.process_vert = function( lineA )

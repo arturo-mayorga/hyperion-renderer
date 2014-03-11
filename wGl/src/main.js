@@ -99,7 +99,7 @@ function mainLoop()
 	context = new GContext(document.getElementById("glcanvas"), shaderSrcMap);
 	scene   = new GScene();
 	camera  = new GCamera();
-	lesson = createLesson();
+	
 	
 	scene.setCamera(camera);
 	
@@ -112,9 +112,8 @@ function mainLoop()
 	
 	context.setScene(scene);
 	
-	tick();
 	
-	var ldr = new GObjLoader(scene);
-	ldr.loadObj("assets/3d/office3d/18361-obj-4/", "OfficeOBJ.obj");
-	//ldr.loadObj("office3d/18361-50509/", "OfficeOBJ.obj");
+	lesson = createLesson(scene);
+	
+	tick();
 }

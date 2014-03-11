@@ -1,3 +1,14 @@
+/**
+ * @interface
+ */
+function GObjLoaderObserver () {}
+GObjLoaderObserver.prototype.onObjLoaderCompleted = function () {};
+
+/**
+ * @param {number} progress Progress value
+ */
+GObjLoaderObserver.prototype.onObjLoaderProgress = function ( progress ) {};
+
 
 /**
  * @constructor
@@ -281,45 +292,71 @@ function GObjLoader( scene_ )
     {
         this.invertNormals = true;
     }
-		
-		
-
 
 	this.client = new XMLHttpRequest();
 	this.target = scene_;
+	this.isDownloadComplete = false;
 }
 	
 GObjLoader.prototype.loadObj = function ( path, source )
 {
+    this.isDownloadComplete = false;
     this.client.open('GET', path + source);
+    this.currentPath = path;
     this.client.onreadystatechange = function() 
     {
         if ( this.client.readyState == 4 )
         {
-            var i = 0;
-            var obj = this.client.responseText.split("\n");
-            
-            var testReader = new this.GObjReader (path, obj, this.target);
-            var meshList = testReader.getMesh();
-            var meshCnt = meshList.lenght;
-            
-            for (var key in meshList)
-            {
-                var thisMesh = meshList[key];
-                var obj = new GObject(thisMesh.getVertBuffer(),
-                                      thisMesh.getTVerBuffer(),
-                                      thisMesh.getNormBuffer(),
-                                      thisMesh.indices,
-                                      key);
-                                      
-                obj.setMtlName(thisMesh.getMtlName());
-                this.target.addChild(obj);
-            }
-            
-            console.debug("finished loading OBJ");
+            this.isDownloadComplete = true;
         }
     }.bind(this);
     this.client.send();
+}
+
+/**
+ * @param {number} time Time value
+ */
+GObjLoader.prototype.update = function ( time )
+{
+    if ( this.isDownloadComplete )
+    {
+        this.isDownloadComplete = false;
+        
+        var i = 0;
+        var obj = this.client.responseText.split("\n");
+        
+        var testReader = new this.GObjReader (this.currentPath, obj, this.target);
+        var meshList = testReader.getMesh();
+        var meshCnt = meshList.lenght;
+        
+        for (var key in meshList)
+        {
+            var thisMesh = meshList[key];
+            var obj = new GObject(thisMesh.getVertBuffer(),
+                                  thisMesh.getTVerBuffer(),
+                                  thisMesh.getNormBuffer(),
+                                  thisMesh.indices,
+                                  key);
+                                  
+            obj.setMtlName(thisMesh.getMtlName());
+            this.target.addChild(obj);
+        }
+        
+        if (this.observer != undefined)
+        {
+            this.observer.onObjLoaderCompleted();
+        }
+        
+        console.debug("finished loading OBJ");
+    }
+}
+
+/**
+ * @param {GObjLoaderObserver} observer Observer that receives updates
+ */
+GObjLoader.prototype.setObserver = function ( observer )
+{
+    this.observer = observer;
 }
 	
 

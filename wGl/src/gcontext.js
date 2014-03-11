@@ -143,6 +143,25 @@ GContext.prototype.initTextureFramebuffer = function()
 GContext.prototype.bindShader = function(shaderProgram)
 {
     var gl = this.gl;
+    
+    if (this.currentProgram != undefined)
+	{
+		if ( -1 < this.currentProgram.positionVertexAttribute)
+		{
+			gl.disableVertexAttribArray(this.currentProgram.positionVertexAttribute);
+		}
+		
+		if ( -1 < this.currentProgram.textureVertexAttribute)
+		{
+			gl.disableVertexAttribArray(this.currentProgram.textureVertexAttribute);
+		}
+	
+		if ( -1 < this.currentProgram.normalVertexAttribute)
+		{
+			gl.disableVertexAttribArray(this.currentProgram.normalVertexAttribute);
+		}
+	}
+    
     gl.useProgram(shaderProgram);
     this.currentProgram = shaderProgram;
 

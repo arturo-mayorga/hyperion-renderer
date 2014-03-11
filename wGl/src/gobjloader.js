@@ -122,14 +122,18 @@ function GObjLoader( scene_ )
 		this.currentMesh = undefined;
 		this.scene = scene;
         this.path = path;
+        this.objStrA = objStrA;
 
 		this.currentIndex = 0;
 		
-		this.groupList = {};
+		this.groupList = [];
+		this.groupMap = {};
 		
 		this.invertNormals = false;
+		this.isLoadComplete = false;
+		this.updateIndex = 0;
 		
-		var lineHandlerMap = 
+		this.lineHandlerMap = 
 		{
 			"#"      :this.process_comment,
 			"g"      :this.process_group,
@@ -141,30 +145,37 @@ function GObjLoader( scene_ )
 			"usemtl" :this.process_usemtl,
 			"invnv"  :this.process_invnv
 		}
-		
-		
-		
-        var size = objStrA.length;
-        for ( var i = 0; i < size; ++i )
+	}
+	
+	this.GObjReader.prototype.update = function (time)
+	{
+	   
+	    
+        if ( this.updateIndex < this.objStrA.length )
         {
-            var stra = this.scrub(objStrA[i].split(" "));
+            var stra = this.scrub(this.objStrA[this.updateIndex ].split(" "));
                             
             if ( stra.length > 1 )
             {
-                this.handler = lineHandlerMap[stra[0]];
+                this.handler = this.lineHandlerMap[stra[0]];
                 if (this.handler != undefined)
                 {
                     this.handler(stra);
                 }
                 else
                 {
-                    console.debug("Cant handle [" + objStrA[i] + "]");
+                    console.debug("Cant handle [" + objStrA[this.updateIndex ] + "]");
                 }
             }
+            
+            ++this.updateIndex;
         }
+        else
+        {
+            this.isLoadComplete = true;
+        }
+        
 	}
-	
-	
 	
 	this.GObjReader.prototype.getMesh = function ()
     {
@@ -197,7 +208,8 @@ function GObjLoader( scene_ )
         
         if ( this.currentMesh != undefined )
         {
-            this.groupList[this.currentMesh.getName()] = this.currentMesh;
+            this.groupMap[this.currentMesh.getName()] = this.currentMesh;
+            this.groupList.push(this.currentMesh);
         }
         
         this.currentVertIMap = {};
@@ -211,7 +223,7 @@ function GObjLoader( scene_ )
             name += " " + lineA[i];
         }
         
-        while (this.groupList[name] != undefined)
+        while (this.groupMap[name] != undefined)
         {
             name += "_";
         }
@@ -296,6 +308,11 @@ function GObjLoader( scene_ )
 	this.client = new XMLHttpRequest();
 	this.target = scene_;
 	this.isDownloadComplete = false;
+	this.isReaderReady = false;
+	this.isReadComplete = false;
+	this.isInsertComplete = false;
+	this.insertIndex = 0;
+	this.availableTime = 17;
 }
 	
 GObjLoader.prototype.loadObj = function ( path, source )
@@ -318,36 +335,74 @@ GObjLoader.prototype.loadObj = function ( path, source )
  */
 GObjLoader.prototype.update = function ( time )
 {
-    if ( this.isDownloadComplete )
+    var timeStart = new Date().getTime();
+    
+    var targetTime = 17;
+    
+    if (time > targetTime)
     {
-        this.isDownloadComplete = false;
-        
-        var i = 0;
-        var obj = this.client.responseText.split("\n");
-        
-        var testReader = new this.GObjReader (this.currentPath, obj, this.target);
-        var meshList = testReader.getMesh();
-        var meshCnt = meshList.lenght;
-        
-        for (var key in meshList)
+        --this.availableTime;
+    }
+    else
+    {
+        ++this.availableTime;
+    }
+    
+    while ( ( (new Date().getTime()) - timeStart) < this.availableTime )
+    {
+        if ( this.isInsertComplete )
         {
-            var thisMesh = meshList[key];
-            var obj = new GObject(thisMesh.getVertBuffer(),
-                                  thisMesh.getTVerBuffer(),
-                                  thisMesh.getNormBuffer(),
-                                  thisMesh.indices,
-                                  key);
-                                  
-            obj.setMtlName(thisMesh.getMtlName());
-            this.target.addChild(obj);
+            if (this.observer != undefined)
+            {
+                this.observer.onObjLoaderCompleted();
+                return;
+            }
         }
-        
-        if (this.observer != undefined)
+        else if ( this.isReadComplete )
         {
-            this.observer.onObjLoaderCompleted();
+            var meshList = this.testReader.getMesh();
+            
+            if ( this.insertIndex < meshList.length )
+            {
+                var thisMesh = meshList[this.insertIndex];
+                var obj = new GObject(thisMesh.getVertBuffer(),
+                                      thisMesh.getTVerBuffer(),
+                                      thisMesh.getNormBuffer(),
+                                      thisMesh.indices,
+                                      thisMesh.getName());
+                                      
+                obj.setMtlName(thisMesh.getMtlName());
+                this.target.addChild(obj);
+                
+                ++this.insertIndex;
+            }
+            else
+            {
+                this.isInsertComplete = true;
+            }
+            
+            return;
         }
-        
-        console.debug("finished loading OBJ");
+        else if ( this.isReaderReady )
+        {
+            if (false == this.testReader.isLoadComplete)
+            {
+                this.testReader.update( time );
+            }
+            else
+            {
+                this.isReadComplete = true;
+            }
+        }
+        else if ( this.isDownloadComplete )
+        {    
+            var i = 0;
+            var obj = this.client.responseText.split("\n");
+            
+            this.testReader = new this.GObjReader (this.currentPath, obj, this.target);
+            
+            this.isReaderReady = true;
+        }
     }
 }
 

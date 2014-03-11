@@ -380,8 +380,6 @@ GObjLoader.prototype.update = function ( time )
             {
                 this.isInsertComplete = true;
             }
-            
-            return;
         }
         else if ( this.isReaderReady )
         {

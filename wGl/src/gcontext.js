@@ -24,7 +24,7 @@ function GContext(canvas, shaderSrcMap)
     this.initTextureFramebuffer();
     this.initShaders(shaderSrcMap);
     
-    gl.clearColor(0.5, 0.7, 0.5, 1.0);
+    gl.clearColor(0.1, 0.3, 0.1, 1.0);
     gl.enable(gl.DEPTH_TEST);
     
     
@@ -77,6 +77,7 @@ GContext.prototype.draw = function()
     this.bindShader(gl.shaderProgram);
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.rttFramebuffer);
     gl.viewport(0, 0, 1024, 1024);
+    gl.enable(gl.DEPTH_TEST);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	
     scene.draw();
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -87,6 +88,8 @@ GContext.prototype.draw = function()
 GContext.prototype.drawScreenBuffer = function()
 {
     var gl = this.gl;
+	
+    gl.disable(gl.DEPTH_TEST);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     

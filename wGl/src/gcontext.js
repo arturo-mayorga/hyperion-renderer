@@ -15,6 +15,7 @@ function GContext(canvas, shaderSrcMap)
 	var whiteTexture = new GTexture(["white.jpg"], "assets/2d/");
     
     this.gl = canvas.getContext("experimental-webgl", { antialias: true } );
+	
     var gl = this.gl;
     
     gl.viewportWidth = canvas.width;
@@ -75,7 +76,7 @@ GContext.prototype.draw = function()
     var gl = this.gl;
     this.bindShader(gl.shaderProgram);
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.rttFramebuffer);
-    gl.viewport(0, 0, 512, 512);
+    gl.viewport(0, 0, 1024, 1024);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	
     scene.draw();
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -112,8 +113,8 @@ GContext.prototype.initTextureFramebuffer = function()
     var gl = this.gl;
     this.rttFramebuffer = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.rttFramebuffer);
-    this.rttFramebuffer.width = 512;
-    this.rttFramebuffer.height = 512;
+    this.rttFramebuffer.width = 1024;
+    this.rttFramebuffer.height = 1024;
     
     this.rttTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.rttTexture);

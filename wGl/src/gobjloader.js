@@ -140,6 +140,7 @@ function GObjLoader( scene_ )
 		this.invertNormals = false;
 		this.isLoadComplete = false;
 		this.updateIndex = 0;
+		this.polyCount = 0;
 		
 		this.lineHandlerMap = 
 		{
@@ -180,6 +181,7 @@ function GObjLoader( scene_ )
         }
         else
         {
+			console.debug("Loaded " + this.polyCount + " polygons.");
             this.isLoadComplete = true;
         }
         
@@ -269,6 +271,7 @@ function GObjLoader( scene_ )
     
     this.GObjReader.prototype.process_face = function( lineA )
     {
+		++this.polyCount;
         for (var i = 1; i <= 3; ++i)
         {
             var idxs = new this.IndexRecord( lineA[i] );

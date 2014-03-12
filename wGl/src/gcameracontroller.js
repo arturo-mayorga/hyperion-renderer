@@ -56,8 +56,8 @@ function GCameraController()
     this.dX = this.dY = this.dZ = 0;
     this.dPitch = this.dRoll = this.dYaw = 0;
     
-    window.addEventListener('keydown',this.onKeyDown.bind(this),false);
-    window.addEventListener("keyup",this.onKeyUp.bind(this),false);
+    document.addEventListener('keydown',this.onKeyDown.bind(this),false);
+    document.addEventListener("keyup",this.onKeyUp.bind(this),false);
 }
 	
 GCameraController.prototype.onKeyDown = function (e)

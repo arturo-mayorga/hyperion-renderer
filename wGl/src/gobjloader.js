@@ -373,6 +373,11 @@ GObjLoader.prototype.update = function ( time )
         ++this.availableTime;
     }
 	
+	if ( this.availableTime <= 0 )
+	{
+		this.availableTime = 5;
+	}
+	
 	this.totalProgress = (this.downloadProgress + this.processProgress*10.0)/11.0;
     
     while ( ( (new Date().getTime()) - timeStart) < this.availableTime )

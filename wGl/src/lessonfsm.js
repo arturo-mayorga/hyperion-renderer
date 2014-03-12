@@ -54,6 +54,8 @@ LoadState.prototype.exit = function ()
 LoadState.prototype.update = function (time) 
 {
     this.loader.update(time);
+	
+	// console.debug(this.loader.totalProgress);
 };
  
 LoadState.prototype.onObjLoaderCompleted = function () 

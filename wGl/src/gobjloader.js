@@ -5,6 +5,12 @@ function GObjLoaderObserver () {}
 GObjLoaderObserver.prototype.onObjLoaderCompleted = function () {};
 
 /**
+ * @interface
+ */
+function GObjReaderObserver () {}
+GObjReaderObserver.prototype.onNewMeshAvailable = function ( mesh ) {} 
+
+/**
  * @param {number} progress Progress value
  */
 GObjLoaderObserver.prototype.onObjLoaderProgress = function ( progress ) {};
@@ -12,6 +18,7 @@ GObjLoaderObserver.prototype.onObjLoaderProgress = function ( progress ) {};
 
 /**
  * @constructor
+ * @implements {GObjReaderObserver}
  */
 function GObjLoader( scene_ )
 {
@@ -103,7 +110,7 @@ function GObjLoader( scene_ )
     /**
      * @constructor
      */
-	this.GObjReader = function( path, objStrA, scene )
+	this.GObjReader = function( path, objStrA, scene, observer )
 	{
 	    /**
 	     * @struct
@@ -123,6 +130,7 @@ function GObjLoader( scene_ )
 		this.scene = scene;
         this.path = path;
         this.objStrA = objStrA;
+		this.observer = observer;
 
 		this.currentIndex = 0;
 		
@@ -210,6 +218,7 @@ function GObjLoader( scene_ )
         {
             this.groupMap[this.currentMesh.getName()] = this.currentMesh;
             this.groupList.push(this.currentMesh);
+			this.observer.onNewMeshAvailable(this.currentMesh);
         }
         
         this.currentVertIMap = {};
@@ -310,9 +319,13 @@ function GObjLoader( scene_ )
 	this.isDownloadComplete = false;
 	this.isReaderReady = false;
 	this.isReadComplete = false;
-	this.isInsertComplete = false;
 	this.insertIndex = 0;
 	this.availableTime = 17;
+	this.downloadProgress = 0;
+	this.processProgress = 0;
+	this.objLineCount = 0;
+	this.objLinesProcessed = 0;
+	this.totalProgress = 0;
 }
 	
 GObjLoader.prototype.loadObj = function ( path, source )
@@ -320,12 +333,24 @@ GObjLoader.prototype.loadObj = function ( path, source )
     this.isDownloadComplete = false;
     this.client.open('GET', path + source);
     this.currentPath = path;
-    this.client.onreadystatechange = function() 
+    this.client.onreadystatechange = function(e) 
     {
         if ( this.client.readyState == 4 )
         {
             this.isDownloadComplete = true;
+			this.downloadProgress = 1;
         }
+		else if ( this.client.readyState == 3 )
+		{
+			if ( e.lengthComputable )
+			{
+				this.downloadProgress = e.loaded / e.total;
+			}
+			else
+			{
+				this.downloadProgress += (1.0 - this.downloadProgress) / 10.0;
+			}
+		}
     }.bind(this);
     this.client.send();
 }
@@ -347,38 +372,17 @@ GObjLoader.prototype.update = function ( time )
     {
         ++this.availableTime;
     }
+	
+	this.totalProgress = (this.downloadProgress + this.processProgress*10.0)/11.0;
     
     while ( ( (new Date().getTime()) - timeStart) < this.availableTime )
     {
-        if ( this.isInsertComplete )
+        if ( this.isReadComplete )
         {
-            if (this.observer != undefined)
+			if (this.observer != undefined)
             {
                 this.observer.onObjLoaderCompleted();
                 return;
-            }
-        }
-        else if ( this.isReadComplete )
-        {
-            var meshList = this.testReader.getMesh();
-            
-            if ( this.insertIndex < meshList.length )
-            {
-                var thisMesh = meshList[this.insertIndex];
-                var obj = new GObject(thisMesh.getVertBuffer(),
-                                      thisMesh.getTVerBuffer(),
-                                      thisMesh.getNormBuffer(),
-                                      thisMesh.indices,
-                                      thisMesh.getName());
-                                      
-                obj.setMtlName(thisMesh.getMtlName());
-                this.target.addChild(obj);
-                
-                ++this.insertIndex;
-            }
-            else
-            {
-                this.isInsertComplete = true;
             }
         }
         else if ( this.isReaderReady )
@@ -386,6 +390,8 @@ GObjLoader.prototype.update = function ( time )
             if (false == this.testReader.isLoadComplete)
             {
                 this.testReader.update( time );
+				++this.objLinesProcessed;
+				this.processProgress = this.objLinesProcessed / this.objLineCount;
             }
             else
             {
@@ -396,12 +402,23 @@ GObjLoader.prototype.update = function ( time )
         {    
             var i = 0;
             var obj = this.client.responseText.split("\n");
-            
-            this.testReader = new this.GObjReader (this.currentPath, obj, this.target);
-            
-            this.isReaderReady = true;
+			this.objLineCount = obj.length;
+			this.testReader = new this.GObjReader (this.currentPath, obj, this.target, this);
+			this.isReaderReady = true;
         }
     }
+}
+
+GObjLoader.prototype.onNewMeshAvailable = function ( mesh )
+{
+	var obj = new GObject(mesh.getVertBuffer(),
+						  mesh.getTVerBuffer(),
+						  mesh.getNormBuffer(),
+						  mesh.indices,
+						  mesh.getName());
+                                      
+	obj.setMtlName(mesh.getMtlName());
+	this.target.addChild(obj);
 }
 
 /**

@@ -18,6 +18,9 @@ function GContext(canvas, shaderSrcMap)
 	
     var gl = this.gl;
     
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.enable(gl.BLEND);
+    
     gl.viewportWidth = canvas.width;
     gl.viewportHeight = canvas.height;
     
@@ -71,6 +74,12 @@ GContext.prototype.setScene = function (scene_)
     this.scene.bindToContext(this.gl);
 }
 
+GContext.prototype.setHud = function ( hud_ )
+{
+    this.hud = hud_;
+    this.hud.bindToContext(this.gl);
+}
+
 GContext.prototype.draw = function()
 {
     var gl = this.gl;
@@ -83,6 +92,11 @@ GContext.prototype.draw = function()
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     
     this.drawScreenBuffer();	
+    
+    if (this.hud != undefined)
+    {
+        this.hud.draw();
+    }
 }
 
 GContext.prototype.drawScreenBuffer = function()
@@ -96,7 +110,12 @@ GContext.prototype.drawScreenBuffer = function()
     this.bindShader(gl.fullscreenProgram);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.rttTexture);
-    gl.uniform1i(gl.fullscreenProgram.map_Kd, 0);
+    gl.uniform1i(gl.fullscreenProgram.mapKd, 0);
+    
+    if ( null != gl.fullscreenProgram.Kd )
+    {
+        gl.uniform4fv(gl.fullscreenProgram.Kd, [1, 1, 1, 1]);
+    }
     
     gl.bindBuffer(gl.ARRAY_BUFFER, this.screenVertBuffer);
     gl.vertexAttribPointer(gl.fullscreenProgram.positionVertexAttribute, 
@@ -108,7 +127,7 @@ GContext.prototype.drawScreenBuffer = function()
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.screenIndxBuffer);
     gl.drawElements(gl.TRIANGLES, this.screenIndxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-    gl.bindTexture(gl.TEXTURE_2D, null);
+  //  gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
 GContext.prototype.initTextureFramebuffer = function()

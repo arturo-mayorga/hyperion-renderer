@@ -41,6 +41,7 @@ window.requestAnimFrame = (function() {
 
 var context;
 var scene;
+var hud;
 var camController;
 var camera;
 var lesson;
@@ -99,6 +100,7 @@ function mainLoop()
 	context = new GContext(document.getElementById("glcanvas"), shaderSrcMap);
 	scene   = new GScene();
 	camera  = new GCamera();
+	hud     = new GHudController();
 	
 	
 	scene.setCamera(camera);
@@ -111,6 +113,7 @@ function mainLoop()
 	camController.bindCamera(camera);
 	
 	context.setScene(scene);
+	context.setHud(hud);
 	
 	
 	lesson = createLesson(scene);

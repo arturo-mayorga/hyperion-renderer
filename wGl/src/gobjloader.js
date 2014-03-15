@@ -382,6 +382,11 @@ GObjLoader.prototype.update = function ( time )
 	}
 	
 	this.totalProgress = (this.downloadProgress + this.processProgress*10.0)/11.0;
+	
+	if (this.observer != undefined)
+	{
+		this.observer.onObjLoaderProgress(this.totalProgress);
+	}
     
     while ( ( (new Date().getTime()) - timeStart) < this.availableTime )
     {

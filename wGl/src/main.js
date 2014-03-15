@@ -116,7 +116,7 @@ function mainLoop()
 	context.setHud(hud);
 	
 	
-	lesson = createLesson(scene);
+	lesson = createLesson(scene, hud);
 	
 	tick();
 }

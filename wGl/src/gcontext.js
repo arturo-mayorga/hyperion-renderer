@@ -62,6 +62,8 @@ function GContext(canvas, shaderSrcMap)
                   gl.STATIC_DRAW);
     this.screenIndxBuffer.itemSize = 1;
     this.screenIndxBuffer.numItems = 6;
+	
+	this.hMatrix = mat3.create();
     
     whiteTexture.bindToContext(gl);
     gl.whiteTexture = whiteTexture;
@@ -126,6 +128,12 @@ GContext.prototype.drawScreenBuffer = function()
                            this.screenTextBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.screenIndxBuffer);
+	
+	if ( null != gl.fullscreenProgram.hMatrixUniform )
+    {
+        gl.uniformMatrix3fv(gl.fullscreenProgram.hMatrixUniform, false, this.hMatrix);
+    }
+	
     gl.drawElements(gl.TRIANGLES, this.screenIndxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
   //  gl.bindTexture(gl.TEXTURE_2D, null);
 }
@@ -210,6 +218,7 @@ GContext.prototype.bindShader = function(shaderProgram)
     shaderProgram.pMatrixUniform  = gl.getUniformLocation(shaderProgram, "uPMatrix");
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
     shaderProgram.nMatrixUniform  = gl.getUniformLocation(shaderProgram, "uNMatrix");
+    shaderProgram.hMatrixUniform  = gl.getUniformLocation(shaderProgram, "uHMatrix");
     shaderProgram.Ka              = gl.getUniformLocation(shaderProgram, "uKa");
     shaderProgram.Kd              = gl.getUniformLocation(shaderProgram, "uKd");
     shaderProgram.mapKd           = gl.getUniformLocation(shaderProgram, "uMapKd");

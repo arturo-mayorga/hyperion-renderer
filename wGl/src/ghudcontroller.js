@@ -151,14 +151,6 @@ GHudController.prototype.draw = function()
     gl.vertexAttribPointer(gl.fullscreenProgram.textureVertexAttribute, 
                            this.recTextBuffer.itemSize, gl.FLOAT, false, 0, 0);
     
-   /* if ( null != gl.fullscreenProgram.Kd )
-    {
-        gl.uniform4fv(gl.fullscreenProgram.Kd, [0, 1, 1, 0.5]);
-    }
-    
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.recIndxBuffer);
-    gl.drawElements(gl.TRIANGLES, this.recIndxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-    */
     this.group_draw(this.transform);
 }
 

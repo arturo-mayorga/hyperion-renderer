@@ -29,6 +29,8 @@ module.exports = function(grunt) {
                     'src/gobject.js',
                     'src/gtexture.js',
                     'src/gscene.js',
+					'src/ghudcontroller.js',
+					'src/ghudrectangle.js',
                     'src/gcontext.js',
                     'src/gmtlloader.js',
                     'src/gobjloader.js',

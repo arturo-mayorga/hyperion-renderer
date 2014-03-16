@@ -45,7 +45,6 @@ LoadState.prototype.fireSignal = FsmState.prototype.fireSignal;
 
 LoadState.prototype.enter = function () 
 {
-	console.debug("entering LoadState");
 	this.loader.loadObj("assets/3d/office3d/18361-obj-4/", "OfficeOBJ.obj");
 
 	this.ui = {};
@@ -96,7 +95,7 @@ LoadState.prototype.onObjLoaderCompleted = function ()
  */
 LoadState.prototype.onObjLoaderProgress = function ( progress ) 
 {;
-	this.ui.pFg.setDrawRec(0, 0, progress*.7, .05);
+	this.ui.pFg.setDrawRec( .7*(progress-1), 0, progress*.7, .05);
 };
 
 

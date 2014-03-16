@@ -24,8 +24,8 @@ GHudWidget.prototype.setDrawRec = function ( x, y, width, height )
 	// the values passed in are meant to be between 0 and 1
 	// currently there are no plans to add debug assertions
     mat3.identity(this.transform);
-    mat3.translate(this.transform, this.transform, [x, y]);
-    mat3.scale(this.transform,this.transform, [width, height]);
+	mat3.translate(this.transform, this.transform, [x, y]);
+	mat3.scale(this.transform,this.transform, [width, height]);  
 }
 
 /**
@@ -103,10 +103,10 @@ GHudController.prototype.bindToContext = function (gl)
     gl.bindBuffer(gl.ARRAY_BUFFER, this.recVertBuffer);
     
     gl.bufferData(gl.ARRAY_BUFFER,
-                  new Float32Array([-1,-1,0,
-                                    1,-1,0,
-                                    1,1,0,
-                                    -1,1,0]),
+                  new Float32Array([-1,-1,1,
+                                    1,-1,1,
+                                    1,1,1,
+                                    -1,1,1]),
                   gl.STATIC_DRAW);
     
     this.recVertBuffer.itemSize = 3;

@@ -8,14 +8,14 @@ module.exports = function(grunt) {
             banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
           },
           build: {
-            src: 'temp/<%= pkg.name %>.js',
-            dest: 'build/<%= pkg.name %>.min.js'
+            src: 'src/*.js',
+            dest: 'build/main.ug.min.js'
           }
         },
         concat: {
             app: {
                 src:'src/*.js',
-                dest:'temp/main.js'
+                dest:'build/main.concat.js'
             }
         },
         'closure-compiler': {
@@ -56,6 +56,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-closure-compiler');
     
     // Default task(s).
-    grunt.registerTask('default', ['closure-compiler', 'concat']);
+    grunt.registerTask('default', ['closure-compiler', 'concat', 'uglify']);
 
 };

@@ -35,10 +35,10 @@ function GContext(canvas, shaderSrcMap)
     gl.bindBuffer(gl.ARRAY_BUFFER, this.screenVertBuffer);
     
     gl.bufferData(gl.ARRAY_BUFFER,
-                  new Float32Array([-1,-1,0,
-                                    1,-1,0,
-                                    1,1,0,
-                                    -1,1,0]),
+                  new Float32Array([-1,-1,1,
+                                    1,-1,1,
+                                    1,1,1,
+                                    -1,1,1]),
                   gl.STATIC_DRAW);
     
     this.screenVertBuffer.itemSize = 3;

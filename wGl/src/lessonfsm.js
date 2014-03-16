@@ -27,8 +27,11 @@ function LoadState( scene, hud )
 {
     this.scene = scene;
 	this.hud = hud;
-	this.loader = new GObjLoader(this.scene);
-	this.loader.setObserver(this);
+	this.envLoader = new GObjLoader(this.scene);
+	this.envLoader.setObserver(this);
+	
+	this.penLoader = new GObjLoader(this.scene);
+	this.penLoader.setObserver(this);
 }
 
 /**
@@ -45,7 +48,8 @@ LoadState.prototype.fireSignal = FsmState.prototype.fireSignal;
 
 LoadState.prototype.enter = function () 
 {
-	this.loader.loadObj("assets/3d/office3d/18361-obj-4/", "OfficeOBJ.obj");
+	this.envLoader.loadObj("assets/3d/office3d/18361-obj-4/", "OfficeOBJ.obj");
+	this.penLoader.loadObj("assets/3d/stylus/", "stylus.obj");
 
 	this.ui = {};
 	var bg = new GHudRectangle();
@@ -82,20 +86,35 @@ LoadState.prototype.exit = function ()
 
 LoadState.prototype.update = function (time) 
 {
-    this.loader.update(time);
+    this.envLoader.update(time);
+	this.penLoader.update(time);
 };
  
-LoadState.prototype.onObjLoaderCompleted = function () 
+LoadState.prototype.onObjLoaderCompleted = function ( loader ) 
 {
-    this.fireSignal("loadComplete");
+	// wait for 2 loaders
+	if (this.loadCount == undefined)
+	{
+		this.loadCount = 1;
+	}
+	else
+	{
+		++this.loadCount;
+	}
+	
+	if (this.loadCount >= 2)
+	{
+		this.fireSignal("loadComplete");
+	}
 };
 
 /**
  * @param {number} progress Progress value
  */
-LoadState.prototype.onObjLoaderProgress = function ( progress ) 
-{;
-	this.ui.pFg.setDrawRec( .7*(progress-1), 0, progress*.7, .05);
+LoadState.prototype.onObjLoaderProgress = function ( loader, progress ) 
+{
+	var tProgress = this.penLoader.totalProgress * this.envLoader.totalProgress;
+	this.ui.pFg.setDrawRec( .7*(tProgress-1), 0, tProgress*.7, .05);
 };
 
 

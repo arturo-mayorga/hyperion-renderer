@@ -17,8 +17,11 @@ function GMtlLoader( scene_ )
 			"#":      this.process_comment,
 			"newmtl": this.process_newmtl,
 			"ka":     this.process_ka,
+			"Ka":     this.process_ka,
 			"kd":     this.process_kd,
+			"Kd":     this.process_kd,
 			"ks":     this.process_ks,
+			"Ks":     this.process_ks,
 			"map_kd": this.process_mapKd
 		}
 		
@@ -35,7 +38,7 @@ function GMtlLoader( scene_ )
             }
             else
             {
-                //console.debug("Cant handle [" + mtlStrA[i] + "]");
+                console.debug("Cant handle [" + mtlStrA[i] + "]");
             }
         }
 	}

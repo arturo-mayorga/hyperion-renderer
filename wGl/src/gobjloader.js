@@ -2,7 +2,11 @@
  * @interface
  */
 function GObjLoaderObserver () {}
-GObjLoaderObserver.prototype.onObjLoaderCompleted = function () {};
+
+/**
+ * @param {GObjLoader}
+ */
+GObjLoaderObserver.prototype.onObjLoaderCompleted = function ( loader ) {};
 
 /**
  * @interface
@@ -11,9 +15,10 @@ function GObjReaderObserver () {}
 GObjReaderObserver.prototype.onNewMeshAvailable = function ( mesh ) {} 
 
 /**
+ * @param {GObjLoader}
  * @param {number} progress Progress value
  */
-GObjLoaderObserver.prototype.onObjLoaderProgress = function ( progress ) {};
+GObjLoaderObserver.prototype.onObjLoaderProgress = function ( loader, progress ) {};
 
 
 /**
@@ -145,6 +150,7 @@ function GObjLoader( scene_ )
 		this.lineHandlerMap = 
 		{
 			"#"      :this.process_comment,
+			"o"      :this.process_group,
 			"g"      :this.process_group,
 			"v"      :this.process_vert,
 			"vt"     :this.process_texVert,
@@ -173,7 +179,7 @@ function GObjLoader( scene_ )
                 }
                 else
                 {
-                    console.debug("Cant handle [" + objStrA[this.updateIndex ] + "]");
+                    console.debug("Cant handle [" + this.objStrA[this.updateIndex ] + "]");
                 }
             }
             
@@ -385,18 +391,14 @@ GObjLoader.prototype.update = function ( time )
 	
 	if (this.observer != undefined)
 	{
-		this.observer.onObjLoaderProgress(this.totalProgress);
+		this.observer.onObjLoaderProgress(this, this.totalProgress);
 	}
     
     while ( ( (new Date().getTime()) - timeStart) < this.availableTime )
     {
         if ( this.isReadComplete )
         {
-			if (this.observer != undefined)
-            {
-                this.observer.onObjLoaderCompleted();
-                return;
-            }
+			return;
         }
         else if ( this.isReaderReady )
         {
@@ -409,6 +411,11 @@ GObjLoader.prototype.update = function ( time )
             else
             {
                 this.isReadComplete = true;
+				if (this.observer != undefined)
+				{
+					this.observer.onObjLoaderCompleted( this );
+					return;
+				}
             }
         }
         else if ( this.isDownloadComplete )

@@ -38,6 +38,8 @@ float uKsExponent = 100.0;
     highp vec3 color = diffuseFactor * materialDiffuseColor + specularFactor * uKs.xyz;
 
     gl_FragColor = vec4(color, 1); 
+	//gl_FragColor = vec4(vNormal.xyz, 1);
+	//gl_FragColor = vec4(materialDiffuseColor, 1);
 }
 
 

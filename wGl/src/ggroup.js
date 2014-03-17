@@ -37,7 +37,7 @@ GGroup.prototype.draw = function(parentMvMat, materials)
 	var childCount = this.children.length;
 	for (var i = 0; i < childCount; ++i)
 	{
-		this.children[i].draw(parentMvMat, materials);
+		this.children[i].draw(this.drawMvMatrix, materials);
 	}
 }
 

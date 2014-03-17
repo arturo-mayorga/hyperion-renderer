@@ -14,7 +14,7 @@ function GCameraController()
 	this.eyeRight = vec3.create();
 	this.tempDEyePos = vec3.create();
     
-    this.moveSize = .1;
+    this.moveSize = .4;
     this.rotSize = .05;
     
     this.camera = undefined;

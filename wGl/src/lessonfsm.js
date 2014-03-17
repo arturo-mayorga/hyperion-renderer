@@ -31,6 +31,10 @@ function LoadState( scene, hud )
 	this.officeGroup = new GGroup( "officeGroup" );
 	this.penGroup = new GGroup( "penGroup" );
 	
+	var officeTransform = mat4.create();
+	mat4.scale(officeTransform, officeTransform, [4, 4, 4]);
+	this.officeGroup.setMvMatrix(officeTransform);
+	
 	this.scene.addChild(this.officeGroup);
 	this.scene.addChild(this.penGroup);
 	

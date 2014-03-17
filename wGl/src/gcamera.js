@@ -29,7 +29,7 @@ GCamera.prototype.draw = function(ouMvMatrix)
     gl.viewport(0, 0, 1024, 1024);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    mat4.perspective(this.pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
+    mat4.perspective(this.pMatrix, 0.8*(3.14159/4), gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
     
     mat4.multiply(this.camMatrix, this.pMatrix, this.mvMatrix);
     

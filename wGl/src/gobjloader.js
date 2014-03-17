@@ -25,7 +25,7 @@ GObjLoaderObserver.prototype.onObjLoaderProgress = function ( loader, progress )
  * @constructor
  * @implements {GObjReaderObserver}
  */
-function GObjLoader( scene_ )
+function GObjLoader( scene, group )
 {
 
     /**
@@ -115,7 +115,7 @@ function GObjLoader( scene_ )
     /**
      * @constructor
      */
-	this.GObjReader = function( path, objStrA, scene, observer )
+	this.GObjReader = function( path, objStrA, scene, group, observer )
 	{
 	    /**
 	     * @struct
@@ -133,6 +133,7 @@ function GObjLoader( scene_ )
 		this.objNormals = [];
 		this.currentMesh = undefined;
 		this.scene = scene;
+		this.group = group;
         this.path = path;
         this.objStrA = objStrA;
 		this.observer = observer;
@@ -324,7 +325,8 @@ function GObjLoader( scene_ )
     }
 
 	this.client = new XMLHttpRequest();
-	this.target = scene_;
+	this.scene = scene;
+	this.group = group;
 	this.isDownloadComplete = false;
 	this.isReaderReady = false;
 	this.isReadComplete = false;
@@ -423,7 +425,7 @@ GObjLoader.prototype.update = function ( time )
             var i = 0;
             var obj = this.client.responseText.split("\n");
 			this.objLineCount = obj.length;
-			this.testReader = new this.GObjReader (this.currentPath, obj, this.target, this);
+			this.testReader = new this.GObjReader (this.currentPath, obj, this.scene, this.group, this);
 			this.isReaderReady = true;
         }
     }
@@ -438,7 +440,7 @@ GObjLoader.prototype.onNewMeshAvailable = function ( mesh )
 						  mesh.getName());
                                       
 	obj.setMtlName(mesh.getMtlName());
-	this.target.addChild(obj);
+	this.group.addChild(obj);
 }
 
 /**

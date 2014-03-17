@@ -27,10 +27,17 @@ function LoadState( scene, hud )
 {
     this.scene = scene;
 	this.hud = hud;
-	this.envLoader = new GObjLoader(this.scene);
+	
+	this.officeGroup = new GGroup( "officeGroup" );
+	this.penGroup = new GGroup( "penGroup" );
+	
+	this.scene.addChild(this.officeGroup);
+	this.scene.addChild(this.penGroup);
+	
+	this.envLoader = new GObjLoader(this.scene, this.officeGroup);
 	this.envLoader.setObserver(this);
 	
-	this.penLoader = new GObjLoader(this.scene);
+	this.penLoader = new GObjLoader(this.scene, this.penGroup);
 	this.penLoader.setObserver(this);
 }
 

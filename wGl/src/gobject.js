@@ -22,6 +22,11 @@ function GObject(verts, tverts, normals, indices, name)
     this.normalMatrix = mat4.create();
 }
 
+GObject.prototype.getName = function()
+{
+    return this.name;
+}
+
 GObject.prototype.setMtlName = function( mName )
 {
     this.mtlName = mName;
@@ -36,6 +41,8 @@ GObject.prototype.setMvMatrix = function(mat)
 GObject.prototype.bindToContext = function(gl_)
 {
     if (gl_ == undefined) return;
+    if (gl_ == this.gl) return;
+    
     this.gl = gl_;
     var gl = this.gl;
     

@@ -16,6 +16,8 @@ function createLesson( scene, hud )
 	return ret;
 }
 
+var __pgGroup = undefined;
+
 /**
  * @constructor
  * @implements {FsmState}
@@ -34,6 +36,12 @@ function LoadState( scene, hud )
 	var officeTransform = mat4.create();
 	mat4.scale(officeTransform, officeTransform, [4, 4, 4]);
 	this.officeGroup.setMvMatrix(officeTransform);
+	
+	this.penTransform = mat4.create();
+	mat4.translate(this.penTransform, this.penTransform, [1.5, 5.609, 11.5]);
+	this.penGroup.setMvMatrix(this.penTransform);
+	
+	__pgGroup = this.penGroup;
 	
 	this.scene.addChild(this.officeGroup);
 	this.scene.addChild(this.penGroup);
@@ -93,6 +101,36 @@ LoadState.prototype.exit = function ()
 	{
 		this.hud.removeChild(this.ui.components[i]);
 	} 
+	
+	var childrenTemp = [];
+	
+	var len = this.penGroup.children.length;
+	for (var i = 0; i < len; ++i)
+	{
+	    childrenTemp.push(this.penGroup.removeChild(this.penGroup.children[0]));
+	}
+	
+	for (var i = 0; i < len; ++i)
+	{
+	    var newGroup = new GGroup( "group__" + childrenTemp[i].getName() );
+	    newGroup.addChild(childrenTemp[i]);
+	    this.penGroup.addChild(newGroup);
+	    
+	    if (i == 3)
+	    {
+	        newGroup.addChild(childrenTemp[++i]);
+	    }
+	}
+	
+	len = this.penGroup.children.length;
+	
+	for (var i = 0; i < len; ++i)
+	{    
+	    var penTransform = mat4.create();
+	    mat4.translate(penTransform, penTransform, [0, 0, i*0.1]);
+	    this.penGroup.children[i].setMvMatrix(penTransform);
+	    
+	}
 };
 
 LoadState.prototype.update = function (time) 

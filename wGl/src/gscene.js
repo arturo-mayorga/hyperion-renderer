@@ -12,6 +12,11 @@ function GScene()
 	
 	var camera;
 	
+	this.getChildren = function()
+	{
+		return _children;
+	}
+	
 	this.bindToContext = function(gl_)
 	{
 		gl = gl_;
@@ -55,6 +60,11 @@ function GScene()
 	this.setCamera = function(camera_)
 	{
 		camera = camera_;
+	}
+	
+	this.getCamera = function()
+	{
+		return camera;
 	}
 }
 

@@ -10,8 +10,10 @@ function createLesson( scene, hud )
 	
 	ret.addState("Load", new LoadState( scene, hud ));
 	ret.addState("Explore", new ExploreState( scene, hud ));
+	ret.addState("Asm", new AsmState( scene, hud ));
 	
 	ret.addTransition( "Load", "loadComplete", "Explore" );
+	ret.addTransition( "Explore", "startAsm", "Asm" );
 	ret.setState("Load");
 	return ret;
 }
@@ -173,7 +175,7 @@ LoadState.prototype.onObjLoaderProgress = function ( loader, progress )
  * @param {GScene} scene Scene that is driven by this state
  * @param {GHudController} hud  Hud to be driven by this state
  */
-function ExploreState( scene ) 
+function ExploreState( scene, hud ) 
 {
     this.scene = scene;
 	this.hud = hud;
@@ -199,5 +201,78 @@ ExploreState.prototype.exit = function ()
 };
 ExploreState.prototype.update = function (time) 
 {
+	this.fireSignal("startAsm");
 };
+
+
+/**
+ * @constructor
+ * @implements {FsmState}
+ * @param {GScene} scene Scene that is driven by this state
+ * @param {GHudController} hud  Hud to be driven by this state
+ */
+function AsmState( scene, hud ) 
+{
+    this.scene = scene;
+	this.hud = hud;
+	this.camera = scene.getCamera();
+	this.testMember = "test str";
+}
+/**
+ * Set the signal observer
+ * @param {FsmSignalObserver} observer The new observer to be used
+ */
+AsmState.prototype.setSignalObserver = FsmState.prototype.setSignalObserver;
+/**
+ * Fire the transition signal
+ * @param {string} signal Name of the signal to fire
+ */
+AsmState.prototype.fireSignal = FsmState.prototype.fireSignal;
+
+AsmState.prototype.enter = function () 
+{
+	console.debug("entering AsmState");
+
+	var children = this.scene.getChildren();
+	var len = children.length;
+	for (var i = 0; i < len; ++i)
+	{
+		if (children[i].getName() == "penGroup")
+		{
+			this.penGroup = children[i];
+		}
+	}
+	
+	this.clip     = this.penGroup[0];
+	this.gum      = this.penGroup[1];
+	this.spring   = this.penGroup[2];
+	this.ink      = this.penGroup[3];
+	this.cylinder = this.penGroup[4];
+	this.axle     = this.penGroup[5];
+	this.housing  = this.penGroup[6];
+	this.grip     = this.penGroup[7];
+	
+	this.eyePos = [1.3583784103393555, 9.672802925109863, 17.14227294921875];
+	this.eyeLookAt = [1.1498558521270752, -6.496527671813965, -5.181362152099609];
+	this.eyeUp = [-0.0014136419631540775, 0.8503075838088989, -0.5262849926948547];
+	
+	this.
+	
+	this.handler = this.test;
+};
+AsmState.prototype.exit = function () 
+{
+	console.debug("exiting AsmState");
+};
+AsmState.prototype.update = function (time) 
+{
+	this.handler(time);
+};
+
+AsmState.prototype.test = function (time)
+{
+	console.debug(this.testMember);
+	
+	
+}
 

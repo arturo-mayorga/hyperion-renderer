@@ -18,7 +18,6 @@ function animate() {
 	lastTime = timeNow;
 
 	lesson.update(elapsed);
-	//camController.update(elapsed);
 	context.draw(elapsed);
 }
 
@@ -108,9 +107,6 @@ function mainLoop()
 	camera.setLookAt(4.232629776000977*4, 2.6432266235351562*4, 0.2486426830291748*4);
 	camera.setUp(-0.09341227263212204, 0.9805285334587097, 0.17273758351802826);
 	camera.setEye(9.44430160522461*4, 4.382470607757568*4, -3.9111077785491943*4);
-	
-	//camController = new GCameraController();
-	//camController.bindCamera(camera);
 	
 	context.setScene(scene);
 	context.setHud(hud);

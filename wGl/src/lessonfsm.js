@@ -12,7 +12,8 @@ function createLesson( scene, hud )
 	ret.addState("Explore", new ExploreState( scene, hud ));
 	ret.addState("Asm", new AsmState( scene, hud ));
 	
-	ret.addTransition( "Load", "loadComplete", "Explore" );
+	ret.addTransition( "Load", "loadComplete", "Asm" );
+	ret.addTransition( "Asm", "exitAsm", "Explore" );
 	ret.addTransition( "Explore", "startAsm", "Asm" );
 	ret.setState("Load");
 	return ret;
@@ -193,14 +194,18 @@ ExploreState.prototype.fireSignal = FsmState.prototype.fireSignal;
 ExploreState.prototype.enter = function () 
 {
 	console.debug("entering ExploreState");
+	this.camController = new GCameraController();
+	this.camController.bindCamera(this.scene.getCamera());
 };
 ExploreState.prototype.exit = function () 
 {
+	this.camController = undefined;
 	console.debug("exiting ExploreState");
 };
 ExploreState.prototype.update = function (time) 
 {
-	this.fireSignal("startAsm");
+	//this.fireSignal("startAsm");
+	this.camController.update(time);
 };
 
 
@@ -719,7 +724,7 @@ AsmState.prototype.testOut = function (time)
     if ( undefined == this.trans )
 	{
 		this.trans = vec3.fromValues(-0.09, 2.8, 3.8 );
-		var target = vec3.fromValues(-0.085, 2.8, 3.8 );
+		var target = vec3.fromValues(-0.075, 2.8, 3.8 );
 		
 		this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
 	}
@@ -738,6 +743,22 @@ AsmState.prototype.testOut = function (time)
 	{
 		this.trans = undefined;
 		this.inkAnimator = undefined;
+		this.handler = this.holdBeforeTestIn;
+	}
+}
+
+AsmState.prototype.holdBeforeTestIn = function (time)
+{
+	if ( this.currentLapse == undefined )
+	{
+		this.currentLapse = 0;
+	}
+	
+	this.currentLapse += time;
+	
+	if ( this.currentLapse >= 3000 )
+	{
+		this.currentLapse = undefined;
 		this.handler = this.testIn;
 	}
 }
@@ -772,4 +793,82 @@ AsmState.prototype.testIn = function (time)
 
 AsmState.prototype.idle = function (time)
 {
+	if ( this.currentLapse == undefined )
+	{
+		this.currentLapse = 0;
+	}
+	
+	this.currentLapse += time;
+	
+	if ( this.currentLapse >= 300 )
+	{
+		this.currentLapse = undefined;
+		this.handler = this.placeOnTable;
+	}
+}
+
+AsmState.prototype.placeOnTable = function (time)
+{
+	if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues( 0.0, 2.8, 3.8 );
+		var target = vec3.fromValues( 0.0, 0.0, 0.0 );
+		
+		this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.inkAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans); 
+	
+	this.clip.setMvMatrix(transform);     
+	this.gum.setMvMatrix(transform);      
+	this.spring.setMvMatrix(transform);   
+	this.ink.setMvMatrix(transform);      
+	this.cylinder.setMvMatrix(transform); 
+	this.axle.setMvMatrix(transform);     
+	this.housing.setMvMatrix(transform);  
+	this.grip.setMvMatrix(transform);     
+	
+	if (this.lookAtAnimator == undefined)
+	{	
+		this.camera.getEye(this.tempEye);
+		this.camera.getUp(this.tempUp);
+		this.camera.getLookAt(this.tempLookAt);
+		
+		var targetEye    = [0, 9, 0];
+		var targetLookAt = [1.5, 5.609, 11.5];
+		var targetUp     = [-0, 1, 0];
+		
+		this.eyeAnimator    = new Vec3Animator( this.tempEye, targetEye, 1000 );
+		this.upAnimator     = new Vec3Animator( this.tempUp, targetUp, 1000 );
+		this.lookAtAnimator = new Vec3Animator( this.tempLookAt, targetLookAt, 100 );
+	}
+	
+	this.lookAtAnimator.update( time );
+	this.upAnimator.update( time );
+	this.eyeAnimator.update( time );
+	
+	if (this.lookAtAnimator.getIsComplete() && 
+		this.upAnimator.getIsComplete() && 
+	    this.eyeAnimator.getIsComplete() && 
+		this.inkAnimator.getIsComplete())
+	{
+		this.lookAtAnimator = undefined;
+		this.upAnimator = undefined;
+		this.eyeAnimator = undefined;
+		this.trans = undefined;
+		this.inkAnimator = undefined;
+		this.handler = this.done;
+	}
+	
+	this.camera.setEye(this.tempEye[0], this.tempEye[1], this.tempEye[2]);
+	this.camera.setUp(this.tempUp[0], this.tempUp[1], this.tempUp[2]);
+	this.camera.setLookAt(this.tempLookAt[0], this.tempLookAt[1], this.tempLookAt[2]);
+}
+
+AsmState.prototype.done = function (time)
+{
+	this.fireSignal("exitAsm");
 }

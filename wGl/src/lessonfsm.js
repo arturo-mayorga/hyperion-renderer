@@ -131,7 +131,6 @@ LoadState.prototype.exit = function ()
 	    var penTransform = mat4.create();
 	    mat4.translate(penTransform, penTransform, [0, 0, i*0.1]);
 	    this.penGroup.children[i].setMvMatrix(penTransform);
-	    
 	}
 };
 
@@ -207,6 +206,49 @@ ExploreState.prototype.update = function (time)
 
 /**
  * @constructor
+ */
+function Vec3Animator( inVector, target, targetLapseTime )
+{
+	this.startVec = vec3.fromValues(inVector[0], inVector[1], inVector[2]);
+	this.inVector = inVector;
+	this.target = target;
+	this.lapseTime = 0;
+	this.targetLapseTime = targetLapseTime;
+	this.isComplete = false;
+}
+
+/**
+ * @param {number} time  Time since the last update
+ */
+Vec3Animator.prototype.update = function( time )
+{
+	this.lapseTime += time;
+	if ( this.lapseTime > this.targetLapseTime )
+	{
+		this.lapseTime = this.targetLapseTime;
+	}
+	
+	var percent = this.lapseTime / this.targetLapseTime;;
+	
+	if (percent >= 1)
+	{
+		percent = 1;
+		this.isComplete = true;
+	}
+	
+	for (var i = 0; i < 3; ++i)
+	{
+		this.inVector[i] = this.startVec[i] + (this.target[i] - this.startVec[i])*percent;
+	}
+}
+
+Vec3Animator.prototype.getIsComplete = function()
+{
+	return this.isComplete;
+}
+
+/**
+ * @constructor
  * @implements {FsmState}
  * @param {GScene} scene Scene that is driven by this state
  * @param {GHudController} hud  Hud to be driven by this state
@@ -216,7 +258,9 @@ function AsmState( scene, hud )
     this.scene = scene;
 	this.hud = hud;
 	this.camera = scene.getCamera();
-	this.testMember = "test str";
+	this.tempEye = vec3.create();
+	this.tempUp = vec3.create();
+	this.tempLookAt = vec3.create();
 }
 /**
  * Set the signal observer
@@ -243,22 +287,16 @@ AsmState.prototype.enter = function ()
 		}
 	}
 	
-	this.clip     = this.penGroup[0];
-	this.gum      = this.penGroup[1];
-	this.spring   = this.penGroup[2];
-	this.ink      = this.penGroup[3];
-	this.cylinder = this.penGroup[4];
-	this.axle     = this.penGroup[5];
-	this.housing  = this.penGroup[6];
-	this.grip     = this.penGroup[7];
+	this.clip     = this.penGroup.children[0];
+	this.gum      = this.penGroup.children[1];
+	this.spring   = this.penGroup.children[2];
+	this.ink      = this.penGroup.children[3];
+	this.cylinder = this.penGroup.children[4];
+	this.axle     = this.penGroup.children[5];
+	this.housing  = this.penGroup.children[6];
+	this.grip     = this.penGroup.children[7];
 	
-	this.eyePos = [1.3583784103393555, 9.672802925109863, 17.14227294921875];
-	this.eyeLookAt = [1.1498558521270752, -6.496527671813965, -5.181362152099609];
-	this.eyeUp = [-0.0014136419631540775, 0.8503075838088989, -0.5262849926948547];
-	
-	this.
-	
-	this.handler = this.test;
+	this.handler = this.moveCam;
 };
 AsmState.prototype.exit = function () 
 {
@@ -269,10 +307,469 @@ AsmState.prototype.update = function (time)
 	this.handler(time);
 };
 
-AsmState.prototype.test = function (time)
-{
-	console.debug(this.testMember);
+AsmState.prototype.moveCam = function (time)
+{	
+	if (this.lookAtAnimator == undefined)
+	{	
+		this.camera.getEye(this.tempEye);
+		this.camera.getUp(this.tempUp);
+		this.camera.getLookAt(this.tempLookAt);
+		
+		var targetEye    = [1.3583784103393555, 9.672802925109863, 17.14227294921875];
+		var targetLookAt = [1.1498558521270752, -6.496527671813965, -5.181362152099609];
+		var targetUp     = [-0.0014136419631540775, 0.8503075838088989, -0.5262849926948547];
+		
+		this.eyeAnimator    = new Vec3Animator( this.tempEye, targetEye, 3000 );
+		this.upAnimator     = new Vec3Animator( this.tempUp, targetUp, 3000 );
+		this.lookAtAnimator = new Vec3Animator( this.tempLookAt, targetLookAt, 3000 );
+	}
 	
+	this.lookAtAnimator.update( time );
+	this.upAnimator.update( time );
+	this.eyeAnimator.update( time );
 	
+	if (this.lookAtAnimator.getIsComplete() && 
+		this.upAnimator.getIsComplete() && 
+	    this.eyeAnimator.getIsComplete())
+	{
+		this.lookAtAnimator = undefined;
+		this.upAnimator = undefined;
+		this.eyeAnimator = undefined;
+		this.handler = this.grabInk;
+	}
+	
+	this.camera.setEye(this.tempEye[0], this.tempEye[1], this.tempEye[2]);
+	this.camera.setUp(this.tempUp[0], this.tempUp[1], this.tempUp[2]);
+	this.camera.setLookAt(this.tempLookAt[0], this.tempLookAt[1], this.tempLookAt[2]);
 }
 
+AsmState.prototype.grabInk = function (time)
+{
+    if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues( 0, 0, 0.3 );
+		var target = vec3.fromValues( 0.7, 2.8, 3.8 );
+		
+		this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.inkAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans);
+	this.ink.setMvMatrix(transform);
+	
+	if ( this.inkAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.inkAnimator = undefined;
+		this.handler = this.grabSpring;
+	}
+}
+
+AsmState.prototype.grabSpring = function (time)
+{
+    if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues( 0, 0, 0.2 );
+		var target = vec3.fromValues( -0.7, 2.8, 3.8 );
+		
+		this.springAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.springAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans);
+	this.spring.setMvMatrix(transform);
+	
+	if ( this.springAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.springAnimator = undefined;
+		this.handler = this.installSpring;
+	}
+}
+
+AsmState.prototype.installSpring = function (time)
+{
+    if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues( 0.7, 2.8, 3.8 );
+		var target = vec3.fromValues( -0.7, 2.8, 3.8 );
+		
+		this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.inkAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans);
+	this.ink.setMvMatrix(transform);
+	
+	if ( this.inkAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.inkAnimator = undefined;
+		this.handler = this.grabAxle;
+	}
+}
+
+AsmState.prototype.grabAxle = function (time)
+{
+	if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues( 0, 0, 0.5 );
+		var target = vec3.fromValues( 0.7, 2.8, 3.8 );
+		
+		this.axleAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.axleAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans);
+	this.axle.setMvMatrix(transform);
+	
+	if ( this.axleAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.axleAnimator = undefined;
+		this.handler = this.installAxle;
+	}
+}
+
+AsmState.prototype.installAxle = function (time)
+{
+	if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues( 0.7, 2.8, 3.8 );
+		var target = vec3.fromValues( -0.7, 2.8, 3.8 );
+		
+		this.axleAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.axleAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans);
+	this.axle.setMvMatrix(transform);
+	
+	if ( this.axleAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.axleAnimator = undefined;
+		this.handler = this.grabHousing;
+	}
+}
+
+AsmState.prototype.grabHousing = function (time)
+{
+	if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues( 0, 0, 0.6 );
+		var target = vec3.fromValues( 0.7, 2.8, 3.8 );
+		
+		this.housingAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.housingAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans);
+	this.housing.setMvMatrix(transform);
+	
+	if ( this.housingAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.housingAnimator = undefined;
+		this.handler = this.installHousing;
+	}
+}
+
+AsmState.prototype.installHousing = function (time)
+{
+	if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues( -0.7, 2.8, 3.8 );
+		this.trans2 = vec3.fromValues( 0.7, 2.8, 3.8 );
+		var target = vec3.fromValues( 0.0, 2.8, 3.8 );
+		
+		this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
+		this.asmAnimator = new Vec3Animator( this.trans2,target, 1000 );
+	}
+	
+	this.inkAnimator.update(time);
+	this.asmAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans);
+	this.ink.setMvMatrix(transform);
+	this.spring.setMvMatrix(transform);
+	this.axle.setMvMatrix(transform);
+	
+	mat4.identity(transform);
+	mat4.translate(transform, transform, this.trans2);
+	this.housing.setMvMatrix(transform);
+	
+	if ( this.asmAnimator.getIsComplete() &&
+         this.inkAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.asmAnimator = undefined;
+		this.inkAnimator = undefined;
+		this.handler = this.grabGrip;
+	}
+}
+
+AsmState.prototype.grabGrip = function (time)
+{
+	if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues( 0, 0, 0.7 );
+		var target = vec3.fromValues( -0.7, 2.8, 3.8 );
+		
+		this.housingAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.housingAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans);
+	this.grip.setMvMatrix(transform);
+	
+	if ( this.housingAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.housingAnimator = undefined;
+		this.handler = this.installGrip;
+	}
+}
+
+AsmState.prototype.installGrip = function (time)
+{
+	if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues( -0.7, 2.8, 3.8 );
+		var target = vec3.fromValues(  0.0, 2.8, 3.8 );
+		
+		this.housingAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.housingAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans);
+	this.grip.setMvMatrix(transform);
+	
+	if ( this.housingAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.housingAnimator = undefined;
+		this.handler = this.grabCylinder;
+	}
+}
+
+AsmState.prototype.grabCylinder = function (time)
+{
+	if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues( 0.0, 0.0, 0.4 );
+		var target = vec3.fromValues( 0.4, 2.8, 3.8 );
+		
+		this.cylinderAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.cylinderAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans);
+	this.cylinder.setMvMatrix(transform);
+	
+	if ( this.cylinderAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.cylinderAnimator = undefined;
+		this.handler = this.installCylinder;
+	}
+}
+
+AsmState.prototype.installCylinder = function (time)
+{
+	if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues( 0.4, 2.8, 3.8 );
+		var target = vec3.fromValues( 0.0, 2.8, 3.8 );
+		
+		this.cylinderAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.cylinderAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans);
+	this.cylinder.setMvMatrix(transform);
+	
+	if ( this.cylinderAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.cylinderAnimator = undefined;
+		this.handler = this.grabClip;
+	}
+}
+
+AsmState.prototype.grabClip = function (time)
+{
+	if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues( 0.0, 0.0, 0.0 );
+		var target = vec3.fromValues( 0.4, 2.8, 3.8 );
+		
+		this.clipAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.clipAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans);
+	this.clip.setMvMatrix(transform);
+	
+	if ( this.clipAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.clipAnimator = undefined;
+		this.handler = this.installClip;
+	}
+}
+
+AsmState.prototype.installClip = function (time)
+{
+	if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues( 0.4, 2.8, 3.8 );
+		var target = vec3.fromValues( 0.0, 2.8, 3.8 );
+		
+		this.clipAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.clipAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans);
+	this.clip.setMvMatrix(transform);
+	
+	if ( this.clipAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.clipAnimator = undefined;
+		this.handler = this.grabGum;
+	}
+}
+
+AsmState.prototype.grabGum = function (time)
+{
+	if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues( 0.0, 0.0, 0.0 );
+		var target = vec3.fromValues(-0.7, 2.8, 3.8 );
+		
+		this.gumAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.gumAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans);
+	this.gum.setMvMatrix(transform);
+	
+	if ( this.gumAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.gumAnimator = undefined;
+		this.handler = this.installGum;
+	}
+}
+
+AsmState.prototype.installGum = function (time)
+{
+    if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues(-0.7, 2.8, 3.8 );
+		var target = vec3.fromValues( 0.0, 2.8, 3.8 );
+		
+		this.gumAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.gumAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans);
+	this.gum.setMvMatrix(transform);
+	
+	if ( this.gumAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.gumAnimator = undefined;
+		this.handler = this.testOut;
+	}
+}
+
+AsmState.prototype.testOut = function (time)
+{
+    if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues(-0.09, 2.8, 3.8 );
+		var target = vec3.fromValues(-0.085, 2.8, 3.8 );
+		
+		this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.inkAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans); 
+	
+	this.clip.setMvMatrix(transform);
+	this.cylinder.setMvMatrix(transform);
+	this.axle.setMvMatrix(transform);
+	this.ink.setMvMatrix(transform);
+	
+	if ( this.inkAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.inkAnimator = undefined;
+		this.handler = this.testIn;
+	}
+}
+
+AsmState.prototype.testIn = function (time)
+{
+	if ( undefined == this.trans )
+	{
+		this.trans = vec3.fromValues(-0.09, 2.8, 3.8 );
+		var target = vec3.fromValues(-0.0, 2.8, 3.8 );
+		
+		this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
+	}
+	
+	this.inkAnimator.update(time);
+	
+	var transform = mat4.create();
+	mat4.translate(transform, transform, this.trans); 
+	
+	this.clip.setMvMatrix(transform);
+	this.cylinder.setMvMatrix(transform);
+	this.axle.setMvMatrix(transform);
+	this.ink.setMvMatrix(transform);
+	
+	if ( this.inkAnimator.getIsComplete() )
+	{
+		this.trans = undefined;
+		this.inkAnimator = undefined;
+		this.handler = this.idle;
+	}
+}
+
+AsmState.prototype.idle = function (time)
+{
+}

@@ -54,7 +54,7 @@ GHudGroup.prototype.bindToContext = function(gl, recIdxBuffer)
     }
 }
 
-GHudGroup.prototype.draw = function( transform )
+GHudGroup.prototype.draw = function( transform, shader )
 {
     mat3.multiply(this.drawTransform, transform, this.transform);
 
@@ -62,7 +62,7 @@ GHudGroup.prototype.draw = function( transform )
     
     for (var i = 0; i < childCount; ++i)
     {
-        this.children[i].draw(this.transform);
+        this.children[i].draw(this.transform, shader);
     }
 }
 
@@ -134,24 +134,24 @@ GHudController.prototype.bindToContext = function (gl)
     this.group_bindToContext(gl, this.recIndxBuffer);
 }
 
-GHudController.prototype.draw = function()
+GHudController.prototype.draw = function(shader)
 {
     var gl = this.gl; 
     gl.activeTexture(gl.TEXTURE0);
     
     gl.whiteTexture.draw(gl.TEXTURE0, 
-                gl.fullscreenProgram.mapKd,
-                gl.fullscreenProgram.mapKdScale);
+                shader.uniforms.mapKd,
+                shader.uniforms.mapKdScale);
     
     gl.bindBuffer(gl.ARRAY_BUFFER, this.recVertBuffer);
-    gl.vertexAttribPointer(gl.fullscreenProgram.positionVertexAttribute, 
+    gl.vertexAttribPointer(shader.attributes.positionVertexAttribute, 
                            this.recVertBuffer.itemSize, gl.FLOAT, false, 0, 0);
     
     gl.bindBuffer(gl.ARRAY_BUFFER, this.recTextBuffer);
-    gl.vertexAttribPointer(gl.fullscreenProgram.textureVertexAttribute, 
+    gl.vertexAttribPointer(shader.attributes.textureVertexAttribute, 
                            this.recTextBuffer.itemSize, gl.FLOAT, false, 0, 0);
     
-    this.group_draw(this.transform);
+    this.group_draw(this.transform, shader);
 }
 
 

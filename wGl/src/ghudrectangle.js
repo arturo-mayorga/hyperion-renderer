@@ -23,18 +23,18 @@ GHudRectangle.prototype.setColor = function(r, g, b, a)
 	this.bgColor[0] = r; this.bgColor[1] = g;
 	this.bgColor[2] = b; this.bgColor[3] = a;
 }
-GHudRectangle.prototype.draw = function( mat ) 
+GHudRectangle.prototype.draw = function( mat, shader ) 
 {
 	mat3.multiply(this.drawTransform, mat, this.transform);
 	var gl = this.gl;
-	if ( null != gl.fullscreenProgram.Kd )
+	if ( null != shader.uniforms.Kd )
     {
-        gl.uniform4fv(gl.fullscreenProgram.Kd, this.bgColor);
+        gl.uniform4fv(shader.uniforms.Kd, this.bgColor);
     }
 	
-	if ( null != gl.fullscreenProgram.hMatrixUniform )
+	if ( null != shader.uniforms.hMatrixUniform )
     {
-        gl.uniformMatrix3fv(gl.fullscreenProgram.hMatrixUniform, false, this.drawTransform);
+        gl.uniformMatrix3fv(shader.uniforms.hMatrixUniform, false, this.drawTransform);
     }
     
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.recIndxBuffer);

@@ -1,6 +1,116 @@
 /**
  * @constructor
  */
+function GShader(vertex, fragment)
+{
+    this.vertex = vertex;
+    this.fragment = fragment;
+}
+
+GShader.prototype.getShader = function (shaderScript, shaderType) 
+{
+    var gl = this.gl;
+    var shader;
+    shader = gl.createShader(shaderType);
+
+    gl.shaderSource(shader, shaderScript);
+    gl.compileShader(shader);
+
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.debug(gl.getShaderInfoLog(shader));
+        return null;
+    }
+
+    return shader;
+}
+
+GShader.prototype.bindToContext = function (gl)
+{
+    this.gl = gl;
+    
+    var fragmentShader = this.getShader(this.fragment, gl.FRAGMENT_SHADER);
+    var vertexShader = this.getShader(this.vertex, gl.VERTEX_SHADER);
+
+    var shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) 
+    {
+        console.debug("Could not initialise shaders");
+    }
+    
+    var attr = {};
+    attr.positionVertexAttribute = gl.getAttribLocation(shaderProgram, "aPositionVertex");
+    attr.textureVertexAttribute  = gl.getAttribLocation(shaderProgram, "aTextureVertex");
+    attr.normalVertexAttribute   = gl.getAttribLocation(shaderProgram, "aNormalVertex");
+    
+    var uniforms = {};
+    uniforms.pMatrixUniform  = gl.getUniformLocation(shaderProgram, "uPMatrix");
+    uniforms.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+    uniforms.nMatrixUniform  = gl.getUniformLocation(shaderProgram, "uNMatrix");
+    uniforms.hMatrixUniform  = gl.getUniformLocation(shaderProgram, "uHMatrix");
+    uniforms.Ka              = gl.getUniformLocation(shaderProgram, "uKa");
+    uniforms.Kd              = gl.getUniformLocation(shaderProgram, "uKd");
+    uniforms.mapKd           = gl.getUniformLocation(shaderProgram, "uMapKd");
+    uniforms.mapKdScale      = gl.getUniformLocation(shaderProgram, "uMapKdScale");
+    uniforms.Ks              = gl.getUniformLocation(shaderProgram, "uKs");
+    
+    this.attributes = attr;
+    this.uniforms = uniforms;
+    this.glProgram = shaderProgram;
+}
+
+GShader.prototype.deactivate = function()
+{
+    var gl = this.gl;
+    
+    if (this.glProgram != undefined)
+	{
+		if ( -1 < this.attributes.positionVertexAttribute)
+		{
+			gl.disableVertexAttribArray(this.attributes.positionVertexAttribute);
+		}
+		
+		if ( -1 < this.attributes.textureVertexAttribute)
+		{
+			gl.disableVertexAttribArray(this.attributes.textureVertexAttribute);
+		}
+	
+		if ( -1 < this.attributes.normalVertexAttribute)
+		{
+			gl.disableVertexAttribArray(this.attributes.normalVertexAttribute);
+		}
+	}
+}
+
+GShader.prototype.activate = function()
+{
+    var gl = this.gl;
+    
+    gl.useProgram(this.glProgram);
+
+    if ( -1 < this.attributes.positionVertexAttribute)
+    {
+        gl.enableVertexAttribArray(this.attributes.positionVertexAttribute);
+    }
+    
+    if ( -1 < this.attributes.textureVertexAttribute)
+    {
+        gl.enableVertexAttribArray(this.attributes.textureVertexAttribute);
+    }
+
+    if ( -1 < this.attributes.normalVertexAttribute)
+    {
+        gl.enableVertexAttribArray(this.attributes.normalVertexAttribute);
+    } 
+}
+
+
+/**
+ * @constructor
+ */
 function GContext(canvas, shaderSrcMap)
 {
 	this.scene            = undefined;
@@ -85,23 +195,28 @@ GContext.prototype.setHud = function ( hud_ )
 GContext.prototype.draw = function()
 {
     var gl = this.gl;
-    this.bindShader(gl.shaderProgram);
+    this.phongShader.activate();
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.rttFramebuffer);
     gl.viewport(0, 0, 1024, 1024);
     gl.enable(gl.DEPTH_TEST);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	
-    scene.draw();
+    scene.draw(this.phongShader);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    this.phongShader.deactivate();
     
-    this.drawScreenBuffer();	
+    this.fullScreenProgram.activate();
+    
+    this.drawScreenBuffer(this.fullScreenProgram);	
     
     if (this.hud != undefined)
     {
-        this.hud.draw();
+        this.hud.draw(this.fullScreenProgram);
     }
+    this.fullScreenProgram.deactivate();
+    //this.unbindShader(gl.fullscreenProgram);
 }
 
-GContext.prototype.drawScreenBuffer = function()
+GContext.prototype.drawScreenBuffer = function(shader)
 {
     var gl = this.gl;
 	
@@ -109,32 +224,34 @@ GContext.prototype.drawScreenBuffer = function()
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    this.bindShader(gl.fullscreenProgram);
+    //this.bindShader(gl.fullscreenProgram);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.rttTexture);
-    gl.uniform1i(gl.fullscreenProgram.mapKd, 0);
+    gl.uniform1i(shader.uniforms.mapKd, 0);
     
-    if ( null != gl.fullscreenProgram.Kd )
+    if ( null != shader.uniforms.Kd )
     {
-        gl.uniform4fv(gl.fullscreenProgram.Kd, [1, 1, 1, 1]);
+        gl.uniform4fv(shader.uniforms.Kd, [1, 1, 1, 1]);
     }
     
     gl.bindBuffer(gl.ARRAY_BUFFER, this.screenVertBuffer);
-    gl.vertexAttribPointer(gl.fullscreenProgram.positionVertexAttribute, 
+    gl.vertexAttribPointer(shader.attributes.positionVertexAttribute, 
                            this.screenVertBuffer.itemSize, gl.FLOAT, false, 0, 0);
     
     gl.bindBuffer(gl.ARRAY_BUFFER, this.screenTextBuffer);
-    gl.vertexAttribPointer(gl.fullscreenProgram.textureVertexAttribute, 
+    gl.vertexAttribPointer(shader.attributes.textureVertexAttribute, 
                            this.screenTextBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.screenIndxBuffer);
 	
-	if ( null != gl.fullscreenProgram.hMatrixUniform )
+	if ( null != shader.uniforms.hMatrixUniform )
     {
-        gl.uniformMatrix3fv(gl.fullscreenProgram.hMatrixUniform, false, this.hMatrix);
+        gl.uniformMatrix3fv(shader.uniforms.hMatrixUniform, false, this.hMatrix);
     }
 	
     gl.drawElements(gl.TRIANGLES, this.screenIndxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    
+     
   //  gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
@@ -171,27 +288,32 @@ GContext.prototype.initTextureFramebuffer = function()
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 }
 
-GContext.prototype.bindShader = function(shaderProgram)
+GContext.prototype.unbindShader = function(shaderProgram)
 {
     var gl = this.gl;
     
-    if (this.currentProgram != undefined)
+    if (shaderProgram!= undefined)
 	{
-		if ( -1 < this.currentProgram.positionVertexAttribute)
+		if ( -1 < shaderProgram.positionVertexAttribute)
 		{
-			gl.disableVertexAttribArray(this.currentProgram.positionVertexAttribute);
+			gl.disableVertexAttribArray(shaderProgram.positionVertexAttribute);
 		}
 		
-		if ( -1 < this.currentProgram.textureVertexAttribute)
+		if ( -1 < shaderProgram.textureVertexAttribute)
 		{
-			gl.disableVertexAttribArray(this.currentProgram.textureVertexAttribute);
+			gl.disableVertexAttribArray(shaderProgram.textureVertexAttribute);
 		}
 	
 		if ( -1 < this.currentProgram.normalVertexAttribute)
 		{
-			gl.disableVertexAttribArray(this.currentProgram.normalVertexAttribute);
+			gl.disableVertexAttribArray(shaderProgram.normalVertexAttribute);
 		}
 	}
+}
+
+GContext.prototype.bindShader = function(shaderProgram)
+{
+    var gl = this.gl;
     
     gl.useProgram(shaderProgram);
     this.currentProgram = shaderProgram;
@@ -250,9 +372,16 @@ GContext.prototype.createShaderProgram = function (vertex, fragment)
 GContext.prototype.initShaders = function (shaderSrcMap) 
 {
     var gl = this.gl;
-    gl.shaderProgram = this.createShaderProgram(shaderSrcMap["phong-vs.c"], shaderSrcMap["phong-fs.c"]);
+    //gl.fullscreenProgram = this.createShaderProgram(shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
     
-    gl.fullscreenProgram = this.createShaderProgram(shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
+    var phong = new GShader(shaderSrcMap["phong-vs.c"], shaderSrcMap["phong-fs.c"]);
+    phong.bindToContext(gl);
+    
+    var fullScr = new GShader(shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
+    fullScr.bindToContext(gl);
+    
+    this.fullScreenProgram = fullScr;
+    this.phongShader = phong;
 }
 
 GContext.prototype.getShader = function (shaderScript, shaderType) 

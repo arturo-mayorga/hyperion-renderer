@@ -19,7 +19,7 @@ function GCamera()
 	this.mvMatrix = mat4.create();
 }
 	
-GCamera.prototype.draw = function(ouMvMatrix)
+GCamera.prototype.draw = function(ouMvMatrix, shader)
 {
     var gl = this.gl;
     this.updateMatrices();
@@ -33,7 +33,7 @@ GCamera.prototype.draw = function(ouMvMatrix)
     
     mat4.multiply(this.camMatrix, this.pMatrix, this.mvMatrix);
     
-    gl.uniformMatrix4fv(gl.shaderProgram.pMatrixUniform, false, this.pMatrix);
+    gl.uniformMatrix4fv(shader.uniforms.pMatrixUniform, false, this.pMatrix);
 }
 
 GCamera.prototype.bindToContext = function(gl_)

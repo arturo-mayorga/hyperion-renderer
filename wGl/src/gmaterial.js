@@ -31,28 +31,28 @@ GMaterial.prototype.getName = function()
     return this.name;
 }
 
-GMaterial.prototype.draw = function()
+GMaterial.prototype.draw = function( shader )
 {
     var gl = this.gl;
     
-    if ( null != gl.shaderProgram.Ka )
+    if ( null != shader.uniforms.Ka )
     {
-        gl.uniform4fv(gl.shaderProgram.Ka, this.Ka);
+        gl.uniform4fv(shader.uniforms.Ka, this.Ka);
     }
     
-    if ( null != gl.shaderProgram.Kd )
+    if ( null != shader.uniforms.Kd )
     {
         this.Kd[3] = (this.mapKd===gl.whiteTexture)?1.0:0.0;
-        gl.uniform4fv(gl.shaderProgram.Kd, this.Kd);
+        gl.uniform4fv(shader.uniforms.Kd, this.Kd);
     }
     
     this.mapKd.draw(gl.TEXTURE0, 
-                gl.shaderProgram.mapKd,
-                gl.shaderProgram.mapKdScale);
+                shader.uniforms.mapKd,
+                shader.uniforms.mapKdScale);
     
-    if ( null != gl.shaderProgram.Ks )
+    if ( null != shader.uniforms.Ks )
     {
-        gl.uniform4fv(gl.shaderProgram.Ks, this.Ks);
+        gl.uniform4fv(shader.uniforms.Ks, this.Ks);
     }
     
     

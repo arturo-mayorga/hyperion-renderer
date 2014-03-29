@@ -34,14 +34,15 @@ function GScene()
 		}
 	}
 	
-	this.draw = function()
+	
+	this.draw = function( shader )
 	{
-		camera.draw(_eyeMvMatrix);
+		camera.draw(_eyeMvMatrix, shader);
 		
 	    var childCount = _children.length;
 		for (var i = 0; i < childCount; ++i)
 		{
-			_children[i].draw(_eyeMvMatrix, _materials);
+			_children[i].draw(_eyeMvMatrix, _materials, shader);
 		}
 	}
 	

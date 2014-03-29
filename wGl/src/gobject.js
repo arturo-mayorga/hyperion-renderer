@@ -79,42 +79,42 @@ GObject.prototype.bindToContext = function(gl_)
     }
 }
 
-GObject.prototype.draw = function(parentMvMat, materials)
+GObject.prototype.draw = function(parentMvMat, materials, shader)
 {
    if ( !this.valid ) return;
    
    var gl = this.gl;
    
-    if (gl.shaderProgram.positionVertexAttribute > -1)
+    if (shader.attributes.positionVertexAttribute > -1)
     {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
-        gl.vertexAttribPointer(gl.shaderProgram.positionVertexAttribute, 
+        gl.vertexAttribPointer(shader.attributes.positionVertexAttribute, 
                                this.vertBuffer.itemSize, gl.FLOAT, false, 0, 0);
     }
 
-    if (gl.shaderProgram.normalVertexAttribute > -1)
+    if (shader.attributes.normalVertexAttribute > -1)
     {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.normlBuffer);
-        gl.vertexAttribPointer(gl.shaderProgram.normalVertexAttribute, 
+        gl.vertexAttribPointer(shader.attributes.normalVertexAttribute, 
                                this.normlBuffer.itemSize, gl.FLOAT, false, 0, 0);
     }
     
-    if (gl.shaderProgram.textureVertexAttribute > -1)
+    if (shader.attributes.textureVertexAttribute > -1)
     {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.tverBuffer);
-        gl.vertexAttribPointer(gl.shaderProgram.textureVertexAttribute, 
+        gl.vertexAttribPointer(shader.attributes.textureVertexAttribute, 
                                this.tverBuffer.itemSize, gl.FLOAT, false, 0, 0);
     }
     
     var isDrawMvMatrixReady = false;
-    if ( null != gl.shaderProgram.mvMatrixUniform )
+    if ( null != shader.uniforms.mvMatrixUniform )
     {
         mat4.multiply(this.drawMvMatrix, parentMvMat, this.mvMatrix);
         isDrawMvMatrixReady = true;
-        gl.uniformMatrix4fv(gl.shaderProgram.mvMatrixUniform, false, this.drawMvMatrix);
+        gl.uniformMatrix4fv(shader.uniforms.mvMatrixUniform, false, this.drawMvMatrix);
     }
     
-    if ( null != gl.shaderProgram.nMatrixUniform )
+    if ( null != shader.uniforms.nMatrixUniform )
     {
         if ( !isDrawMvMatrixReady )
         {
@@ -125,7 +125,7 @@ GObject.prototype.draw = function(parentMvMat, materials)
         mat4.invert(this.normalMatrix, this.drawMvMatrix);
         mat4.transpose(this.normalMatrix, this.normalMatrix);
         
-        gl.uniformMatrix4fv(gl.shaderProgram.nMatrixUniform, false, this.normalMatrix);
+        gl.uniformMatrix4fv(shader.uniforms.nMatrixUniform, false, this.normalMatrix);
     }
     
     if ( this.material == undefined &&
@@ -136,7 +136,7 @@ GObject.prototype.draw = function(parentMvMat, materials)
     
     if ( this.material != undefined )
     {
-        this.material.draw();
+        this.material.draw( shader );
     }
     
     if (this.indexBuffer.numItems !=  this.normlBuffer.numItems  ||

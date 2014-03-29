@@ -43,13 +43,13 @@ GGroup.prototype.removeChild = function(child)
     return child;
 }
 
-GGroup.prototype.draw = function(parentMvMat, materials)
+GGroup.prototype.draw = function(parentMvMat, materials, shader)
 {
 	mat4.multiply(this.drawMvMatrix, parentMvMat, this.mvMatrix);
 	var childCount = this.children.length;
 	for (var i = 0; i < childCount; ++i)
 	{
-		this.children[i].draw(this.drawMvMatrix, materials);
+		this.children[i].draw(this.drawMvMatrix, materials, shader);
 	}
 }
 

@@ -1,0 +1,110 @@
+/**
+ * @constructor
+ */
+function GShader(vertex, fragment)
+{
+    this.vertex = vertex;
+    this.fragment = fragment;
+}
+
+GShader.prototype.getShader = function (shaderScript, shaderType) 
+{
+    var gl = this.gl;
+    var shader;
+    shader = gl.createShader(shaderType);
+
+    gl.shaderSource(shader, shaderScript);
+    gl.compileShader(shader);
+
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.debug(gl.getShaderInfoLog(shader));
+        return null;
+    }
+
+    return shader;
+}
+
+GShader.prototype.bindToContext = function (gl)
+{
+    this.gl = gl;
+    
+    var fragmentShader = this.getShader(this.fragment, gl.FRAGMENT_SHADER);
+    var vertexShader = this.getShader(this.vertex, gl.VERTEX_SHADER);
+
+    var shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) 
+    {
+        console.debug("Could not initialise shaders");
+    }
+    
+    var attr = {};
+    attr.positionVertexAttribute = gl.getAttribLocation(shaderProgram, "aPositionVertex");
+    attr.textureVertexAttribute  = gl.getAttribLocation(shaderProgram, "aTextureVertex");
+    attr.normalVertexAttribute   = gl.getAttribLocation(shaderProgram, "aNormalVertex");
+    
+    var uniforms = {};
+    uniforms.pMatrixUniform  = gl.getUniformLocation(shaderProgram, "uPMatrix");
+    uniforms.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+    uniforms.nMatrixUniform  = gl.getUniformLocation(shaderProgram, "uNMatrix");
+    uniforms.hMatrixUniform  = gl.getUniformLocation(shaderProgram, "uHMatrix");
+    uniforms.Ka              = gl.getUniformLocation(shaderProgram, "uKa");
+    uniforms.Kd              = gl.getUniformLocation(shaderProgram, "uKd");
+    uniforms.mapKd           = gl.getUniformLocation(shaderProgram, "uMapKd");
+    uniforms.mapKdScale      = gl.getUniformLocation(shaderProgram, "uMapKdScale");
+    uniforms.Ks              = gl.getUniformLocation(shaderProgram, "uKs");
+    
+    this.attributes = attr;
+    this.uniforms = uniforms;
+    this.glProgram = shaderProgram;
+}
+
+GShader.prototype.deactivate = function()
+{
+    var gl = this.gl;
+    
+    if (this.glProgram != undefined)
+	{
+		if ( -1 < this.attributes.positionVertexAttribute)
+		{
+			gl.disableVertexAttribArray(this.attributes.positionVertexAttribute);
+		}
+		
+		if ( -1 < this.attributes.textureVertexAttribute)
+		{
+			gl.disableVertexAttribArray(this.attributes.textureVertexAttribute);
+		}
+	
+		if ( -1 < this.attributes.normalVertexAttribute)
+		{
+			gl.disableVertexAttribArray(this.attributes.normalVertexAttribute);
+		}
+	}
+}
+
+GShader.prototype.activate = function()
+{
+    var gl = this.gl;
+    
+    gl.useProgram(this.glProgram);
+
+    if ( -1 < this.attributes.positionVertexAttribute)
+    {
+        gl.enableVertexAttribArray(this.attributes.positionVertexAttribute);
+    }
+    
+    if ( -1 < this.attributes.textureVertexAttribute)
+    {
+        gl.enableVertexAttribArray(this.attributes.textureVertexAttribute);
+    }
+
+    if ( -1 < this.attributes.normalVertexAttribute)
+    {
+        gl.enableVertexAttribArray(this.attributes.normalVertexAttribute);
+    } 
+}
+
+

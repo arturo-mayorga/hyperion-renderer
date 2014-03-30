@@ -23,9 +23,11 @@ module.exports = function(grunt) {
                 js: [
                     'src/fsm.js',
                     'src/lessonfsm.js',
+                    'src/gshader.js',
                     'src/glmatrix.js',
                     'src/gcamera.js',
                     'src/gmaterial.js',
+                    'src/ggroup.js',
                     'src/gobject.js',
                     'src/gtexture.js',
                     'src/gscene.js',

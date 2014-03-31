@@ -1,4 +1,18 @@
 module.exports = function(grunt) {
+    
+    var srcList = [
+                    'src/graphics/renderstrategy/*.js',
+                    'src/graphics/core/*.js',
+                    'src/graphics/assets/*.js',
+                    'src/graphics/assetloader/*.js',
+                    'src/graphics/scene/*.js',
+                    'src/graphics/hud/*.js',
+                    'src/graphics/*.js',
+                    'src/fsm.js',
+                    'src/lessonfsm.js',
+                    'src/gcameracontroller.js',
+                    'src/main.js'
+                ];
 
     // Project configuration.
     grunt.initConfig({
@@ -8,38 +22,19 @@ module.exports = function(grunt) {
             banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
           },
           build: {
-            src: 'src/*.js',
+            src: srcList,
             dest: 'build/main.ug.min.js'
           }
         },
         concat: {
             app: {
-                src:'src/*.js',
+                src:srcList,
                 dest:'build/main.concat.js'
             }
         },
         'closure-compiler': {
             frontend: {
-                js: [
-                    'src/fsm.js',
-                    'src/lessonfsm.js',
-                    'src/gshader.js',
-                    'src/glmatrix.js',
-                    'src/gcamera.js',
-                    'src/gmaterial.js',
-                    'src/ggroup.js',
-                    'src/gobject.js',
-                    'src/gtexture.js',
-                    'src/gscene.js',
-					'src/ghudcontroller.js',
-					'src/ghudrectangle.js',
-                    'src/grenderstrategy.js',
-                    'src/gcontext.js',
-                    'src/gmtlloader.js',
-                    'src/gobjloader.js',
-                    'src/gcameracontroller.js',
-                    'src/main.js'
-                ],
+                js: srcList,
                 jsOutputFile: 'build/main.min.js',
                 options: {
                     compilation_level: 'ADVANCED_OPTIMIZATIONS',

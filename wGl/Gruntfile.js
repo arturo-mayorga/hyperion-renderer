@@ -33,6 +33,7 @@ module.exports = function(grunt) {
                     'src/gscene.js',
 					'src/ghudcontroller.js',
 					'src/ghudrectangle.js',
+                    'src/grenderstrategy.js',
                     'src/gcontext.js',
                     'src/gmtlloader.js',
                     'src/gobjloader.js',

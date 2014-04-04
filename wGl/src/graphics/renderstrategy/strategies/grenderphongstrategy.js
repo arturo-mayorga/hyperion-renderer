@@ -2,15 +2,82 @@
  * @constructor
  * @implements {GRenderStrategy}
  */
-function GRenderPhongStrategy( gl, shaderSrcMap )
+function GRenderPhongStrategy( gl )
 {
     this.gl = gl;
+    this.configure();
     
+}
+
+GRenderPhongStrategy.prototype.configure = function()
+{
+    this.shaderSrcMap = 
+    {
+        "phong-vs.c":undefined,
+        "phong-fs.c":undefined,
+        "fullscr-vs.c":undefined,
+        "fullscr-fs.c":undefined
+    };
+    
+    for (var key in this.shaderSrcMap)
+    {
+        this.loadShader(key);
+    }
+};
+
+GRenderPhongStrategy.prototype.reload = function()
+{
+    this._isReady = false;
+    this.phongShader.destroy();
+    this.fullScreenProgram.destroy();
+    
+    this.phongShader = undefined;
+    this.fullScreenProgram = undefined;
+    this.configure();
+};
+
+GRenderPhongStrategy.prototype.loadShader = function(srcName)
+{
+    var client = new XMLHttpRequest();
+    var _this = this;
+    client.open('GET', "assets/shaders/" + srcName);
+    client.onreadystatechange = function() 
+    {
+        if ( client.readyState == 4 )
+        {
+            _this.shaderSrcMap[srcName] = client.responseText; 
+            _this.checkShaderDependencies();
+        }
+    }
+    client.send();
+};
+
+GRenderPhongStrategy.prototype.checkShaderDependencies = function()
+{
+    for (var key in this.shaderSrcMap)
+    {
+        if (this.shaderSrcMap[key] == undefined)
+        {
+            return;
+        }
+    }
+    
+    this.initialize();
+};
+
+GRenderPhongStrategy.prototype.initialize = function()
+{   
     this.initTextureFramebuffer();
-    this.initShaders(shaderSrcMap);
+    this.initShaders(this.shaderSrcMap);
     
     this.initScreenVBOs();
-}
+    this._isReady = true;
+};
+
+GRenderPhongStrategy.prototype.isReady = function()
+{
+    return true == this._isReady;
+};
 
 GRenderPhongStrategy.prototype.initScreenVBOs = function()
 {

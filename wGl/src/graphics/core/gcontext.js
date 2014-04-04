@@ -1,7 +1,7 @@
 /**
  * @constructor
  */
-function GContext(canvas, shaderSrcMap)
+function GContext(canvas)
 {
 	this.scene            = undefined;
 	this.gl               = undefined;
@@ -24,30 +24,43 @@ function GContext(canvas, shaderSrcMap)
     gl.viewportWidth = canvas.width;
     gl.viewportHeight = canvas.height;
     
-    var renderStrategyFactory = new GRenderStrategyFactory( gl, shaderSrcMap );
+    var renderStrategyFactory = new GRenderStrategyFactory( gl );
     
     this.renderStrategy = renderStrategyFactory.creteBestFit();
     
     
     whiteTexture.bindToContext(gl);
     gl.whiteTexture = whiteTexture;
-}
+};
 	
 GContext.prototype.setScene = function (scene_)
 {
     this.scene = scene_;
     this.scene.bindToContext(this.gl);
-}
+};
 
 GContext.prototype.setHud = function ( hud_ )
 {
     this.hud = hud_;
     this.hud.bindToContext(this.gl);
-}
+};
 
 GContext.prototype.draw = function()
 {
     this.renderStrategy.draw(this.scene, this.hud);
-}
+};
+
+/**
+ * @returns {boolean}
+ */
+GContext.prototype.isReady = function()
+{
+    return this.renderStrategy.isReady();
+};
+
+GContext.prototype.reloadRenderStrategy = function()
+{
+    this.renderStrategy.reload();
+};
 
 

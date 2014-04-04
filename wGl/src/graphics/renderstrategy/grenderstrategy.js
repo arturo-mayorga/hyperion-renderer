@@ -6,6 +6,14 @@ function GRenderStrategy()
 }
 
 /**
+ * @return {boolean}
+ */
+GRenderStrategy.prototype.isReady = function() {return false;};
+
+GRenderStrategy.prototype.reload = function() {};
+
+
+/**
  * @param {GScene} scene Scene object that needs to be drawn
  * @param (GHudController} hud Hud controller that needs to be drawn
  */

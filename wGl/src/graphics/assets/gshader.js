@@ -24,6 +24,20 @@ GShader.prototype.getShader = function (shaderScript, shaderType)
     return shader;
 }
 
+
+GShader.prototype.destroy = function ()
+{
+    // NOTE: once this function is used the GShader object
+    // is no longer valid and should be discarted
+    var gl = this.gl;
+    
+    gl.detachShader(this.glProgram, this.vShader);
+    gl.detachShader(this.glProgram, this.fShader);
+    gl.deleteProgram(this.glProgram);
+    gl.deleteShader(this.vShader);
+    gl.deleteShader(this.fShader);
+}
+
 GShader.prototype.bindToContext = function (gl)
 {
     this.gl = gl;
@@ -60,6 +74,8 @@ GShader.prototype.bindToContext = function (gl)
     this.attributes = attr;
     this.uniforms = uniforms;
     this.glProgram = shaderProgram;
+    this.vShader = vertexShader;
+    this.fShader = fragmentShader;
 }
 
 GShader.prototype.deactivate = function()

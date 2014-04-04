@@ -9,16 +9,17 @@ function animate() {
 	
 	var timeNow = new Date().getTime();
 	var elapsed = 0;
-	if (lastTime != 0) {
+	if (lastTime != 0) 
+	{
 		elapsed = timeNow - lastTime;
-
-		rPyramid += (90 * elapsed) / 1000.0;
-		rCube -= (75 * elapsed) / 1000.0;
 	}
 	lastTime = timeNow;
 
-	lesson.update(elapsed);
-	context.draw(elapsed);
+	if (context.isReady())
+	{
+        lesson.update(elapsed);
+        context.draw(elapsed);
+	}
 }
 
 
@@ -41,62 +42,16 @@ window.requestAnimFrame = (function() {
 var context;
 var scene;
 var hud;
-var camController;
 var camera;
 var lesson;
 
-var shaderSrcMap =
-{
-    "phong-vs.c":undefined,
-    "phong-fs.c":undefined,
-    "fullscr-vs.c":undefined,
-    "fullscr-fs.c":undefined
-};
 
 
-function start() 
-{
-    for (var key in shaderSrcMap)
-    {
-        loadShader(key);
-    }
-}
-
-window.onload=start;
-
-function loadShader(srcName)
-{
-    var client = new XMLHttpRequest();
-    client.open('GET', "assets/shaders/" + srcName);
-    client.onreadystatechange = function() 
-    {
-        if ( client.readyState == 4 )
-        {
-            shaderSrcMap[srcName] = client.responseText; 
-            checkShaderDependencies();
-        }
-    }
-    client.send();
-}
-
-function checkShaderDependencies()
-{
-    for (var key in shaderSrcMap)
-    {
-        if (shaderSrcMap[key] == undefined)
-        {
-            return;
-        }
-    }
-    
-    // if all the shaders are loaded move on
-    // to the main loop
-    mainLoop();
-}
+window.onload=mainLoop;
 
 function mainLoop()
 {
-	context = new GContext(document.getElementById("glcanvas"), shaderSrcMap);
+	context = new GContext(document.getElementById("glcanvas"));
 	scene   = new GScene();
 	camera  = new GCamera();
 	hud     = new GHudController();

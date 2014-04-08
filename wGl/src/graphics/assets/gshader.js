@@ -16,7 +16,9 @@ GShader.prototype.getShader = function (shaderScript, shaderType)
     gl.shaderSource(shader, shaderScript);
     gl.compileShader(shader);
 
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) 
+    {
+        console.debug(shaderScript);
         console.debug(gl.getShaderInfoLog(shader));
         return null;
     }
@@ -51,7 +53,8 @@ GShader.prototype.bindToContext = function (gl)
     gl.linkProgram(shaderProgram);
 
     if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) 
-    {
+    { 
+        console.debug(gl.getProgramInfoLog(shaderProgram));
         console.debug("Could not initialise shaders");
     }
     

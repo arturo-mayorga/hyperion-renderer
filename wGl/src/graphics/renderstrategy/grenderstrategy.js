@@ -22,13 +22,13 @@ GRenderStrategy.prototype.draw = function ( scene, hud ) {};
 /**
  * @constructor
  */
-function GRenderStrategyFactory(gl, smap)
+function GRenderStrategyFactory(gl)
 {
     this.gl = gl;
-    this.smap = smap;
     this.strategyMap = 
     {
-        "simplePhong": function(gl, smap) { return new GRenderPhongStrategy( gl, smap ); }
+        "simplePhong": function(gl) { return new GRenderPhongStrategy( gl ); },
+        "deferredPhong": function(gl) { return new GRenderDeferredStrategy( gl ); }
     };
     
 }
@@ -41,7 +41,7 @@ GRenderStrategyFactory.prototype.createByName = function ( name )
     var createFn = this.strategyMap[name];
     if ( undefined != createFn )
     {
-        return createFn(this.gl, this.smap);
+        return createFn(this.gl);
     }
     
     return null;
@@ -52,6 +52,7 @@ GRenderStrategyFactory.prototype.createByName = function ( name )
  */
 GRenderStrategyFactory.prototype.creteBestFit = function ()
 {
+   // return this.createByName( "deferredPhong" );
     return this.createByName( "simplePhong" );
 };
 

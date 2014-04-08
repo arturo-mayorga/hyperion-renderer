@@ -180,7 +180,7 @@ function GObjLoader( scene, group )
                 }
                 else
                 {
-                    console.debug("Cant handle [" + this.objStrA[this.updateIndex ] + "]");
+                   // console.debug("Cant handle [" + this.objStrA[this.updateIndex ] + "]");
                 }
             }
             

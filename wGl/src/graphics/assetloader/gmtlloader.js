@@ -38,7 +38,7 @@ function GMtlLoader( scene_ )
             }
             else
             {
-                console.debug("Cant handle [" + mtlStrA[i] + "]");
+                //console.debug("Cant handle [" + mtlStrA[i] + "]");
             }
         }
 	}

@@ -305,7 +305,7 @@ GRenderDeferredStrategy.prototype.initializeFBO = function()
 
     
     FBO = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, FBO[0]);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, FBO);
     var bufs = [];
     bufs[0] = ext.COLOR_ATTACHMENT0_WEBGL;
     bufs[1] = ext.COLOR_ATTACHMENT1_WEBGL;

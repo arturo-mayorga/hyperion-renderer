@@ -79,7 +79,7 @@ GObject.prototype.bindToContext = function(gl_)
     }
 }
 
-GObject.prototype.draw = function(parentMvMat, materials, shader)
+GObject.prototype.draw = function(parentMvMat, materials, shader, drawMode)
 {
    if ( !this.valid ) return;
    
@@ -148,7 +148,7 @@ GObject.prototype.draw = function(parentMvMat, materials, shader)
     }
     
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-    gl.drawElements(gl.TRIANGLES, this.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(drawMode, this.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
 

@@ -21,6 +21,8 @@ function GScene()
 	{
 		gl = gl_;
 		
+		this.drawMode = gl.TRIANGLES;
+		
 		camera.bindToContext(gl);
 		var childCount = _children.length;
 		for (var i = 0; i < childCount; ++i)
@@ -42,9 +44,14 @@ function GScene()
 	    var childCount = _children.length;
 		for (var i = 0; i < childCount; ++i)
 		{
-			_children[i].draw(_eyeMvMatrix, _materials, shader);
+			_children[i].draw(_eyeMvMatrix, _materials, shader, this.drawMode);
 		}
 	}
+	
+	this.setDrawMode = function( mode )
+	{
+	    this.drawMode = mode;
+	};
 	
 	this.addMaterial = function( mat )
 	{

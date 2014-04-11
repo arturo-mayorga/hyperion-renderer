@@ -44,6 +44,8 @@ GRenderDeferredStrategy.prototype.configure = function()
     {
         "deferred-vs.c":undefined,
         "deferred-fs.c":undefined,
+        "light-vs.c":undefined,
+        "light-fs.c":undefined,
         "fullscr-vs.c":undefined,
         "fullscr-fs.c":undefined
     };
@@ -170,6 +172,111 @@ GRenderDeferredStrategy.prototype.create2dTexture = function(filter, format, typ
     return texture;
 };
 
+GRenderDeferredStrategy.prototype.initShaders = function (shaderSrcMap) 
+{
+    var gl = this.gl;
+      
+    var phong = new GShader(shaderSrcMap["deferred-vs.c"], shaderSrcMap["deferred-fs.c"]);
+    phong.bindToContext(gl);
+    
+    var fullScr = new GShader(shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
+    fullScr.bindToContext(gl);
+    
+    var light = new GShader(shaderSrcMap["light-vs.c"], shaderSrcMap["light-fs.c"]);
+    light.bindToContext(gl);
+    
+    this.lightProgram = light;
+    this.fullScreenProgram = fullScr;
+    this.phongShader = phong;
+};
+
+GRenderDeferredStrategy.prototype.drawScreenBuffer = function(shader)
+{
+    var gl = this.gl;
+	
+    
+    
+   
+   // this.frameBuffers.renderToTexture.bindTexture(gl.TEXTURE0, "phong");
+    
+    
+    gl.uniform1i(shader.uniforms.mapKd, 0);
+    
+    if ( null != shader.uniforms.Kd )
+    {
+        gl.uniform4fv(shader.uniforms.Kd, [1, 1, 1, 1]);
+    }
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.screenVertBuffer);
+    gl.vertexAttribPointer(shader.attributes.positionVertexAttribute, 
+                           this.screenVertBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.screenTextBuffer);
+    gl.vertexAttribPointer(shader.attributes.textureVertexAttribute, 
+                           this.screenTextBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.screenIndxBuffer);
+	
+	if ( null != shader.uniforms.hMatrixUniform )
+    {
+        gl.uniformMatrix3fv(shader.uniforms.hMatrixUniform, false, this.hMatrix);
+    }
+	
+    gl.drawElements(gl.TRIANGLES, this.screenIndxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+};
+
+GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
+{
+    var gl = this.gl;
+    this.phongShader.activate();
+    this.frameBuffers.prePass.bindBuffer();
+   
+    gl.viewport(0, 0, 1024, 1024);
+    gl.enable(gl.DEPTH_TEST);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	
+    scene.draw(this.phongShader);
+    
+    this.frameBuffers.prePass.unbindBuffer();
+    this.phongShader.deactivate();
+    
+    this.lightProgram.activate();
+    
+    gl.disable(gl.DEPTH_TEST);
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    
+    
+    this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "depthRGBTexture");
+    this.setHRec(-0.5, 0.5, 0.5, 0.5);
+    this.drawScreenBuffer(this.lightProgram);
+    this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "normalTexture");
+    this.setHRec(0.5, 0.5, 0.5, 0.5);
+    this.drawScreenBuffer(this.lightProgram);
+    this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "positionTexture");  
+    this.setHRec(-0.5, -0.5, 0.5, 0.5);
+    this.drawScreenBuffer(this.lightProgram);
+    this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "colorTexture");
+    this.setHRec(0.5, -0.5, 0.5, 0.5);
+    this.drawScreenBuffer(this.lightProgram);
+    this.lightProgram.deactivate();
+    
+    this.fullScreenProgram.activate();    	
+    if (hud != undefined)
+    {
+        hud.draw(this.fullScreenProgram);
+    }
+    this.fullScreenProgram.deactivate();
+};
+
+GRenderDeferredStrategy.prototype.setHRec = function( x, y, width, height )
+{
+	// the values passed in are meant to be between 0 and 1
+	// currently there are no plans to add debug assertions
+    mat3.identity(this.hMatrix);
+	mat3.translate(this.hMatrix, this.hMatrix, [x, y]);
+	mat3.scale(this.hMatrix,this.hMatrix, [width, height]);  
+}
+
 GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
 {
     var gl = this.gl;
@@ -202,82 +309,6 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     };
 };
 
-
-
-GRenderDeferredStrategy.prototype.initShaders = function (shaderSrcMap) 
-{
-    var gl = this.gl;
-      
-    var phong = new GShader(shaderSrcMap["deferred-vs.c"], shaderSrcMap["deferred-fs.c"]);
-    phong.bindToContext(gl);
-    
-    var fullScr = new GShader(shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
-    fullScr.bindToContext(gl);
-    
-    this.fullScreenProgram = fullScr;
-    this.phongShader = phong;
-};
-
-GRenderDeferredStrategy.prototype.drawScreenBuffer = function(shader)
-{
-    var gl = this.gl;
-	
-    gl.disable(gl.DEPTH_TEST);
-    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    
-   
-    this.frameBuffers.renderToTexture.bindTexture(gl.TEXTURE0, "phong");
-    
-    
-    gl.uniform1i(shader.uniforms.mapKd, 0);
-    
-    if ( null != shader.uniforms.Kd )
-    {
-        gl.uniform4fv(shader.uniforms.Kd, [1, 1, 1, 1]);
-    }
-    
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.screenVertBuffer);
-    gl.vertexAttribPointer(shader.attributes.positionVertexAttribute, 
-                           this.screenVertBuffer.itemSize, gl.FLOAT, false, 0, 0);
-    
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.screenTextBuffer);
-    gl.vertexAttribPointer(shader.attributes.textureVertexAttribute, 
-                           this.screenTextBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.screenIndxBuffer);
-	
-	if ( null != shader.uniforms.hMatrixUniform )
-    {
-        gl.uniformMatrix3fv(shader.uniforms.hMatrixUniform, false, this.hMatrix);
-    }
-	
-    gl.drawElements(gl.TRIANGLES, this.screenIndxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-};
-
-GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
-{
-    var gl = this.gl;
-    this.phongShader.activate();
-    this.frameBuffers.renderToTexture.bindBuffer();
-   
-    gl.viewport(0, 0, 1024, 1024);
-    gl.enable(gl.DEPTH_TEST);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	
-    scene.draw(this.phongShader);
-    
-    this.frameBuffers.renderToTexture.unbindBuffer();
-    this.phongShader.deactivate();
-    
-    this.fullScreenProgram.activate();    
-    this.drawScreenBuffer(this.fullScreenProgram);	
-    if (hud != undefined)
-    {
-        hud.draw(this.fullScreenProgram);
-    }
-    this.fullScreenProgram.deactivate();
-};
-
 GRenderDeferredStrategy.prototype.initializeFBO = function() 
 {
     var gl = this.gl;
@@ -297,11 +328,13 @@ GRenderDeferredStrategy.prototype.initializeFBO = function()
         return;
     }
      
-    var depthTexture    = this.create2dTexture(gl.NEAREST, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT); 
+    
+   // var depthTexture    = this.create2dTexture(gl.NEAREST, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT); 
+    //var depthTexture    = this.create2dTexture(gl.NEAREST, gl.DEPTH_COMPONENT16, gl.UNSIGNED_SHORT); 
     var normalTexture   = this.create2dTexture(gl.LINEAR, gl.RGBA, gl.FLOAT); 
     var positionTexture = this.create2dTexture(gl.LINEAR, gl.RGBA, gl.FLOAT); 
-    var colorTexture    = this.create2dTexture(gl.LINEAR, gl.RGBA, gl.FLOAT); 
-    var depthRGBTexture = this.create2dTexture(gl.LINEAR, gl.RGBA, gl.FLOAT);
+    var colorTexture    = this.create2dTexture(gl.LINEAR, gl.RGBA, gl.UNSIGNED_BYTE); 
+    var depthRGBTexture = this.create2dTexture(gl.LINEAR, gl.RGBA, gl.UNSIGNED_BYTE);
 
     
     FBO = gl.createFramebuffer();
@@ -312,8 +345,14 @@ GRenderDeferredStrategy.prototype.initializeFBO = function()
     bufs[2] = ext.COLOR_ATTACHMENT2_WEBGL;
     bufs[3] = ext.COLOR_ATTACHMENT3_WEBGL;
     ext.drawBuffersWEBGL(bufs);
+    
+    var renderbuffer = gl.createRenderbuffer();
+    gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, 1024, 1024);
+   // gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
 
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
+   // gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, bufs[0], gl.TEXTURE_2D, depthRGBTexture, 0);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, bufs[1], gl.TEXTURE_2D, normalTexture, 0);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, bufs[2], gl.TEXTURE_2D, positionTexture, 0);    
@@ -321,7 +360,7 @@ GRenderDeferredStrategy.prototype.initializeFBO = function()
     
     var textures = 
     {
-        depthTexture    :depthTexture,
+      //  depthTexture    :depthTexture,
         depthRGBTexture :depthRGBTexture,
         normalTexture   :normalTexture,
         positionTexture :positionTexture,    

@@ -193,14 +193,26 @@ GRenderDeferredStrategy.prototype.initShaders = function (shaderSrcMap)
 GRenderDeferredStrategy.prototype.drawScreenBuffer = function(shader)
 {
     var gl = this.gl;
-	
     
+    if ( null != shader.uniforms.mapKd)
+    {
+        gl.uniform1i(shader.uniforms.mapKd, 0);
+    }
     
-   
-   // this.frameBuffers.renderToTexture.bindTexture(gl.TEXTURE0, "phong");
-    
-    
-    gl.uniform1i(shader.uniforms.mapKd, 0);
+    if ( null != shader.uniforms.mapRGBDepth )
+    {
+        gl.uniform1i(shader.uniforms.mapRGBDepth, 1);
+    }
+ 
+    if ( null != shader.uniforms.mapNormal )
+    {
+        gl.uniform1i(shader.uniforms.mapNormal, 2);
+    }
+  
+    if ( null != shader.uniforms.mapPosition )
+    {
+        gl.uniform1i(shader.uniforms.mapPosition, 3);
+    }
     
     if ( null != shader.uniforms.Kd )
     {
@@ -239,28 +251,34 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.frameBuffers.prePass.unbindBuffer();
     this.phongShader.deactivate();
     
-    this.lightProgram.activate();
-    
     gl.disable(gl.DEPTH_TEST);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    
-    this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "depthRGBTexture");
-    this.setHRec(-0.5, 0.5, 0.5, 0.5);
-    this.drawScreenBuffer(this.lightProgram);
-    this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "normalTexture");
-    this.setHRec(0.5, 0.5, 0.5, 0.5);
-    this.drawScreenBuffer(this.lightProgram);
-    this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "positionTexture");  
-    this.setHRec(-0.5, -0.5, 0.5, 0.5);
-    this.drawScreenBuffer(this.lightProgram);
+    this.lightProgram.activate();
+     
     this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "colorTexture");
-    this.setHRec(0.5, -0.5, 0.5, 0.5);
+    this.frameBuffers.prePass.bindTexture(gl.TEXTURE1, "depthRGBTexture");
+    this.frameBuffers.prePass.bindTexture(gl.TEXTURE2, "normalTexture");
+    this.frameBuffers.prePass.bindTexture(gl.TEXTURE3, "positionTexture"); 
+    this.setHRec(0, 0, 1, 1);
     this.drawScreenBuffer(this.lightProgram);
     this.lightProgram.deactivate();
     
-    this.fullScreenProgram.activate();    	
+    this.fullScreenProgram.activate(); 
+    this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "depthRGBTexture");
+    this.setHRec(-0.125+0.75, 0.125-0.75, 0.125, 0.125);
+    this.drawScreenBuffer(this.fullScreenProgram);
+    this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "normalTexture");
+    this.setHRec(0.125+0.75, 0.125-0.75, 0.125, 0.125);
+    this.drawScreenBuffer(this.fullScreenProgram);
+    this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "positionTexture");  
+    this.setHRec(-0.125+0.75, -0.125-0.75, 0.125, 0.125);
+    this.drawScreenBuffer(this.fullScreenProgram);
+    this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "colorTexture");
+    this.setHRec(0.125+0.75, -0.125-0.75, 0.125, 0.125);
+    this.drawScreenBuffer(this.fullScreenProgram);
+       	
     if (hud != undefined)
     {
         hud.draw(this.fullScreenProgram);

@@ -10,6 +10,7 @@ varying vec2 vKdMapCoord;
 
 varying mediump vec4 vNormal;
 varying highp vec4 vPosition;
+varying highp vec4 vpPosition;
 
 // todo: this should be a uniform passed in by the scene object
 varying highp vec4 lightPosition;
@@ -18,7 +19,8 @@ void main(void)
 {
 	vNormal = uNMatrix * vec4(aNormalVertex, 1.0);
 	vPosition = uMVMatrix * vec4(aPositionVertex, 1.0);
-	gl_Position = uPMatrix * vPosition;
+	vpPosition = uPMatrix * vPosition;
+	gl_Position = vpPosition;
 	lightPosition = uMVMatrix * vec4(0, 5, 0, 1.0);	
 	vKdMapCoord = aTextureVertex;
 }

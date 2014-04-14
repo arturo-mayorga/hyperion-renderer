@@ -74,6 +74,10 @@ GShader.prototype.bindToContext = function (gl)
     uniforms.mapKdScale      = gl.getUniformLocation(shaderProgram, "uMapKdScale");
     uniforms.Ks              = gl.getUniformLocation(shaderProgram, "uKs");
     
+    uniforms.mapNormal       = gl.getUniformLocation(shaderProgram, "uMapNormal");
+    uniforms.mapPosition     = gl.getUniformLocation(shaderProgram, "uMapPosition");
+    uniforms.mapRGBDepth     = gl.getUniformLocation(shaderProgram, "uMapRGBDepth");
+    
     this.attributes = attr;
     this.uniforms = uniforms;
     this.glProgram = shaderProgram;

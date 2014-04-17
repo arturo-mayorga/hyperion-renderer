@@ -11,9 +11,6 @@ const float numSamples = 4.0;
 float pw = 1.0/1280.0*0.5; 
 float ph = 1.0/720.0*0.5;
 
-//float pw = 1.0/800.0*0.5; 
-//float ph = 1.0/600.0*0.5;
-
 float randoms(float co)
 {
   //  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453)*2.0 - 1.0 ;
@@ -38,9 +35,39 @@ float readDepth(in vec2 coord)
 {  
     if (coord.x<0.0||coord.y<0.0) return 1.0;
     
-    float posZ = texture2D(uMapPosition, coord).z;   
-    return posZ;  
+    float posZ = texture2D(uMapPosition, coord).z;  
+    return posZ;
+    
+   /* vec4 RGBDepth = texture2D(uMapRGBDepth, coord);
+    float posZ = RGBDepth.x*100.0+ RGBDepth.y*100.0;
+    float nearZ = 0.1;  
+    float farZ = 100.0;  
+    return (2.0 * nearZ) / (nearZ + farZ - posZ * (farZ - nearZ)); */ 
+      
 } 
+
+float compareDepths(in float depth1, in float depth2,inout int far)  
+{  
+    /*float diff = (depth1 - depth2)*100.0; //depth difference (0-100)
+    float gdisplace = 0.2; //gauss bell center
+    float garea = 10.0; //gauss bell width 2
+    
+    //reduce left bell width to avoid self-shadowing
+    if (diff<gdisplace)
+    { 
+        garea = 0.1;
+    }
+    else
+    {
+        far = 1;
+    }
+    float gauss = pow(2.7182,-2.0*(diff-gdisplace)*(diff-gdisplace)/(garea*garea));
+    
+    return gauss;*/
+    
+    float rangeCheck =  abs(depth1 - depth2) < 0.2 ? 1.0 : 0.0;
+     return (depth1 > depth2 ? 1.0 : 0.0) * rangeCheck;
+}
 
 
 vec3 calAO(float depth, vec2 sample)
@@ -56,22 +83,28 @@ vec3 calAO(float depth, vec2 sample)
     {
         vec2 coord = vec2(coordw , coordh);
         vec2 coord2 = vec2(coordw2, coordh2);
+        int far = 0;
         
         // get sample depth:
         float sampleDepth = readDepth(coord);
         
+        temp = compareDepths(depth, sampleDepth,far);
+        
+        if (far > 0)
+        {
+            temp2 = compareDepths(readDepth(coord2),depth,far);
+            temp += (1.0-temp)*temp2; 
+        }
+        
         
         float normalAtt = 1.0;
         
-        // range check & accumulate:
-        
-        float rangeCheck =  abs(depth - sampleDepth) < 0.2 ? normalAtt : 0.0;
-        
-        if (depth >= sampleDepth)
+        // range check & accumulate:  
+        if (temp > 0.0)
         {
             vec4 sampleColor = texture2D(uMapKd, coord);
             vec3 incCol = 1.0 - sampleColor.xyz*0.5;
-            return incCol.xyz * rangeCheck;
+            return incCol.xyz * temp;
         }
     }
     
@@ -81,22 +114,15 @@ vec3 calAO(float depth, vec2 sample)
 
 void main(void)
 {
-    vec3 tv3Normal   = texture2D(uMapNormal,   vTexCoordinate).xyz;
-    vec3 tv3Position = texture2D(uMapPosition, vTexCoordinate).xyz;
-    vec3 tv3RGBDepth = texture2D(uMapRGBDepth, vTexCoordinate).xyz;
+    //vec3 tv3Normal   = texture2D(uMapNormal,   vTexCoordinate).xyz;
+    //vec3 tv3Position = texture2D(uMapPosition, vTexCoordinate).xyz;
+    //vec3 tv3RGBDepth = texture2D(uMapRGBDepth, vTexCoordinate).xyz;
 	vec3 tv3Color    = texture2D(uMapKd,       vTexCoordinate).xyz;
 
-	float tfdDepthValue = tv3Position.z; //256.0 * (tv3RGBDepth.x + tv3RGBDepth.y);
-	
-
-	// there is greater sampling penalty for larger radii
-    float uRadius = min (0.06, 0.10/tfdDepthValue); 
+	float tfdDepthValue = readDepth(vTexCoordinate);  //256.0 * (tv3RGBDepth.x + tv3RGBDepth.y);
     
     vec3 random = vec3(random(vTexCoordinate), random(vTexCoordinate*32.43), random(vTexCoordinate*45.6));
-	
-	
-	
-	float occlusion = 0.0;
+    
 	vec3 occlusionC = vec3(0);
     for (float i = 0.0; i < numSamples; ++i) 
     {
@@ -115,8 +141,11 @@ void main(void)
         ph += random.y*0.0007;
         
         //increase sampling area:
-        pw *= 1.7;  
-        ph *= 1.7;    
+        //pw *= 1.7;  
+        //ph *= 1.7;
+        
+        pw *= 3.5;  
+        ph *= 3.5;
     }
     
     vec3 ovFactor = 1.0 - (occlusionC/(numSamples*8.0));

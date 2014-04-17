@@ -44,8 +44,8 @@ void main(void)
 
     highp vec3 color = diffuseFactor * materialDiffuseColor + specularFactor * uKs.xyz;*/
     
-    float fDepth = dot(vpPosition, vpPosition) / 256.0; 
-    gl_FragData[0] = vec4(floor(fDepth), fract(fDepth),fract(fDepth), 1);
+    highp float fDepth = vpPosition.z; 
+    gl_FragData[0] = vec4(vec3(fDepth/100.0), 1);
     gl_FragData[1] = vec4(vNormal.xyz, 1);
     gl_FragData[2] = vec4(vpPosition.xyz, 1);
     gl_FragData[3] = vec4(materialDiffuseColor, 1);

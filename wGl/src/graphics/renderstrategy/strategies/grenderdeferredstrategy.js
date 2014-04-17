@@ -256,6 +256,7 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
     this.lightProgram.activate();
+    this.frameBuffers.renderToTexture.bindBuffer();
      
     this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "colorTexture");
     this.frameBuffers.prePass.bindTexture(gl.TEXTURE1, "depthRGBTexture");
@@ -263,9 +264,14 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.frameBuffers.prePass.bindTexture(gl.TEXTURE3, "positionTexture"); 
     this.setHRec(0, 0, 1, 1);
     this.drawScreenBuffer(this.lightProgram);
+    this.frameBuffers.renderToTexture.unbindBuffer();
     this.lightProgram.deactivate();
     
     this.fullScreenProgram.activate(); 
+    
+    this.frameBuffers.renderToTexture.bindTexture(gl.TEXTURE0, "phong");
+    this.setHRec(0, 0, 1, 1);
+    this.drawScreenBuffer(this.fullScreenProgram);
     this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "depthRGBTexture");
     this.setHRec(-0.125+0.75, 0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.fullScreenProgram);

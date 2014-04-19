@@ -1,31 +1,91 @@
 /**
  * @constructor
  */
-function GFrameBufferContainer(gl, buffer, textures)
+function GFrameBuffer( config )
 {
-    this.textures = textures;
-    this.buffer = buffer;
-    this.gl = gl;
+    var gl = config.gl;
+    var framebuffer = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+    
+    var renderbuffer = gl.createRenderbuffer();
+    gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, config.width, config.height);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+    
+    this.textures = {};
+    this.fBuffer = framebuffer;
+    this.rBuffer = renderbuffer;
+    this.cfg = config;
 }
 
-GFrameBufferContainer.prototype.bindBuffer = function ()
+GFrameBuffer.prototype.create2dTexture = function (filter, format, type)
 {
-    var gl = this.gl;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.buffer);
+    var gl = this.cfg.gl;
+    var texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D, 0, format, this.cfg.width, this.cfg.height, 0, format, type, null);
+    
+    return texture;
 };
 
-GFrameBufferContainer.prototype.unbindBuffer = function ()
+GFrameBuffer.prototype.addBufferTexture = function ( cfg )
+{ 
+    var gl = this.cfg.gl;
+    var texture = this.create2dTexture(cfg.filter, cfg.format, cfg.type);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, cfg.attachment, gl.TEXTURE_2D, texture, 0);
+    
+    this.textures[cfg.name] = texture;
+};
+
+GFrameBuffer.prototype.complete = function ()
 {
-    var gl = this.gl;
+    var gl = this.cfg.gl;
+    if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE)
+    {
+        console.debug("incomplete famebuffer");
+    }
+    
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 };
 
-GFrameBufferContainer.prototype.bindTexture = function (id, name)
+GFrameBuffer.prototype.bindBuffer = function ()
 {
-    var gl = this.gl;
+    var gl = this.cfg.gl;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fBuffer);
+};
+
+GFrameBuffer.prototype.unbindBuffer = function ()
+{
+    var gl = this.cfg.gl;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+};
+
+GFrameBuffer.prototype.bindTexture = function (id, name)
+{
+    var gl = this.cfg.gl;
     gl.activeTexture(id);
     gl.bindTexture(gl.TEXTURE_2D, this.textures[name]);
 };
+
+function GFrameBufferOld(gl, buffer, textures)
+{
+    this.textures = textures;
+    this.fBuffer = buffer;
+    this.cfg = {};
+    this.cfg.gl = gl;
+}
+
+GFrameBufferOld.prototype.bindBuffer = GFrameBuffer.prototype.bindBuffer;
+
+GFrameBufferOld.prototype.unbindBuffer = GFrameBuffer.prototype.unbindBuffer;
+
+GFrameBufferOld.prototype.bindTexture = GFrameBuffer.prototype.bindTexture;
 
 /** 
  * @constructor
@@ -257,6 +317,7 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     
     this.lightProgram.activate();
     this.frameBuffers.renderToTexture.bindBuffer();
+    gl.viewport(0, 0, 1024, 1024);
      
     this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "colorTexture");
     this.frameBuffers.prePass.bindTexture(gl.TEXTURE1, "depthRGBTexture");
@@ -268,6 +329,7 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.lightProgram.deactivate();
     
     this.fullScreenProgram.activate(); 
+	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     
     this.frameBuffers.renderToTexture.bindTexture(gl.TEXTURE0, "phong");
     this.setHRec(0, 0, 1, 1);
@@ -305,31 +367,31 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
 {
     var gl = this.gl;
     
-    framebuffer = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-    
-    var texture = this.create2dTexture(gl.LINEAR, gl.RGBA, gl.UNSIGNED_BYTE);
-    
-    var renderbuffer = gl.createRenderbuffer();
-    gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, 1024, 1024);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
-    
-    if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE)
+    var fbCfg = 
     {
-        console.debug("incomplete famebuffer");
-    }
+        gl: this.gl,
+        width: 1024,
+        height: 1024
+    };
     
-    gl.bindTexture(gl.TEXTURE_2D, null);
-    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    var frameBuffer = new GFrameBuffer(fbCfg);
     
-    var container = new GFrameBufferContainer(gl, framebuffer, {phong:texture});
+    var texCfg = 
+    {
+        filter: gl.LINEAR,
+        format: gl.RGBA,
+        type: gl.UNSIGNED_BYTE,
+        attachment: gl.COLOR_ATTACHMENT0,
+        name: "phong"
+    };
+    
+    frameBuffer.addBufferTexture(texCfg);
+    frameBuffer.complete();
+   
     
     this.frameBuffers = 
     {
-        renderToTexture: container
+        renderToTexture: frameBuffer
     };
 };
 
@@ -340,58 +402,64 @@ GRenderDeferredStrategy.prototype.initializeFBO = function()
     
     var FBO;
       
-    var ext = this.gl.getExtension('WEBGL_draw_buffers');
+    var db = gl.getExtension("WEBGL_draw_buffers");
+    var tf = gl.getExtension("OES_texture_float");
+    var tfl = gl.getExtension("OES_texture_float_linear");
+    var dt = gl.getExtension("WEBGL_depth_texture");
     
-    gl.getExtension("OES_texture_float");
-    gl.getExtension("OES_texture_float_linear");
-    var extDepth = gl.getExtension("WEBGL_depth_texture");
+    var glExtensions = 
+    {
+        WEBGL_draw_buffers:db,
+        OES_texture_float:tf,
+        OES_texture_float_linear:tfl,
+        WEBGL_depth_texture:dt
+    };
 
-    if(!extDepth){
+    if(!dt){
         console.log("Extension Depth texture is not working");
         console.debug(":( Sorry, Your browser doesn't support depth texture extension. Please browse to webglreport.com to see more information.");
         return;
     }
-     
     
-   // var depthTexture    = this.create2dTexture(gl.NEAREST, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT); 
-    //var depthTexture    = this.create2dTexture(gl.NEAREST, gl.DEPTH_COMPONENT16, gl.UNSIGNED_SHORT); 
+    FBO = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, FBO);
+    
+    
+    var renderbuffer = gl.createRenderbuffer();
+    gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, 1024, 1024);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+    
+    
+    var depthTexture    = this.create2dTexture(gl.NEAREST, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT); 
     var normalTexture   = this.create2dTexture(gl.LINEAR, gl.RGBA, gl.FLOAT); 
     var positionTexture = this.create2dTexture(gl.LINEAR, gl.RGBA, gl.FLOAT); 
     var colorTexture    = this.create2dTexture(gl.LINEAR, gl.RGBA, gl.UNSIGNED_BYTE); 
     var depthRGBTexture = this.create2dTexture(gl.LINEAR, gl.RGBA, gl.UNSIGNED_BYTE);
 
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, db.COLOR_ATTACHMENT0_WEBGL, gl.TEXTURE_2D, depthRGBTexture, 0);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, db.COLOR_ATTACHMENT1_WEBGL, gl.TEXTURE_2D, normalTexture, 0);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, db.COLOR_ATTACHMENT2_WEBGL, gl.TEXTURE_2D, positionTexture, 0);    
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, db.COLOR_ATTACHMENT3_WEBGL, gl.TEXTURE_2D, colorTexture, 0);  
     
-    FBO = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, FBO);
     var bufs = [];
-    bufs[0] = ext.COLOR_ATTACHMENT0_WEBGL;
-    bufs[1] = ext.COLOR_ATTACHMENT1_WEBGL;
-    bufs[2] = ext.COLOR_ATTACHMENT2_WEBGL;
-    bufs[3] = ext.COLOR_ATTACHMENT3_WEBGL;
-    ext.drawBuffersWEBGL(bufs);
-    
-    var renderbuffer = gl.createRenderbuffer();
-    gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, 1024, 1024);
-   // gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
-
-   // gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, bufs[0], gl.TEXTURE_2D, depthRGBTexture, 0);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, bufs[1], gl.TEXTURE_2D, normalTexture, 0);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, bufs[2], gl.TEXTURE_2D, positionTexture, 0);    
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, bufs[3], gl.TEXTURE_2D, colorTexture, 0);    
+    bufs[0] = db.COLOR_ATTACHMENT0_WEBGL;
+    bufs[1] = db.COLOR_ATTACHMENT1_WEBGL;
+    bufs[2] = db.COLOR_ATTACHMENT2_WEBGL;
+    bufs[3] = db.COLOR_ATTACHMENT3_WEBGL;
+    db.drawBuffersWEBGL(bufs);
     
     var textures = 
     {
-      //  depthTexture    :depthTexture,
+        depthTexture    :depthTexture,
         depthRGBTexture :depthRGBTexture,
         normalTexture   :normalTexture,
         positionTexture :positionTexture,    
         colorTexture    :colorTexture
     };
     
-    var container = new GFrameBufferContainer(gl, FBO, textures);
+    var container = new GFrameBufferOld(gl, FBO, textures);
     
     this.frameBuffers.prePass = container;
 

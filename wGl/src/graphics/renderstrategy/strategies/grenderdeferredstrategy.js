@@ -36,14 +36,31 @@ GFrameBuffer.prototype.addBufferTexture = function ( cfg )
 { 
     var gl = this.cfg.gl;
     var texture = this.create2dTexture(cfg.filter, cfg.format, cfg.type);
-    
     gl.framebufferTexture2D(gl.FRAMEBUFFER, cfg.attachment, gl.TEXTURE_2D, texture, 0);
     this.textures[cfg.name] = texture;
+    
+      if ( undefined != this.cfg.extensions &&
+           undefined != this.cfg.extensions.WEBGL_draw_buffers &&
+           cfg.attachment >= this.cfg.extensions.WEBGL_draw_buffers.COLOR_ATTACHMENT0_WEBGL &&
+           cfg.attachment <= this.cfg.extensions.WEBGL_draw_buffers.COLOR_ATTACHMENT15_WEBGL )
+      {
+          if ( undefined == this.WEBGL_draw_buffers_drawBuffersList )
+          {
+              this.WEBGL_draw_buffers_drawBuffersList = [];
+          }
+          
+          this.WEBGL_draw_buffers_drawBuffersList.push(cfg.attachment);
+      }
 };
 
 GFrameBuffer.prototype.complete = function ()
 {
     var gl = this.cfg.gl;
+    
+    if ( undefined != this.WEBGL_draw_buffers_drawBuffersList )
+    {
+        this.cfg.extensions.WEBGL_draw_buffers.drawBuffersWEBGL(this.WEBGL_draw_buffers_drawBuffersList);
+    }
     
     if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE)
     {
@@ -356,9 +373,7 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     
     var fbCfg = 
     {
-        gl: this.gl,
-        //width: 1024,
-        //height: 1024
+        gl: this.gl, 
         width: 512,
         height: 512
     };
@@ -430,15 +445,6 @@ GRenderDeferredStrategy.prototype.initializeFBO = function()
     {
         frameBuffer.addBufferTexture(texCfgs[i]); 
     }
-    
-    var bufs_ = 
-    [
-        db.COLOR_ATTACHMENT0_WEBGL,
-        db.COLOR_ATTACHMENT1_WEBGL,
-        db.COLOR_ATTACHMENT2_WEBGL,
-        db.COLOR_ATTACHMENT3_WEBGL
-    ];
-    db.drawBuffersWEBGL(bufs_);
     
     frameBuffer.complete(); 
     

@@ -16,7 +16,7 @@ void main(void)
 {
 // todo: should this be turned into a uniform variable?
 float uKsExponent = 100.0;
-
+vec4 lightPosition_ = vec4(0);
 
     highp vec3 materialDiffuseColor = mix(texture2D(uMapKd, 
 										  vec2(vKdMapCoord.s / uMapKdScale.s, 
@@ -24,7 +24,7 @@ float uKsExponent = 100.0;
 										  uKd, 
 										  uKd.a).xyz;
 
-    highp vec3 lightDirection = normalize(vec3(lightPosition - vPosition)); 
+    highp vec3 lightDirection = normalize(vec3(lightPosition_ - vPosition)); 
     highp vec3 normal = normalize(vNormal.xyz);
 
     highp float diffuseFactor = max(0.0, dot(normal, lightDirection)); 
@@ -35,7 +35,7 @@ float uKsExponent = 100.0;
 
     float specularFactor = pow(specular, uKsExponent);
 
-    highp vec3 color = diffuseFactor * materialDiffuseColor + specularFactor * uKs.xyz;
+    highp vec3 color = diffuseFactor * materialDiffuseColor;// + specularFactor * uKs.xyz;
 
     gl_FragColor = vec4(color, 1); 
 	//gl_FragColor = vec4(vNormal.xyz, 1);

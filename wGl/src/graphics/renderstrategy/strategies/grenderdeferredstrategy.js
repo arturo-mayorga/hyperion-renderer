@@ -107,12 +107,16 @@ GRenderDeferredStrategy.prototype.configure = function()
 {
     this.shaderSrcMap = 
     {
+        "blur-vs.c":undefined,
+        "blur-fs.c":undefined,
         "deferred-vs.c":undefined,
         "deferred-fs.c":undefined,
+        "fullscr-vs.c":undefined,
+        "fullscr-fs.c":undefined,
         "light-vs.c":undefined,
         "light-fs.c":undefined,
-        "fullscr-vs.c":undefined,
-        "fullscr-fs.c":undefined
+        "ssao-vs.c":undefined,
+        "ssao-fs.c":undefined
     };
     
     for (var key in this.shaderSrcMap)
@@ -223,20 +227,6 @@ GRenderDeferredStrategy.prototype.initScreenVBOs = function()
 	this.hMatrix = mat3.create();
 };
 
-GRenderDeferredStrategy.prototype.create2dTexture = function(filter, format, type)
-{
-    var gl = this.gl;
-    var texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texImage2D(gl.TEXTURE_2D, 0, format, 1024, 1024, 0, format, type, null);
-    
-    return texture;
-};
-
 GRenderDeferredStrategy.prototype.initShaders = function (shaderSrcMap) 
 {
     var gl = this.gl;
@@ -250,9 +240,17 @@ GRenderDeferredStrategy.prototype.initShaders = function (shaderSrcMap)
     var light = new GShader(shaderSrcMap["light-vs.c"], shaderSrcMap["light-fs.c"]);
     light.bindToContext(gl);
     
+    var ssao = new GShader(shaderSrcMap["ssao-vs.c"], shaderSrcMap["ssao-fs.c"]);
+    ssao.bindToContext(gl);
+    
+    var blur = new GShader(shaderSrcMap["blur-vs.c"], shaderSrcMap["blur-fs.c"]);
+    blur.bindToContext(gl);
+    
     this.lightProgram = light;
+    this.ssaoProgram = ssao;
     this.fullScreenProgram = fullScr;
     this.phongShader = phong;
+    this.blurProgram = blur;
 };
 
 GRenderDeferredStrategy.prototype.drawScreenBuffer = function(shader)
@@ -305,6 +303,7 @@ GRenderDeferredStrategy.prototype.drawScreenBuffer = function(shader)
 GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
 {
     var gl = this.gl;
+    gl.disable(gl.BLEND);
     this.phongShader.activate();
     this.frameBuffers.prePass.bindBuffer();
    
@@ -320,8 +319,31 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
+    // ssao
+    this.ssaoProgram.activate();
+    this.frameBuffers.ssao.bindBuffer();
+     
+    this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "colorTexture");
+    this.frameBuffers.prePass.bindTexture(gl.TEXTURE1, "depthRGBTexture");
+    this.frameBuffers.prePass.bindTexture(gl.TEXTURE2, "normalTexture");
+    this.frameBuffers.prePass.bindTexture(gl.TEXTURE3, "positionTexture"); 
+    this.setHRec(0, 0, 1, 1);
+    this.drawScreenBuffer(this.ssaoProgram);
+    this.frameBuffers.ssao.unbindBuffer();
+    this.ssaoProgram.deactivate();
+    
+    // ssao blur
+    this.blurProgram.activate();
+    this.frameBuffers.ssaoBlur.bindBuffer();
+    this.frameBuffers.ssao.bindTexture(gl.TEXTURE0, "color");
+    this.setHRec(0, 0, 1, 1);
+    this.drawScreenBuffer(this.blurProgram);
+    this.frameBuffers.ssaoBlur.unbindBuffer();
+    this.blurProgram.deactivate();
+    
+    // light
     this.lightProgram.activate();
-    this.frameBuffers.renderToTexture.bindBuffer();
+    this.frameBuffers.light.bindBuffer();
      
     this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "colorTexture");
     this.frameBuffers.prePass.bindTexture(gl.TEXTURE1, "depthRGBTexture");
@@ -329,13 +351,15 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.frameBuffers.prePass.bindTexture(gl.TEXTURE3, "positionTexture"); 
     this.setHRec(0, 0, 1, 1);
     this.drawScreenBuffer(this.lightProgram);
-    this.frameBuffers.renderToTexture.unbindBuffer();
+    this.frameBuffers.light.unbindBuffer();
     this.lightProgram.deactivate();
     
+    
+    // HUD
     this.fullScreenProgram.activate(); 
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     
-    this.frameBuffers.renderToTexture.bindTexture(gl.TEXTURE0, "phong");
+    this.frameBuffers.light.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0, 0, 1, 1);
     this.drawScreenBuffer(this.fullScreenProgram);
     this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "depthRGBTexture");
@@ -350,6 +374,9 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "colorTexture");
     this.setHRec(0.125+0.75, -0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.fullScreenProgram);
+    
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.enable(gl.BLEND);
        	
     if (hud != undefined)
     {
@@ -374,8 +401,8 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     var fbCfg = 
     {
         gl: this.gl, 
-        width: 512,
-        height: 512
+        width: 256,
+        height: 256
     };
     
     var texCfg = 
@@ -384,7 +411,7 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
         format: gl.RGBA,
         type: gl.UNSIGNED_BYTE,
         attachment: gl.COLOR_ATTACHMENT0,
-        name: "phong"
+        name: "color"
     };
     
     var frameBuffer = new GFrameBuffer(fbCfg);
@@ -393,8 +420,21 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
    
     this.frameBuffers = 
     {
-        renderToTexture: frameBuffer
+        ssao: frameBuffer
     };
+    
+    frameBuffer = new GFrameBuffer(fbCfg);
+    frameBuffer.addBufferTexture(texCfg);
+    frameBuffer.complete();
+    
+    this.frameBuffers.ssaoBlur = frameBuffer;
+    
+    fbCfg.width = fbCfg.height = 1024;
+    frameBuffer = new GFrameBuffer(fbCfg);
+    frameBuffer.addBufferTexture(texCfg);
+    frameBuffer.complete();
+    
+    this.frameBuffers.light = frameBuffer;
 };
 
 GRenderDeferredStrategy.prototype.initializeFBO = function() 

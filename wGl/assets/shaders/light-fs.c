@@ -6,6 +6,15 @@ uniform sampler2D uMapNormal;
 uniform sampler2D uMapPosition;
 uniform sampler2D uMapRGBDepth;
 
+uniform vec3 uLightPosition0;
+/*uniform vec3 uLightPosition1;
+uniform vec3 uLightPosition2;
+uniform vec3 uLightPosition3;
+uniform vec3 uLightPosition4;
+uniform vec3 uLightPosition5;
+uniform vec3 uLightPosition6;
+uniform vec3 uLightPosition7;
+uniform vec3 uLightPosition8;*/
 
 
 void main(void)

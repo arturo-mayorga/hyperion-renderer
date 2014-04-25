@@ -344,6 +344,8 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     // light
     this.lightProgram.activate();
     this.frameBuffers.light.bindBuffer();
+    scene.drawLights( this.lightProgram );
+    
      
     this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "colorTexture");
     this.frameBuffers.prePass.bindTexture(gl.TEXTURE1, "depthRGBTexture");

@@ -93,16 +93,21 @@ GScene.prototype.bindToContext = function( gl )
     }
 };
 
-
-GScene.prototype.draw = function( shader )
+GScene.prototype.drawLights = function ( shader )
 {
-    this.camera.draw( this.eyeMvMatrix, shader );
-    
     var lightCount = this.lights.length;
     for (var l = 0; l < lightCount; ++l)
     {
         this.lights[l].draw( this.eyeMvMatrix, shader );
     }
+};
+
+
+GScene.prototype.draw = function( shader )
+{
+    this.camera.draw( this.eyeMvMatrix, shader );
+    
+    this.drawLights( shader );
     
     var childCount = this.children.length;
     for (var i = 0; i < childCount; ++i)

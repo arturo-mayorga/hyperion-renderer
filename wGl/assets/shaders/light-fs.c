@@ -4,47 +4,47 @@ varying vec2 vTexCoordinate;
 uniform sampler2D uMapKd;
 uniform sampler2D uMapNormal;
 uniform sampler2D uMapPosition;
-uniform sampler2D uMapRGBDepth;
 
 uniform vec3 uLightPosition0;
-/*uniform vec3 uLightPosition1;
+uniform vec3 uLightPosition1;
 uniform vec3 uLightPosition2;
 uniform vec3 uLightPosition3;
 uniform vec3 uLightPosition4;
 uniform vec3 uLightPosition5;
 uniform vec3 uLightPosition6;
 uniform vec3 uLightPosition7;
-uniform vec3 uLightPosition8;*/
+uniform vec3 uLightPosition8;
 
-
-void main(void)
-{
-    // todo: should this be turned into a uniform variable?
+// todo: should this be turned into a uniform variable?
 float uKsExponent = 100.0;
 
-vec3 lightPosition = vec3(0.0, 0.0, 0.0);
-
-    vec3 tv3Normal   = texture2D(uMapNormal,   vTexCoordinate).xyz;
-    vec3 tv3Position = texture2D(uMapPosition, vTexCoordinate).xyz;
-    vec3 tv3RGBDepth = texture2D(uMapRGBDepth, vTexCoordinate).xyz;
-	vec3 tv3Color    = texture2D(uMapKd,       vTexCoordinate).xyz;
-
-	 
-
-    highp vec3 lightDirection = normalize(vec3(lightPosition - tv3Position)); 
-    highp vec3 normal = normalize(tv3Normal.xyz);
+vec4 calcLight(vec3 normal, vec3 position, vec3 lightPosition, vec3 lightColor)
+{
+    highp vec3 lightDirection = normalize(lightPosition - position); 
 
     highp float diffuseFactor = max(0.0, dot(normal, lightDirection)); 
     
-    vec3 E = normalize(-tv3Position.xyz);
+    vec3 E = normalize(-position.xyz);
     vec3 R = reflect(-lightDirection, normal);
     float specular =  max(dot(R, E), 0.0);
 
     float specularFactor = pow(specular, uKsExponent);
 
-    highp vec3 color = diffuseFactor * tv3Color;// + specularFactor * uKs.xyz;
+    return vec4(lightColor* diffuseFactor, specularFactor);
+}
 
-    gl_FragColor = vec4(color, 1); 
+
+void main(void)
+{
+    vec3 tv3Normal   = normalize(texture2D(uMapNormal,   vTexCoordinate).xyz);
+    vec3 tv3Position = texture2D(uMapPosition, vTexCoordinate).xyz;
+	vec3 tv3Color    = texture2D(uMapKd,       vTexCoordinate).xyz;
+	
+	vec3 lightColor = vec3(1, 1, 1);
+
+	vec4 lightRes = calcLight(tv3Normal, tv3Position, uLightPosition0, lightColor);
+
+    gl_FragColor = vec4(lightRes.xyz*tv3Color, 1); 
 } 
 
 

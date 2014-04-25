@@ -134,9 +134,35 @@ LoadState.prototype.exit = function ()
 	    this.penGroup.children[i].setMvMatrix(penTransform);
 	}
 	
-	var light = new GLight();
-	light.setPosition(-18.131103515625, 19.09733009338379, 7.844475269317627);
-	this.scene.addLight(light);
+	var light0 = new GLight();
+	var light1 = new GLight();
+	var light2 = new GLight();
+	var light3 = new GLight();
+	var light4 = new GLight();
+	var light5 = new GLight();
+	var light6 = new GLight();
+	var light7 = new GLight();
+	var light8 = new GLight();
+	
+	light0.setPosition(-18, 19.25, 8);
+	light1.setPosition(-12, 19.25, -2);
+	light2.setPosition(-6, 19.25, 8);
+	light3.setPosition(0, 19.25, -2);
+	light4.setPosition(6, 19.25, 8);
+	light5.setPosition(12, 19.25, -2);
+	light6.setPosition(18, 19, 8);
+	light7.setPosition(24, 19, -2);
+	light8.setPosition(30, 19, 8);
+	
+	this.scene.addLight(light0);
+	this.scene.addLight(light1);
+	this.scene.addLight(light2);
+	this.scene.addLight(light3);
+	this.scene.addLight(light4);
+	this.scene.addLight(light5);
+	this.scene.addLight(light6);
+	this.scene.addLight(light7);
+	this.scene.addLight(light8);
 };
 
 LoadState.prototype.update = function (time) 

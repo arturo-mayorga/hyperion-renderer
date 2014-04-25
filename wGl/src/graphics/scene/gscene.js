@@ -9,6 +9,11 @@ function GLight()
     this.index = 0;
 }
 
+GLight.prototype.setIndex = function ( index )
+{
+    this.index = index;
+};
+
 GLight.prototype.setPosition = function( x, y, z )
 {
     this.position[0] = x;
@@ -124,6 +129,7 @@ GScene.prototype.setDrawMode = function( mode )
 GScene.prototype.addLight = function( light )
 {
     light.bindToContext( this.gl );
+    light.setIndex( this.lights.length );
     this.lights.push( light );
 };
 

@@ -133,6 +133,10 @@ LoadState.prototype.exit = function ()
 	    mat4.translate(penTransform, penTransform, [0, 0, i*0.1]);
 	    this.penGroup.children[i].setMvMatrix(penTransform);
 	}
+	
+	var light = new GLight();
+	light.setPosition(-18.131103515625, 19.09733009338379, 7.844475269317627);
+	this.scene.addLight(light);
 };
 
 LoadState.prototype.update = function (time) 

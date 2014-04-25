@@ -9,6 +9,13 @@ function GLight()
     this.index = 0;
 }
 
+GLight.prototype.setPosition = function( x, y, z )
+{
+    this.uPosition[0] = x;
+    this.uPosition[1] = y;
+    this.uPosition[2] = z;
+};
+
 GLight.prototype.bindToContext = function( gl )
 {
     this.gl = gl;
@@ -47,75 +54,82 @@ GLight.prototype.draw = function (parentMvMat, shader)
  */
 function GScene()
 {
-	var gl = undefined;
-	var _children = [];
-	var _eyeMvMatrix = mat4.create();
+	this.gl = undefined;
+	this.children = [];
+	this.eyeMvMatrix = mat4.create();
 	
-	var _materials = {};
+	this.materials = {};
+	this.lights = [];
 	
-	var camera;
-	
-	this.getChildren = function()
-	{
-		return _children;
-	}
-	
-	this.bindToContext = function(gl_)
-	{
-		gl = gl_;
-		
-		this.drawMode = gl.TRIANGLES;
-		
-		camera.bindToContext(gl);
-		var childCount = _children.length;
-		for (var i = 0; i < childCount; ++i)
-		{
-			_children[i].bindToContext(gl);
-		}
-		
-		for (var key in _materials)
-		{
-			_materials[key].bindToContext(gl);
-		}
-	}
-	
-	
-	this.draw = function( shader )
-	{
-		camera.draw(_eyeMvMatrix, shader);
-		
-	    var childCount = _children.length;
-		for (var i = 0; i < childCount; ++i)
-		{
-			_children[i].draw(_eyeMvMatrix, _materials, shader, this.drawMode);
-		}
-	}
-	
-	this.setDrawMode = function( mode )
-	{
-	    this.drawMode = mode;
-	};
-	
-	this.addMaterial = function( mat )
-	{
-		mat.bindToContext(gl);
-		_materials[mat.getName()] = mat;
-	}
-	
-	this.addChild = function(child)
-	{
-		child.bindToContext(gl);
-		_children.push(child);
-	}
-	
-	this.setCamera = function(camera_)
-	{
-		camera = camera_;
-	}
-	
-	this.getCamera = function()
-	{
-		return camera;
-	}
+	this.camera;
 }
+	
+GScene.prototype.addLight = function( light )
+{
+    this.lights.push( light );
+};
+
+GScene.prototype.getChildren = function()
+{
+    return this.children;
+};
+
+GScene.prototype.bindToContext = function(gl)
+{
+    this.gl = gl;
+    
+    this.drawMode = gl.TRIANGLES;
+    
+    this.camera.bindToContext(gl);
+    var childCount = this.children.length;
+    for (var i = 0; i < childCount; ++i)
+    {
+        this.children[i].bindToContext(gl);
+    }
+    
+    for (var key in this.materials)
+    {
+        this.materials[key].bindToContext(gl);
+    }
+};
+
+
+GScene.prototype.draw = function( shader )
+{
+    this.camera.draw(this.eyeMvMatrix, shader);
+    
+    var childCount = this.children.length;
+    for (var i = 0; i < childCount; ++i)
+    {
+        this.children[i].draw(this.eyeMvMatrix, this.materials, shader, this.drawMode);
+    }
+};
+
+GScene.prototype.setDrawMode = function( mode )
+{
+    this.drawMode = mode;
+};
+
+GScene.prototype.addMaterial = function( mat )
+{
+    var gl = this.gl;
+    mat.bindToContext(gl);
+    this.materials[mat.getName()] = mat;
+};
+
+GScene.prototype.addChild = function(child)
+{
+    child.bindToContext(this.gl);
+    this.children.push(child);
+};
+
+GScene.prototype.setCamera = function(camera)
+{
+    this.camera = camera;
+};
+
+GScene.prototype.getCamera = function()
+{
+    return this.camera;
+};
 

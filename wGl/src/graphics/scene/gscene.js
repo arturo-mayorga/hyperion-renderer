@@ -11,9 +11,9 @@ function GLight()
 
 GLight.prototype.setPosition = function( x, y, z )
 {
-    this.uPosition[0] = x;
-    this.uPosition[1] = y;
-    this.uPosition[2] = z;
+    this.position[0] = x;
+    this.position[1] = y;
+    this.position[2] = z;
 };
 
 GLight.prototype.bindToContext = function( gl )
@@ -21,7 +21,7 @@ GLight.prototype.bindToContext = function( gl )
     this.gl = gl;
 };
 
-GLight.prototype.draw = function (parentMvMat, shader)
+GLight.prototype.draw = function ( parentMvMat, shader )
 {
     vec3.transformMat4(this.uPosition, this.position, parentMvMat);
     
@@ -63,45 +63,51 @@ function GScene()
 	
 	this.camera;
 }
-	
-GScene.prototype.addLight = function( light )
-{
-    this.lights.push( light );
-};
 
 GScene.prototype.getChildren = function()
 {
     return this.children;
 };
 
-GScene.prototype.bindToContext = function(gl)
+GScene.prototype.getLights = function()
+{
+    return this.lights;
+};
+
+GScene.prototype.bindToContext = function( gl )
 {
     this.gl = gl;
     
     this.drawMode = gl.TRIANGLES;
     
-    this.camera.bindToContext(gl);
+    this.camera.bindToContext( gl );
     var childCount = this.children.length;
     for (var i = 0; i < childCount; ++i)
     {
-        this.children[i].bindToContext(gl);
+        this.children[i].bindToContext( gl );
     }
     
     for (var key in this.materials)
     {
-        this.materials[key].bindToContext(gl);
+        this.materials[key].bindToContext( gl );
     }
 };
 
 
 GScene.prototype.draw = function( shader )
 {
-    this.camera.draw(this.eyeMvMatrix, shader);
+    this.camera.draw( this.eyeMvMatrix, shader );
+    
+    var lightCount = this.lights.length;
+    for (var l = 0; l < lightCount; ++l)
+    {
+        this.lights[l].draw( this.eyeMvMatrix, shader );
+    }
     
     var childCount = this.children.length;
     for (var i = 0; i < childCount; ++i)
     {
-        this.children[i].draw(this.eyeMvMatrix, this.materials, shader, this.drawMode);
+        this.children[i].draw( this.eyeMvMatrix, this.materials, shader, this.drawMode );
     }
 };
 
@@ -110,20 +116,26 @@ GScene.prototype.setDrawMode = function( mode )
     this.drawMode = mode;
 };
 
+GScene.prototype.addLight = function( light )
+{
+    light.bindToContext( this.gl );
+    this.lights.push( light );
+};
+
 GScene.prototype.addMaterial = function( mat )
 {
     var gl = this.gl;
-    mat.bindToContext(gl);
+    mat.bindToContext( gl );
     this.materials[mat.getName()] = mat;
 };
 
-GScene.prototype.addChild = function(child)
+GScene.prototype.addChild = function( child )
 {
     child.bindToContext(this.gl);
     this.children.push(child);
 };
 
-GScene.prototype.setCamera = function(camera)
+GScene.prototype.setCamera = function( camera )
 {
     this.camera = camera;
 };

@@ -107,6 +107,15 @@ GScene.prototype.drawLights = function ( shader )
     }
 };
 
+GScene.prototype.drawGeometry = function ( parentMvMatrix, shader )
+{
+    var childCount = this.children.length;
+    for (var i = 0; i < childCount; ++i)
+    {
+        this.children[i].draw( parentMvMatrix, this.materials, shader, this.drawMode );
+    }
+};
+
 
 GScene.prototype.draw = function( shader )
 {
@@ -114,11 +123,7 @@ GScene.prototype.draw = function( shader )
     
     this.drawLights( shader );
     
-    var childCount = this.children.length;
-    for (var i = 0; i < childCount; ++i)
-    {
-        this.children[i].draw( this.eyeMvMatrix, this.materials, shader, this.drawMode );
-    }
+    this.drawGeometry( this.eyeMvMatrix, shader );
 };
 
 GScene.prototype.setDrawMode = function( mode )

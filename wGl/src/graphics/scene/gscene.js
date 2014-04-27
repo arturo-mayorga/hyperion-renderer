@@ -66,7 +66,7 @@ function GScene()
 	this.materials = {};
 	this.lights = [];
 	
-	this.camera;
+	this.camera = undefined;
 }
 
 GScene.prototype.getChildren = function()

@@ -39,11 +39,16 @@ GFrameBuffer.prototype.addBufferTexture = function ( cfg )
     gl.framebufferTexture2D(gl.FRAMEBUFFER, cfg.attachment, gl.TEXTURE_2D, texture, 0);
     this.textures[cfg.name] = texture;
     
+    console.debug(cfg.name);
+    console.debug(cfg.attachment);
+    
       if ( undefined != this.cfg.extensions &&
            undefined != this.cfg.extensions.WEBGL_draw_buffers &&
-           cfg.attachment >= this.cfg.extensions.WEBGL_draw_buffers.COLOR_ATTACHMENT0_WEBGL &&
-           cfg.attachment <= this.cfg.extensions.WEBGL_draw_buffers.COLOR_ATTACHMENT15_WEBGL )
+           // The closure compiler has problems accessing members of extensions unless they are called like this
+           cfg.attachment >= this.cfg.extensions.WEBGL_draw_buffers['COLOR_ATTACHMENT0_WEBGL'] &&
+           cfg.attachment <= this.cfg.extensions.WEBGL_draw_buffers['COLOR_ATTACHMENT15_WEBGL'] )
       {
+          console.debug("adding to drawBuffersList");
           if ( undefined == this.WEBGL_draw_buffers_drawBuffersList )
           {
               this.WEBGL_draw_buffers_drawBuffersList = [];
@@ -59,7 +64,8 @@ GFrameBuffer.prototype.complete = function ()
     
     if ( undefined != this.WEBGL_draw_buffers_drawBuffersList )
     {
-        this.cfg.extensions.WEBGL_draw_buffers.drawBuffersWEBGL(this.WEBGL_draw_buffers_drawBuffersList);
+        // The closure compiler has problems accessing members of extensions unless they are called like this
+        this.cfg.extensions.WEBGL_draw_buffers['drawBuffersWEBGL'](this.WEBGL_draw_buffers_drawBuffersList);
     }
     
     if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE)
@@ -76,7 +82,7 @@ GFrameBuffer.prototype.bindBuffer = function ()
 {
     var gl = this.cfg.gl;
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.fBuffer);
-    gl.viewport(0, 0, this.cfg.width, this.cfg.width);
+    gl.viewport(0, 0, this.cfg.width, this.cfg.height);
 };
 
 GFrameBuffer.prototype.unbindBuffer = function ()
@@ -105,7 +111,8 @@ function GRenderDeferredStrategy( gl )
 
 GRenderDeferredStrategy.prototype.configure = function()
 {
-    this.shaderSrcMap = 
+    // this map variable is to keep the closure compiler from getting confused.
+    var map = this.shaderSrcMap = 
     {
         "blur-vs.c":undefined,
         "blur-fs.c":undefined,
@@ -119,7 +126,7 @@ GRenderDeferredStrategy.prototype.configure = function()
         "ssao-fs.c":undefined
     };
     
-    for (var key in this.shaderSrcMap)
+    for (var key in map)
     {
         this.loadShader(key);
     }
@@ -370,7 +377,7 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "normalTexture");
     this.setHRec(0.125+0.75, 0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.fullScreenProgram);
-    this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "positionTexture");  
+    this.frameBuffers.ssaoBlur.bindTexture(gl.TEXTURE0, "color");  
     this.setHRec(-0.125+0.75, -0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.fullScreenProgram);
     this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "colorTexture");
@@ -400,13 +407,6 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
 {
     var gl = this.gl;
     
-    var fbCfg = 
-    {
-        gl: this.gl, 
-        width: 256,
-        height: 256
-    };
-    
     var texCfg = 
     {
         filter: gl.LINEAR,
@@ -416,7 +416,7 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
         name: "color"
     };
     
-    var frameBuffer = new GFrameBuffer(fbCfg);
+    var frameBuffer = new GFrameBuffer({ gl: this.gl, width: 256, height: 256 });
     frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
    
@@ -425,14 +425,13 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
         ssao: frameBuffer
     };
     
-    frameBuffer = new GFrameBuffer(fbCfg);
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 256, height: 256 });
     frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
     
     this.frameBuffers.ssaoBlur = frameBuffer;
     
-    fbCfg.width = fbCfg.height = 1024;
-    frameBuffer = new GFrameBuffer(fbCfg);
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
     
@@ -473,15 +472,19 @@ GRenderDeferredStrategy.prototype.initializeFBO = function()
         height: 1024
     };
     
+    console.debug("color att0 " + db['COLOR_ATTACHMENT0_WEBGL']);
+    
     var texCfgs = [
         { filter: gl.NEAREST, format: gl.DEPTH_COMPONENT, type: gl.UNSIGNED_INT,  attachment: gl.DEPTH_ATTACHMENT,        name: "depthTexture" },
-        { filter: gl.LINEAR,  format: gl.RGBA,            type: gl.UNSIGNED_BYTE, attachment: db.COLOR_ATTACHMENT0_WEBGL, name: "depthRGBTexture" },
-        { filter: gl.LINEAR,  format: gl.RGBA,            type: gl.FLOAT,         attachment: db.COLOR_ATTACHMENT1_WEBGL, name: "normalTexture" },
-        { filter: gl.LINEAR,  format: gl.RGBA,            type: gl.FLOAT,         attachment: db.COLOR_ATTACHMENT2_WEBGL, name: "positionTexture" },
-        { filter: gl.LINEAR,  format: gl.RGBA,            type: gl.UNSIGNED_BYTE, attachment: db.COLOR_ATTACHMENT3_WEBGL, name: "colorTexture" }
+        // The closure compiler has problems accessing members of extensions unless they are called like this
+        { filter: gl.LINEAR,  format: gl.RGBA,            type: gl.UNSIGNED_BYTE, attachment: db['COLOR_ATTACHMENT0_WEBGL'], name: "depthRGBTexture" },
+        { filter: gl.LINEAR,  format: gl.RGBA,            type: gl.FLOAT,         attachment: db['COLOR_ATTACHMENT1_WEBGL'], name: "normalTexture" },
+        { filter: gl.LINEAR,  format: gl.RGBA,            type: gl.FLOAT,         attachment: db['COLOR_ATTACHMENT2_WEBGL'], name: "positionTexture" },
+        { filter: gl.LINEAR,  format: gl.RGBA,            type: gl.UNSIGNED_BYTE, attachment: db['COLOR_ATTACHMENT3_WEBGL'], name: "colorTexture" }
     ];
     
     var frameBuffer = new GFrameBuffer(fbCfg);
+    
     
     for (var i = 0; i < texCfgs.length; ++i)
     {

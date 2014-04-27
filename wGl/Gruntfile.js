@@ -9,10 +9,7 @@ module.exports = function(grunt) {
                     'src/graphics/scene/*.js',
                     'src/graphics/hud/*.js',
                     'src/graphics/*.js',
-                    'src/fsm.js',
-                    'src/lessonfsm.js',
-                    'src/gcameracontroller.js',
-                    'src/main.js'
+                    'src/*.js'
                 ];
 
     // Project configuration.
@@ -39,11 +36,7 @@ module.exports = function(grunt) {
                 jsOutputFile: 'build/main.min.js',
                 options: {
                     compilation_level: 'ADVANCED_OPTIMIZATIONS',
-                    language_in: 'ECMASCRIPT5_STRICT'/*,
-                    define: [
-                        '"DEBUG=false"',
-                        '"UI_DELAY=500"'
-                    ],*/
+                    language_in: 'ECMASCRIPT5_STRICT'
                 }
             }
         }

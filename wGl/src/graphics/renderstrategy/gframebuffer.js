@@ -99,4 +99,65 @@ GFrameBuffer.prototype.bindTexture = function (id, name)
 };
 
 
+/** 
+ * @constructor
+ */
+function GRenderPassCmd()
+{
+}
+ 
+GRenderPassCmd.prototype.run = function()
+{
+    this.shaderProgram.activate();
+    this.frameBuffer.bindBuffer();
+     
+    this.bindTextures();
+    
+    
+    this.setHRec(0, 0, 1, 1);
+    this.drawScreenBuffer(this.shaderProgram);
+    
+    this.frameBuffer.unbindBuffer();
+    this.shaderProgram.deactivate();
+};
+
+GRenderPassCmd.prototype.bindTextures = function()
+{
+    if ( undefined == this.textureList ) return;
+    
+    var texCount = this.textureList.length;
+    
+    for (var i = 0; i < texCount; ++i)
+    {
+        this.textureList[i].gTexture.draw(this.textureList[i].glTextureTarget, null, null);
+    }
+};
+ 
+GRenderPassCmd.prototype.runG = function()
+{
+    this.shaderProgram.activate();
+    this.frameBuffer.bindBuffer();
+   
+    this.drawGeometry( scene );
+    
+    
+    this.frameBuffers.unbindBuffer();
+    this.shaderProgram.deactivate();
+};
+
+GRenderPassCmd.prototype.drawGeometry = function( scene )
+{
+    if ( undefined == scene ) return;
+    
+    gl.enable(gl.DEPTH_TEST);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	
+    scene.draw(this.shaderProgram);
+};
+
+GRenderPassCmd.prototype.drawFullScreen = function()
+{
+    this.setHRec(0, 0, 1, 1);
+    this.drawScreenBuffer(this.shaderProgram);
+};
+
 

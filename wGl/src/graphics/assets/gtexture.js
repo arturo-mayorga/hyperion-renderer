@@ -5,24 +5,28 @@
 function GTexture( mtlargs, path ) 
 {
 	this.scale = vec2.fromValues(1, 1);
-	
-	
     this.path = path;
+    this.processArgs( mtlargs );
+}
+
+GTexture.prototype.processArgs = function( args )
+{
+    if ( undefined == args ) return;
     
-    var aLen = mtlargs.length;
+    var aLen = args.length;
     for (var i = 0; i < aLen; ++i)
     {
-        if ( mtlargs[i] == "-s" )
+        if ( args[i] == "-s" )
         {
-            this.scale[0] = parseFloat(mtlargs[++i]);
-            this.scale[1] = parseFloat(mtlargs[++i]);
+            this.scale[0] = parseFloat(args[++i]);
+            this.scale[1] = parseFloat(args[++i]);
         }
         else
         {
-            this.name = mtlargs[i];
+            this.name = args[i];
         }
     }
-}
+};
 	
 GTexture.prototype.draw = function(glTextureTarget, textureUniform, scaleUniform)
 {    
@@ -60,12 +64,14 @@ GTexture.prototype.getName = function()
 }
 
 GTexture.prototype.loadTexture = function() 
-{
-    var _this = this;
-    
-    this.image = new Image();
-    this.image.onload = this.handleTextureLoaded.bind(this);
-    this.image.src = this.path+this.name;
+{   
+    if ( undefined != this.path &&
+         undefined != this.name )
+    {
+        this.image = new Image();
+        this.image.onload = this.handleTextureLoaded.bind(this);
+        this.image.src = this.path+this.name;
+    }
 }
 
 GTexture.prototype.handleTextureLoaded = function() 

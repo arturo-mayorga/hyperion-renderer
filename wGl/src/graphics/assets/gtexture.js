@@ -96,4 +96,9 @@ GTexture.prototype.sendTextureToGl = function()
     _gl.generateMipmap(_gl.TEXTURE_2D);
     _gl.bindTexture(_gl.TEXTURE_2D, null);
 }
+
+GTexture.prototype.setTextureHandle = function( handle )
+{
+    this.glTHandle = handle;
+};
 	

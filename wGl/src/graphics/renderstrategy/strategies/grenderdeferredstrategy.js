@@ -35,10 +35,10 @@ GRenderDeferredStrategy.prototype.configure = function()
 GRenderDeferredStrategy.prototype.reload = function()
 {
     this._isReady = false;
-    this.phongShader.destroy();
+    this.deferredShader.destroy();
     this.fullScreenProgram.destroy();
     
-    this.phongShader = undefined;
+    this.deferredShader = undefined;
     this.fullScreenProgram = undefined;
     this.configure();
 };
@@ -83,6 +83,8 @@ GRenderDeferredStrategy.prototype.initialize = function()
     
     this.initShaders(this.shaderSrcMap);
     
+    this.initPassCmds();
+    
     this._isReady = true;
 };
 
@@ -99,8 +101,8 @@ GRenderDeferredStrategy.prototype.initScreenVBOs = function()
     gl.enable(gl.DEPTH_TEST);
     
     
-    this.screenVertBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.screenVertBuffer);
+    var screenVertBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, screenVertBuffer);
     
     gl.bufferData(gl.ARRAY_BUFFER,
                   new Float32Array([-1,-1,1,
@@ -109,27 +111,34 @@ GRenderDeferredStrategy.prototype.initScreenVBOs = function()
                                     -1,1,1]),
                   gl.STATIC_DRAW);
     
-    this.screenVertBuffer.itemSize = 3;
-    this.screenVertBuffer.numItems = 4;
+    screenVertBuffer.itemSize = 3;
+    screenVertBuffer.numItems = 4;
     
-    this.screenTextBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.screenTextBuffer);
+    var screenTextBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, screenTextBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, 
                   new Float32Array([0,0,  
                                     1,0,  
                                     1,1,  
                                     0,1]), 
                   gl.STATIC_DRAW);
-    this.screenTextBuffer.itemSize = 2;
-    this.screenTextBuffer.numItems = 4;
+    screenTextBuffer.itemSize = 2;
+    screenTextBuffer.numItems = 4;
     
-    this.screenIndxBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.screenIndxBuffer);
+    var screenIndxBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenIndxBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, 
                   new Uint16Array([0, 1, 2, 2, 3, 0]),
                   gl.STATIC_DRAW);
-    this.screenIndxBuffer.itemSize = 1;
-    this.screenIndxBuffer.numItems = 6;
+    screenIndxBuffer.itemSize = 1;
+    screenIndxBuffer.numItems = 6;
+    
+    this.screen = {};
+    
+    this.screen.vertBuffer = screenVertBuffer;
+    this.screen.textBuffer = screenTextBuffer;
+    this.screen.indxBuffer = screenIndxBuffer;
+    
 	
 	this.hMatrix = mat3.create();
 };
@@ -138,8 +147,8 @@ GRenderDeferredStrategy.prototype.initShaders = function (shaderSrcMap)
 {
     var gl = this.gl;
       
-    var phong = new GShader(shaderSrcMap["deferred-vs.c"], shaderSrcMap["deferred-fs.c"]);
-    phong.bindToContext(gl);
+    var deferred = new GShader(shaderSrcMap["deferred-vs.c"], shaderSrcMap["deferred-fs.c"]);
+    deferred.bindToContext(gl);
     
     var fullScr = new GShader(shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
     fullScr.bindToContext(gl);
@@ -156,7 +165,7 @@ GRenderDeferredStrategy.prototype.initShaders = function (shaderSrcMap)
     this.lightProgram = light;
     this.ssaoProgram = ssao;
     this.fullScreenProgram = fullScr;
-    this.phongShader = phong;
+    this.deferredShader = deferred;
     this.blurProgram = blur;
 };
 
@@ -189,37 +198,42 @@ GRenderDeferredStrategy.prototype.drawScreenBuffer = function(shader)
         gl.uniform4fv(shader.uniforms.Kd, [1, 1, 1, 1]);
     }
     
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.screenVertBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.screen.vertBuffer);
     gl.vertexAttribPointer(shader.attributes.positionVertexAttribute, 
-                           this.screenVertBuffer.itemSize, gl.FLOAT, false, 0, 0);
+                           this.screen.vertBuffer.itemSize, gl.FLOAT, false, 0, 0);
     
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.screenTextBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.screen.textBuffer);
     gl.vertexAttribPointer(shader.attributes.textureVertexAttribute, 
-                           this.screenTextBuffer.itemSize, gl.FLOAT, false, 0, 0);
+                           this.screen.textBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.screenIndxBuffer);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.screen.indxBuffer);
 	
 	if ( null != shader.uniforms.hMatrixUniform )
     {
         gl.uniformMatrix3fv(shader.uniforms.hMatrixUniform, false, this.hMatrix);
     }
 	
-    gl.drawElements(gl.TRIANGLES, this.screenIndxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, this.screen.indxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+};
+
+GRenderDeferredStrategy.prototype.initPassCmds = function()
+{
+    this.geometryPass = new GRenderPassCmd();
+    this.geometryPass.setProgram( this.deferredShader );
+    this.geometryPass.setFrameBuffer( this.frameBuffers.prePass );
+    this.geometryPass.bindToContext( this.gl );
+    if ( false == this.geometryPass.checkValid() )
+    {
+        console.debug("Pass command not valid");
+    }
 };
 
 GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
 {
     var gl = this.gl;
     gl.disable(gl.BLEND);
-    this.phongShader.activate();
-    this.frameBuffers.prePass.bindBuffer();
-   
-    gl.enable(gl.DEPTH_TEST);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	
-    scene.draw(this.phongShader);
     
-    this.frameBuffers.prePass.unbindBuffer();
-    this.phongShader.deactivate();
+    this.geometryPass.run( scene );
     
     gl.disable(gl.DEPTH_TEST);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
@@ -370,8 +384,6 @@ GRenderDeferredStrategy.prototype.initializeFBO = function()
         width: 1024,
         height: 1024
     };
-    
-    console.debug("color att0 " + db['COLOR_ATTACHMENT0_WEBGL']);
     
     var texCfgs = [
         { filter: gl.NEAREST, format: gl.DEPTH_COMPONENT, type: gl.UNSIGNED_INT,  attachment: gl.DEPTH_ATTACHMENT,        name: "depthTexture" },

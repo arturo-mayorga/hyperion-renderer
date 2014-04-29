@@ -30,12 +30,14 @@ GTexture.prototype.processArgs = function( args )
 	
 GTexture.prototype.draw = function(glTextureTarget, textureUniform, scaleUniform)
 {    
-    if (this.glTHandle != undefined)
+    if (undefined != this.glTHandle &&
+        undefined != glTextureTarget )
     {
+        this.gl.activeTexture(glTextureTarget);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.glTHandle);
+        
         if ( null != textureUniform )
-        {
-            this.gl.activeTexture(glTextureTarget);
-            this.gl.bindTexture(this.gl.TEXTURE_2D, this.glTHandle);
+        {    
             this.gl.uniform1i(textureUniform, 0);
         }
         

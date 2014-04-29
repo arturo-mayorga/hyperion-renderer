@@ -218,14 +218,66 @@ GRenderDeferredStrategy.prototype.drawScreenBuffer = function(shader)
 
 GRenderDeferredStrategy.prototype.initPassCmds = function()
 {
-    this.geometryPass = new GRenderPassCmd();
-    this.geometryPass.setProgram( this.deferredShader );
-    this.geometryPass.setFrameBuffer( this.frameBuffers.prePass );
-    this.geometryPass.bindToContext( this.gl );
-    if ( false == this.geometryPass.checkValid() )
+    this.passes = {};
+    var gl = this.gl;
+    
+    var geometryPass = new GRenderPassCmd();
+    geometryPass.setProgram( this.deferredShader );
+    geometryPass.setFrameBuffer( this.frameBuffers.prePass );
+    geometryPass.bindToContext( this.gl );
+    if ( false == geometryPass.checkValid() )
     {
-        console.debug("Pass command not valid");
+        console.debug("Geometry pass command not valid");
     }
+    
+    var ssaoPass = new GRenderPassCmd();
+    ssaoPass.setProgram( this.ssaoProgram );
+    ssaoPass.setFrameBuffer( this.frameBuffers.ssao );
+    ssaoPass.setScreenGeometry( this.screen );
+    ssaoPass.setHRec( 0, 0, 1, 1 );
+    ssaoPass.bindToContext( this.gl );
+    ssaoPass.addInputTexture( this.frameBuffers.prePass.createGTexture("colorTexture"),    gl.TEXTURE0 );
+    ssaoPass.addInputTexture( this.frameBuffers.prePass.createGTexture("depthRGBTexture"), gl.TEXTURE1 );
+    ssaoPass.addInputTexture( this.frameBuffers.prePass.createGTexture("normalTexture"),   gl.TEXTURE2 );
+    ssaoPass.addInputTexture( this.frameBuffers.prePass.createGTexture("positionTexture"), gl.TEXTURE3 );
+    if ( false == ssaoPass.checkValid() )
+    {
+        console.debug("SSAO pass command not valid");
+    }
+    
+    var ssaoBPass = new GRenderPassCmd();
+    ssaoBPass.setProgram( this.blurProgram );
+    ssaoBPass.setFrameBuffer( this.frameBuffers.ssaoBlur );
+    ssaoBPass.setScreenGeometry( this.screen );
+    ssaoBPass.setHRec( 0, 0, 1, 1 );
+    ssaoBPass.bindToContext( this.gl );
+    ssaoBPass.addInputTexture( this.frameBuffers.ssao.createGTexture("color"), gl.TEXTURE0 );
+    if ( false == ssaoBPass.checkValid() )
+    {
+        console.debug("SSAO blur pass command not valid");
+    }
+    
+    var lightPass = new GRenderPassCmd();
+    lightPass.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
+    lightPass.setProgram( this.lightProgram );
+    lightPass.setFrameBuffer( this.frameBuffers.light );
+    lightPass.setScreenGeometry( this.screen );
+    lightPass.setHRec( 0, 0, 1, 1 );
+    lightPass.bindToContext( this.gl );
+    lightPass.addInputTexture( this.frameBuffers.prePass.createGTexture("colorTexture"),    gl.TEXTURE0 );
+    lightPass.addInputTexture( this.frameBuffers.prePass.createGTexture("depthRGBTexture"), gl.TEXTURE1 );
+    lightPass.addInputTexture( this.frameBuffers.prePass.createGTexture("normalTexture"),   gl.TEXTURE2 );
+    lightPass.addInputTexture( this.frameBuffers.prePass.createGTexture("positionTexture"), gl.TEXTURE3 );
+ 
+    if ( false == ssaoBPass.checkValid() )
+    {
+        console.debug("SSAO blur pass command not valid");
+    }
+    
+    this.passes.geometry = geometryPass;
+    this.passes.ssao = ssaoPass;
+    this.passes.ssaoBlur = ssaoBPass;
+    this.passes.light = lightPass;
 };
 
 GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
@@ -233,48 +285,16 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     var gl = this.gl;
     gl.disable(gl.BLEND);
     
-    this.geometryPass.run( scene );
+    this.passes.geometry.run( scene );
     
     gl.disable(gl.DEPTH_TEST);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    // ssao
-    this.ssaoProgram.activate();
-    this.frameBuffers.ssao.bindBuffer();
-     
-    this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "colorTexture");
-    this.frameBuffers.prePass.bindTexture(gl.TEXTURE1, "depthRGBTexture");
-    this.frameBuffers.prePass.bindTexture(gl.TEXTURE2, "normalTexture");
-    this.frameBuffers.prePass.bindTexture(gl.TEXTURE3, "positionTexture"); 
-    this.setHRec(0, 0, 1, 1);
-    this.drawScreenBuffer(this.ssaoProgram);
-    this.frameBuffers.ssao.unbindBuffer();
-    this.ssaoProgram.deactivate();
-    
-    // ssao blur
-    this.blurProgram.activate();
-    this.frameBuffers.ssaoBlur.bindBuffer();
-    this.frameBuffers.ssao.bindTexture(gl.TEXTURE0, "color");
-    this.setHRec(0, 0, 1, 1);
-    this.drawScreenBuffer(this.blurProgram);
-    this.frameBuffers.ssaoBlur.unbindBuffer();
-    this.blurProgram.deactivate();
-    
-    // light
-    this.lightProgram.activate();
-    this.frameBuffers.light.bindBuffer();
-    scene.drawLights( this.lightProgram );
-    
-     
-    this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "colorTexture");
-    this.frameBuffers.prePass.bindTexture(gl.TEXTURE1, "depthRGBTexture");
-    this.frameBuffers.prePass.bindTexture(gl.TEXTURE2, "normalTexture");
-    this.frameBuffers.prePass.bindTexture(gl.TEXTURE3, "positionTexture"); 
-    this.setHRec(0, 0, 1, 1);
-    this.drawScreenBuffer(this.lightProgram);
-    this.frameBuffers.light.unbindBuffer();
-    this.lightProgram.deactivate();
+  
+    this.passes.ssao.run();
+    this.passes.ssaoBlur.run();
+    this.passes.light.run( scene );
     
     
     // HUD

@@ -98,10 +98,10 @@ GFrameBuffer.prototype.createGTexture = function ( name )
 {
     var textureHandle = this.textures[name];
     
-    if ( undefined == textureHandle )
+    if ( undefined != textureHandle )
     {
         var gTexture = new GTexture();
-        gTexture.bindToContext( this.gl );
+        gTexture.bindToContext( this.cfg.gl );
         gTexture.setTextureHandle( textureHandle );
         return gTexture;
     }
@@ -109,14 +109,24 @@ GFrameBuffer.prototype.createGTexture = function ( name )
     return undefined;
 };
 
-
+var GRENDERPASSCMD_SCENE_DRAW_MODE = 
+{
+    DEFAULT:0,
+    LIGHTS_ONLY:1
+};
 /** 
  * @constructor
  */
 function GRenderPassCmd()
 {
     this.hMatrix = mat3.create();
+    this.sceneDrawMode = GRENDERPASSCMD_SCENE_DRAW_MODE.DEFAULT;
 }
+
+GRenderPassCmd.prototype.setSceneDrawMode = function( drawMode )
+{
+    this.sceneDrawMode = drawMode;
+};
 
 GRenderPassCmd.prototype.checkValid = function()
 {
@@ -192,8 +202,8 @@ GRenderPassCmd.prototype.drawScreenBuffer = function(shader)
     var gl = this.gl;
     
     mat3.identity(this.hMatrix);
-	mat3.translate(this.hMatrix, this.hMatrix, [hRec.x, hRec.y]);
-	mat3.scale(this.hMatrix,this.hMatrix, [hRec.w, hRec.h]); 
+	mat3.translate(this.hMatrix, this.hMatrix, [this.hRec.x, this.hRec.y]);
+	mat3.scale(this.hMatrix,this.hMatrix, [this.hRec.w, this.hRec.h]); 
     
     if ( null != shader.uniforms.mapKd)
     {
@@ -254,9 +264,23 @@ GRenderPassCmd.prototype.drawGeometry = function( scene )
     
     var gl = this.gl;
     
-    gl.enable(gl.DEPTH_TEST);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	
-    scene.draw(this.shaderProgram);
+    var GRENDERPASSCMD_SCENE_DRAW_MODE = 
+{
+    DEFAULT:0,
+    LIGHTS_ONLY:1
+};
+    
+    switch ( this.sceneDrawMode )
+    {
+    case   GRENDERPASSCMD_SCENE_DRAW_MODE.DEFAULT:    
+        gl.enable(gl.DEPTH_TEST);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	
+        scene.draw(this.shaderProgram);
+        break;
+    case GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY:
+        scene.drawLights( this.shaderProgram );
+        break;
+    }
 };
 
 GRenderPassCmd.prototype.drawFullScreen = function()

@@ -222,6 +222,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var gl = this.gl;
     
     var geometryPass = new GRenderPassCmd();
+    geometryPass.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
     geometryPass.setProgram( this.deferredShader );
     geometryPass.setFrameBuffer( this.frameBuffers.prePass );
     geometryPass.bindToContext( this.gl );
@@ -278,7 +279,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     }
     
     ssaoPass.addDependency( geometryPass );
-    ssaoBPass.addDependency( ssao );
+    ssaoBPass.addDependency( ssaoPass );
     lightPass.addDependency( ssaoBPass );
     
      

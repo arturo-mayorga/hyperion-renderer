@@ -309,7 +309,7 @@ GRenderPassCmd.prototype.runDependencies = function( scene )
         
         for ( var i = 0; i < dependencyLen; ++i )
         {
-            this.dependencyPasses.run( scene );
+            this.dependencyPasses[i].run( scene );
         }
     }
 };
@@ -322,7 +322,8 @@ GRenderPassCmd.prototype.drawGeometry = function( scene )
     
     switch ( this.sceneDrawMode )
     {
-        case GRENDERPASSCMD_SCENE_DRAW_MODE.DEFAULT:	
+        case GRENDERPASSCMD_SCENE_DRAW_MODE.DEFAULT:
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             scene.draw( this.shaderProgram );
             break;
         case GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY:

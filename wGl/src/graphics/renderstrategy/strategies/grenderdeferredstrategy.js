@@ -272,7 +272,6 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     lightPass.addInputTexture( this.frameBuffers.prePass.createGTexture("depthRGBTexture"), gl.TEXTURE1 );
     lightPass.addInputTexture( this.frameBuffers.prePass.createGTexture("normalTexture"),   gl.TEXTURE2 );
     lightPass.addInputTexture( this.frameBuffers.prePass.createGTexture("positionTexture"), gl.TEXTURE3 );
- 
     if ( false == ssaoBPass.checkValid() )
     {
         console.debug("SSAO blur pass command not valid");

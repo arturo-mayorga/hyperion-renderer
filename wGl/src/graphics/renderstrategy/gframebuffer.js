@@ -197,6 +197,7 @@ GRenderPassCmd.prototype.processDepthTestSwitch = function()
  
 GRenderPassCmd.prototype.run = function( scene )
 {
+    this.runDependencies( scene );
     this.processDepthTestSwitch();
     
     this.shaderProgram.activate();
@@ -288,6 +289,29 @@ GRenderPassCmd.prototype.addInputTexture = function( gTexture, glTextureTarget )
     }
     
     this.textureList.push( {gTexture:gTexture, glTextureTarget:glTextureTarget} );
+};
+
+GRenderPassCmd.prototype.addDependency = function( dependencyPass )
+{
+    if ( undefined == this.dependencyPasses )
+    {
+        this.dependencyPasses = [];
+    }
+    
+    this.dependencyPasses.push( dependencyPass );
+};
+
+GRenderPassCmd.prototype.runDependencies = function( scene )
+{
+    if ( undefined != this.dependencyPasses )
+    {
+        var dependencyLen = this.dependencyPasses.length;
+        
+        for ( var i = 0; i < dependencyLen; ++i )
+        {
+            this.dependencyPasses.run( scene );
+        }
+    }
 };
 
 GRenderPassCmd.prototype.drawGeometry = function( scene )

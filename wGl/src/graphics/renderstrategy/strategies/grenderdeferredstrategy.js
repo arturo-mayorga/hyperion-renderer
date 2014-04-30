@@ -277,10 +277,12 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
         console.debug("SSAO blur pass command not valid");
     }
     
-    this.passes.geometry = geometryPass;
-    this.passes.ssao = ssaoPass;
-    this.passes.ssaoBlur = ssaoBPass;
-    this.passes.light = lightPass;
+    ssaoPass.addDependency( geometryPass );
+    ssaoBPass.addDependency( ssao );
+    lightPass.addDependency( ssaoBPass );
+    
+     
+    this.passCmds = lightPass;
 };
 
 GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
@@ -288,10 +290,8 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     var gl = this.gl;
     gl.disable(gl.BLEND);
     
-    this.passes.geometry.run( scene );
-    this.passes.ssao.run( scene );
-    this.passes.ssaoBlur.run( scene );
-    this.passes.light.run( scene );
+  
+    this.passCmds.run( scene );
     
     
     // HUD

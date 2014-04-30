@@ -111,9 +111,18 @@ GFrameBuffer.prototype.createGTexture = function ( name )
 
 var GRENDERPASSCMD_SCENE_DRAW_MODE = 
 {
-    DEFAULT:0,
-    LIGHTS_ONLY:1
+    DEFAULT     : 0,
+    LIGHTS_ONLY : 1,
+    NO_GEOMETRY : 2
 };
+
+var GRENDERPASSCMD_DEPTH_TEST_SWITCH = 
+{
+    NO_CHANGE : 0,
+    ENABLE    : 1,
+    DISABLE   : 2
+};
+
 /** 
  * @constructor
  */
@@ -121,6 +130,7 @@ function GRenderPassCmd()
 {
     this.hMatrix = mat3.create();
     this.sceneDrawMode = GRENDERPASSCMD_SCENE_DRAW_MODE.DEFAULT;
+    this.depthTestSwitch = GRENDERPASSCMD_DEPTH_TEST_SWITCH.NO_CHANGE;
 }
 
 GRenderPassCmd.prototype.setSceneDrawMode = function( drawMode )
@@ -164,9 +174,31 @@ GRenderPassCmd.prototype.setHRec = function( x, y, w, h )
 {
     this.hRec = { x:x, y:y, w:w, h:h };
 };
+
+GRenderPassCmd.prototype.setDepthTestSwitch = function( testSwitch )
+{
+    this.depthTestSwitch = testSwitch;
+};
+
+GRenderPassCmd.prototype.processDepthTestSwitch = function()
+{    
+    switch ( this.depthTestSwitch )
+    {
+        case GRENDERPASSCMD_DEPTH_TEST_SWITCH.NO_CHANGE:
+            break;
+        case GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE:
+            this.gl.enable( this.gl.DEPTH_TEST );
+            break;
+        case GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE:
+            this.gl.disable( this.gl.DEPTH_TEST );
+            break;
+    }
+};
  
 GRenderPassCmd.prototype.run = function( scene )
 {
+    this.processDepthTestSwitch();
+    
     this.shaderProgram.activate();
     this.frameBuffer.bindBuffer();
     
@@ -264,22 +296,16 @@ GRenderPassCmd.prototype.drawGeometry = function( scene )
     
     var gl = this.gl;
     
-    var GRENDERPASSCMD_SCENE_DRAW_MODE = 
-{
-    DEFAULT:0,
-    LIGHTS_ONLY:1
-};
-    
     switch ( this.sceneDrawMode )
     {
-    case   GRENDERPASSCMD_SCENE_DRAW_MODE.DEFAULT:    
-        gl.enable(gl.DEPTH_TEST);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	
-        scene.draw(this.shaderProgram);
-        break;
-    case GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY:
-        scene.drawLights( this.shaderProgram );
-        break;
+        case GRENDERPASSCMD_SCENE_DRAW_MODE.DEFAULT:	
+            scene.draw( this.shaderProgram );
+            break;
+        case GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY:
+            scene.drawLights( this.shaderProgram );
+            break;
+        case GRENDERPASSCMD_SCENE_DRAW_MODE.NO_GEOMETRY:
+            break;
     }
 };
 

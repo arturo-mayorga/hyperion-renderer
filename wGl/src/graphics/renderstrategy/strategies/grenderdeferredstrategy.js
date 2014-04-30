@@ -231,6 +231,8 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     }
     
     var ssaoPass = new GRenderPassCmd();
+    ssaoPass.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
+    ssaoPass.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.NO_GEOMETRY );
     ssaoPass.setProgram( this.ssaoProgram );
     ssaoPass.setFrameBuffer( this.frameBuffers.ssao );
     ssaoPass.setScreenGeometry( this.screen );
@@ -246,6 +248,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     }
     
     var ssaoBPass = new GRenderPassCmd();
+    ssaoBPass.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.NO_GEOMETRY );
     ssaoBPass.setProgram( this.blurProgram );
     ssaoBPass.setFrameBuffer( this.frameBuffers.ssaoBlur );
     ssaoBPass.setScreenGeometry( this.screen );
@@ -286,14 +289,8 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     gl.disable(gl.BLEND);
     
     this.passes.geometry.run( scene );
-    
-    gl.disable(gl.DEPTH_TEST);
-    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    
-  
-    this.passes.ssao.run();
-    this.passes.ssaoBlur.run();
+    this.passes.ssao.run( scene );
+    this.passes.ssaoBlur.run( scene );
     this.passes.light.run( scene );
     
     

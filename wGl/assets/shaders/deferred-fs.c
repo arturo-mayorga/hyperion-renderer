@@ -16,40 +16,17 @@ varying highp vec4 lightPosition;
 
 void main(void)
 {
- // gl_FragData[0] = vec4(0,0,0,0);
- // gl_FragData[1] = vec4(0.5);
- // gl_FragData[2] = vec4(0.75);
- // gl_FragData[3] = vec4(1.0);
-  
-// todo: should this be turned into a uniform variable?
-//float uKsExponent = 100.0;
-
-
     highp vec3 materialDiffuseColor = mix(texture2D(uMapKd, 
 										  vec2(vKdMapCoord.s / uMapKdScale.s, 
 											   vKdMapCoord.t / uMapKdScale.t)), 
 										  uKd, 
 										  uKd.a).xyz;
-
-   /* highp vec3 lightDirection = normalize(vec3(lightPosition - vPosition)); 
-    highp vec3 normal = normalize(vNormal.xyz);
-
-    highp float diffuseFactor = max(0.0, dot(normal, lightDirection)); 
-    
-    vec3 E = normalize(-vPosition.xyz);
-    vec3 R = reflect(-lightDirection, normal);
-    float specular =  max(dot(R, E), 0.0);
-
-    float specularFactor = pow(specular, uKsExponent);
-
-    highp vec3 color = diffuseFactor * materialDiffuseColor + specularFactor * uKs.xyz;*/
     
     highp float fDepth = vpPosition.z; 
     gl_FragData[0] = vec4(vec3(fDepth/100.0), 1);
     gl_FragData[1] = vec4(vNormal.xyz, vpPosition.z);
     gl_FragData[2] = vec4(vPosition.xyz, 1);
     gl_FragData[3] = vec4(materialDiffuseColor, 1);
-
     //gl_FragColor = vec4(color, 1); 
 }
 

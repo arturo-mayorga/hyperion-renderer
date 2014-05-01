@@ -109,7 +109,7 @@ GRenderPassCmd.prototype.bindTextures = function()
     
     for (var i = 0; i < texCount; ++i)
     {
-        this.textureList[i].gTexture.draw(this.textureList[i].glTextureTarget, null, null);
+        this.textureList[i].gTexture.draw( this.textureList[i].glTextureTarget, null, null );
     }
 };
 
@@ -212,7 +212,7 @@ GRenderPassCmd.prototype.drawGeometry = function( scene )
     switch ( this.sceneDrawMode )
     {
         case GRENDERPASSCMD_SCENE_DRAW_MODE.DEFAULT:
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
             scene.draw( this.shaderProgram );
             break;
         case GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY:
@@ -225,8 +225,8 @@ GRenderPassCmd.prototype.drawGeometry = function( scene )
 
 GRenderPassCmd.prototype.drawFullScreen = function()
 {
-    this.setHRec(0, 0, 1, 1);
-    this.drawScreenBuffer(this.shaderProgram);
+    this.setHRec( 0, 0, 1, 1 );
+    this.drawScreenBuffer( this.shaderProgram );
 };
 
 

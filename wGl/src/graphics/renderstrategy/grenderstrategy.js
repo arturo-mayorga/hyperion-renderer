@@ -28,7 +28,8 @@ function GRenderStrategyFactory(gl)
     this.strategyMap = 
     {
         "simplePhong": function(gl) { return new GRenderPhongStrategy( gl ); },
-        "deferredPhong": function(gl) { return new GRenderDeferredStrategy( gl ); }
+        "deferredPhong": function(gl) { return new GRenderDeferredStrategy( gl ); },
+        "deferredMTargetPhong": function(gl) { return new GRenderMultiTargetDeferredStrategy( gl ); }
     };
     
 }
@@ -52,8 +53,9 @@ GRenderStrategyFactory.prototype.createByName = function ( name )
  */
 GRenderStrategyFactory.prototype.creteBestFit = function ()
 {
-    return this.createByName( "deferredPhong" );
-    //return this.createByName( "simplePhong" );
+    return this.createByName( "deferredMTargetPhong" );
+    // return this.createByName( "deferredPhong" );
+    // return this.createByName( "simplePhong" );
 };
 
 

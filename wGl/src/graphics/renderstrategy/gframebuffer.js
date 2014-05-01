@@ -40,10 +40,10 @@ GFrameBuffer.prototype.addBufferTexture = function ( cfg )
     this.textures[cfg.name] = texture;
     
     if ( undefined != this.cfg.extensions &&
-       undefined != this.cfg.extensions.WEBGL_draw_buffers &&
-       // The closure compiler has problems accessing members of extensions unless they are called like this
-       cfg.attachment >= this.cfg.extensions.WEBGL_draw_buffers['COLOR_ATTACHMENT0_WEBGL'] &&
-       cfg.attachment <= this.cfg.extensions.WEBGL_draw_buffers['COLOR_ATTACHMENT15_WEBGL'] )
+         undefined != this.cfg.extensions.WEBGL_draw_buffers &&
+         // The closure compiler has problems accessing members of extensions unless they are called like this
+         cfg.attachment >= this.cfg.extensions.WEBGL_draw_buffers['COLOR_ATTACHMENT0_WEBGL'] &&
+         cfg.attachment <= this.cfg.extensions.WEBGL_draw_buffers['COLOR_ATTACHMENT15_WEBGL'] )
     {
         if ( undefined == this.WEBGL_draw_buffers_drawBuffersList )
         {

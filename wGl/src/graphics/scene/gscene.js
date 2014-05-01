@@ -116,13 +116,18 @@ GScene.prototype.drawGeometry = function ( parentMvMatrix, shader )
     }
 };
 
+GScene.prototype.drawThroughCamera = function ( camera, shader )
+{
+    camera.draw( this.eyeMvMatrix, shader );    
+    this.drawLights( shader );    
+    this.drawGeometry( this.eyeMvMatrix, shader );
+};
+
 
 GScene.prototype.draw = function( shader )
 {
     this.camera.draw( this.eyeMvMatrix, shader );
-    
     this.drawLights( shader );
-    
     this.drawGeometry( this.eyeMvMatrix, shader );
 };
 

@@ -2,14 +2,14 @@
  * @constructor
  * @implements {GRenderStrategy}
  */
-function GRenderDeferredStrategy( gl )
+function GRenderMultiTargetDeferredStrategy( gl )
 {
     this.gl = gl;
     this.configure();
     
 }
 
-GRenderDeferredStrategy.prototype.configure = function()
+GRenderMultiTargetDeferredStrategy.prototype.configure = function()
 {
     // this map variable is to keep the closure compiler from getting confused.
     var map = this.shaderSrcMap = 
@@ -32,7 +32,7 @@ GRenderDeferredStrategy.prototype.configure = function()
     }
 };
 
-GRenderDeferredStrategy.prototype.reload = function()
+GRenderMultiTargetDeferredStrategy.prototype.reload = function()
 {
     this._isReady = false;
     this.deferredShader.destroy();
@@ -43,7 +43,7 @@ GRenderDeferredStrategy.prototype.reload = function()
     this.configure();
 };
 
-GRenderDeferredStrategy.prototype.loadShader = function(srcName)
+GRenderMultiTargetDeferredStrategy.prototype.loadShader = function(srcName)
 {
     var client = new XMLHttpRequest();
     var _this = this;
@@ -59,7 +59,7 @@ GRenderDeferredStrategy.prototype.loadShader = function(srcName)
     client.send();
 };
 
-GRenderDeferredStrategy.prototype.checkShaderDependencies = function()
+GRenderMultiTargetDeferredStrategy.prototype.checkShaderDependencies = function()
 {
     for (var key in this.shaderSrcMap)
     {
@@ -72,7 +72,7 @@ GRenderDeferredStrategy.prototype.checkShaderDependencies = function()
     this.initialize();
 };
 
-GRenderDeferredStrategy.prototype.initialize = function()
+GRenderMultiTargetDeferredStrategy.prototype.initialize = function()
 {   
     this.initTextureFramebuffer();
     
@@ -88,12 +88,12 @@ GRenderDeferredStrategy.prototype.initialize = function()
     this._isReady = true;
 };
 
-GRenderDeferredStrategy.prototype.isReady = function()
+GRenderMultiTargetDeferredStrategy.prototype.isReady = function()
 {
     return true == this._isReady;
 };
 
-GRenderDeferredStrategy.prototype.initScreenVBOs = function()
+GRenderMultiTargetDeferredStrategy.prototype.initScreenVBOs = function()
 {
     var gl = this.gl;
     
@@ -143,7 +143,7 @@ GRenderDeferredStrategy.prototype.initScreenVBOs = function()
 	this.hMatrix = mat3.create();
 };
 
-GRenderDeferredStrategy.prototype.initShaders = function (shaderSrcMap) 
+GRenderMultiTargetDeferredStrategy.prototype.initShaders = function (shaderSrcMap) 
 {
     var gl = this.gl;
       
@@ -169,7 +169,7 @@ GRenderDeferredStrategy.prototype.initShaders = function (shaderSrcMap)
     this.blurProgram = blur;
 };
 
-GRenderDeferredStrategy.prototype.drawScreenBuffer = function(shader)
+GRenderMultiTargetDeferredStrategy.prototype.drawScreenBuffer = function(shader)
 {
     var gl = this.gl;
     
@@ -216,7 +216,7 @@ GRenderDeferredStrategy.prototype.drawScreenBuffer = function(shader)
     gl.drawElements(gl.TRIANGLES, this.screen.indxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 };
 
-GRenderDeferredStrategy.prototype.initPassCmds = function()
+GRenderMultiTargetDeferredStrategy.prototype.initPassCmds = function()
 {
     this.passes = {};
     var gl = this.gl;
@@ -285,7 +285,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     this.passCmds = lightPass;
 };
 
-GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
+GRenderMultiTargetDeferredStrategy.prototype.draw = function ( scene, hud )
 {
     var gl = this.gl;
     gl.disable(gl.BLEND);
@@ -325,7 +325,7 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.fullScreenProgram.deactivate();
 };
 
-GRenderDeferredStrategy.prototype.setHRec = function( x, y, width, height )
+GRenderMultiTargetDeferredStrategy.prototype.setHRec = function( x, y, width, height )
 {
 	// the values passed in are meant to be between 0 and 1
 	// currently there are no plans to add debug assertions
@@ -334,7 +334,7 @@ GRenderDeferredStrategy.prototype.setHRec = function( x, y, width, height )
 	mat3.scale(this.hMatrix,this.hMatrix, [width, height]);  
 }
 
-GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
+GRenderMultiTargetDeferredStrategy.prototype.initTextureFramebuffer = function()
 {
     var gl = this.gl;
     
@@ -369,7 +369,7 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     this.frameBuffers.light = frameBuffer;
 };
 
-GRenderDeferredStrategy.prototype.initializeFBO = function() 
+GRenderMultiTargetDeferredStrategy.prototype.initializeFBO = function() 
 {
     var gl = this.gl;
     console.log("initFBO");

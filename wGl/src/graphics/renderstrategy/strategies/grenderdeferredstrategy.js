@@ -16,8 +16,6 @@ GRenderDeferredStrategy.prototype.configure = function()
     {
         "blur-vs.c":undefined,
         "blur-fs.c":undefined,
-        "deferred-vs.c":undefined,
-        "deferred-fs.c":undefined,
         "fullscr-vs.c":undefined,
         "fullscr-fs.c":undefined,
         "light-vs.c":undefined,
@@ -81,16 +79,8 @@ GRenderDeferredStrategy.prototype.checkShaderDependencies = function()
 GRenderDeferredStrategy.prototype.initialize = function()
 {   
     this.initTextureFramebuffer();
-    
-    
-   
-    
-    this.initializeFBO();
-    
-     this.initScreenVBOs();
-    
-    this.initShaders(this.shaderSrcMap);
-    
+    this.initScreenVBOs();
+    this.initShaders();
     this.initPassCmds();
     
     this._isReady = true;
@@ -151,12 +141,12 @@ GRenderDeferredStrategy.prototype.initScreenVBOs = function()
 	this.hMatrix = mat3.create();
 };
 
-GRenderDeferredStrategy.prototype.initShaders = function (shaderSrcMap) 
+GRenderDeferredStrategy.prototype.initShaders = function () 
 {
+    var shaderSrcMap = this.shaderSrcMap;
     var gl = this.gl;
     this.programs = {};
-      
-    this.programs.deferred = new GShader(shaderSrcMap["deferred-vs.c"], shaderSrcMap["deferred-fs.c"]);
+  
     this.programs.fullScr = new GShader(shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
     this.programs.light = new GShader(shaderSrcMap["light-vs.c"], shaderSrcMap["light-fs.c"]);
     this.programs.ssao = new GShader(shaderSrcMap["ssao-vs.c"], shaderSrcMap["ssao-fs.c"]);
@@ -223,16 +213,6 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     this.passes = {};
     var gl = this.gl;
     
-    var geometryPass = new GRenderPassCmd();
-    geometryPass.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
-    geometryPass.setProgram( this.programs.deferred );
-    geometryPass.setFrameBuffer( this.frameBuffers.prePass );
-    geometryPass.bindToContext( this.gl );
-    if ( false == geometryPass.checkValid() )
-    {
-        console.debug("Geometry pass command not valid");
-    }
-    
     var colorPass = new GRenderPassCmd();
     colorPass.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
     colorPass.setProgram( this.programs.colorspec );
@@ -272,7 +252,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     ssaoPass.setHRec( 0, 0, 1, 1 );
     ssaoPass.bindToContext( this.gl );
     ssaoPass.addInputTexture( this.frameBuffers.color.createGTexture("color"),    gl.TEXTURE0 );
-    ssaoPass.addInputTexture( this.frameBuffers.prePass.createGTexture("depthRGBTexture"), gl.TEXTURE1 );
+    ssaoPass.addInputTexture( this.frameBuffers.color.createGTexture("color"), gl.TEXTURE1 );
     ssaoPass.addInputTexture( this.frameBuffers.normal.createGTexture("color"),   gl.TEXTURE2 );
     ssaoPass.addInputTexture( this.frameBuffers.position.createGTexture("color"), gl.TEXTURE3 );
     if ( false == ssaoPass.checkValid() )
@@ -301,7 +281,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     lightPass.setHRec( 0, 0, 1, 1 );
     lightPass.bindToContext( this.gl );
     lightPass.addInputTexture( this.frameBuffers.color.createGTexture("color"),    gl.TEXTURE0 );
-    lightPass.addInputTexture( this.frameBuffers.prePass.createGTexture("depthRGBTexture"), gl.TEXTURE1 );
+    lightPass.addInputTexture( this.frameBuffers.color.createGTexture("color"), gl.TEXTURE1 );
     lightPass.addInputTexture( this.frameBuffers.normal.createGTexture("color"),   gl.TEXTURE2 );
     lightPass.addInputTexture( this.frameBuffers.position.createGTexture("color"), gl.TEXTURE3 );
     if ( false == ssaoBPass.checkValid() )
@@ -309,7 +289,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
         console.debug("SSAO blur pass command not valid");
     }
     
-    //ssaoPass.addDependency( geometryPass );
+    
     ssaoPass.addDependency( colorPass );
     ssaoPass.addDependency( normalPass );
     ssaoPass.addDependency( positionPass );
@@ -374,6 +354,13 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
 {
     var gl = this.gl;
     
+
+    var tf = gl.getExtension("OES_texture_float");
+    var tfl = null;//gl.getExtension("OES_texture_float_linear"); // turning this off for now... its running better and no image difference
+    var dt = gl.getExtension("WEBGL_depth_texture");
+    
+    var floatTexFilter = (tfl != null)?gl.LINEAR:gl.NEAREST;
+    
     var texCfg = 
     {
         filter: gl.LINEAR,
@@ -385,17 +372,14 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     
     var texCfgFloat = 
     {
-        filter: gl.LINEAR,
+        filter: floatTexFilter,
         format: gl.RGBA,
         type: gl.FLOAT,
         attachment: gl.COLOR_ATTACHMENT0,
         name: "color"
     };
     
-    var db = gl.getExtension("WEBGL_draw_buffers");
-    var tf = gl.getExtension("OES_texture_float");
-    var tfl = gl.getExtension("OES_texture_float_linear");
-    var dt = gl.getExtension("WEBGL_depth_texture");
+   
     
     var frameBuffer = new GFrameBuffer({ gl: this.gl, width: 256, height: 256 });
     frameBuffer.addBufferTexture(texCfg);
@@ -430,67 +414,6 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     frameBuffer.addBufferTexture(texCfgFloat);
     frameBuffer.complete();
     this.frameBuffers.position = frameBuffer;
-};
-
-GRenderDeferredStrategy.prototype.initializeFBO = function() 
-{
-    var gl = this.gl;
-    console.log("initFBO");
-    
-    var FBO;
-      
-    var db = gl.getExtension("WEBGL_draw_buffers");
-    var tf = gl.getExtension("OES_texture_float");
-    var tfl = gl.getExtension("OES_texture_float_linear");
-    var dt = gl.getExtension("WEBGL_depth_texture");
-    
-    var floatTexFilter = (tfl != null)?gl.LINEAR:gl.NEAREST;
-    
-    var glExtensions = 
-    {
-        WEBGL_draw_buffers:db,
-        OES_texture_float:tf,
-        OES_texture_float_linear:tfl,
-        WEBGL_depth_texture:dt
-    };
-
-    if(!dt){
-        console.log("Extension Depth texture is not working");
-        console.debug(":( Sorry, Your browser doesn't support depth texture extension. Please browse to webglreport.com to see more information.");
-        return;
-    }
-    
-    var fbCfg = 
-    {
-        gl: this.gl,
-        extensions: glExtensions,
-        width: 1024,
-        height: 1024
-    };
-    
-    var texCfgs = [
-        { filter: gl.NEAREST, format: gl.DEPTH_COMPONENT, type: gl.UNSIGNED_INT,  attachment: gl.DEPTH_ATTACHMENT,        name: "depthTexture" },
-        // The closure compiler has problems accessing members of extensions unless they are called like this
-        { filter: gl.LINEAR,      format: gl.RGBA,            type: gl.UNSIGNED_BYTE, attachment: db['COLOR_ATTACHMENT0_WEBGL'], name: "depthRGBTexture" },
-        { filter: floatTexFilter, format: gl.RGBA,            type: gl.FLOAT,         attachment: db['COLOR_ATTACHMENT1_WEBGL'], name: "normalTexture" },
-        { filter: floatTexFilter, format: gl.RGBA,            type: gl.FLOAT,         attachment: db['COLOR_ATTACHMENT2_WEBGL'], name: "positionTexture" },
-        { filter: gl.LINEAR,      format: gl.RGBA,            type: gl.UNSIGNED_BYTE, attachment: db['COLOR_ATTACHMENT3_WEBGL'], name: "colorTexture" }
-    ];
-    
-    var frameBuffer = new GFrameBuffer(fbCfg);
-    
-    
-    for (var i = 0; i < texCfgs.length; ++i)
-    {
-        frameBuffer.addBufferTexture(texCfgs[i]); 
-    }
-    
-    frameBuffer.complete(); 
-    
-    this.frameBuffers.prePass = frameBuffer; 
-    
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    gl.bindTexture(gl.TEXTURE_2D, null);
 };
 
 

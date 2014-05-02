@@ -1,4 +1,3 @@
-#extension GL_EXT_draw_buffers : require
 precision mediump float;
 
 uniform vec4 uKs;

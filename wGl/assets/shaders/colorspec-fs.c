@@ -23,7 +23,6 @@ void main(void)
     
 
     gl_FragColor = vec4(materialDiffuseColor, 1); 
-    //gl_FragColor = vec4(1.0, 0.0, 0.0, 1);
 }
 
 

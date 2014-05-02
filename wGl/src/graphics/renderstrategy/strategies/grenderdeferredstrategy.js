@@ -23,7 +23,13 @@ GRenderDeferredStrategy.prototype.configure = function()
         "light-vs.c":undefined,
         "light-fs.c":undefined,
         "ssao-vs.c":undefined,
-        "ssao-fs.c":undefined
+        "ssao-fs.c":undefined,
+        "colorspec-vs.c":undefined,
+        "colorspec-fs.c":undefined,
+        "normaldepth-fs.c":undefined,
+        "normaldepth-vs.c":undefined,
+        "position-fs.c":undefined,
+        "position-vs.c":undefined
     };
     
     for (var key in map)
@@ -146,27 +152,21 @@ GRenderDeferredStrategy.prototype.initScreenVBOs = function()
 GRenderDeferredStrategy.prototype.initShaders = function (shaderSrcMap) 
 {
     var gl = this.gl;
+    this.programs = {};
       
-    var deferred = new GShader(shaderSrcMap["deferred-vs.c"], shaderSrcMap["deferred-fs.c"]);
-    deferred.bindToContext(gl);
-    
-    var fullScr = new GShader(shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
-    fullScr.bindToContext(gl);
-    
-    var light = new GShader(shaderSrcMap["light-vs.c"], shaderSrcMap["light-fs.c"]);
-    light.bindToContext(gl);
-    
-    var ssao = new GShader(shaderSrcMap["ssao-vs.c"], shaderSrcMap["ssao-fs.c"]);
-    ssao.bindToContext(gl);
-    
-    var blur = new GShader(shaderSrcMap["blur-vs.c"], shaderSrcMap["blur-fs.c"]);
-    blur.bindToContext(gl);
-    
-    this.lightProgram = light;
-    this.ssaoProgram = ssao;
-    this.fullScreenProgram = fullScr;
-    this.deferredShader = deferred;
-    this.blurProgram = blur;
+    this.programs.deferred = new GShader(shaderSrcMap["deferred-vs.c"], shaderSrcMap["deferred-fs.c"]);
+    this.programs.fullScr = new GShader(shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
+    this.programs.light = new GShader(shaderSrcMap["light-vs.c"], shaderSrcMap["light-fs.c"]);
+    this.programs.ssao = new GShader(shaderSrcMap["ssao-vs.c"], shaderSrcMap["ssao-fs.c"]);
+    this.programs.blur = new GShader(shaderSrcMap["blur-vs.c"], shaderSrcMap["blur-fs.c"]);
+    this.programs.colorspec = new GShader(shaderSrcMap["colorspec-vs.c"], shaderSrcMap["colorspec-fs.c"]);
+    this.programs.normaldepth = new GShader(shaderSrcMap["normaldepth-vs.c"], shaderSrcMap["normaldepth-fs.c"]);
+    this.programs.position = new GShader(shaderSrcMap["position-vs.c"], shaderSrcMap["position-fs.c"]);
+
+    for ( var key in this.programs )
+    {
+        this.programs[key].bindToContext(gl);
+    }
 };
 
 GRenderDeferredStrategy.prototype.drawScreenBuffer = function(shader)
@@ -223,7 +223,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     
     var geometryPass = new GRenderPassCmd();
     geometryPass.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
-    geometryPass.setProgram( this.deferredShader );
+    geometryPass.setProgram( this.programs.deferred );
     geometryPass.setFrameBuffer( this.frameBuffers.prePass );
     geometryPass.bindToContext( this.gl );
     if ( false == geometryPass.checkValid() )
@@ -234,7 +234,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var ssaoPass = new GRenderPassCmd();
     ssaoPass.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
     ssaoPass.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.NO_GEOMETRY );
-    ssaoPass.setProgram( this.ssaoProgram );
+    ssaoPass.setProgram( this.programs.ssao );
     ssaoPass.setFrameBuffer( this.frameBuffers.ssao );
     ssaoPass.setScreenGeometry( this.screen );
     ssaoPass.setHRec( 0, 0, 1, 1 );
@@ -250,7 +250,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     
     var ssaoBPass = new GRenderPassCmd();
     ssaoBPass.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.NO_GEOMETRY );
-    ssaoBPass.setProgram( this.blurProgram );
+    ssaoBPass.setProgram( this.programs.blur );
     ssaoBPass.setFrameBuffer( this.frameBuffers.ssaoBlur );
     ssaoBPass.setScreenGeometry( this.screen );
     ssaoBPass.setHRec( 0, 0, 1, 1 );
@@ -263,7 +263,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     
     var lightPass = new GRenderPassCmd();
     lightPass.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
-    lightPass.setProgram( this.lightProgram );
+    lightPass.setProgram( this.programs.light );
     lightPass.setFrameBuffer( this.frameBuffers.light );
     lightPass.setScreenGeometry( this.screen );
     lightPass.setHRec( 0, 0, 1, 1 );
@@ -295,12 +295,12 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     
     
     // HUD
-    this.fullScreenProgram.activate(); 
+    this.programs.fullScr.activate(); 
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     
     this.frameBuffers.light.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0, 0, 1, 1);
-    this.drawScreenBuffer(this.fullScreenProgram);
+    this.drawScreenBuffer(this.programs.fullScr);
     
     /*this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "depthRGBTexture");
     this.setHRec(-0.125+0.75, 0.125-0.75, 0.125, 0.125);
@@ -320,9 +320,9 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
        	
     if (hud != undefined)
     {
-        hud.draw(this.fullScreenProgram);
+        hud.draw(this.programs.fullScr);
     }
-    this.fullScreenProgram.deactivate();
+    this.programs.fullScr.deactivate();
 };
 
 GRenderDeferredStrategy.prototype.setHRec = function( x, y, width, height )

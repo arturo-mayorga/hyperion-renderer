@@ -53,8 +53,8 @@ GRenderStrategyFactory.prototype.createByName = function ( name )
  */
 GRenderStrategyFactory.prototype.creteBestFit = function ()
 {
-    return this.createByName( "deferredMTargetPhong" );
-    // return this.createByName( "deferredPhong" );
+    // return this.createByName( "deferredMTargetPhong" );
+     return this.createByName( "deferredPhong" );
     // return this.createByName( "simplePhong" );
 };
 

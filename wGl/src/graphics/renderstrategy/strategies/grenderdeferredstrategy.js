@@ -255,7 +255,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     
     var positionPass = new GRenderPassCmd();
     positionPass.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
-    positionPass.setProgram( this.programs.deferred );
+    positionPass.setProgram( this.programs.position );
     positionPass.setFrameBuffer( this.frameBuffers.position );
     positionPass.bindToContext( this.gl );
     if ( false == positionPass.checkValid() )
@@ -340,15 +340,16 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     /*this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "depthRGBTexture");
     this.setHRec(-0.125+0.75, 0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.fullScreenProgram);*/
-    this.frameBuffers.color.bindTexture(gl.TEXTURE0, "color");
+    
+    /*this.frameBuffers.color.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0.125+0.75, 0.125-0.75, 0.125, 0.125);
-    this.drawScreenBuffer(this.programs.fullScr);
-    this.frameBuffers.normal.bindTexture(gl.TEXTURE0, "color");  
+    this.drawScreenBuffer(this.programs.fullScr);*/
+    /*this.frameBuffers.normal.bindTexture(gl.TEXTURE0, "color");  
     this.setHRec(-0.125+0.75, -0.125-0.75, 0.125, 0.125);
-    this.drawScreenBuffer(this.programs.fullScr);
-    this.frameBuffers.position.bindTexture(gl.TEXTURE0, "color");
+    this.drawScreenBuffer(this.programs.fullScr);*/
+    /*this.frameBuffers.position.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0.125+0.75, -0.125-0.75, 0.125, 0.125);
-    this.drawScreenBuffer(this.programs.fullScr);
+    this.drawScreenBuffer(this.programs.fullScr);*/
     
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.enable(gl.BLEND);

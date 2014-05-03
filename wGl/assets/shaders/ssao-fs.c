@@ -4,7 +4,6 @@ varying vec2 vTexCoordinate;
 uniform sampler2D uMapKd;
 uniform sampler2D uMapNormal;
 uniform sampler2D uMapPosition;
-uniform sampler2D uMapRGBDepth;
 
 const float numSamples = 4.0;
 

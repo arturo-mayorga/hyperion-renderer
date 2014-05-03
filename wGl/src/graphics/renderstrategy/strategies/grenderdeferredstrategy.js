@@ -169,20 +169,15 @@ GRenderDeferredStrategy.prototype.drawScreenBuffer = function(shader)
     {
         gl.uniform1i(shader.uniforms.mapKd, 0);
     }
-    
-    if ( null != shader.uniforms.mapRGBDepth )
-    {
-        gl.uniform1i(shader.uniforms.mapRGBDepth, 1);
-    }
  
     if ( null != shader.uniforms.mapNormal )
     {
-        gl.uniform1i(shader.uniforms.mapNormal, 2);
+        gl.uniform1i(shader.uniforms.mapNormal, 1);
     }
   
     if ( null != shader.uniforms.mapPosition )
     {
-        gl.uniform1i(shader.uniforms.mapPosition, 3);
+        gl.uniform1i(shader.uniforms.mapPosition, 2);
     }
     
     if ( null != shader.uniforms.Kd )

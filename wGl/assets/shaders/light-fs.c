@@ -4,6 +4,9 @@ varying vec2 vTexCoordinate;
 uniform sampler2D uMapKd;
 uniform sampler2D uMapNormal;
 uniform sampler2D uMapPosition;
+uniform sampler2D uMapShadow;
+
+uniform mat4 uShadowMatrix;
 
 uniform vec3 uLightPosition0;
 

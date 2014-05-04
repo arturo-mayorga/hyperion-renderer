@@ -59,33 +59,36 @@ GShader.prototype.bindToContext = function (gl)
     }
     
     var attr = {};
-    attr.positionVertexAttribute = gl.getAttribLocation(shaderProgram, "aPositionVertex");
-    attr.textureVertexAttribute  = gl.getAttribLocation(shaderProgram, "aTextureVertex");
-    attr.normalVertexAttribute   = gl.getAttribLocation(shaderProgram, "aNormalVertex");
+    attr.positionVertexAttribute = gl.getAttribLocation( shaderProgram, "aPositionVertex" );
+    attr.textureVertexAttribute  = gl.getAttribLocation( shaderProgram, "aTextureVertex" );
+    attr.normalVertexAttribute   = gl.getAttribLocation( shaderProgram, "aNormalVertex" );
     
     var uniforms = {};
-    uniforms.pMatrixUniform  = gl.getUniformLocation(shaderProgram, "uPMatrix");
-    uniforms.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-    uniforms.nMatrixUniform  = gl.getUniformLocation(shaderProgram, "uNMatrix");
-    uniforms.hMatrixUniform  = gl.getUniformLocation(shaderProgram, "uHMatrix");
-    uniforms.Ka              = gl.getUniformLocation(shaderProgram, "uKa");
-    uniforms.Kd              = gl.getUniformLocation(shaderProgram, "uKd");
-    uniforms.mapKd           = gl.getUniformLocation(shaderProgram, "uMapKd");
-    uniforms.mapKdScale      = gl.getUniformLocation(shaderProgram, "uMapKdScale");
-    uniforms.Ks              = gl.getUniformLocation(shaderProgram, "uKs");
+    uniforms.pMatrixUniform  = gl.getUniformLocation( shaderProgram, "uPMatrix" );
+    uniforms.mvMatrixUniform = gl.getUniformLocation( shaderProgram, "uMVMatrix" );
+    uniforms.nMatrixUniform  = gl.getUniformLocation( shaderProgram, "uNMatrix" );
+    uniforms.hMatrixUniform  = gl.getUniformLocation( shaderProgram, "uHMatrix" );
+    uniforms.Ka              = gl.getUniformLocation( shaderProgram, "uKa" );
+    uniforms.Kd              = gl.getUniformLocation( shaderProgram, "uKd" );
+    uniforms.mapKd           = gl.getUniformLocation( shaderProgram, "uMapKd" );
+    uniforms.mapKdScale      = gl.getUniformLocation( shaderProgram, "uMapKdScale" );
+    uniforms.Ks              = gl.getUniformLocation( shaderProgram, "uKs" );
     
-    uniforms.mapNormal       = gl.getUniformLocation(shaderProgram, "uMapNormal");
-    uniforms.mapPosition     = gl.getUniformLocation(shaderProgram, "uMapPosition");
+    uniforms.mapNormal       = gl.getUniformLocation( shaderProgram, "uMapNormal" );
+    uniforms.mapPosition     = gl.getUniformLocation( shaderProgram, "uMapPosition" );
+    uniforms.mapShadow       = gl.getUniformLocation( shaderProgram, "uMapShadow" );
     
-    uniforms.lightPosition0  = gl.getUniformLocation(shaderProgram, "uLightPosition0");
-    uniforms.lightPosition1  = gl.getUniformLocation(shaderProgram, "uLightPosition1");
-    uniforms.lightPosition2  = gl.getUniformLocation(shaderProgram, "uLightPosition2");
-    uniforms.lightPosition3  = gl.getUniformLocation(shaderProgram, "uLightPosition3");
-    uniforms.lightPosition4  = gl.getUniformLocation(shaderProgram, "uLightPosition4");
-    uniforms.lightPosition5  = gl.getUniformLocation(shaderProgram, "uLightPosition5");
-    uniforms.lightPosition6  = gl.getUniformLocation(shaderProgram, "uLightPosition6");
-    uniforms.lightPosition7  = gl.getUniformLocation(shaderProgram, "uLightPosition7");
-    uniforms.lightPosition8  = gl.getUniformLocation(shaderProgram, "uLightPosition8");
+    uniforms.lightPosition0  = gl.getUniformLocation( shaderProgram, "uLightPosition0" );
+    uniforms.lightPosition1  = gl.getUniformLocation( shaderProgram, "uLightPosition1" );
+    uniforms.lightPosition2  = gl.getUniformLocation( shaderProgram, "uLightPosition2" );
+    uniforms.lightPosition3  = gl.getUniformLocation( shaderProgram, "uLightPosition3" );
+    uniforms.lightPosition4  = gl.getUniformLocation( shaderProgram, "uLightPosition4" );
+    uniforms.lightPosition5  = gl.getUniformLocation( shaderProgram, "uLightPosition5" );
+    uniforms.lightPosition6  = gl.getUniformLocation( shaderProgram, "uLightPosition6" );
+    uniforms.lightPosition7  = gl.getUniformLocation( shaderProgram, "uLightPosition7" );
+    uniforms.lightPosition8  = gl.getUniformLocation( shaderProgram, "uLightPosition8" );
+    
+    uniforms.shadowMatrix    = gl.getUniformLocation( shaderProgram, "uShadowMatrix" );
     
     this.attributes = attr;
     this.uniforms = uniforms;

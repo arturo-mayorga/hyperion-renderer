@@ -21,6 +21,13 @@ GLight.prototype.setPosition = function( x, y, z )
     this.position[2] = z;
 };
 
+GLight.prototype.getPosition = function( position )
+{
+    position[0] = this.position[0];
+    position[1] = this.position[1];
+    position[2] = this.position[2];
+};
+
 GLight.prototype.bindToContext = function( gl )
 {
     this.gl = gl;

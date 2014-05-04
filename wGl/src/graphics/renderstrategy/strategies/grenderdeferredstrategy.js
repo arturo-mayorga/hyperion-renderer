@@ -208,6 +208,25 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     this.passes = {};
     var gl = this.gl;
     
+    this.lightCamControlers = {};
+    
+    var leftCtrl = new GLightBasedCamCtrl();
+    leftCtrl.bindToContext( this.gl );
+    leftCtrl.setUp( 1, 0, 0 );
+    leftCtrl.setLookAtDir( 0, -1, 0 );
+    this.lightCamControlers.left = leftCtrl;
+    var normalLSource = new GRenderPassCmd();
+    normalLSource.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
+    normalLSource.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.CUSTOM_CAMERA );
+    normalLSource.setCustomCameraController( leftCtrl );
+    normalLSource.setProgram( this.programs.normaldepth );
+    normalLSource.setFrameBuffer( this.frameBuffers.lightNormal );
+    normalLSource.bindToContext( this.gl );
+    if ( false == normalLSource.checkValid() )
+    {
+        console.debug("Geometry pass command not valid");
+    }
+    
     var colorPass = new GRenderPassCmd();
     colorPass.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
     colorPass.setProgram( this.programs.colorspec );
@@ -247,9 +266,8 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     ssaoPass.setHRec( 0, 0, 1, 1 );
     ssaoPass.bindToContext( this.gl );
     ssaoPass.addInputTexture( this.frameBuffers.color.createGTexture("color"),    gl.TEXTURE0 );
-    ssaoPass.addInputTexture( this.frameBuffers.color.createGTexture("color"), gl.TEXTURE1 );
-    ssaoPass.addInputTexture( this.frameBuffers.normal.createGTexture("color"),   gl.TEXTURE2 );
-    ssaoPass.addInputTexture( this.frameBuffers.position.createGTexture("color"), gl.TEXTURE3 );
+    ssaoPass.addInputTexture( this.frameBuffers.normal.createGTexture("color"),   gl.TEXTURE1 );
+    ssaoPass.addInputTexture( this.frameBuffers.position.createGTexture("color"), gl.TEXTURE2 );
     if ( false == ssaoPass.checkValid() )
     {
         console.debug("SSAO pass command not valid");
@@ -275,22 +293,21 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     lightPass.setScreenGeometry( this.screen );
     lightPass.setHRec( 0, 0, 1, 1 );
     lightPass.bindToContext( this.gl );
-    lightPass.addInputTexture( this.frameBuffers.color.createGTexture("color"),    gl.TEXTURE0 );
-    lightPass.addInputTexture( this.frameBuffers.color.createGTexture("color"), gl.TEXTURE1 );
-    lightPass.addInputTexture( this.frameBuffers.normal.createGTexture("color"),   gl.TEXTURE2 );
-    lightPass.addInputTexture( this.frameBuffers.position.createGTexture("color"), gl.TEXTURE3 );
+    lightPass.addInputTexture( this.frameBuffers.color.createGTexture("color"),       gl.TEXTURE0 );
+    lightPass.addInputTexture( this.frameBuffers.normal.createGTexture("color"),      gl.TEXTURE1 );
+    lightPass.addInputTexture( this.frameBuffers.position.createGTexture("color"),    gl.TEXTURE2 );
+    lightPass.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"), gl.TEXTURE3 );
     if ( false == ssaoBPass.checkValid() )
     {
-        console.debug("SSAO blur pass command not valid");
+        console.debug("lightPass pass command not valid");
     }
     
-    
+    colorPass.addDependency( normalLSource );
     ssaoPass.addDependency( colorPass );
     ssaoPass.addDependency( normalPass );
     ssaoPass.addDependency( positionPass );
     ssaoBPass.addDependency( ssaoPass );
     lightPass.addDependency( ssaoBPass );
-    
      
     this.passCmds = lightPass;
 };
@@ -300,6 +317,10 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     var gl = this.gl;
     gl.disable(gl.BLEND);
     
+    for ( var key in this.lightCamControlers )
+    {
+        this.lightCamControlers[key].update( scene );
+    }
   
     this.passCmds.run( scene );
     
@@ -319,9 +340,9 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     /*this.frameBuffers.color.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0.125+0.75, 0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.programs.fullScr);*/
-    /*this.frameBuffers.normal.bindTexture(gl.TEXTURE0, "color");  
+    this.frameBuffers.lightNormal.bindTexture(gl.TEXTURE0, "color");  
     this.setHRec(-0.125+0.75, -0.125-0.75, 0.125, 0.125);
-    this.drawScreenBuffer(this.programs.fullScr);*/
+    this.drawScreenBuffer(this.programs.fullScr);
     /*this.frameBuffers.position.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0.125+0.75, -0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.programs.fullScr);*/
@@ -405,10 +426,15 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     frameBuffer.complete();
     this.frameBuffers.normal = frameBuffer;
     
-        frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfgFloat);
     frameBuffer.complete();
     this.frameBuffers.position = frameBuffer;
+    
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
+    frameBuffer.addBufferTexture(texCfgFloat);
+    frameBuffer.complete();
+    this.frameBuffers.lightNormal = frameBuffer;
 };
 
 

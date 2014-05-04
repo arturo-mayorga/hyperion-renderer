@@ -276,8 +276,53 @@ GRenderPassCmd.prototype.drawGeometry = function( scene )
             scene.draw( this.shaderProgram );
             break;
         case GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY:
+        {
             scene.drawLights( this.shaderProgram );
+            var light = scene.getLights()[0];
+            var lightLocation = vec3.fromValues( 0, 0, 0 );
+            var lookAtDir     = vec3.fromValues( 0, -1, 0 );
+            var lookAt        = vec3.fromValues( 0, 0, 1 )
+            var upDir         = vec3.fromValues( 1, 0, 0 );
+    
+            if ( undefined != light )
+            {
+                
+                light.getPosition( lightLocation );
+                vec3.add( lookAt, lightLocation, lookAtDir );
+                
+                var camera = new GCamera();
+                camera.setEye( lightLocation[0], lightLocation[1], lightLocation[2] );
+                camera.setUp( upDir[0], upDir[1], upDir[2] );
+                camera.setLookAt( lookAt[0], lookAt[1], lookAt[2] );
+                camera.setFovy( 3.14159/2 );
+                camera.setAspect( 1 );
+                camera.updateMatrices();
+                
+                
+                var gCamera = scene.getCamera();
+                gCamera.updateMatrices();
+                
+                var sceneMvMatrix = mat4.create();
+                var lMvMatrix = mat4.create();
+                var lPMatrix = mat4.create();
+                var uniformMatrix = mat4.create();
+                
+                gCamera.getMvMatrix( sceneMvMatrix );
+                camera.getMvMatrix( lMvMatrix );
+                camera.getPMatrix( lPMatrix );
+                
+                mat4.invert( sceneMvMatrix, sceneMvMatrix );
+                mat4.multiply( uniformMatrix, sceneMvMatrix, lMvMatrix );
+                mat4.multiply( uniformMatrix, uniformMatrix, lPMatrix );
+                
+                if ( undefined != this.shaderProgram.uniforms.shadowMatrix )
+                {
+                    gl.uniformMatrix4fv( this.shaderProgram.uniforms.shadowMatrix, false, uniformMatrix );
+                }
+            }
+    
             break;
+        }
         case GRENDERPASSCMD_SCENE_DRAW_MODE.NO_GEOMETRY:
             break;
     }

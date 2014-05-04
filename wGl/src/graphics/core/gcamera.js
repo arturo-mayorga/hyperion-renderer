@@ -21,21 +21,24 @@ function GCamera()
 	this.fovy = 0.8*(3.14159/4);
 }
 	
-GCamera.prototype.draw = function(ouMvMatrix, shader)
+GCamera.prototype.draw = function( ouMvMatrix, shader )
 {
     var gl = this.gl;
     this.updateMatrices();
     
     mat4.copy(ouMvMatrix, this.mvMatrix);
-
-    mat4.perspective(this.pMatrix, this.fovy, this.aspect, 0.1, 100.0);
     
-    gl.uniformMatrix4fv(shader.uniforms.pMatrixUniform, false, this.pMatrix);
+    gl.uniformMatrix4fv( shader.uniforms.pMatrixUniform, false, this.pMatrix );
 };
 
-GCamera.prototype.getMvMatrix = function(outMvMatrix)
+GCamera.prototype.getMvMatrix = function( outMvMatrix )
 {
-    mat4.copy(outMvMatrix, this.mvMatrix);
+    mat4.copy( outMvMatrix, this.mvMatrix );
+};
+
+GCamera.prototype.getPMatrix = function ( outPMatrix )
+{
+    mat4.copy( outPMatrix, this.pMatrix );
 };
 
 GCamera.prototype.bindToContext = function(gl_)
@@ -53,7 +56,7 @@ GCamera.prototype.setAspect = function( aspect )
     this.aspect = aspect;
 };
 
-GCamera.prototype.setEye = function (x, y, z)
+GCamera.prototype.setEye = function ( x, y, z )
 {
     this.eye[0] = x; this.eye[1] = y; this.eye[2] = z;
 };
@@ -92,4 +95,5 @@ GCamera.prototype.getLookAt = function (outA)
 GCamera.prototype.updateMatrices = function()
 { 
     mat4.lookAt(this.mvMatrix, this.eye, this.lookAt, this.up);
+    mat4.perspective(this.pMatrix, this.fovy, this.aspect, 0.1, 100.0);
 };

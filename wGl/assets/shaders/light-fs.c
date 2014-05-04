@@ -31,15 +31,32 @@ vec4 calcLight(vec3 normal, vec3 position, vec3 lightPosition, vec3 lightColor)
 
 void main(void)
 {
-    vec3 tv3Normal   = normalize(texture2D(uMapNormal,   vTexCoordinate).xyz);
-    vec3 tv3Position = texture2D(uMapPosition, vTexCoordinate).xyz;
+    vec4 tv4Normal   = texture2D(uMapNormal,   vTexCoordinate);
+    vec4 tv4Position = texture2D(uMapPosition, vTexCoordinate);
 	vec3 tv3Color    = texture2D(uMapKd,       vTexCoordinate).xyz;
 	
-	vec3 lightColor = vec3(1, 1, 1);
+	vec4 shadowProj = tv4Position * uShadowMatrix;
+	
+	vec4 t4Shadow    = texture2D(uMapShadow, shadowProj.xy);
+	
+    vec3 lightColor = vec3( 1, 1, 1 );
 
-	vec4 lightRes = calcLight(tv3Normal, tv3Position, uLightPosition0, lightColor);
-
-    gl_FragColor = vec4(lightRes.xyz*tv3Color, 1); 
+    vec4 lightRes = calcLight( normalize(tv4Normal.xyz), 
+                               tv4Position.xyz, 
+                               uLightPosition0, 
+                               lightColor );
+        
+    if (t4Shadow.z < shadowProj.z)
+	{
+	    lightRes *= 0.3;
+	}
+    
+    gl_FragColor = vec4(lightRes.xyz*tv3Color, 1);
+    
+    gl_FragColor = vec4(vec3( (tv4Position.z*-1.0)/32.0  ), 1);
+    
+    gl_FragColor = vec4(vec3( (shadowProj.z*-1.0)/128.0  ), 1);
+    
 } 
 
 

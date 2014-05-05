@@ -311,9 +311,11 @@ GRenderPassCmd.prototype.drawGeometry = function( scene )
                 camera.getMvMatrix( lMvMatrix );
                 camera.getPMatrix( lPMatrix );
                 
-                mat4.invert( uniformMatrix, sceneMvMatrix );
-                mat4.multiply( uniformMatrix, sceneMvMatrix, lMvMatrix );
-                mat4.multiply( uniformMatrix, uniformMatrix, lPMatrix );
+                mat4.invert( sceneMvMatrix, sceneMvMatrix );
+				
+				mat4.multiply( uniformMatrix, uniformMatrix, lPMatrix );
+				mat4.multiply( uniformMatrix, uniformMatrix, lMvMatrix );
+				mat4.multiply( uniformMatrix, uniformMatrix, sceneMvMatrix );
                 
                 if ( undefined != this.shaderProgram.uniforms.shadowMatrix )
                 {

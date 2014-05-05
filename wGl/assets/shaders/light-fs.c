@@ -35,7 +35,7 @@ void main(void)
     vec4 tv4Position = texture2D(uMapPosition, vTexCoordinate);
 	vec3 tv3Color    = texture2D(uMapKd,       vTexCoordinate).xyz;
 	
-	vec4 shadowProj = tv4Position * uShadowMatrix;
+	vec4 shadowProj =  uShadowMatrix * tv4Position;
 	
 	vec4 t4Shadow    = texture2D(uMapShadow, shadowProj.xy);
 	
@@ -46,16 +46,18 @@ void main(void)
                                uLightPosition0, 
                                lightColor );
         
-    if (t4Shadow.z < shadowProj.z)
+    if (t4Shadow.w < shadowProj.z)
 	{
 	    lightRes *= 0.3;
 	}
     
+	// lightRes *= shadowProj.z/32.0;
+	
     gl_FragColor = vec4(lightRes.xyz*tv3Color, 1);
     
-    gl_FragColor = vec4(vec3( (tv4Position.z*-1.0)/32.0  ), 1);
+    //gl_FragColor = vec4(vec3( (tv4Position.w)/32.0  ), 1);
     
-    gl_FragColor = vec4(vec3( (shadowProj.z*-1.0)/128.0  ), 1);
+  //  gl_FragColor = vec4(vec3( (shadowProj.z)/1.0  ), 1);
     
 } 
 

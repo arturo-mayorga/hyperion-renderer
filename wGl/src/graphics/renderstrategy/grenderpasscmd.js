@@ -54,8 +54,12 @@ GLightBasedCamCtrl.prototype.update = function( scene )
         this.camera.setEye( this.lightLocation[0], this.lightLocation[1], this.lightLocation[2] );
         this.camera.setUp( this.upDir[0], this.upDir[1], this.upDir[2] );
         this.camera.setLookAt( this.lookAt[0], this.lookAt[1], this.lookAt[2] );
+        
+        tempGlobalLightCamera = this.camera;
     }
 };
+
+var tempGlobalLightCamera;
 
 GLightBasedCamCtrl.prototype.setUp = function( x, y, z )
 {
@@ -294,9 +298,12 @@ GRenderPassCmd.prototype.drawGeometry = function( scene )
                 camera.setEye( lightLocation[0], lightLocation[1], lightLocation[2] );
                 camera.setUp( upDir[0], upDir[1], upDir[2] );
                 camera.setLookAt( lookAt[0], lookAt[1], lookAt[2] );
-                camera.setFovy( 3.14159/2 );
+                camera.setFovy( (3.14159/2) * 1 );
                 camera.setAspect( 1 );
                 camera.updateMatrices();
+                
+                
+               // camera = tempGlobalLightCamera;
                 
                 
                 var gCamera = scene.getCamera();
@@ -313,13 +320,18 @@ GRenderPassCmd.prototype.drawGeometry = function( scene )
                 
                 mat4.invert( sceneMvMatrix, sceneMvMatrix );
 				
-				mat4.multiply( uniformMatrix, uniformMatrix, lPMatrix );
+				//mat4.multiply( uniformMatrix, uniformMatrix, lPMatrix );
 				mat4.multiply( uniformMatrix, uniformMatrix, lMvMatrix );
 				mat4.multiply( uniformMatrix, uniformMatrix, sceneMvMatrix );
                 
                 if ( undefined != this.shaderProgram.uniforms.shadowMatrix )
                 {
                     gl.uniformMatrix4fv( this.shaderProgram.uniforms.shadowMatrix, false, uniformMatrix );
+                }
+                
+                if ( undefined != this.shaderProgram.uniforms.pMatrixUniform )
+                {
+                    gl.uniformMatrix4fv( this.shaderProgram.uniforms.pMatrixUniform, false, lPMatrix );
                 }
             }
     

@@ -7,6 +7,7 @@ uniform sampler2D uMapPosition;
 uniform sampler2D uMapShadow;
 
 uniform mat4 uShadowMatrix;
+uniform mat4 uPMatrix;
 
 uniform vec3 uLightPosition0;
 
@@ -32,12 +33,23 @@ vec4 calcLight(vec3 normal, vec3 position, vec3 lightPosition, vec3 lightColor)
 void main(void)
 {
     vec4 tv4Normal   = texture2D(uMapNormal,   vTexCoordinate);
-    vec4 tv4Position = texture2D(uMapPosition, vTexCoordinate);
+    highp vec4 tv4Position = texture2D(uMapPosition, vTexCoordinate);
 	vec3 tv3Color    = texture2D(uMapKd,       vTexCoordinate).xyz;
 	
-	vec4 shadowProj =  uShadowMatrix * tv4Position;
+	highp vec4 shadowProj_ =  uShadowMatrix * vec4(tv4Position.xyz, 1.0);
 	
-	vec4 t4Shadow    = texture2D(uMapShadow, shadowProj.xy);
+	
+	
+	highp vec4 shadowProj = vec4(shadowProj_.xyz, 1.0) * uPMatrix ;
+	
+	shadowProj.x /= -shadowProj_.z;
+	shadowProj.y /= -shadowProj_.z;
+	
+	//vec4 t4Shadow    = texture2D(uMapShadow, shadowProj.xy);
+	//vec4 t4Shadow    = texture2D(uMapShadow, vTexCoordinate);
+	float d = 1.0;
+	vec4 t4Shadow    = texture2D(uMapShadow, vec2((shadowProj.x+1.0)/2.0, (shadowProj.y+1.0)/2.0));
+	//vec4 t4Shadow    = texture2D(uMapShadow, vec2(shadowProj.x, shadowProj.y));
 	
     vec3 lightColor = vec3( 1, 1, 1 );
 
@@ -46,18 +58,30 @@ void main(void)
                                uLightPosition0, 
                                lightColor );
         
-    if (t4Shadow.w < shadowProj.z)
+    
+	
+	if ( abs(shadowProj.x) < 1.0 && abs(shadowProj.y) < 1.0  )
 	{
-	    lightRes *= 0.3;
-	}
+	    
+	    if (t4Shadow.w <= shadowProj.z)
+        {
+            lightRes *= 0.7;
+        }
     
 	// lightRes *= shadowProj.z/32.0;
 	
     gl_FragColor = vec4(lightRes.xyz*tv3Color, 1);
     
-    //gl_FragColor = vec4(vec3( (tv4Position.w)/32.0  ), 1);
+    //gl_FragColor = vec4(vec3( (t4Shadow.w)/32.0  ), 1);
     
-  //  gl_FragColor = vec4(vec3( (shadowProj.z)/1.0  ), 1);
+   // gl_FragColor = vec4( (shadowProj.x/d), shadowProj.y/d, (shadowProj.z)/32.0, 1);
+    
+    //gl_FragColor = vec4(vec3( (shadowProj.z)/32.0  ), 1);
+    }
+    else
+    {
+        gl_FragColor = vec4(lightRes.xyz*tv3Color, 1);
+    }
     
 } 
 

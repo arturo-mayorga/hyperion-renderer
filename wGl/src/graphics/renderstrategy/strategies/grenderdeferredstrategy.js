@@ -39,11 +39,13 @@ GRenderDeferredStrategy.prototype.configure = function()
 GRenderDeferredStrategy.prototype.reload = function()
 {
     this._isReady = false;
-    this.deferredShader.destroy();
-    this.fullScreenProgram.destroy();
     
-    this.deferredShader = undefined;
-    this.fullScreenProgram = undefined;
+    for ( var key in this.programs )
+    {
+        this.programs[key].destroy();
+        this.programs[key] = undefined;
+    }
+    
     this.configure();
 };
 

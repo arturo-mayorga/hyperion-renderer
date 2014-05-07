@@ -54,12 +54,8 @@ GLightBasedCamCtrl.prototype.update = function( scene )
         this.camera.setEye( this.lightLocation[0], this.lightLocation[1], this.lightLocation[2] );
         this.camera.setUp( this.upDir[0], this.upDir[1], this.upDir[2] );
         this.camera.setLookAt( this.lookAt[0], this.lookAt[1], this.lookAt[2] );
-        
-        tempGlobalLightCamera = this.camera;
     }
 };
-
-var tempGlobalLightCamera;
 
 GLightBasedCamCtrl.prototype.setUp = function( x, y, z )
 {
@@ -302,10 +298,6 @@ GRenderPassCmd.prototype.drawGeometry = function( scene )
                 camera.setAspect( 1 );
                 camera.updateMatrices();
                 
-                
-               // camera = tempGlobalLightCamera;
-                
-                
                 var gCamera = scene.getCamera();
                 gCamera.updateMatrices();
                 
@@ -319,8 +311,6 @@ GRenderPassCmd.prototype.drawGeometry = function( scene )
                 camera.getPMatrix( lPMatrix );
                 
                 mat4.invert( sceneMvMatrix, sceneMvMatrix );
-				
-				//mat4.multiply( uniformMatrix, uniformMatrix, lPMatrix );
 				mat4.multiply( uniformMatrix, uniformMatrix, lMvMatrix );
 				mat4.multiply( uniformMatrix, uniformMatrix, sceneMvMatrix );
                 

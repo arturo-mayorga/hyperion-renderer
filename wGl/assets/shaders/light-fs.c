@@ -37,19 +37,11 @@ void main(void)
 	vec3 tv3Color    = texture2D(uMapKd,       vTexCoordinate).xyz;
 	
 	highp vec4 shadowProj_ =  uShadowMatrix * vec4(tv4Position.xyz, 1.0);
+	highp vec4 shadowProj = uPMatrix * vec4(shadowProj_.xyz, 1.0);
 	
+	shadowProj /= shadowProj.w;
 	
-	
-	highp vec4 shadowProj = vec4(shadowProj_.xyz, 1.0) * uPMatrix ;
-	
-	shadowProj.x /= -shadowProj_.z;
-	shadowProj.y /= -shadowProj_.z;
-	
-	//vec4 t4Shadow    = texture2D(uMapShadow, shadowProj.xy);
-	//vec4 t4Shadow    = texture2D(uMapShadow, vTexCoordinate);
-	float d = 1.0;
-	vec4 t4Shadow    = texture2D(uMapShadow, vec2((shadowProj.x+1.0)/2.0, (shadowProj.y+1.0)/2.0));
-	//vec4 t4Shadow    = texture2D(uMapShadow, vec2(shadowProj.x, shadowProj.y));
+	vec4 t4Shadow    = texture2D(uMapShadow, vec2( (shadowProj.x+1.0)/2.0, (shadowProj.y+1.0)/2.0));
 	
     vec3 lightColor = vec3( 1, 1, 1 );
 
@@ -63,20 +55,14 @@ void main(void)
 	if ( abs(shadowProj.x) < 1.0 && abs(shadowProj.y) < 1.0  )
 	{
 	    
-	    if (t4Shadow.w <= shadowProj.z)
+	    if ( (t4Shadow.w) > (shadowProj_.z + 0.2) )
         {
             lightRes *= 0.7;
-        }
+        } 
     
-	// lightRes *= shadowProj.z/32.0;
-	
-    gl_FragColor = vec4(lightRes.xyz*tv3Color, 1);
+        gl_FragColor = vec4(lightRes.xyz*tv3Color, 1);
     
-    //gl_FragColor = vec4(vec3( (t4Shadow.w)/32.0  ), 1);
-    
-   // gl_FragColor = vec4( (shadowProj.x/d), shadowProj.y/d, (shadowProj.z)/32.0, 1);
-    
-    //gl_FragColor = vec4(vec3( (shadowProj.z)/32.0  ), 1);
+   
     }
     else
     {

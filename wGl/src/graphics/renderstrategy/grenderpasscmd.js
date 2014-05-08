@@ -72,6 +72,66 @@ GLightBasedCamCtrl.prototype.getCamera = function()
     return this.camera;
 };
 
+/**
+ * @constructor
+ */
+function GRenderPassClearCmd()
+{
+}
+
+GRenderPassClearCmd.prototype.setFrameBuffer = function( frameBuffer )
+{
+    this.frameBuffer = frameBuffer;
+};
+
+GRenderPassClearCmd.prototype.bindToContext = function ( gl )
+{
+    this.gl = gl;
+};
+
+GRenderPassClearCmd.prototype.addDependency = function( dependencyPass )
+{
+    if ( undefined == this.dependencyPasses )
+    {
+        this.dependencyPasses = [];
+    }
+    
+    this.dependencyPasses.push( dependencyPass );
+};
+
+GRenderPassClearCmd.prototype.checkValid = function()
+{
+    if ( undefined == this.frameBuffer ||
+         undefined == this.gl )
+    {
+        return false;
+    }
+    
+    return true;
+};
+
+GRenderPassClearCmd.prototype.runDependencies = function( scene )
+{
+    if ( undefined != this.dependencyPasses )
+    {
+        var dependencyLen = this.dependencyPasses.length;
+        
+        for ( var i = 0; i < dependencyLen; ++i )
+        {
+            this.dependencyPasses[i].run( scene );
+        }
+    }
+};
+
+GRenderPassClearCmd.prototype.run = function( scene )
+{
+    var gl = this.gl;
+    this.runDependencies( scene ); 
+    this.frameBuffer.bindBuffer(); 
+    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT ); 
+    this.frameBuffer.unbindBuffer();
+};
+
 
 /** 
  * @constructor
@@ -81,7 +141,17 @@ function GRenderPassCmd()
     this.hMatrix = mat3.create();
     this.sceneDrawMode = GRENDERPASSCMD_SCENE_DRAW_MODE.DEFAULT;
     this.depthTestSwitch = GRENDERPASSCMD_DEPTH_TEST_SWITCH.NO_CHANGE;
+    
+    GRenderPassCmd_sceneMvMatrix = mat4.create();
+    GRenderPassCmd_lMvMatrix = mat4.create();
+    GRenderPassCmd_lPMatrix = mat4.create();
+    GRenderPassCmd_uniformMatrix = mat4.create();
 }
+
+var GRenderPassCmd_sceneMvMatrix;
+var GRenderPassCmd_lMvMatrix;
+var GRenderPassCmd_lPMatrix;
+var GRenderPassCmd_uniformMatrix;
 
 GRenderPassCmd.prototype.setSceneDrawMode = function( drawMode )
 {
@@ -208,6 +278,11 @@ GRenderPassCmd.prototype.drawScreenBuffer = function(shader)
         gl.uniform1i( shader.uniforms.mapShadow, 3 );
     }
     
+    if ( null != shader.uniforms.mapPing )
+    {
+        gl.uniform1i( shader.uniforms.mapPing, 4 );
+    }
+    
     gl.bindBuffer( gl.ARRAY_BUFFER, this.screen.vertBuffer);
     gl.vertexAttribPointer( shader.attributes.positionVertexAttribute, 
                             this.screen.vertBuffer.itemSize, gl.FLOAT, false, 0, 0 );
@@ -279,49 +354,36 @@ GRenderPassCmd.prototype.drawGeometry = function( scene )
         {
             scene.drawLights( this.shaderProgram );
             var light = scene.getLights()[0];
-            var lightLocation = vec3.fromValues( 0, 0, 0 );
-            var lookAtDir     = vec3.fromValues( 0, -1, 0 );
-            var lookAt        = vec3.fromValues( 0, 0, 1 )
-            var upDir         = vec3.fromValues( 1, 0, 0 );
+            
+          
     
             if ( undefined != light )
             {
+              
                 
-                light.getPosition( lightLocation );
-                vec3.add( lookAt, lightLocation, lookAtDir );
-                
-                var camera = new GCamera();
-                camera.setEye( lightLocation[0], lightLocation[1], lightLocation[2] );
-                camera.setUp( upDir[0], upDir[1], upDir[2] );
-                camera.setLookAt( lookAt[0], lookAt[1], lookAt[2] );
-                camera.setFovy( (3.14159/2) * 1 );
-                camera.setAspect( 1 );
-                camera.updateMatrices();
+                var camera = this.lightCamera;
                 
                 var gCamera = scene.getCamera();
                 gCamera.updateMatrices();
                 
-                var sceneMvMatrix = mat4.create();
-                var lMvMatrix = mat4.create();
-                var lPMatrix = mat4.create();
-                var uniformMatrix = mat4.create();
+                mat4.identity(GRenderPassCmd_uniformMatrix);
                 
-                gCamera.getMvMatrix( sceneMvMatrix );
-                camera.getMvMatrix( lMvMatrix );
-                camera.getPMatrix( lPMatrix );
+                gCamera.getMvMatrix( GRenderPassCmd_sceneMvMatrix );
+                camera.getMvMatrix( GRenderPassCmd_lMvMatrix );
+                camera.getPMatrix( GRenderPassCmd_lPMatrix );
                 
-                mat4.invert( sceneMvMatrix, sceneMvMatrix );
-				mat4.multiply( uniformMatrix, uniformMatrix, lMvMatrix );
-				mat4.multiply( uniformMatrix, uniformMatrix, sceneMvMatrix );
+                mat4.invert( GRenderPassCmd_sceneMvMatrix, GRenderPassCmd_sceneMvMatrix );
+				mat4.multiply( GRenderPassCmd_uniformMatrix, GRenderPassCmd_uniformMatrix, GRenderPassCmd_lMvMatrix );
+				mat4.multiply( GRenderPassCmd_uniformMatrix, GRenderPassCmd_uniformMatrix, GRenderPassCmd_sceneMvMatrix );
                 
                 if ( undefined != this.shaderProgram.uniforms.shadowMatrix )
                 {
-                    gl.uniformMatrix4fv( this.shaderProgram.uniforms.shadowMatrix, false, uniformMatrix );
+                    gl.uniformMatrix4fv( this.shaderProgram.uniforms.shadowMatrix, false, GRenderPassCmd_uniformMatrix );
                 }
                 
                 if ( undefined != this.shaderProgram.uniforms.pMatrixUniform )
                 {
-                    gl.uniformMatrix4fv( this.shaderProgram.uniforms.pMatrixUniform, false, lPMatrix );
+                    gl.uniformMatrix4fv( this.shaderProgram.uniforms.pMatrixUniform, false, GRenderPassCmd_lPMatrix );
                 }
             }
     
@@ -330,6 +392,13 @@ GRenderPassCmd.prototype.drawGeometry = function( scene )
         case GRENDERPASSCMD_SCENE_DRAW_MODE.NO_GEOMETRY:
             break;
     }
+};
+
+
+
+GRenderPassCmd.prototype.setLightCamera = function ( camera )
+{
+    this.lightCamera = camera;
 };
 
 /**

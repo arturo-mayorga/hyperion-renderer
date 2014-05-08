@@ -554,9 +554,9 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     /*this.frameBuffers.color.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0.125+0.75, 0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.programs.fullScr);*/
-    this.frameBuffers.lightNormal.bindTexture(gl.TEXTURE0, "color");  
+    /*this.frameBuffers.lightNormal.bindTexture(gl.TEXTURE0, "color");  
     this.setHRec(-0.125+0.75, -0.125-0.75, 0.125, 0.125);
-    this.drawScreenBuffer(this.programs.fullScr); 
+    this.drawScreenBuffer(this.programs.fullScr); */
     /*this.frameBuffers.position.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0.125+0.75, -0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.programs.fullScr);*/

@@ -257,30 +257,32 @@ GRenderPassCmd.prototype.drawScreenBuffer = function(shader)
     mat3.identity( this.hMatrix);
 	mat3.translate( this.hMatrix, this.hMatrix, [this.hRec.x, this.hRec.y] );
 	mat3.scale( this.hMatrix,this.hMatrix, [this.hRec.w, this.hRec.h] ); 
+	
+	var mapIdx = 0;
     
     if ( null != shader.uniforms.mapKd )
     {
-        gl.uniform1i( shader.uniforms.mapKd, 0 );
+        gl.uniform1i( shader.uniforms.mapKd, mapIdx++ );
     }
  
     if ( null != shader.uniforms.mapNormal )
     {
-        gl.uniform1i( shader.uniforms.mapNormal, 1 );
+        gl.uniform1i( shader.uniforms.mapNormal, mapIdx++ );
     }
   
     if ( null != shader.uniforms.mapPosition )
     {
-        gl.uniform1i( shader.uniforms.mapPosition, 2 );
+        gl.uniform1i( shader.uniforms.mapPosition, mapIdx++ );
     }
     
     if ( null != shader.uniforms.mapShadow )
     {
-        gl.uniform1i( shader.uniforms.mapShadow, 3 );
+        gl.uniform1i( shader.uniforms.mapShadow, mapIdx++ );
     }
     
     if ( null != shader.uniforms.mapPing )
     {
-        gl.uniform1i( shader.uniforms.mapPing, 4 );
+        gl.uniform1i( shader.uniforms.mapPing, mapIdx++ );
     }
     
     gl.bindBuffer( gl.ARRAY_BUFFER, this.screen.vertBuffer);

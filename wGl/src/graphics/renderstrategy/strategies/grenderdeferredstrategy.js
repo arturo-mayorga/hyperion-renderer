@@ -18,8 +18,8 @@ GRenderDeferredStrategy.prototype.configure = function()
         "blur-fs.c":undefined,
         "fullscr-vs.c":undefined,
         "fullscr-fs.c":undefined,
-        "light-vs.c":undefined,
-        "light-fs.c":undefined,
+        "shadowmap-vs.c":undefined,
+        "shadowmap-fs.c":undefined,
         "ssao-vs.c":undefined,
         "ssao-fs.c":undefined,
         "colorspec-vs.c":undefined,
@@ -150,7 +150,7 @@ GRenderDeferredStrategy.prototype.initShaders = function ()
     this.programs = {};
   
     this.programs.fullScr = new GShader(shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
-    this.programs.light = new GShader(shaderSrcMap["light-vs.c"], shaderSrcMap["light-fs.c"]);
+    this.programs.shadowmap = new GShader(shaderSrcMap["shadowmap-vs.c"], shaderSrcMap["shadowmap-fs.c"]);
     this.programs.ssao = new GShader(shaderSrcMap["ssao-vs.c"], shaderSrcMap["ssao-fs.c"]);
     this.programs.blur = new GShader(shaderSrcMap["blur-vs.c"], shaderSrcMap["blur-fs.c"]);
     this.programs.colorspec = new GShader(shaderSrcMap["colorspec-vs.c"], shaderSrcMap["colorspec-fs.c"]);
@@ -219,30 +219,21 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     colorPass.setProgram( this.programs.colorspec );
     colorPass.setFrameBuffer( this.frameBuffers.color );
     colorPass.bindToContext( this.gl );
-    if ( false == colorPass.checkValid() )
-    {
-        console.debug("Geometry pass command not valid");
-    }
+    
     
     var normalPass = new GRenderPassCmd();
     normalPass.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
     normalPass.setProgram( this.programs.normaldepth );
     normalPass.setFrameBuffer( this.frameBuffers.normal );
     normalPass.bindToContext( this.gl );
-    if ( false == normalPass.checkValid() )
-    {
-        console.debug("Geometry pass command not valid");
-    }
+   
     
     var positionPass = new GRenderPassCmd();
     positionPass.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
     positionPass.setProgram( this.programs.position );
     positionPass.setFrameBuffer( this.frameBuffers.position );
     positionPass.bindToContext( this.gl );
-    if ( false == positionPass.checkValid() )
-    {
-        console.debug("Geometry pass command not valid");
-    }
+    
     
     var ssaoPass = new GRenderPassCmd();
     ssaoPass.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
@@ -255,10 +246,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     ssaoPass.addInputTexture( this.frameBuffers.color.createGTexture("color"),    gl.TEXTURE0 );
     ssaoPass.addInputTexture( this.frameBuffers.normal.createGTexture("color"),   gl.TEXTURE1 );
     ssaoPass.addInputTexture( this.frameBuffers.position.createGTexture("color"), gl.TEXTURE2 );
-    if ( false == ssaoPass.checkValid() )
-    {
-        console.debug("SSAO pass command not valid");
-    }
+   
     
     var ssaoBPass = new GRenderPassCmd();
     ssaoBPass.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.NO_GEOMETRY );
@@ -268,18 +256,12 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     ssaoBPass.setHRec( 0, 0, 1, 1 );
     ssaoBPass.bindToContext( this.gl );
     ssaoBPass.addInputTexture( this.frameBuffers.ssao.createGTexture("color"), gl.TEXTURE0 );
-    if ( false == ssaoBPass.checkValid() )
-    {
-        console.debug("SSAO blur pass command not valid");
-    }
+   
     
-    var clearLightPong = new GRenderPassClearCmd();
-    clearLightPong.setFrameBuffer( this.frameBuffers.lightPong );
-    clearLightPong.bindToContext( this.gl );
-    if ( false == clearLightPong.checkValid() )
-    {
-        console.debug("clearLightPong pass command not valid");
-    }
+    var clearShadowmapPong = new GRenderPassClearCmd();
+    clearShadowmapPong.setFrameBuffer( this.frameBuffers.shadowmapPong );
+    clearShadowmapPong.bindToContext( this.gl );
+    
     
     var leftCtrl = new GLightBasedCamCtrl();
     leftCtrl.bindToContext( this.gl );
@@ -293,29 +275,23 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     normalLSource.setProgram( this.programs.normaldepth );
     normalLSource.setFrameBuffer( this.frameBuffers.lightNormal );
     normalLSource.bindToContext( this.gl );
-    if ( false == normalLSource.checkValid() )
-    {
-        console.debug("Geometry pass command not valid");
-    }
+   
     
-    var lightPassL = new GRenderPassCmd();
-    lightPassL.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
-    lightPassL.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
-    lightPassL.setLightCamera( leftCtrl.getCamera() );
-    lightPassL.setProgram( this.programs.light );
-    lightPassL.setFrameBuffer( this.frameBuffers.light );
-    lightPassL.setScreenGeometry( this.screen );
-    lightPassL.setHRec( 0, 0, 1, 1 );
-    lightPassL.bindToContext( this.gl );
-    lightPassL.addInputTexture( this.frameBuffers.color.createGTexture("color"),       gl.TEXTURE0 );
-    lightPassL.addInputTexture( this.frameBuffers.normal.createGTexture("color"),      gl.TEXTURE1 );
-    lightPassL.addInputTexture( this.frameBuffers.position.createGTexture("color"),    gl.TEXTURE2 );
-    lightPassL.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"), gl.TEXTURE3 );
-    lightPassL.addInputTexture( this.frameBuffers.lightPong.createGTexture("color"),   gl.TEXTURE4 );
-    if ( false == ssaoBPass.checkValid() )
-    {
-        console.debug("lightPass pass command not valid");
-    }
+    var shadowmapPassL = new GRenderPassCmd();
+    shadowmapPassL.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
+    shadowmapPassL.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
+    shadowmapPassL.setLightCamera( leftCtrl.getCamera() );
+    shadowmapPassL.setProgram( this.programs.shadowmap );
+    shadowmapPassL.setFrameBuffer( this.frameBuffers.shadowmap );
+    shadowmapPassL.setScreenGeometry( this.screen );
+    shadowmapPassL.setHRec( 0, 0, 1, 1 );
+    shadowmapPassL.bindToContext( this.gl );
+    shadowmapPassL.addInputTexture( this.frameBuffers.color.createGTexture("color"),       gl.TEXTURE0 );
+    shadowmapPassL.addInputTexture( this.frameBuffers.normal.createGTexture("color"),      gl.TEXTURE1 );
+    shadowmapPassL.addInputTexture( this.frameBuffers.position.createGTexture("color"),    gl.TEXTURE2 );
+    shadowmapPassL.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"), gl.TEXTURE3 );
+    shadowmapPassL.addInputTexture( this.frameBuffers.shadowmapPong.createGTexture("color"),   gl.TEXTURE4 );
+    
     
     var rightCtrl = new GLightBasedCamCtrl();
     rightCtrl.bindToContext( this.gl );
@@ -329,29 +305,23 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     normalRSource.setProgram( this.programs.normaldepth );
     normalRSource.setFrameBuffer( this.frameBuffers.lightNormal );
     normalRSource.bindToContext( this.gl );
-    if ( false == normalRSource.checkValid() )
-    {
-        console.debug("Geometry pass command not valid");
-    }
+  
     
-    var lightPassR = new GRenderPassCmd();
-    lightPassR.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
-    lightPassR.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
-    lightPassR.setLightCamera( rightCtrl.getCamera() );
-    lightPassR.setProgram( this.programs.light );
-    lightPassR.setFrameBuffer( this.frameBuffers.lightPong );
-    lightPassR.setScreenGeometry( this.screen );
-    lightPassR.setHRec( 0, 0, 1, 1 );
-    lightPassR.bindToContext( this.gl );
-    lightPassR.addInputTexture( this.frameBuffers.color.createGTexture("color"),       gl.TEXTURE0 );
-    lightPassR.addInputTexture( this.frameBuffers.normal.createGTexture("color"),      gl.TEXTURE1 );
-    lightPassR.addInputTexture( this.frameBuffers.position.createGTexture("color"),    gl.TEXTURE2 );
-    lightPassR.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"), gl.TEXTURE3 );
-    lightPassR.addInputTexture( this.frameBuffers.light.createGTexture("color"),   gl.TEXTURE4 );
-    if ( false == ssaoBPass.checkValid() )
-    {
-        console.debug("lightPass pass command not valid");
-    }
+    var shadowmapPassR = new GRenderPassCmd();
+    shadowmapPassR.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
+    shadowmapPassR.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
+    shadowmapPassR.setLightCamera( rightCtrl.getCamera() );
+    shadowmapPassR.setProgram( this.programs.shadowmap );
+    shadowmapPassR.setFrameBuffer( this.frameBuffers.shadowmapPong );
+    shadowmapPassR.setScreenGeometry( this.screen );
+    shadowmapPassR.setHRec( 0, 0, 1, 1 );
+    shadowmapPassR.bindToContext( this.gl );
+    shadowmapPassR.addInputTexture( this.frameBuffers.color.createGTexture("color"),       gl.TEXTURE0 );
+    shadowmapPassR.addInputTexture( this.frameBuffers.normal.createGTexture("color"),      gl.TEXTURE1 );
+    shadowmapPassR.addInputTexture( this.frameBuffers.position.createGTexture("color"),    gl.TEXTURE2 );
+    shadowmapPassR.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"), gl.TEXTURE3 );
+    shadowmapPassR.addInputTexture( this.frameBuffers.shadowmap.createGTexture("color"),   gl.TEXTURE4 );
+   
     
     ////
     
@@ -367,29 +337,23 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     normalFSource.setProgram( this.programs.normaldepth );
     normalFSource.setFrameBuffer( this.frameBuffers.lightNormal );
     normalFSource.bindToContext( this.gl );
-    if ( false == normalFSource.checkValid() )
-    {
-        console.debug("Geometry pass command not valid");
-    }
     
-    var lightPassF = new GRenderPassCmd();
-    lightPassF.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
-    lightPassF.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
-    lightPassF.setLightCamera( frontCtrl.getCamera() );
-    lightPassF.setProgram( this.programs.light );
-    lightPassF.setFrameBuffer( this.frameBuffers.light );
-    lightPassF.setScreenGeometry( this.screen );
-    lightPassF.setHRec( 0, 0, 1, 1 );
-    lightPassF.bindToContext( this.gl );
-    lightPassF.addInputTexture( this.frameBuffers.color.createGTexture("color"),       gl.TEXTURE0 );
-    lightPassF.addInputTexture( this.frameBuffers.normal.createGTexture("color"),      gl.TEXTURE1 );
-    lightPassF.addInputTexture( this.frameBuffers.position.createGTexture("color"),    gl.TEXTURE2 );
-    lightPassF.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"), gl.TEXTURE3 );
-    lightPassF.addInputTexture( this.frameBuffers.lightPong.createGTexture("color"),   gl.TEXTURE4 );
-    if ( false == lightPassF.checkValid() )
-    {
-        console.debug("lightPass pass command not valid");
-    }
+    
+    var shadowmapPassF = new GRenderPassCmd();
+    shadowmapPassF.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
+    shadowmapPassF.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
+    shadowmapPassF.setLightCamera( frontCtrl.getCamera() );
+    shadowmapPassF.setProgram( this.programs.shadowmap );
+    shadowmapPassF.setFrameBuffer( this.frameBuffers.shadowmap );
+    shadowmapPassF.setScreenGeometry( this.screen );
+    shadowmapPassF.setHRec( 0, 0, 1, 1 );
+    shadowmapPassF.bindToContext( this.gl );
+    shadowmapPassF.addInputTexture( this.frameBuffers.color.createGTexture("color"),       gl.TEXTURE0 );
+    shadowmapPassF.addInputTexture( this.frameBuffers.normal.createGTexture("color"),      gl.TEXTURE1 );
+    shadowmapPassF.addInputTexture( this.frameBuffers.position.createGTexture("color"),    gl.TEXTURE2 );
+    shadowmapPassF.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"), gl.TEXTURE3 );
+    shadowmapPassF.addInputTexture( this.frameBuffers.shadowmapPong.createGTexture("color"),   gl.TEXTURE4 );
+ 
     
     var backCtrl = new GLightBasedCamCtrl();
     backCtrl.bindToContext( this.gl );
@@ -403,29 +367,23 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     normalBSource.setProgram( this.programs.normaldepth );
     normalBSource.setFrameBuffer( this.frameBuffers.lightNormal );
     normalBSource.bindToContext( this.gl );
-    if ( false == normalRSource.checkValid() )
-    {
-        console.debug("Geometry pass command not valid");
-    }
+  
     
-    var lightPassB = new GRenderPassCmd();
-    lightPassB.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
-    lightPassB.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
-    lightPassB.setLightCamera( backCtrl.getCamera() );
-    lightPassB.setProgram( this.programs.light );
-    lightPassB.setFrameBuffer( this.frameBuffers.lightPong );
-    lightPassB.setScreenGeometry( this.screen );
-    lightPassB.setHRec( 0, 0, 1, 1 );
-    lightPassB.bindToContext( this.gl );
-    lightPassB.addInputTexture( this.frameBuffers.color.createGTexture("color"),       gl.TEXTURE0 );
-    lightPassB.addInputTexture( this.frameBuffers.normal.createGTexture("color"),      gl.TEXTURE1 );
-    lightPassB.addInputTexture( this.frameBuffers.position.createGTexture("color"),    gl.TEXTURE2 );
-    lightPassB.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"), gl.TEXTURE3 );
-    lightPassB.addInputTexture( this.frameBuffers.light.createGTexture("color"),   gl.TEXTURE4 );
-    if ( false == ssaoBPass.checkValid() )
-    {
-        console.debug("lightPass pass command not valid");
-    }
+    var shadowmapPassB = new GRenderPassCmd();
+    shadowmapPassB.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
+    shadowmapPassB.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
+    shadowmapPassB.setLightCamera( backCtrl.getCamera() );
+    shadowmapPassB.setProgram( this.programs.shadowmap );
+    shadowmapPassB.setFrameBuffer( this.frameBuffers.shadowmapPong );
+    shadowmapPassB.setScreenGeometry( this.screen );
+    shadowmapPassB.setHRec( 0, 0, 1, 1 );
+    shadowmapPassB.bindToContext( this.gl );
+    shadowmapPassB.addInputTexture( this.frameBuffers.color.createGTexture("color"),       gl.TEXTURE0 );
+    shadowmapPassB.addInputTexture( this.frameBuffers.normal.createGTexture("color"),      gl.TEXTURE1 );
+    shadowmapPassB.addInputTexture( this.frameBuffers.position.createGTexture("color"),    gl.TEXTURE2 );
+    shadowmapPassB.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"), gl.TEXTURE3 );
+    shadowmapPassB.addInputTexture( this.frameBuffers.shadowmap.createGTexture("color"),   gl.TEXTURE4 );
+   
     
     ////
     
@@ -441,29 +399,23 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     normalUSource.setProgram( this.programs.normaldepth );
     normalUSource.setFrameBuffer( this.frameBuffers.lightNormal );
     normalUSource.bindToContext( this.gl );
-    if ( false == normalFSource.checkValid() )
-    {
-        console.debug("Geometry pass command not valid");
-    }
+   
     
-    var lightPassU = new GRenderPassCmd();
-    lightPassU.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
-    lightPassU.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
-    lightPassU.setLightCamera( upCtrl.getCamera() );
-    lightPassU.setProgram( this.programs.light );
-    lightPassU.setFrameBuffer( this.frameBuffers.light );
-    lightPassU.setScreenGeometry( this.screen );
-    lightPassU.setHRec( 0, 0, 1, 1 );
-    lightPassU.bindToContext( this.gl );
-    lightPassU.addInputTexture( this.frameBuffers.color.createGTexture("color"),       gl.TEXTURE0 );
-    lightPassU.addInputTexture( this.frameBuffers.normal.createGTexture("color"),      gl.TEXTURE1 );
-    lightPassU.addInputTexture( this.frameBuffers.position.createGTexture("color"),    gl.TEXTURE2 );
-    lightPassU.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"), gl.TEXTURE3 );
-    lightPassU.addInputTexture( this.frameBuffers.lightPong.createGTexture("color"),   gl.TEXTURE4 );
-    if ( false == lightPassU.checkValid() )
-    {
-        console.debug("lightPass pass command not valid");
-    }
+    var shadowmapPassU = new GRenderPassCmd();
+    shadowmapPassU.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
+    shadowmapPassU.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
+    shadowmapPassU.setLightCamera( upCtrl.getCamera() );
+    shadowmapPassU.setProgram( this.programs.shadowmap );
+    shadowmapPassU.setFrameBuffer( this.frameBuffers.shadowmap );
+    shadowmapPassU.setScreenGeometry( this.screen );
+    shadowmapPassU.setHRec( 0, 0, 1, 1 );
+    shadowmapPassU.bindToContext( this.gl );
+    shadowmapPassU.addInputTexture( this.frameBuffers.color.createGTexture("color"),       gl.TEXTURE0 );
+    shadowmapPassU.addInputTexture( this.frameBuffers.normal.createGTexture("color"),      gl.TEXTURE1 );
+    shadowmapPassU.addInputTexture( this.frameBuffers.position.createGTexture("color"),    gl.TEXTURE2 );
+    shadowmapPassU.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"), gl.TEXTURE3 );
+    shadowmapPassU.addInputTexture( this.frameBuffers.shadowmapPong.createGTexture("color"),   gl.TEXTURE4 );
+   
     
     var downCtrl = new GLightBasedCamCtrl();
     downCtrl.bindToContext( this.gl );
@@ -477,33 +429,27 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     normalDSource.setProgram( this.programs.normaldepth );
     normalDSource.setFrameBuffer( this.frameBuffers.lightNormal );
     normalDSource.bindToContext( this.gl );
-    if ( false == normalRSource.checkValid() )
-    {
-        console.debug("Geometry pass command not valid");
-    }
+ 
     
-    var lightPassD = new GRenderPassCmd();
-    lightPassD.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
-    lightPassD.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
-    lightPassD.setLightCamera( downCtrl.getCamera() );
-    lightPassD.setProgram( this.programs.light );
-    lightPassD.setFrameBuffer( this.frameBuffers.lightPong );
-    lightPassD.setScreenGeometry( this.screen );
-    lightPassD.setHRec( 0, 0, 1, 1 );
-    lightPassD.bindToContext( this.gl );
-    lightPassD.addInputTexture( this.frameBuffers.color.createGTexture("color"),       gl.TEXTURE0 );
-    lightPassD.addInputTexture( this.frameBuffers.normal.createGTexture("color"),      gl.TEXTURE1 );
-    lightPassD.addInputTexture( this.frameBuffers.position.createGTexture("color"),    gl.TEXTURE2 );
-    lightPassD.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"), gl.TEXTURE3 );
-    lightPassD.addInputTexture( this.frameBuffers.light.createGTexture("color"),   gl.TEXTURE4 );
-    if ( false == ssaoBPass.checkValid() )
-    {
-        console.debug("lightPass pass command not valid");
-    }
+    var shadowmapPassD = new GRenderPassCmd();
+    shadowmapPassD.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
+    shadowmapPassD.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
+    shadowmapPassD.setLightCamera( downCtrl.getCamera() );
+    shadowmapPassD.setProgram( this.programs.shadowmap );
+    shadowmapPassD.setFrameBuffer( this.frameBuffers.shadowmapPong );
+    shadowmapPassD.setScreenGeometry( this.screen );
+    shadowmapPassD.setHRec( 0, 0, 1, 1 );
+    shadowmapPassD.bindToContext( this.gl );
+    shadowmapPassD.addInputTexture( this.frameBuffers.color.createGTexture("color"),       gl.TEXTURE0 );
+    shadowmapPassD.addInputTexture( this.frameBuffers.normal.createGTexture("color"),      gl.TEXTURE1 );
+    shadowmapPassD.addInputTexture( this.frameBuffers.position.createGTexture("color"),    gl.TEXTURE2 );
+    shadowmapPassD.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"), gl.TEXTURE3 );
+    shadowmapPassD.addInputTexture( this.frameBuffers.shadowmap.createGTexture("color"),   gl.TEXTURE4 );
+  
     
     
     
-    normalPass.addDependency( colorPass );
+  /*  normalPass.addDependency( colorPass );
     positionPass.addDependency( normalPass );
     clearLightPong.addDependency( positionPass );
     
@@ -520,9 +466,30 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
      normalUSource.addDependency( lightPassB ); 
     lightPassU.addDependency( normalUSource );
     normalDSource.addDependency( lightPassU );
-    lightPassD.addDependency( normalDSource );
+    lightPassD.addDependency( normalDSource ); */
+    
+    var cmds = [];
+    
+    cmds.push( normalPass );
+    cmds.push( positionPass );
+    cmds.push( clearShadowmapPong );
+    
+    cmds.push( normalLSource );
+    cmds.push( shadowmapPassL );
+    cmds.push( normalRSource );
+    cmds.push( shadowmapPassR );
+    
+    cmds.push( normalFSource );
+    cmds.push( shadowmapPassF );
+    cmds.push( normalBSource );
+    cmds.push( shadowmapPassB );
+    
+    cmds.push(  normalUSource );
+    cmds.push( shadowmapPassU );
+    cmds.push( normalDSource );
+    cmds.push( shadowmapPassD );
      
-    this.passCmds = lightPassD;
+    this.passCmds = cmds;
 };
 
 GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
@@ -535,15 +502,17 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
         this.lightCamControlers[key].update( scene );
     }
   
-    this.passCmds.run( scene );
-    
+    for (var i = 0; i < this.passCmds.length; ++i)
+    {
+        this.passCmds[i].run( scene );
+    }
     
     // HUD
     this.gl.disable( this.gl.DEPTH_TEST );
     this.programs.fullScr.activate(); 
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     
-    this.frameBuffers.lightPong.bindTexture(gl.TEXTURE0, "color");
+    this.frameBuffers.shadowmapPong.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0, 0, 1, 1);
     this.drawScreenBuffer(this.programs.fullScr); 
     
@@ -625,10 +594,10 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     frameBuffer.complete();
     this.frameBuffers.ssaoBlur = frameBuffer;
     
-    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 256, height: 256 });
     frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
-    this.frameBuffers.light = frameBuffer;
+    this.frameBuffers.shadowmap = frameBuffer;
     
     frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfg);
@@ -645,15 +614,15 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     frameBuffer.complete();
     this.frameBuffers.position = frameBuffer;
     
-    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 512, height: 512 });
     frameBuffer.addBufferTexture(texCfgFloat);
     frameBuffer.complete();
     this.frameBuffers.lightNormal = frameBuffer;
     
-    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
-    frameBuffer.addBufferTexture(texCfgFloat);
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 256, height: 256 });
+    frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
-    this.frameBuffers.lightPong = frameBuffer;
+    this.frameBuffers.shadowmapPong = frameBuffer;
 };
 
 

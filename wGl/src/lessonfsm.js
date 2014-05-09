@@ -144,15 +144,15 @@ LoadState.prototype.exit = function ()
 	var light7 = new GLight();
 	var light8 = new GLight();
 	
-	light0.setPosition(-18, 19.25, 8);
-	light1.setPosition(-12, 19.25, -2);
-	light2.setPosition(-6, 19.25, 8);
-	light3.setPosition(0, 19.25, -2);
-	light4.setPosition(6, 19.25, 8);
-	light5.setPosition(12, 19.25, -2);
-	light6.setPosition(18, 19, 8);
-	light7.setPosition(24, 19, -2);
-	light8.setPosition(30, 19, 8);
+	light0.setPosition(-18, 19.21, 8);
+	light1.setPosition(-12, 19.21, -2);
+	light2.setPosition(-6, 19.21, 8);
+	light3.setPosition(0, 19.21, -2);
+	light4.setPosition(6, 19.21, 8);
+	light5.setPosition(12, 19.21, -2);
+	light6.setPosition(18, 19.21, 8);
+	light7.setPosition(24, 19.21, -2);
+	light8.setPosition(30, 19.21, 8);
 	
 	
 	

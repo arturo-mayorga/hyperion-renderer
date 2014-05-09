@@ -373,6 +373,8 @@ GRenderPassCmd.prototype.drawGeometry = function( scene )
                 camera.getPMatrix( GRenderPassCmd_lPMatrix );
                 
                 mat4.invert( GRenderPassCmd_sceneMvMatrix, GRenderPassCmd_sceneMvMatrix );
+                
+                mat4.multiply( GRenderPassCmd_uniformMatrix, GRenderPassCmd_uniformMatrix, GRenderPassCmd_lPMatrix );
 				mat4.multiply( GRenderPassCmd_uniformMatrix, GRenderPassCmd_uniformMatrix, GRenderPassCmd_lMvMatrix );
 				mat4.multiply( GRenderPassCmd_uniformMatrix, GRenderPassCmd_uniformMatrix, GRenderPassCmd_sceneMvMatrix );
                 

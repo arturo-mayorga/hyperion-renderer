@@ -190,9 +190,9 @@ GRenderPassCmd.prototype.setScreenGeometry = function( screenG )
     this.screen = screenG;
 };
 
-GRenderPassCmd.prototype.setHRec = function( x, y, w, h )
+GRenderPassCmd.prototype.setHRec = function( x, y, w, h, r )
 {
-    this.hRec = { x:x, y:y, w:w, h:h };
+    this.hRec = { x:x, y:y, w:w, h:h, r:r };
 };
 
 GRenderPassCmd.prototype.setDepthTestSwitch = function( testSwitch )
@@ -257,6 +257,7 @@ GRenderPassCmd.prototype.drawScreenBuffer = function(shader)
     mat3.identity( this.hMatrix);
 	mat3.translate( this.hMatrix, this.hMatrix, [this.hRec.x, this.hRec.y] );
 	mat3.scale( this.hMatrix,this.hMatrix, [this.hRec.w, this.hRec.h] ); 
+	mat3.rotate( this.hMatrix,this.hMatrix, this.hRec.r );
 	
 	var mapIdx = 0;
     

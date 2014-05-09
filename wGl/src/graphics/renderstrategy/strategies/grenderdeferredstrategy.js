@@ -241,7 +241,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     ssaoPass.setProgram( this.programs.ssao );
     ssaoPass.setFrameBuffer( this.frameBuffers.ssao );
     ssaoPass.setScreenGeometry( this.screen );
-    ssaoPass.setHRec( 0, 0, 1, 1 );
+    ssaoPass.setHRec( 0, 0, 1, 1, 0 );
     ssaoPass.bindToContext( this.gl );
     ssaoPass.addInputTexture( this.frameBuffers.color.createGTexture("color"),    gl.TEXTURE0 );
     ssaoPass.addInputTexture( this.frameBuffers.normal.createGTexture("color"),   gl.TEXTURE1 );
@@ -253,7 +253,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     ssaoBPass.setProgram( this.programs.blur );
     ssaoBPass.setFrameBuffer( this.frameBuffers.ssaoBlur );
     ssaoBPass.setScreenGeometry( this.screen );
-    ssaoBPass.setHRec( 0, 0, 1, 1 );
+    ssaoBPass.setHRec( 0, 0, 1, 1, 0 );
     ssaoBPass.bindToContext( this.gl );
     ssaoBPass.addInputTexture( this.frameBuffers.ssao.createGTexture("color"), gl.TEXTURE0 );
    
@@ -284,7 +284,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     shadowmapPassL.setProgram( this.programs.shadowmap );
     shadowmapPassL.setFrameBuffer( this.frameBuffers.shadowmap );
     shadowmapPassL.setScreenGeometry( this.screen );
-    shadowmapPassL.setHRec( 0, 0, 1, 1 );
+    shadowmapPassL.setHRec( 0, 0, 1, 1, 0 );
     shadowmapPassL.bindToContext( this.gl );
     shadowmapPassL.addInputTexture( this.frameBuffers.position.createGTexture("color"),      gl.TEXTURE0 );
     shadowmapPassL.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"),   gl.TEXTURE1 );
@@ -312,7 +312,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     shadowmapPassR.setProgram( this.programs.shadowmap );
     shadowmapPassR.setFrameBuffer( this.frameBuffers.shadowmapPong );
     shadowmapPassR.setScreenGeometry( this.screen );
-    shadowmapPassR.setHRec( 0, 0, 1, 1 );
+    shadowmapPassR.setHRec( 0, 0, 1, 1, 0 );
     shadowmapPassR.bindToContext( this.gl );
     shadowmapPassR.addInputTexture( this.frameBuffers.position.createGTexture("color"),    gl.TEXTURE0 );
     shadowmapPassR.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"), gl.TEXTURE1 );
@@ -342,7 +342,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     shadowmapPassF.setProgram( this.programs.shadowmap );
     shadowmapPassF.setFrameBuffer( this.frameBuffers.shadowmap );
     shadowmapPassF.setScreenGeometry( this.screen );
-    shadowmapPassF.setHRec( 0, 0, 1, 1 );
+    shadowmapPassF.setHRec( 0, 0, 1, 1, 0 );
     shadowmapPassF.bindToContext( this.gl );
     shadowmapPassF.addInputTexture( this.frameBuffers.position.createGTexture("color"),      gl.TEXTURE0 );
     shadowmapPassF.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"),   gl.TEXTURE1 );
@@ -370,7 +370,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     shadowmapPassB.setProgram( this.programs.shadowmap );
     shadowmapPassB.setFrameBuffer( this.frameBuffers.shadowmapPong );
     shadowmapPassB.setScreenGeometry( this.screen );
-    shadowmapPassB.setHRec( 0, 0, 1, 1 );
+    shadowmapPassB.setHRec( 0, 0, 1, 1, 0 );
     shadowmapPassB.bindToContext( this.gl );
     shadowmapPassB.addInputTexture( this.frameBuffers.position.createGTexture("color"),    gl.TEXTURE0 );
     shadowmapPassB.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"), gl.TEXTURE1 );
@@ -400,7 +400,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     shadowmapPassU.setProgram( this.programs.shadowmap );
     shadowmapPassU.setFrameBuffer( this.frameBuffers.shadowmap );
     shadowmapPassU.setScreenGeometry( this.screen );
-    shadowmapPassU.setHRec( 0, 0, 1, 1 );
+    shadowmapPassU.setHRec( 0, 0, 1, 1, 0 );
     shadowmapPassU.bindToContext( this.gl );
     shadowmapPassU.addInputTexture( this.frameBuffers.position.createGTexture("color"),       gl.TEXTURE0 );
     shadowmapPassU.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"),    gl.TEXTURE1 );
@@ -428,16 +428,42 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     shadowmapPassD.setProgram( this.programs.shadowmap );
     shadowmapPassD.setFrameBuffer( this.frameBuffers.shadowmapPong );
     shadowmapPassD.setScreenGeometry( this.screen );
-    shadowmapPassD.setHRec( 0, 0, 1, 1 );
+    shadowmapPassD.setHRec( 0, 0, 1, 1, 0 );
     shadowmapPassD.bindToContext( this.gl );
     shadowmapPassD.addInputTexture( this.frameBuffers.position.createGTexture("color"),    gl.TEXTURE0 );
     shadowmapPassD.addInputTexture( this.frameBuffers.lightNormal.createGTexture("color"), gl.TEXTURE1 );
     shadowmapPassD.addInputTexture( this.frameBuffers.shadowmap.createGTexture("color"),   gl.TEXTURE2 ); 
     
+    
+    var clearShadowmap = new GRenderPassClearCmd();
+    clearShadowmap.setFrameBuffer( this.frameBuffers.shadowmap );
+    clearShadowmap.bindToContext( this.gl );
+    
+    
+    var shadowBlurA = new GRenderPassCmd();
+    shadowBlurA.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.NO_GEOMETRY );
+    shadowBlurA.setProgram( this.programs.blur );
+    shadowBlurA.setFrameBuffer( this.frameBuffers.shadowmap );
+    shadowBlurA.setScreenGeometry( this.screen );
+    shadowBlurA.setHRec( 0, 0, 1, 1, 3.14159/2 );
+    shadowBlurA.bindToContext( this.gl );
+    shadowBlurA.addInputTexture( this.frameBuffers.shadowmapPong.createGTexture("color"), gl.TEXTURE0 );
+   
+    var shadowBlurB = new GRenderPassCmd();
+    shadowBlurB.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.NO_GEOMETRY );
+    shadowBlurB.setProgram( this.programs.blur );
+    shadowBlurB.setFrameBuffer( this.frameBuffers.shadowmapPong );
+    shadowBlurB.setScreenGeometry( this.screen );
+    shadowBlurB.setHRec( 0, 0, 1, 1, -3.14159/2 );
+    shadowBlurB.bindToContext( this.gl );
+    shadowBlurB.addInputTexture( this.frameBuffers.shadowmap.createGTexture("color"), gl.TEXTURE0 );
+    
+    
     var cmds = [];
     
     cmds.push( normalPass );
     cmds.push( positionPass );
+    
     cmds.push( clearShadowmapPong );
     
     cmds.push( normalLSource );
@@ -450,10 +476,14 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     cmds.push( normalBSource );
     cmds.push( shadowmapPassB );
     
-    cmds.push(  normalUSource );
+    cmds.push( normalUSource );
     cmds.push( shadowmapPassU );
     cmds.push( normalDSource );
     cmds.push( shadowmapPassD );
+    
+    cmds.push( clearShadowmap );
+    cmds.push( shadowBlurA );
+    cmds.push( shadowBlurB );
      
     this.passCmds = cmds;
 };

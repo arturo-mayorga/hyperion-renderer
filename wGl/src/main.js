@@ -6,7 +6,7 @@ var rCube = 0;
 var lastTime = 0;
 
 function animate() {
-	
+	stats.begin();
 	var timeNow = new Date().getTime();
 	var elapsed = 0;
 	if (lastTime != 0) 
@@ -20,6 +20,7 @@ function animate() {
         lesson.update(elapsed);
         context.draw(elapsed);
 	}
+	stats.end();
 }
 
 
@@ -45,6 +46,7 @@ var hud;
 var camera;
 var lesson;
 
+var stats;
 
 
 window.onload=mainLoop;
@@ -68,6 +70,16 @@ function mainLoop()
 	
 	
 	lesson = createLesson(scene, hud);
+	
+	stats = new Stats();
+    stats.setMode(1); // 0: fps, 1: ms
+    
+    // Align top-left
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
+    
+    document.body.appendChild( stats.domElement );
 	
 	tick();
 }

@@ -70,6 +70,8 @@ function GScene()
 	this.children = [];
 	this.eyeMvMatrix = mat4.create();
 	
+	this.tempMatrix = mat4.create();
+	
 	this.materials = {};
 	this.lights = [];
 	
@@ -125,9 +127,9 @@ GScene.prototype.drawGeometry = function ( parentMvMatrix, shader )
 
 GScene.prototype.drawThroughCamera = function ( camera, shader )
 {
-    camera.draw( this.eyeMvMatrix, shader );    
+    camera.draw( this.tempMatrix, shader );    
     this.drawLights( shader );    
-    this.drawGeometry( this.eyeMvMatrix, shader );
+    this.drawGeometry( this.tempMatrix, shader );
 };
 
 

@@ -239,10 +239,10 @@ GRenderMultiTargetDeferredStrategy.prototype.initPassCmds = function()
     ssaoPass.setScreenGeometry( this.screen );
     ssaoPass.setHRec( 0, 0, 1, 1 );
     ssaoPass.bindToContext( this.gl );
-    ssaoPass.addInputTexture( this.frameBuffers.prePass.createGTexture("colorTexture"),    gl.TEXTURE0 );
-    ssaoPass.addInputTexture( this.frameBuffers.prePass.createGTexture("depthRGBTexture"), gl.TEXTURE1 );
-    ssaoPass.addInputTexture( this.frameBuffers.prePass.createGTexture("normalTexture"),   gl.TEXTURE2 );
-    ssaoPass.addInputTexture( this.frameBuffers.prePass.createGTexture("positionTexture"), gl.TEXTURE3 );
+    ssaoPass.addInputTexture( this.frameBuffers.prePass.getGTexture("colorTexture"),    gl.TEXTURE0 );
+    ssaoPass.addInputTexture( this.frameBuffers.prePass.getGTexture("depthRGBTexture"), gl.TEXTURE1 );
+    ssaoPass.addInputTexture( this.frameBuffers.prePass.getGTexture("normalTexture"),   gl.TEXTURE2 );
+    ssaoPass.addInputTexture( this.frameBuffers.prePass.getGTexture("positionTexture"), gl.TEXTURE3 );
     if ( false == ssaoPass.checkValid() )
     {
         console.debug("SSAO pass command not valid");
@@ -255,7 +255,7 @@ GRenderMultiTargetDeferredStrategy.prototype.initPassCmds = function()
     ssaoBPass.setScreenGeometry( this.screen );
     ssaoBPass.setHRec( 0, 0, 1, 1 );
     ssaoBPass.bindToContext( this.gl );
-    ssaoBPass.addInputTexture( this.frameBuffers.ssao.createGTexture("color"), gl.TEXTURE0 );
+    ssaoBPass.addInputTexture( this.frameBuffers.ssao.getGTexture("color"), gl.TEXTURE0 );
     if ( false == ssaoBPass.checkValid() )
     {
         console.debug("SSAO blur pass command not valid");
@@ -268,10 +268,10 @@ GRenderMultiTargetDeferredStrategy.prototype.initPassCmds = function()
     lightPass.setScreenGeometry( this.screen );
     lightPass.setHRec( 0, 0, 1, 1 );
     lightPass.bindToContext( this.gl );
-    lightPass.addInputTexture( this.frameBuffers.prePass.createGTexture("colorTexture"),    gl.TEXTURE0 );
-    lightPass.addInputTexture( this.frameBuffers.prePass.createGTexture("depthRGBTexture"), gl.TEXTURE1 );
-    lightPass.addInputTexture( this.frameBuffers.prePass.createGTexture("normalTexture"),   gl.TEXTURE2 );
-    lightPass.addInputTexture( this.frameBuffers.prePass.createGTexture("positionTexture"), gl.TEXTURE3 );
+    lightPass.addInputTexture( this.frameBuffers.prePass.getGTexture("colorTexture"),    gl.TEXTURE0 );
+    lightPass.addInputTexture( this.frameBuffers.prePass.getGTexture("depthRGBTexture"), gl.TEXTURE1 );
+    lightPass.addInputTexture( this.frameBuffers.prePass.getGTexture("normalTexture"),   gl.TEXTURE2 );
+    lightPass.addInputTexture( this.frameBuffers.prePass.getGTexture("positionTexture"), gl.TEXTURE3 );
     if ( false == ssaoBPass.checkValid() )
     {
         console.debug("SSAO blur pass command not valid");

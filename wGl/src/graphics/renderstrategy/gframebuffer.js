@@ -12,7 +12,8 @@ function GFrameBuffer( config )
     gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, config.width, config.height);
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
     
-    this.textures = {};
+    this.textures = {};  // webGL texture handlers
+    this.gTextures = []; // GTexture handlers for cashing 
     this.fBuffer = framebuffer;
     this.rBuffer = renderbuffer;
     this.cfg = config;
@@ -94,18 +95,25 @@ GFrameBuffer.prototype.bindTexture = function ( id, name )
     gl.bindTexture(gl.TEXTURE_2D, this.textures[name]);
 };
 
-GFrameBuffer.prototype.createGTexture = function ( name )
+GFrameBuffer.prototype.getGTexture = function ( name )
 {
-    var textureHandle = this.textures[name];
+    var _name = (undefined == name)?"color":name;
+    var ret = this.gTextures[_name];
     
-    if ( undefined != textureHandle )
+    if ( undefined == ret )
     {
-        var gTexture = new GTexture();
-        gTexture.bindToContext( this.cfg.gl );
-        gTexture.setTextureHandle( textureHandle );
-        return gTexture;
+        var textureHandle = this.textures[_name];
+        
+        if ( undefined != textureHandle )
+        {
+            var gTexture = new GTexture();
+            gTexture.bindToContext( this.cfg.gl );
+            gTexture.setTextureHandle( textureHandle );
+            ret = gTexture;
+            this.gTextures[_name] = ret;
+        }
     }
     
-    return undefined;
+    return ret;
 };
 

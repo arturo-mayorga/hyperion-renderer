@@ -1,14 +1,11 @@
 precision mediump float;
 
 varying vec2 vTexCoordinate;
-uniform sampler2D uMapKd;
 uniform sampler2D uMapNormal;
 uniform sampler2D uMapPosition;
 uniform sampler2D uMapShadow;
-uniform sampler2D uMapPing;
 
-uniform mat4 uShadowMatrix;
-uniform mat4 uPMatrix;
+
 
 uniform vec3 uLightPosition0;
 
@@ -35,15 +32,13 @@ void main(void)
 {
     vec4 tv4Normal   = texture2D(uMapNormal,   vTexCoordinate);
     highp vec4 tv4Position = texture2D(uMapPosition, vTexCoordinate);
-	vec3 tv3Color    = texture2D(uMapKd,       vTexCoordinate).xyz;
-	vec4 pingColor   = texture2D( uMapPing,    vTexCoordinate);
 	
-	highp vec4 shadowProj_ =  uShadowMatrix * vec4(tv4Position.xyz, 1.0);
-	highp vec4 shadowProj = uPMatrix * vec4(shadowProj_.xyz, 1.0);
+	vec4 shadowMap   = texture2D( uMapShadow,    vTexCoordinate);
 	
-	shadowProj /= shadowProj.w;
 	
-	vec4 t4Shadow    = texture2D(uMapShadow, vec2( (shadowProj.x+1.0)/2.0, (shadowProj.y+1.0)/2.0));
+	
+
+	
 	
     vec3 lightColor = vec3( 1, 1, 1 );
 
@@ -54,22 +49,8 @@ void main(void)
         
     
 	
-	if ( abs(shadowProj.x) < 1.0 && abs(shadowProj.y) < 1.0 && abs(shadowProj.z) < 1.0 )
-	{
-	    
-	    if ( (t4Shadow.w) > (shadowProj_.z + 0.2) )
-        {
-            lightRes *= 0.7;
-        } 
+	gl_FragColor = shadowMap * lightRes;
     
-        gl_FragColor = vec4(lightRes.xyz*tv3Color, 1) + pingColor;
-    
-   
-    }
-    else
-    {
-        gl_FragColor = pingColor;
-    }
     
 } 
 

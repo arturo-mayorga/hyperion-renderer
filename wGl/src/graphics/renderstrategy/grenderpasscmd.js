@@ -357,13 +357,10 @@ GRenderPassCmd.prototype.drawGeometry = function( scene )
         {
             scene.drawLights( this.shaderProgram );
             var light = scene.getLights()[0];
-            
-          
     
-            if ( undefined != light )
+            if ( undefined != light &&
+                 undefined != this.shaderProgram.uniforms.shadowMatrix )
             {
-              
-                
                 var camera = this.lightCamera;
                 
                 var gCamera = scene.getCamera();
@@ -380,16 +377,8 @@ GRenderPassCmd.prototype.drawGeometry = function( scene )
                 mat4.multiply( GRenderPassCmd_uniformMatrix, GRenderPassCmd_uniformMatrix, GRenderPassCmd_lPMatrix );
 				mat4.multiply( GRenderPassCmd_uniformMatrix, GRenderPassCmd_uniformMatrix, GRenderPassCmd_lMvMatrix );
 				mat4.multiply( GRenderPassCmd_uniformMatrix, GRenderPassCmd_uniformMatrix, GRenderPassCmd_sceneMvMatrix );
-                
-                if ( undefined != this.shaderProgram.uniforms.shadowMatrix )
-                {
-                    gl.uniformMatrix4fv( this.shaderProgram.uniforms.shadowMatrix, false, GRenderPassCmd_uniformMatrix );
-                }
-                
-                if ( undefined != this.shaderProgram.uniforms.pMatrixUniform )
-                {
-                    gl.uniformMatrix4fv( this.shaderProgram.uniforms.pMatrixUniform, false, GRenderPassCmd_lPMatrix );
-                }
+            
+                gl.uniformMatrix4fv( this.shaderProgram.uniforms.shadowMatrix, false, GRenderPassCmd_uniformMatrix );
             }
     
             break;

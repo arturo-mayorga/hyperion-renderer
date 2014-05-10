@@ -11,7 +11,7 @@ void main(void)
 {
  
      vec4 tv4Position = texture2D(uMapPosition, vTexCoordinate);
-	vec4 pingColor   = texture2D( uMapPing,    vTexCoordinate);
+	
 	
 	 vec4 shadowProj =  uShadowMatrix * vec4(tv4Position.xyz, 1.0);
 	
@@ -24,15 +24,16 @@ void main(void)
 	    
 	   if ( t4Shadow.w - shadowProj.z > -0.00008 )
         {
-            gl_FragColor = vec4(1) + pingColor;
+            gl_FragColor = vec4(1);// + pingColor;
         } 
         else
         {
-            gl_FragColor = pingColor;
+            gl_FragColor = vec4(0.5);//pingColor;
         } 
     }
     else
     {
+        vec4 pingColor   = texture2D( uMapPing,    vTexCoordinate);
         gl_FragColor = pingColor;
     }
 } 

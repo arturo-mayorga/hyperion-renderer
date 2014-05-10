@@ -27,7 +27,9 @@ GRenderDeferredStrategy.prototype.configure = function()
         "normaldepth-fs.c":undefined,
         "normaldepth-vs.c":undefined,
         "position-fs.c":undefined,
-        "position-vs.c":undefined
+        "position-vs.c":undefined,
+        "light-fs.c":undefined,
+        "light-vs.c":undefined
     };
     
     for (var key in map)
@@ -149,13 +151,14 @@ GRenderDeferredStrategy.prototype.initShaders = function ()
     var gl = this.gl;
     this.programs = {};
   
-    this.programs.fullScr = new GShader(shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
-    this.programs.shadowmap = new GShader(shaderSrcMap["shadowmap-vs.c"], shaderSrcMap["shadowmap-fs.c"]);
-    this.programs.ssao = new GShader(shaderSrcMap["ssao-vs.c"], shaderSrcMap["ssao-fs.c"]);
-    this.programs.blur = new GShader(shaderSrcMap["blur-vs.c"], shaderSrcMap["blur-fs.c"]);
-    this.programs.colorspec = new GShader(shaderSrcMap["colorspec-vs.c"], shaderSrcMap["colorspec-fs.c"]);
-    this.programs.normaldepth = new GShader(shaderSrcMap["normaldepth-vs.c"], shaderSrcMap["normaldepth-fs.c"]);
-    this.programs.position = new GShader(shaderSrcMap["position-vs.c"], shaderSrcMap["position-fs.c"]);
+    this.programs.fullScr     = new GShader( shaderSrcMap["fullscr-vs.c"],     shaderSrcMap["fullscr-fs.c"]     );
+    this.programs.shadowmap   = new GShader( shaderSrcMap["shadowmap-vs.c"],   shaderSrcMap["shadowmap-fs.c"]   );
+    this.programs.ssao        = new GShader( shaderSrcMap["ssao-vs.c"],        shaderSrcMap["ssao-fs.c"]        );
+    this.programs.blur        = new GShader( shaderSrcMap["blur-vs.c"],        shaderSrcMap["blur-fs.c"]        );
+    this.programs.colorspec   = new GShader( shaderSrcMap["colorspec-vs.c"],   shaderSrcMap["colorspec-fs.c"]   );
+    this.programs.normaldepth = new GShader( shaderSrcMap["normaldepth-vs.c"], shaderSrcMap["normaldepth-fs.c"] );
+    this.programs.position    = new GShader( shaderSrcMap["position-vs.c"],    shaderSrcMap["position-fs.c"]    );
+    this.programs.light       = new GShader( shaderSrcMap["light-vs.c"],       shaderSrcMap["light-fs.c"]       );
 
     for ( var key in this.programs )
     {
@@ -458,6 +461,17 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     shadowBlurB.bindToContext( this.gl );
     shadowBlurB.addInputTexture( this.frameBuffers.shadowmap.createGTexture("color"), gl.TEXTURE0 );
     
+    var phongLightPass = new GRenderPassCmd();
+    phongLightPass.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
+    phongLightPass.setProgram( this.programs.light );
+    phongLightPass.setFrameBuffer( this.frameBuffers.phongLight );
+    phongLightPass.setScreenGeometry( this.screen );
+    phongLightPass.setHRec( 0, 0, 1, 1, 0 );
+    phongLightPass.bindToContext( this.gl );
+    phongLightPass.addInputTexture( this.frameBuffers.normal.createGTexture("color"),        gl.TEXTURE0 );
+    phongLightPass.addInputTexture( this.frameBuffers.position.createGTexture("color"),      gl.TEXTURE1 );
+    phongLightPass.addInputTexture( this.frameBuffers.shadowmapPong.createGTexture("color"), gl.TEXTURE2 );
+    
     
     var cmds = [];
     
@@ -484,6 +498,8 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     cmds.push( clearShadowmap );
     cmds.push( shadowBlurA );
     cmds.push( shadowBlurB );
+    
+    cmds.push( phongLightPass );
      
     this.passCmds = cmds;
 };
@@ -508,7 +524,7 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.programs.fullScr.activate(); 
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     
-    this.frameBuffers.shadowmapPong.bindTexture(gl.TEXTURE0, "color");
+    this.frameBuffers.phongLight.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0, 0, 1, 1);
     this.drawScreenBuffer(this.programs.fullScr); 
     
@@ -619,6 +635,11 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
     this.frameBuffers.shadowmapPong = frameBuffer;
+    
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
+    frameBuffer.addBufferTexture(texCfgFloat);
+    frameBuffer.complete();
+    this.frameBuffers.phongLight = frameBuffer;
 };
 
 

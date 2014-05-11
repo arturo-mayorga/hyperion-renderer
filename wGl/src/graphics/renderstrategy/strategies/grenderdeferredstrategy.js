@@ -215,28 +215,9 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     
     this.lightCamControlers = {};
     
-    
-    
-    var colorPass = new GRenderPassCmd();
-    colorPass.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
-    colorPass.setProgram( this.programs.colorspec );
-    colorPass.setFrameBuffer( this.frameBuffers.color );
-    colorPass.bindToContext( this.gl );
-    
-    
-    var normalPass = new GRenderPassCmd();
-    normalPass.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
-    normalPass.setProgram( this.programs.normaldepth );
-    normalPass.setFrameBuffer( this.frameBuffers.normal );
-    normalPass.bindToContext( this.gl );
-   
-    
-    var positionPass = new GRenderPassCmd();
-    positionPass.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
-    positionPass.setProgram( this.programs.position );
-    positionPass.setFrameBuffer( this.frameBuffers.position );
-    positionPass.bindToContext( this.gl );
-    
+    var colorPass = new GGeometryRenderPassCmd( this.gl, this.programs.colorspec, this.frameBuffers.color );
+    var normalPass = new GGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.normal );
+    var positionPass = new GGeometryRenderPassCmd( this.gl, this.programs.position, this.frameBuffers.position );
     
     var ssaoPass = new GRenderPassCmd();
     ssaoPass.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
@@ -271,13 +252,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     leftCtrl.setUp( 0, 1, 0 );
     leftCtrl.setLookAtDir( -1, 0, 0 );
     this.lightCamControlers.left = leftCtrl;
-    var normalLSource = new GRenderPassCmd();
-    normalLSource.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
-    normalLSource.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.CUSTOM_CAMERA );
-    normalLSource.setCustomCameraController( leftCtrl );
-    normalLSource.setProgram( this.programs.normaldepth );
-    normalLSource.setFrameBuffer( this.frameBuffers.lightNormal );
-    normalLSource.bindToContext( this.gl );
+    var normalLSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, leftCtrl );
    
     
     var shadowmapPassL = new GRenderPassCmd();
@@ -299,13 +274,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     rightCtrl.setUp( 0, 1, 0 );
     rightCtrl.setLookAtDir( 1, 0, 0 );
     this.lightCamControlers.right = rightCtrl;
-    var normalRSource = new GRenderPassCmd();
-    normalRSource.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
-    normalRSource.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.CUSTOM_CAMERA );
-    normalRSource.setCustomCameraController( rightCtrl );
-    normalRSource.setProgram( this.programs.normaldepth );
-    normalRSource.setFrameBuffer( this.frameBuffers.lightNormal );
-    normalRSource.bindToContext( this.gl );
+    var normalRSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, rightCtrl );
   
     
     var shadowmapPassR = new GRenderPassCmd();
@@ -329,13 +298,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     frontCtrl.setUp( 0, 1, 0 );
     frontCtrl.setLookAtDir( 0, 0, 1 );
     this.lightCamControlers.front = frontCtrl;
-    var normalFSource = new GRenderPassCmd();
-    normalFSource.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
-    normalFSource.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.CUSTOM_CAMERA );
-    normalFSource.setCustomCameraController( frontCtrl );
-    normalFSource.setProgram( this.programs.normaldepth );
-    normalFSource.setFrameBuffer( this.frameBuffers.lightNormal );
-    normalFSource.bindToContext( this.gl );
+    var normalFSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, frontCtrl );
     
     
     var shadowmapPassF = new GRenderPassCmd();
@@ -357,13 +320,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     backCtrl.setUp( 0, 1, 0 );
     backCtrl.setLookAtDir( 0, 0, -1 );
     this.lightCamControlers.back = backCtrl;
-    var normalBSource = new GRenderPassCmd();
-    normalBSource.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
-    normalBSource.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.CUSTOM_CAMERA );
-    normalBSource.setCustomCameraController( backCtrl );
-    normalBSource.setProgram( this.programs.normaldepth );
-    normalBSource.setFrameBuffer( this.frameBuffers.lightNormal );
-    normalBSource.bindToContext( this.gl );
+    var normalBSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, backCtrl );
   
     
     var shadowmapPassB = new GRenderPassCmd();
@@ -387,13 +344,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     upCtrl.setUp( 1, 0, 0 );
     upCtrl.setLookAtDir( 0, 1, 0 );
     this.lightCamControlers.up = upCtrl;
-    var normalUSource = new GRenderPassCmd();
-    normalUSource.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
-    normalUSource.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.CUSTOM_CAMERA );
-    normalUSource.setCustomCameraController( upCtrl );
-    normalUSource.setProgram( this.programs.normaldepth );
-    normalUSource.setFrameBuffer( this.frameBuffers.lightNormal );
-    normalUSource.bindToContext( this.gl );
+    var normalUSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, upCtrl );
    
     
     var shadowmapPassU = new GRenderPassCmd();
@@ -415,13 +366,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     downCtrl.setUp( 1, 0, 0 );
     downCtrl.setLookAtDir( 0, -1, 0 );
     this.lightCamControlers.down = downCtrl;
-    var normalDSource = new GRenderPassCmd();
-    normalDSource.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.ENABLE );
-    normalDSource.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.CUSTOM_CAMERA );
-    normalDSource.setCustomCameraController( downCtrl );
-    normalDSource.setProgram( this.programs.normaldepth );
-    normalDSource.setFrameBuffer( this.frameBuffers.lightNormal );
-    normalDSource.bindToContext( this.gl );
+    var normalDSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, downCtrl );
  
     
     var shadowmapPassD = new GRenderPassCmd();
@@ -442,24 +387,13 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     clearShadowmap.setFrameBuffer( this.frameBuffers.shadowmap );
     clearShadowmap.bindToContext( this.gl );
     
-    
-    var shadowBlurA = new GRenderPassCmd();
-    shadowBlurA.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.NO_GEOMETRY );
-    shadowBlurA.setProgram( this.programs.blur );
-    shadowBlurA.setFrameBuffer( this.frameBuffers.shadowmap );
-    shadowBlurA.setScreenGeometry( this.screen );
+    var shadowBlurA = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.shadowmap, this.screen );
     shadowBlurA.setHRec( 0, 0, 1, 1, 3.14159/2 );
-    shadowBlurA.bindToContext( this.gl );
-    shadowBlurA.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE0 );
+    shadowBlurA.addInputFrameBuffer( this.frameBuffers.shadowmapPong, gl.TEXTURE0 );
    
-    var shadowBlurB = new GRenderPassCmd();
-    shadowBlurB.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.NO_GEOMETRY );
-    shadowBlurB.setProgram( this.programs.blur );
-    shadowBlurB.setFrameBuffer( this.frameBuffers.shadowmapPong );
-    shadowBlurB.setScreenGeometry( this.screen );
+    var shadowBlurB = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.shadowmapPong, this.screen );
     shadowBlurB.setHRec( 0, 0, 1, 1, -3.14159/2 );
-    shadowBlurB.bindToContext( this.gl );
-    shadowBlurB.addInputTexture( this.frameBuffers.shadowmap.getGTexture(), gl.TEXTURE0 );
+    shadowBlurB.addInputFrameBuffer( this.frameBuffers.shadowmap, gl.TEXTURE0 );
     
     var phongLightPass = new GRenderPassCmd();
     phongLightPass.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );

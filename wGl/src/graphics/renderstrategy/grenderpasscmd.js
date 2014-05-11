@@ -132,6 +132,159 @@ GRenderPassClearCmd.prototype.run = function( scene )
     this.frameBuffer.unbindBuffer();
 };
 
+/**
+ * @constructor
+ */
+function GGeometryRenderPassCmd( gl, program, frameBuffer )
+{
+    this.gl = gl;
+    this.shaderProgram = program;
+    this.frameBuffer = frameBuffer;
+}
+
+GGeometryRenderPassCmd.prototype.run = function( scene )
+{
+    var gl = this.gl; 
+    gl.enable( this.gl.DEPTH_TEST );
+    
+    this.shaderProgram.activate();
+    this.frameBuffer.bindBuffer();
+    
+    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+    scene.draw( this.shaderProgram );
+    
+    this.frameBuffer.unbindBuffer();
+    this.shaderProgram.deactivate();
+};
+
+/**
+ * @constructor
+ */
+function GCustomCamGeometryRenderPassCmd( gl, program, frameBuffer, cameraController )
+{
+    this.gl = gl;
+    this.shaderProgram = program;
+    this.frameBuffer = frameBuffer;
+    this.customCameraController = cameraController;
+}
+
+GCustomCamGeometryRenderPassCmd.prototype.run = function( scene )
+{
+    var gl = this.gl; 
+    gl.enable( this.gl.DEPTH_TEST );
+    
+    this.shaderProgram.activate();
+    this.frameBuffer.bindBuffer();
+    
+    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+    scene.drawThroughCamera( this.customCameraController.getCamera(), this.shaderProgram );
+    
+    this.frameBuffer.unbindBuffer();
+    this.shaderProgram.deactivate();
+};
+
+
+
+/**
+ * @constructor
+ */
+function GPostEffectRenderPassCmd( gl, program, frameBuffer, screenGeometry )
+{
+    this.gl = gl;
+    this.shaderProgram = program;
+    this.frameBuffer = frameBuffer;
+    this.nextTextureInput = gl.TEXTURE0;
+    this.textureList = [];
+    this.screen = screenGeometry;
+    this.hMatrix = mat3.create();
+    this.setHRec( 0, 0, 1, 1, 0 );
+}
+
+GPostEffectRenderPassCmd.prototype.setHRec = function( x, y, w, h, r )
+{
+    mat3.identity( this.hMatrix);
+	mat3.translate( this.hMatrix, this.hMatrix, [x, y] );
+	mat3.scale( this.hMatrix,this.hMatrix, [w, h] ); 
+	mat3.rotate( this.hMatrix,this.hMatrix, r );
+};
+
+GPostEffectRenderPassCmd.prototype.addInputFrameBuffer = function( frameBuffer )
+{
+    this.addInputTexture( frameBuffer.getGTexture() );
+};
+
+GPostEffectRenderPassCmd.prototype.addInputTexture = function( texture )
+{
+    this.textureList.push( {gTexture:texture, glTextureTarget:this.nextTextureInput++} );
+};
+
+GPostEffectRenderPassCmd.prototype.run = function( scene )
+{ 
+    this.shaderProgram.activate();
+    this.frameBuffer.bindBuffer();
+    
+    var texCount = this.textureList.length;
+    
+    for (var i = 0; i < texCount; ++i)
+    {
+        this.textureList[i].gTexture.draw( this.textureList[i].glTextureTarget, null, null );
+    }
+    
+    this.drawScreenBuffer(this.shaderProgram);
+    
+    this.frameBuffer.unbindBuffer();
+    this.shaderProgram.deactivate();
+};
+
+GPostEffectRenderPassCmd.prototype.drawScreenBuffer = function( shader )
+{   
+    var gl = this.gl;
+	
+	var mapIdx = 0;
+    
+    if ( null != shader.uniforms.mapKd )
+    {
+        gl.uniform1i( shader.uniforms.mapKd, mapIdx++ );
+    }
+ 
+    if ( null != shader.uniforms.mapNormal )
+    {
+        gl.uniform1i( shader.uniforms.mapNormal, mapIdx++ );
+    }
+  
+    if ( null != shader.uniforms.mapPosition )
+    {
+        gl.uniform1i( shader.uniforms.mapPosition, mapIdx++ );
+    }
+    
+    if ( null != shader.uniforms.mapShadow )
+    {
+        gl.uniform1i( shader.uniforms.mapShadow, mapIdx++ );
+    }
+    
+    if ( null != shader.uniforms.mapPing )
+    {
+        gl.uniform1i( shader.uniforms.mapPing, mapIdx++ );
+    }
+    
+    gl.bindBuffer( gl.ARRAY_BUFFER, this.screen.vertBuffer);
+    gl.vertexAttribPointer( shader.attributes.positionVertexAttribute, 
+                            this.screen.vertBuffer.itemSize, gl.FLOAT, false, 0, 0 );
+     
+    gl.bindBuffer( gl.ARRAY_BUFFER, this.screen.textBuffer);
+    gl.vertexAttribPointer( shader.attributes.textureVertexAttribute, 
+                            this.screen.textBuffer.itemSize, gl.FLOAT, false, 0, 0 );
+
+    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, this.screen.indxBuffer );
+	
+	if ( null != shader.uniforms.hMatrixUniform )
+    {
+        gl.uniformMatrix3fv( shader.uniforms.hMatrixUniform, false, this.hMatrix );
+    }
+	
+    gl.drawElements( gl.TRIANGLES, this.screen.indxBuffer.numItems, gl.UNSIGNED_SHORT, 0 );
+};
+
 
 /** 
  * @constructor
@@ -410,7 +563,7 @@ GRenderPassCmd.prototype.getCustomCamera = function()
 
 GRenderPassCmd.prototype.drawFullScreen = function()
 {
-    this.setHRec( 0, 0, 1, 1 );
+    this.setHRec( 0, 0, 1, 1, 0 );
     this.drawScreenBuffer( this.shaderProgram );
 };
 

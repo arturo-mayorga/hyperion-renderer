@@ -90,15 +90,19 @@ FsmMachine.prototype.addTransition = function ( startStateName, signalName, endS
 	this.nameStateMap[startStateName].addSignalTarget(signalName, endStateName);
 };
 
-FsmMachine.prototype.onFsmSignal = function(signal) 
+/**
+ * Handle an FSM signal
+ * @param {string} signal Name of the signal that was fired
+ */
+FsmMachine.prototype.onFsmSignal = function( signal ) 
 {
-	this.signalQueue.push(signal);
+	this.signalQueue.push( signal );
 };
 
 /**
  * @param {string} stateName Name of the new state to transition to
  */
-FsmMachine.prototype.setState = function (stateName)
+FsmMachine.prototype.setState = function ( stateNam )
 {
 	if (this.currentStateName != "")
 	{
@@ -110,6 +114,10 @@ FsmMachine.prototype.setState = function (stateName)
 	this.nameStateMap[this.currentStateName].state.enter();
 }
 
+/**
+ * Update the state machine
+ * @param {number} Number of milliseconds sine the last update
+ */
 FsmMachine.prototype.update = function (time) 
 {
 	if (this.currentStateName == "") return;

@@ -6,7 +6,7 @@ var rCube = 0;
 var lastTime = 0;
 
 function animate() {
-	stats.begin();
+	
 	var timeNow = new Date().getTime();
 	var elapsed = 0;
 	if (lastTime != 0) 
@@ -21,6 +21,7 @@ function animate() {
         context.draw(elapsed);
 	}
 	stats.end();
+	stats.begin();
 }
 
 
@@ -73,6 +74,7 @@ function mainLoop()
 	
 	stats = new Stats();
     stats.setMode(1); // 0: fps, 1: ms
+    stats.begin();
     
     // Align top-left
     stats.domElement.style.position = 'absolute';

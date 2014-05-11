@@ -286,6 +286,80 @@ GPostEffectRenderPassCmd.prototype.drawScreenBuffer = function( shader )
 };
 
 
+/**
+ * @constructor
+ */
+function GPostEffectLitRenderPassCmd( gl, program, frameBuffer, screenGeometry, lightCamera )
+{
+    this.gl = gl;
+    this.shaderProgram = program;
+    this.frameBuffer = frameBuffer;
+    this.nextTextureInput = gl.TEXTURE0;
+    this.textureList = [];
+    this.screen = screenGeometry;
+    this.hMatrix = mat3.create();
+    this.setHRec( 0, 0, 1, 1, 0 );
+    this.lightCamera = lightCamera; 
+    
+    if ( undefined != this.shaderProgram.uniforms.shadowMatrix )
+    {
+        console.debug( "Warning: shaderProgram does not accept shadowMatrix" );
+    }
+}
+
+GPostEffectLitRenderPassCmd.prototype.setHRec = 
+    GPostEffectRenderPassCmd.prototype.setHRec;
+GPostEffectLitRenderPassCmd.prototype.addInputFrameBuffer = 
+    GPostEffectRenderPassCmd.prototype.addInputFrameBuffer;
+GPostEffectLitRenderPassCmd.prototype.addInputTexture = 
+    GPostEffectRenderPassCmd.prototype.addInputTexture;
+GPostEffectLitRenderPassCmd.prototype.drawScreenBuffer = 
+    GPostEffectRenderPassCmd.prototype.drawScreenBuffer;
+
+GPostEffectLitRenderPassCmd.prototype.run = function( scene )
+{ 
+    this.shaderProgram.activate();
+    this.frameBuffer.bindBuffer();
+    
+    var texCount = this.textureList.length;
+    
+    for (var i = 0; i < texCount; ++i)
+    {
+        this.textureList[i].gTexture.draw( this.textureList[i].glTextureTarget, null, null );
+    }
+    
+    var light = scene.getLights()[0];
+    
+    scene.drawLights( this.shaderProgram );
+    var camera = this.lightCamera;
+    
+    var gCamera = scene.getCamera();
+    gCamera.updateMatrices();
+    
+    mat4.identity(GRenderPassCmd_uniformMatrix);
+    
+    gCamera.getMvMatrix( GRenderPassCmd_sceneMvMatrix );
+    camera.getMvMatrix( GRenderPassCmd_lMvMatrix );
+    camera.getPMatrix( GRenderPassCmd_lPMatrix );
+    
+    mat4.invert( GRenderPassCmd_sceneMvMatrix, GRenderPassCmd_sceneMvMatrix );
+    
+    mat4.multiply( GRenderPassCmd_uniformMatrix, GRenderPassCmd_uniformMatrix, GRenderPassCmd_lPMatrix );
+    mat4.multiply( GRenderPassCmd_uniformMatrix, GRenderPassCmd_uniformMatrix, GRenderPassCmd_lMvMatrix );
+    mat4.multiply( GRenderPassCmd_uniformMatrix, GRenderPassCmd_uniformMatrix, GRenderPassCmd_sceneMvMatrix );
+
+    this.gl.uniformMatrix4fv( this.shaderProgram.uniforms.shadowMatrix, false, GRenderPassCmd_uniformMatrix );
+    
+    
+    this.gl.disable( this.gl.DEPTH_TEST );
+    this.drawScreenBuffer(this.shaderProgram);
+    
+    this.frameBuffer.unbindBuffer();
+    this.shaderProgram.deactivate();
+};
+
+
+
 /** 
  * @constructor
  */

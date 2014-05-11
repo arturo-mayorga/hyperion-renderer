@@ -255,15 +255,8 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var normalLSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, leftCtrl );
    
     
-    var shadowmapPassL = new GRenderPassCmd();
-    shadowmapPassL.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
-    shadowmapPassL.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
-    shadowmapPassL.setLightCamera( leftCtrl.getCamera() );
-    shadowmapPassL.setProgram( this.programs.shadowmap );
-    shadowmapPassL.setFrameBuffer( this.frameBuffers.shadowmap );
-    shadowmapPassL.setScreenGeometry( this.screen );
-    shadowmapPassL.setHRec( 0, 0, 1, 1, 0 );
-    shadowmapPassL.bindToContext( this.gl );
+  
+    shadowmapPassL = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmap, this.screen, leftCtrl.getCamera() );
     shadowmapPassL.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE0 );
     shadowmapPassL.addInputTexture( this.frameBuffers.lightNormal.getGTexture(),   gl.TEXTURE1 );
     shadowmapPassL.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );
@@ -277,15 +270,8 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var normalRSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, rightCtrl );
   
     
-    var shadowmapPassR = new GRenderPassCmd();
-    shadowmapPassR.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
-    shadowmapPassR.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
-    shadowmapPassR.setLightCamera( rightCtrl.getCamera() );
-    shadowmapPassR.setProgram( this.programs.shadowmap );
-    shadowmapPassR.setFrameBuffer( this.frameBuffers.shadowmapPong );
-    shadowmapPassR.setScreenGeometry( this.screen );
-    shadowmapPassR.setHRec( 0, 0, 1, 1, 0 );
-    shadowmapPassR.bindToContext( this.gl );
+ 
+    shadowmapPassR = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPong, this.screen, rightCtrl.getCamera() );
     shadowmapPassR.addInputTexture( this.frameBuffers.position.getGTexture(),    gl.TEXTURE0 );
     shadowmapPassR.addInputTexture( this.frameBuffers.lightNormal.getGTexture(), gl.TEXTURE1 );
     shadowmapPassR.addInputTexture( this.frameBuffers.shadowmap.getGTexture(),   gl.TEXTURE2 );
@@ -301,15 +287,8 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var normalFSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, frontCtrl );
     
     
-    var shadowmapPassF = new GRenderPassCmd();
-    shadowmapPassF.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
-    shadowmapPassF.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
-    shadowmapPassF.setLightCamera( frontCtrl.getCamera() );
-    shadowmapPassF.setProgram( this.programs.shadowmap );
-    shadowmapPassF.setFrameBuffer( this.frameBuffers.shadowmap );
-    shadowmapPassF.setScreenGeometry( this.screen );
-    shadowmapPassF.setHRec( 0, 0, 1, 1, 0 );
-    shadowmapPassF.bindToContext( this.gl );
+   
+    shadowmapPassF = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmap, this.screen, frontCtrl.getCamera() );
     shadowmapPassF.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE0 );
     shadowmapPassF.addInputTexture( this.frameBuffers.lightNormal.getGTexture(),   gl.TEXTURE1 );
     shadowmapPassF.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );
@@ -323,15 +302,8 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var normalBSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, backCtrl );
   
     
-    var shadowmapPassB = new GRenderPassCmd();
-    shadowmapPassB.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
-    shadowmapPassB.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
-    shadowmapPassB.setLightCamera( backCtrl.getCamera() );
-    shadowmapPassB.setProgram( this.programs.shadowmap );
-    shadowmapPassB.setFrameBuffer( this.frameBuffers.shadowmapPong );
-    shadowmapPassB.setScreenGeometry( this.screen );
-    shadowmapPassB.setHRec( 0, 0, 1, 1, 0 );
-    shadowmapPassB.bindToContext( this.gl );
+   
+    shadowmapPassB = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPong, this.screen, backCtrl.getCamera() );
     shadowmapPassB.addInputTexture( this.frameBuffers.position.getGTexture(),    gl.TEXTURE0 );
     shadowmapPassB.addInputTexture( this.frameBuffers.lightNormal.getGTexture(), gl.TEXTURE1 );
     shadowmapPassB.addInputTexture( this.frameBuffers.shadowmap.getGTexture(),   gl.TEXTURE2 );
@@ -347,15 +319,8 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var normalUSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, upCtrl );
    
     
-    var shadowmapPassU = new GRenderPassCmd();
-    shadowmapPassU.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
-    shadowmapPassU.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
-    shadowmapPassU.setLightCamera( upCtrl.getCamera() );
-    shadowmapPassU.setProgram( this.programs.shadowmap );
-    shadowmapPassU.setFrameBuffer( this.frameBuffers.shadowmap );
-    shadowmapPassU.setScreenGeometry( this.screen );
-    shadowmapPassU.setHRec( 0, 0, 1, 1, 0 );
-    shadowmapPassU.bindToContext( this.gl );
+   
+    shadowmapPassU = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmap, this.screen, upCtrl.getCamera() );
     shadowmapPassU.addInputTexture( this.frameBuffers.position.getGTexture(),       gl.TEXTURE0 );
     shadowmapPassU.addInputTexture( this.frameBuffers.lightNormal.getGTexture(),    gl.TEXTURE1 );
     shadowmapPassU.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(),  gl.TEXTURE2 );
@@ -368,19 +333,10 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     this.lightCamControlers.down = downCtrl;
     var normalDSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, downCtrl );
  
-    
-    var shadowmapPassD = new GRenderPassCmd();
-    shadowmapPassD.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
-    shadowmapPassD.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
-    shadowmapPassD.setLightCamera( downCtrl.getCamera() );
-    shadowmapPassD.setProgram( this.programs.shadowmap );
-    shadowmapPassD.setFrameBuffer( this.frameBuffers.shadowmapPong );
-    shadowmapPassD.setScreenGeometry( this.screen );
-    shadowmapPassD.setHRec( 0, 0, 1, 1, 0 );
-    shadowmapPassD.bindToContext( this.gl );
+    shadowmapPassD = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPong, this.screen, downCtrl.getCamera() );
     shadowmapPassD.addInputTexture( this.frameBuffers.position.getGTexture(),    gl.TEXTURE0 );
     shadowmapPassD.addInputTexture( this.frameBuffers.lightNormal.getGTexture(), gl.TEXTURE1 );
-    shadowmapPassD.addInputTexture( this.frameBuffers.shadowmap.getGTexture(),   gl.TEXTURE2 ); 
+    shadowmapPassD.addInputTexture( this.frameBuffers.shadowmap.getGTexture(),   gl.TEXTURE2 );
     
     
     var clearShadowmap = new GRenderPassClearCmd();

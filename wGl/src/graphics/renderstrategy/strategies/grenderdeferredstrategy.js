@@ -219,58 +219,24 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var normalPass = new GGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.normal );
     var positionPass = new GGeometryRenderPassCmd( this.gl, this.programs.position, this.frameBuffers.position );
     
-    var ssaoPass = new GRenderPassCmd();
-    ssaoPass.setDepthTestSwitch( GRENDERPASSCMD_DEPTH_TEST_SWITCH.DISABLE );
-    ssaoPass.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.NO_GEOMETRY );
-    ssaoPass.setProgram( this.programs.ssao );
-    ssaoPass.setFrameBuffer( this.frameBuffers.ssao );
-    ssaoPass.setScreenGeometry( this.screen );
-    ssaoPass.setHRec( 0, 0, 1, 1, 0 );
-    ssaoPass.bindToContext( this.gl );
-    ssaoPass.addInputTexture( this.frameBuffers.color.getGTexture(),    gl.TEXTURE0 );
-    ssaoPass.addInputTexture( this.frameBuffers.normal.getGTexture(),   gl.TEXTURE1 );
-    ssaoPass.addInputTexture( this.frameBuffers.position.getGTexture(), gl.TEXTURE2 );
-   
-    
-    var ssaoBPass = new GRenderPassCmd();
-    ssaoBPass.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.NO_GEOMETRY );
-    ssaoBPass.setProgram( this.programs.blur );
-    ssaoBPass.setFrameBuffer( this.frameBuffers.ssaoBlur );
-    ssaoBPass.setScreenGeometry( this.screen );
-    ssaoBPass.setHRec( 0, 0, 1, 1, 0 );
-    ssaoBPass.bindToContext( this.gl );
-    ssaoBPass.addInputTexture( this.frameBuffers.ssao.getGTexture(), gl.TEXTURE0 );
-   
-    
-    var clearShadowmapPong = new GRenderPassClearCmd();
-    clearShadowmapPong.setFrameBuffer( this.frameBuffers.shadowmapPong );
-    clearShadowmapPong.bindToContext( this.gl );
+    var clearShadowmapPong = new GRenderPassClearCmd( this.gl, this.frameBuffers.shadowmapPong );
     
     
-    var leftCtrl = new GLightBasedCamCtrl();
-    leftCtrl.bindToContext( this.gl );
-    leftCtrl.setUp( 0, 1, 0 );
-    leftCtrl.setLookAtDir( -1, 0, 0 );
+    var leftCtrl = new GLightBasedCamCtrl(); leftCtrl.bindToContext( this.gl ); 
+    leftCtrl.setUp( 0, 1, 0 ); leftCtrl.setLookAtDir( -1, 0, 0 );
     this.lightCamControlers.left = leftCtrl;
     var normalLSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, leftCtrl );
-   
-    
-  
     shadowmapPassL = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmap, this.screen, leftCtrl.getCamera() );
     shadowmapPassL.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE0 );
     shadowmapPassL.addInputTexture( this.frameBuffers.lightNormal.getGTexture(),   gl.TEXTURE1 );
     shadowmapPassL.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );
     
     
-    var rightCtrl = new GLightBasedCamCtrl();
-    rightCtrl.bindToContext( this.gl );
-    rightCtrl.setUp( 0, 1, 0 );
-    rightCtrl.setLookAtDir( 1, 0, 0 );
+    var rightCtrl = new GLightBasedCamCtrl(); rightCtrl.bindToContext( this.gl );
+    rightCtrl.setUp( 0, 1, 0 ); rightCtrl.setLookAtDir( 1, 0, 0 );
     this.lightCamControlers.right = rightCtrl;
     var normalRSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, rightCtrl );
   
-    
- 
     shadowmapPassR = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPong, this.screen, rightCtrl.getCamera() );
     shadowmapPassR.addInputTexture( this.frameBuffers.position.getGTexture(),    gl.TEXTURE0 );
     shadowmapPassR.addInputTexture( this.frameBuffers.lightNormal.getGTexture(), gl.TEXTURE1 );
@@ -279,30 +245,20 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     
     ////
     
-    var frontCtrl = new GLightBasedCamCtrl();
-    frontCtrl.bindToContext( this.gl );
-    frontCtrl.setUp( 0, 1, 0 );
-    frontCtrl.setLookAtDir( 0, 0, 1 );
+    var frontCtrl = new GLightBasedCamCtrl(); frontCtrl.bindToContext( this.gl );
+    frontCtrl.setUp( 0, 1, 0 ); frontCtrl.setLookAtDir( 0, 0, 1 );
     this.lightCamControlers.front = frontCtrl;
     var normalFSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, frontCtrl );
-    
-    
-   
     shadowmapPassF = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmap, this.screen, frontCtrl.getCamera() );
     shadowmapPassF.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE0 );
     shadowmapPassF.addInputTexture( this.frameBuffers.lightNormal.getGTexture(),   gl.TEXTURE1 );
     shadowmapPassF.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );
  
     
-    var backCtrl = new GLightBasedCamCtrl();
-    backCtrl.bindToContext( this.gl );
-    backCtrl.setUp( 0, 1, 0 );
-    backCtrl.setLookAtDir( 0, 0, -1 );
+    var backCtrl = new GLightBasedCamCtrl(); backCtrl.bindToContext( this.gl );
+    backCtrl.setUp( 0, 1, 0 ); backCtrl.setLookAtDir( 0, 0, -1 );
     this.lightCamControlers.back = backCtrl;
     var normalBSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, backCtrl );
-  
-    
-   
     shadowmapPassB = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPong, this.screen, backCtrl.getCamera() );
     shadowmapPassB.addInputTexture( this.frameBuffers.position.getGTexture(),    gl.TEXTURE0 );
     shadowmapPassB.addInputTexture( this.frameBuffers.lightNormal.getGTexture(), gl.TEXTURE1 );
@@ -311,37 +267,26 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     
     ////
     
-    var upCtrl = new GLightBasedCamCtrl();
-    upCtrl.bindToContext( this.gl );
-    upCtrl.setUp( 1, 0, 0 );
-    upCtrl.setLookAtDir( 0, 1, 0 );
+    var upCtrl = new GLightBasedCamCtrl(); upCtrl.bindToContext( this.gl );
+    upCtrl.setUp( 1, 0, 0 ); upCtrl.setLookAtDir( 0, 1, 0 );
     this.lightCamControlers.up = upCtrl;
     var normalUSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, upCtrl );
-   
-    
-   
     shadowmapPassU = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmap, this.screen, upCtrl.getCamera() );
     shadowmapPassU.addInputTexture( this.frameBuffers.position.getGTexture(),       gl.TEXTURE0 );
     shadowmapPassU.addInputTexture( this.frameBuffers.lightNormal.getGTexture(),    gl.TEXTURE1 );
     shadowmapPassU.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(),  gl.TEXTURE2 );
    
     
-    var downCtrl = new GLightBasedCamCtrl();
-    downCtrl.bindToContext( this.gl );
-    downCtrl.setUp( 1, 0, 0 );
-    downCtrl.setLookAtDir( 0, -1, 0 );
+    var downCtrl = new GLightBasedCamCtrl(); downCtrl.bindToContext( this.gl );
+    downCtrl.setUp( 1, 0, 0 ); downCtrl.setLookAtDir( 0, -1, 0 );
     this.lightCamControlers.down = downCtrl;
-    var normalDSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, downCtrl );
- 
+    var normalDSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, downCtrl ); 
     shadowmapPassD = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPong, this.screen, downCtrl.getCamera() );
     shadowmapPassD.addInputTexture( this.frameBuffers.position.getGTexture(),    gl.TEXTURE0 );
     shadowmapPassD.addInputTexture( this.frameBuffers.lightNormal.getGTexture(), gl.TEXTURE1 );
     shadowmapPassD.addInputTexture( this.frameBuffers.shadowmap.getGTexture(),   gl.TEXTURE2 );
     
-    
-    var clearShadowmap = new GRenderPassClearCmd();
-    clearShadowmap.setFrameBuffer( this.frameBuffers.shadowmap );
-    clearShadowmap.bindToContext( this.gl );
+    var clearShadowmap = new GRenderPassClearCmd(this.gl, this.frameBuffers.shadowmap );
     
     var shadowBlurA = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.shadowmap, this.screen );
     shadowBlurA.setHRec( 0, 0, 1, 1, 3.14159/2 );
@@ -351,13 +296,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     shadowBlurB.setHRec( 0, 0, 1, 1, -3.14159/2 );
     shadowBlurB.addInputFrameBuffer( this.frameBuffers.shadowmap, gl.TEXTURE0 );
     
-    var phongLightPass = new GRenderPassCmd();
-    phongLightPass.setSceneDrawMode( GRENDERPASSCMD_SCENE_DRAW_MODE.LIGHTS_ONLY );
-    phongLightPass.setProgram( this.programs.light );
-    phongLightPass.setFrameBuffer( this.frameBuffers.phongLight );
-    phongLightPass.setScreenGeometry( this.screen );
-    phongLightPass.setHRec( 0, 0, 1, 1, 0 );
-    phongLightPass.bindToContext( this.gl );
+    phongLightPass = new GPostEffectLitRenderPassCmd( this.gl, this.programs.light, this.frameBuffers.phongLight, this.screen );
     phongLightPass.addInputTexture( this.frameBuffers.normal.getGTexture(),        gl.TEXTURE0 );
     phongLightPass.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE1 );
     phongLightPass.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );

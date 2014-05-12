@@ -68,6 +68,9 @@ LoadState.prototype.setSignalObserver = FsmState.prototype.setSignalObserver;
  */
 LoadState.prototype.fireSignal = FsmState.prototype.fireSignal;
 
+/**
+ * This function is called each time this state is entered
+ */
 LoadState.prototype.enter = function () 
 {
 	this.envLoader.loadObj("assets/3d/office3d/18361-obj-4/", "OfficeOBJ.obj");
@@ -97,6 +100,9 @@ LoadState.prototype.enter = function ()
 	this.ui.pFg = progressFg;
 };
 
+/**
+ * This function is called each time the state is exited
+ */
 LoadState.prototype.exit = function () 
 {
 	var len = this.ui.components.length;
@@ -154,8 +160,6 @@ LoadState.prototype.exit = function ()
 	light7.setPosition(24, 19.21, -2);
 	light8.setPosition(30, 19.21, 8);
 	
-	
-	
 	this.scene.addLight(light6);
 	this.scene.addLight(light7);
 	this.scene.addLight(light8);
@@ -167,12 +171,20 @@ LoadState.prototype.exit = function ()
 	this.scene.addLight(light5);
 };
 
-LoadState.prototype.update = function (time) 
+/**
+ * Update this state
+ * @param {number} Number of milliseconds since the last update
+ */
+LoadState.prototype.update = function ( time ) 
 {
     this.envLoader.update(time);
 	this.penLoader.update(time);
 };
  
+ /**
+  * This function gets called whenever the observed loader completes the loading process
+  * @param {GObjLoader} Loader object that just finished loading its assets
+  */
 LoadState.prototype.onObjLoaderCompleted = function ( loader ) 
 {
 	// wait for 2 loaders
@@ -192,6 +204,8 @@ LoadState.prototype.onObjLoaderCompleted = function ( loader )
 };
 
 /**
+ * This function gets called whenever the observed loader makes progress
+ * @param {GObjLoader} Loader object that is being observed
  * @param {number} progress Progress value
  */
 LoadState.prototype.onObjLoaderProgress = function ( loader, progress ) 
@@ -223,17 +237,29 @@ ExploreState.prototype.setSignalObserver = FsmState.prototype.setSignalObserver;
  */
 ExploreState.prototype.fireSignal = FsmState.prototype.fireSignal;
 
+/**
+ * This function is called whenever we enter the explore state
+ */
 ExploreState.prototype.enter = function () 
 {
 	console.debug("entering ExploreState");
 	this.camController = new GCameraController();
 	this.camController.bindCamera(this.scene.getCamera());
 };
+
+/**
+ * This function is called whenever we exit the explore state
+ */
 ExploreState.prototype.exit = function () 
 {
 	this.camController = undefined;
 	console.debug("exiting ExploreState");
 };
+
+/**
+ * This is the update function for the explore state
+ * @param {number} number of milliseconds since the last update
+ */
 ExploreState.prototype.update = function (time) 
 {
 	//this.fireSignal("startAsm");
@@ -255,6 +281,7 @@ function Vec3Animator( inVector, target, targetLapseTime )
 }
 
 /**
+ * This updates the animation state
  * @param {number} time  Time since the last update
  */
 Vec3Animator.prototype.update = function( time )
@@ -279,6 +306,10 @@ Vec3Animator.prototype.update = function( time )
 	}
 }
 
+/**
+ * Determines if the current animation has completed
+ * @return {boolean}
+ */
 Vec3Animator.prototype.getIsComplete = function()
 {
 	return this.isComplete;
@@ -310,6 +341,9 @@ AsmState.prototype.setSignalObserver = FsmState.prototype.setSignalObserver;
  */
 AsmState.prototype.fireSignal = FsmState.prototype.fireSignal;
 
+/**
+ * This function is called whenever we enter the assembly state
+ */
 AsmState.prototype.enter = function () 
 {
 	console.debug("entering AsmState");
@@ -335,15 +369,28 @@ AsmState.prototype.enter = function ()
 	
 	this.handler = this.moveCam;
 };
+
+/**
+ * This function is called whenever we exit the assembly state
+ */
 AsmState.prototype.exit = function () 
 {
 	console.debug("exiting AsmState");
 };
+
+/**
+ * This updates the assembly state by calling into the currently
+ * active sub state
+ */
 AsmState.prototype.update = function (time) 
 {
 	this.handler(time);
 };
 
+/**
+ * Assembly sub state: move the camera in front of the desk
+ * @param {number} Number of milliseconds since the last update
+ */
 AsmState.prototype.moveCam = function (time)
 {	
 	if (this.lookAtAnimator == undefined)
@@ -380,6 +427,10 @@ AsmState.prototype.moveCam = function (time)
 	this.camera.setLookAt(this.tempLookAt[0], this.tempLookAt[1], this.tempLookAt[2]);
 }
 
+/**
+ * Assembly sub state: pick up the ink container from the table
+ * @param {number} Number of milliseconds since the last update
+ */
 AsmState.prototype.grabInk = function (time)
 {
     if ( undefined == this.trans )
@@ -404,6 +455,10 @@ AsmState.prototype.grabInk = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: pick up the spring from the table
+ * @param {number} Number of milliseconds since the last update
+ */
 AsmState.prototype.grabSpring = function (time)
 {
     if ( undefined == this.trans )
@@ -428,6 +483,10 @@ AsmState.prototype.grabSpring = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: install the spring on the ink container
+ * @param {number} Number of milliseconds since the last update
+ */
 AsmState.prototype.installSpring = function (time)
 {
     if ( undefined == this.trans )
@@ -452,6 +511,10 @@ AsmState.prototype.installSpring = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: pick up the axle form the table and line up for installation
+ * @param {number} Number of milliseconds since the last update
+ */
 AsmState.prototype.grabAxle = function (time)
 {
 	if ( undefined == this.trans )
@@ -476,6 +539,10 @@ AsmState.prototype.grabAxle = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: Install the axle to the current assembly
+ * @param {number} Number of milliseconds since the last update
+ */
 AsmState.prototype.installAxle = function (time)
 {
 	if ( undefined == this.trans )
@@ -500,6 +567,10 @@ AsmState.prototype.installAxle = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: pick up the housin from the table and align it for installation
+ * @param {number} Number of milliseconds since the last update
+ */
 AsmState.prototype.grabHousing = function (time)
 {
 	if ( undefined == this.trans )
@@ -524,6 +595,10 @@ AsmState.prototype.grabHousing = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: Install the housing to the current assembly
+ * @param {number} Number of milliseconds since the last update
+ */
 AsmState.prototype.installHousing = function (time)
 {
 	if ( undefined == this.trans )
@@ -559,6 +634,10 @@ AsmState.prototype.installHousing = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: pick up the grip from the table and line it up for installation
+ * @param {number} Number of milliseconds since the last update
+ */
 AsmState.prototype.grabGrip = function (time)
 {
 	if ( undefined == this.trans )
@@ -583,6 +662,10 @@ AsmState.prototype.grabGrip = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: Install the grip to the rest of the assembly
+ * @param {number} Number of milliseconds since the last update
+ */
 AsmState.prototype.installGrip = function (time)
 {
 	if ( undefined == this.trans )
@@ -607,6 +690,10 @@ AsmState.prototype.installGrip = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: Pick up the cylinder from the table and align for installation
+ * @param {number} Number of milliseconds since the last update.
+ */
 AsmState.prototype.grabCylinder = function (time)
 {
 	if ( undefined == this.trans )
@@ -631,6 +718,10 @@ AsmState.prototype.grabCylinder = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: Install the cylinder to the assembly
+ * @param {number} Number of milliseconds since the last update
+ */
 AsmState.prototype.installCylinder = function (time)
 {
 	if ( undefined == this.trans )
@@ -655,6 +746,10 @@ AsmState.prototype.installCylinder = function (time)
 	}
 }
 
+/** 
+ * Assembly sub state: Pick up the clip from the table
+ * @param {number} Number of milliseconds since the last update.
+ */
 AsmState.prototype.grabClip = function (time)
 {
 	if ( undefined == this.trans )
@@ -679,6 +774,10 @@ AsmState.prototype.grabClip = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: Install the clip to the assembly
+ * @param {number} Number of milliseconds since the last update.
+ */
 AsmState.prototype.installClip = function (time)
 {
 	if ( undefined == this.trans )
@@ -703,6 +802,10 @@ AsmState.prototype.installClip = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: Pick up the gum from the table and align it for isntallation.
+ * @param {number} Number of milliseconds since the last update
+ */
 AsmState.prototype.grabGum = function (time)
 {
 	if ( undefined == this.trans )
@@ -726,7 +829,10 @@ AsmState.prototype.grabGum = function (time)
 		this.handler = this.installGum;
 	}
 }
-
+/**
+ * Assembly sub state: Install the gum to the assembly
+ * @param {number} Number of milliseconds since the last update.
+ */
 AsmState.prototype.installGum = function (time)
 {
     if ( undefined == this.trans )
@@ -751,6 +857,10 @@ AsmState.prototype.installGum = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: Animate testing of the pen (going out)
+ * @param {number} Number of milliseconds since the last update.
+ */
 AsmState.prototype.testOut = function (time)
 {
     if ( undefined == this.trans )
@@ -779,6 +889,10 @@ AsmState.prototype.testOut = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: hold the assembly in position.
+ * @param {number} Number of milliseconds since the last update.
+ */
 AsmState.prototype.holdBeforeTestIn = function (time)
 {
 	if ( this.currentLapse == undefined )
@@ -795,6 +909,10 @@ AsmState.prototype.holdBeforeTestIn = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: Animate testing of the pen (going in)
+ * @param {number} Number of milliseconds since the last update.
+ */
 AsmState.prototype.testIn = function (time)
 {
 	if ( undefined == this.trans )
@@ -823,6 +941,10 @@ AsmState.prototype.testIn = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: hold the assembly in position.
+ * @param {number} Number of milliseconds since the last update.
+ */
 AsmState.prototype.idle = function (time)
 {
 	if ( this.currentLapse == undefined )
@@ -839,6 +961,11 @@ AsmState.prototype.idle = function (time)
 	}
 }
 
+/**
+ * Assembly sub state: Place the assembly on the table and move the camera away from the desk
+ * in preparation for exiting the assembly state
+ * @param {number} Number of milliseconds since the last update.
+ */
 AsmState.prototype.placeOnTable = function (time)
 {
 	if ( undefined == this.trans )
@@ -900,6 +1027,10 @@ AsmState.prototype.placeOnTable = function (time)
 	this.camera.setLookAt(this.tempLookAt[0], this.tempLookAt[1], this.tempLookAt[2]);
 }
 
+/**
+ * Assembly sub state: Fire the signal to leave the assembly state
+ * @param {number} Number of milliseconds since the last update
+ */
 AsmState.prototype.done = function (time)
 {
 	this.fireSignal("exitAsm");

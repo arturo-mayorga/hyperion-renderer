@@ -59,19 +59,31 @@ function GCameraController()
     document.addEventListener('keydown',this.onKeyDown.bind(this),false);
     document.addEventListener("keyup",this.onKeyUp.bind(this),false);
 }
-	
-GCameraController.prototype.onKeyDown = function (e)
+
+/**
+ * Called when a key is pressed on the keyboard
+ * @param {KeyboardEvent} Event containing the key that was pressed
+ */ 
+GCameraController.prototype.onKeyDown = function ( e )
 {
     this.handler = this.keydownMap[e.keyCode];
     if (this.handler) { this.handler(); }
 }
 
+/**
+ * Called when a key is released on the keyboard
+ * @param {KeyboardEvent} Event containing the key that was pressed
+ */ 
 GCameraController.prototype.onKeyUp = function (e)
 {
     this.handler = this.keyupMap[e.keyCode];
     if (this.handler) { this.handler(); }
 }
 
+/**
+ * Bind a camera to this controller
+ * @param {GCamera} Camera object to bind to this controller
+ */
 GCameraController.prototype.bindCamera = function( camera )
 {
     var lookAt = vec3.create();
@@ -83,8 +95,11 @@ GCameraController.prototype.bindCamera = function( camera )
                    lookAt, this.eyePos );
 }
 
-
-GCameraController.prototype.update = function(elapsedTime)
+/**
+ * Update the camera state
+ * @param {number} Number of milliseconds since the last call.
+ */
+GCameraController.prototype.update = function( elapsedTime )
 {
     if ( this.camera == undefined ) return;
     

@@ -10,8 +10,23 @@ FsmSignalObserver.prototype.onFsmSignal = function(signal) {};
 function FsmState() 
 {
 }
-FsmState.prototype.update = function (time) {};
+
+/**
+ * Update the state machine
+ * @param {number} Number of milliseconds sine the last update
+ */
+FsmState.prototype.update = function ( time ) {};
+
+/**
+ * This function is called each time this state 
+ * is entered
+ */
 FsmState.prototype.enter = function () {};
+
+/**
+ * This function is called each time this state
+ * is exited
+ */
 FsmState.prototype.exit = function () {};
 
 /**
@@ -100,9 +115,10 @@ FsmMachine.prototype.onFsmSignal = function( signal )
 };
 
 /**
+ * Set the current state
  * @param {string} stateName Name of the new state to transition to
  */
-FsmMachine.prototype.setState = function ( stateNam )
+FsmMachine.prototype.setState = function ( stateName )
 {
 	if (this.currentStateName != "")
 	{
@@ -118,7 +134,7 @@ FsmMachine.prototype.setState = function ( stateNam )
  * Update the state machine
  * @param {number} Number of milliseconds sine the last update
  */
-FsmMachine.prototype.update = function (time) 
+FsmMachine.prototype.update = function ( time ) 
 {
 	if (this.currentStateName == "") return;
 	// update the current state
@@ -150,5 +166,15 @@ FsmMachine.prototype.update = function (time)
 		this.currentStateName = nextStateName;
 	}
 };
+
+/**
+ * This function is called each time this state 
+ * is entered
+ */
 FsmMachine.prototype.enter = function () {};
+
+/**
+ * This function is called each time this state
+ * is exited
+ */
 FsmMachine.prototype.exit = function () {};

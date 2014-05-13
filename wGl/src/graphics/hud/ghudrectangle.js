@@ -13,6 +13,7 @@ GHudRectangle.prototype.bindToContext = GHudWidget.prototype.bindToContext;
 GHudRectangle.prototype.setDrawRec    = GHudWidget.prototype.setDrawRec;
 
 /**
+ * Set the color for this hud rectangle
  * @param {number} r Red component
  * @param {number] g Green component
  * @param {number} b Blue component
@@ -22,7 +23,13 @@ GHudRectangle.prototype.setColor = function(r, g, b, a)
 {
 	this.bgColor[0] = r; this.bgColor[1] = g;
 	this.bgColor[2] = b; this.bgColor[3] = a;
-}
+};
+
+/**
+ * Draw the rectangle
+ * @param {Array.<number>} Array of numbers representing a 3 by 3 matrix
+ * @param {GShader} Shader program to use for drawing this rectangle
+ */
 GHudRectangle.prototype.draw = function( mat, shader ) 
 {
 	mat3.multiply(this.drawTransform, mat, this.transform);

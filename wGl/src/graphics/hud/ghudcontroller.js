@@ -6,7 +6,19 @@ function GHudWidget()
     this.gl = undefined;
     this.transform = mat3.create();
 }
-GHudWidget.prototype.draw = function( mat ) {};
+
+/**
+ * Draw this widget using the provided transform matrix and shader
+ * @param {Array.<number>} List of numbers representing the 3 by 3 transform matrix
+ * @param {GShader} Shader program to use for drawing this group
+ */
+GHudWidget.prototype.draw = function( mat, shader ) {};
+
+/**
+ * Bind the current widget to the webgl context and buffer to use for drawing
+ * @param {WebGLRenderingContext}
+ * @param {WebGLBuffer}
+ */
 GHudWidget.prototype.bindToContext = function( gl, recIdxBuffer ) 
 {
 	this.recIndxBuffer = recIdxBuffer;
@@ -14,15 +26,16 @@ GHudWidget.prototype.bindToContext = function( gl, recIdxBuffer )
 };
 
 /**
- * @param {number} x X position to be use for placement
- * @param {number} y Y Position to be used for placement
- * @param {number} width Width value to use for the drawing rec
- * @param {number} height Height value to be used for the drawing rec
+ * Set the drawing rectangle area
+ * NOTE: The values passed in are meant to be between 0 and 1
+ * currently there are no plans to add debug assertions
+ * @param {number} X position to be use for placement
+ * @param {number} Y Position to be used for placement
+ * @param {number} Width value to use for the drawing rec
+ * @param {number} Height value to be used for the drawing rec
  */
 GHudWidget.prototype.setDrawRec = function ( x, y, width, height )
 {
-	// the values passed in are meant to be between 0 and 1
-	// currently there are no plans to add debug assertions
     mat3.identity(this.transform);
 	mat3.translate(this.transform, this.transform, [x, y]);
 	mat3.scale(this.transform,this.transform, [width, height]);  
@@ -42,11 +55,16 @@ function GHudGroup()
 
 GHudGroup.prototype.setDrawRec = GHudWidget.prototype.setDrawRec;
 
-GHudGroup.prototype.bindToContext = function(gl, recIdxBuffer)
+/**
+ * Bind the current group to the webgl context and buffer to use for drawing
+ * NOTE: The expectation is that groups will not need to render themselves
+ * they will simply maintain a transformation hierarchy and delegate 
+ * all actual drawing to their children.
+ * @param {WebGLRenderingContext}
+ * @param {WebGLBuffer}
+ */
+GHudGroup.prototype.bindToContext = function( gl, recIdxBuffer )
 {
-   // the expectation is that groups will not need to render themselves
-   // they will simply maintain a transformation hierarchy and delegate 
-   // all actual drawing to their children.
    var childCount = this.children.length;
     for (var i = 0; i < childCount; ++i)
     {
@@ -54,6 +72,11 @@ GHudGroup.prototype.bindToContext = function(gl, recIdxBuffer)
     }
 }
 
+/**
+ * Draw this group using the provided transform matrix and shader
+ * @param {Array.<number>} List of numbers representing the 3 by 3 transform matrix
+ * @param {GShader} Shader program to use for drawing this group
+ */
 GHudGroup.prototype.draw = function( transform, shader )
 {
     mat3.multiply(this.drawTransform, transform, this.transform);
@@ -66,16 +89,24 @@ GHudGroup.prototype.draw = function( transform, shader )
     }
 }
 
-GHudGroup.prototype.addChild = function(child)
+/**
+ * Add the provided child to the HUD
+ * @param {GHudRectangle} Child to add to the HUD
+ */
+GHudGroup.prototype.addChild = function( child )
 {
     child.bindToContext(this.gl, this.recIndxBuffer);
     this.children.push(child);
-}
+};
 
-GHudGroup.prototype.removeChild = function(child)
+/**
+ * Remove the provided child from the HUD
+ * @param {GHudRectangle} Child to remove from the HUD
+ */
+GHudGroup.prototype.removeChild = function( child )
 {
 	this.children.splice(this.children.indexOf(child),1);
-}
+};
 
 
 /**
@@ -96,7 +127,11 @@ GHudController.prototype.group_bindToContext = GHudGroup.prototype.bindToContext
 GHudController.prototype.addChild            = GHudGroup.prototype.addChild;
 GHudController.prototype.removeChild         = GHudGroup.prototype.removeChild;
 
-GHudController.prototype.bindToContext = function (gl)
+/**
+ * Called to bind this HUD controller to a gl context
+ * @param {WebGLRenderingContext} Context to bind to this HUD controller
+ */
+GHudController.prototype.bindToContext = function ( gl )
 {
 	this.gl = gl;
     this.recVertBuffer = gl.createBuffer();
@@ -132,9 +167,13 @@ GHudController.prototype.bindToContext = function (gl)
     this.recIndxBuffer.numItems = 6;
     
     this.group_bindToContext(gl, this.recIndxBuffer);
-}
+};
 
-GHudController.prototype.draw = function(shader)
+/**
+ * Draw the heads up display
+ * @param {GShader} Shader program to use for drawing the HUD
+ */
+GHudController.prototype.draw = function( shader )
 {
     var gl = this.gl; 
     gl.activeTexture(gl.TEXTURE0);
@@ -152,6 +191,6 @@ GHudController.prototype.draw = function(shader)
                            this.recTextBuffer.itemSize, gl.FLOAT, false, 0, 0);
     
     this.group_draw(this.transform, shader);
-}
+};
 
 

@@ -10,10 +10,14 @@ function GRenderStrategy()
  */
 GRenderStrategy.prototype.isReady = function() {return false;};
 
+/**
+ * Request to reload the current strategy
+ */
 GRenderStrategy.prototype.reload = function() {};
 
 
 /**
+ * Draw the current strategy
  * @param {GScene} scene Scene object that needs to be drawn
  * @param (GHudController} hud Hud controller that needs to be drawn
  */
@@ -21,8 +25,9 @@ GRenderStrategy.prototype.draw = function ( scene, hud ) {};
 
 /**
  * @constructor
+ * @param {WebGLRenderingContext}
  */
-function GRenderStrategyFactory(gl)
+function GRenderStrategyFactory( gl )
 {
     this.gl = gl;
     this.strategyMap = 
@@ -34,7 +39,9 @@ function GRenderStrategyFactory(gl)
 }
 
 /**
- * @returns {GRenderStrategy}
+ * Create a new render strategy using the given name
+ * @param {string}
+ * @return {GRenderStrategy}
  */
 GRenderStrategyFactory.prototype.createByName = function ( name )
 {
@@ -48,7 +55,7 @@ GRenderStrategyFactory.prototype.createByName = function ( name )
 };
 
 /**
- * @returns {GRenderStrategy}
+ * @return {GRenderStrategy}
  */
 GRenderStrategyFactory.prototype.creteBestFit = function ()
 { 

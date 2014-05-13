@@ -8,7 +8,17 @@ IGRenderPassCmd.prototype.run = function( scene ) {};
  * @interface
  */
 function IGRenderPassCmdCameraController() {}
+
+/**
+ * Get the camera managed by this controller
+ * @return {GCamera} camera being managed by this controller
+ */
 IGRenderPassCmdCameraController.prototype.getCamera = function() {};
+
+/**
+ * Bind the controller to a context for rendering
+ * @param {WebGLRenderingContext} context to use for this controller
+ */
 IGRenderPassCmdCameraController.prototype.bindToContext = function( gl ) {};
 
 /**
@@ -29,11 +39,19 @@ function GLightBasedCamCtrl()
     this.lightIndex = 0;
 }
 
+/**
+ * Implementation of IGRenderPassCmdCameraController.prototype.bindToContext
+ * @param {WebGLRenderingContext} context to use for this controller
+ */
 GLightBasedCamCtrl.prototype.bindToContext = function( gl ) 
 {
     this.camera.bindToContext( gl );
 };
 
+/**
+ * Update this camera controller 
+ * @param {GScene} scene to use while updating this controller
+ */
 GLightBasedCamCtrl.prototype.update = function( scene )
 {
     var light = scene.getLights()[this.lightIndex];
@@ -49,16 +67,32 @@ GLightBasedCamCtrl.prototype.update = function( scene )
     }
 };
 
+/** 
+ * Set the up direction from the perspective of the light
+ * @param {number] X component of the direction
+ * @param {number} Y component of the direction
+ * @param {number} Z component of the direction
+ */
 GLightBasedCamCtrl.prototype.setUp = function( x, y, z )
 {
     this.upDir[0] = x; this.upDir[1] = y; this.upDir[2] = z;
 };
 
+/**
+ * Set the look at direction from the perspective of the light
+ * @param {number} X component of the direction
+ * @param {number} Y component of the direction
+ * @param {number} Z component of the direction
+ */
 GLightBasedCamCtrl.prototype.setLookAtDir = function( x, y, z )
 {
     this.lookAtDir[0] = x; this.lookAtDir[1] = y; this.lookAtDir[2] = z;
 };
 
+/**
+ * Implementation of IGRenderPassCmdCameraController.prototype.getCamera
+ * @return {GCamera} camera being managed by this controller
+ */
 GLightBasedCamCtrl.prototype.getCamera = function() 
 {
     return this.camera;
@@ -73,6 +107,10 @@ function GRenderPassClearCmd( gl, frameBuffer )
      this.gl = gl;
 }
 
+/**
+ * @constructor
+ * @param {GScene} Scene object to run this pass command against
+ */
 GRenderPassClearCmd.prototype.run = function( scene )
 {
     var gl = this.gl;
@@ -83,6 +121,9 @@ GRenderPassClearCmd.prototype.run = function( scene )
 
 /**
  * @constructor
+ * @param {WebGLRenderingContext} Context to use for rendering
+ * @param {GShader} Shader program to use for this pass
+ * @param {GFrameBuffer} Target frame buffer object for this pass
  */
 function GGeometryRenderPassCmd( gl, program, frameBuffer )
 {
@@ -91,6 +132,10 @@ function GGeometryRenderPassCmd( gl, program, frameBuffer )
     this.frameBuffer = frameBuffer;
 }
 
+/**
+ * Execute this pass
+ * @param {GScene} Scene object to run this pass command against
+ */
 GGeometryRenderPassCmd.prototype.run = function( scene )
 {
     var gl = this.gl; 
@@ -108,6 +153,10 @@ GGeometryRenderPassCmd.prototype.run = function( scene )
 
 /**
  * @constructor
+ * @param {WebGLRenderingContext} Context to use for rendering
+ * @param {GShader} Shader program to use for this pass
+ * @param {GFrameBuffer} Target frame buffer object for this pass
+ * @param {IGRenderPassCmdCameraController} camera controller for this pass
  */
 function GCustomCamGeometryRenderPassCmd( gl, program, frameBuffer, cameraController )
 {
@@ -117,6 +166,10 @@ function GCustomCamGeometryRenderPassCmd( gl, program, frameBuffer, cameraContro
     this.customCameraController = cameraController;
 }
 
+/**
+ * Execute this pass
+ * @param {GScene} Scene object to run this pass command against
+ */
 GCustomCamGeometryRenderPassCmd.prototype.run = function( scene )
 {
     var gl = this.gl; 
@@ -136,6 +189,10 @@ GCustomCamGeometryRenderPassCmd.prototype.run = function( scene )
 
 /**
  * @constructor
+ * @param {WebGLRenderingContext} Context to use for rendering
+ * @param {GShader} Shader program to use for this pass
+ * @param {GFrameBuffer} Target frame buffer object for this pass
+ * @param {Object} Object containing the screen geometry
  */
 function GPostEffectRenderPassCmd( gl, program, frameBuffer, screenGeometry )
 {
@@ -149,6 +206,14 @@ function GPostEffectRenderPassCmd( gl, program, frameBuffer, screenGeometry )
     this.setHRec( 0, 0, 1, 1, 0 );
 }
 
+/**
+ * Define the rendering rectangle for this pass
+ * @param {number} X component reprecenting the center of the rectangle
+ * @param {number} Y component reprecenting the center of the rectangle
+ * @param {number} With component in screen size percentage
+ * @param {number} Height component in screen size percentage
+ * @param {number} Rotation in radians
+ */
 GPostEffectRenderPassCmd.prototype.setHRec = function( x, y, w, h, r )
 {
     mat3.identity( this.hMatrix);
@@ -157,16 +222,28 @@ GPostEffectRenderPassCmd.prototype.setHRec = function( x, y, w, h, r )
 	mat3.rotate( this.hMatrix,this.hMatrix, r );
 };
 
+/**
+ * Add an input frame buffer that contains a texture that can be used as rendering input
+ * @param {GFrameBuffer}
+ */
 GPostEffectRenderPassCmd.prototype.addInputFrameBuffer = function( frameBuffer )
 {
     this.addInputTexture( frameBuffer.getGTexture() );
 };
 
+/**
+ * Add an input texture to use while rendering this pass
+ * @param {GTexture} texture to use for input
+ */
 GPostEffectRenderPassCmd.prototype.addInputTexture = function( texture )
 {
     this.textureList.push( {gTexture:texture, glTextureTarget:this.nextTextureInput++} );
 };
 
+/**
+ * Execute this pass
+ * @param {GScene} Scene objec to run tihs pass command against
+ */
 GPostEffectRenderPassCmd.prototype.run = function( scene )
 { 
     this.shaderProgram.activate();
@@ -185,6 +262,10 @@ GPostEffectRenderPassCmd.prototype.run = function( scene )
     this.shaderProgram.deactivate();
 };
 
+/**
+ * Helper function to draw the screen geometry
+ * @param {GShader} Shader program to use while drawing the screen
+ */
 GPostEffectRenderPassCmd.prototype.drawScreenBuffer = function( shader )
 {   
     var gl = this.gl;
@@ -237,6 +318,11 @@ GPostEffectRenderPassCmd.prototype.drawScreenBuffer = function( shader )
 
 /**
  * @constructor
+ * @param {WebGLRenderingContext} context to use for rendering
+ * @param {GShader} Shader program for rendeinrg this pass
+ * @param {GFrameBuffer} Frame buffer to render onto
+ * @param {Object} Object containing the screen geometry
+ * @param {GCamera} Camera representing the light that we are rendering through
  */
 function GPostEffectLitRenderPassCmd( gl, program, frameBuffer, screenGeometry, lightCamera )
 {
@@ -284,6 +370,9 @@ var GRenderPassCmd_lMvMatrix;
 var GRenderPassCmd_lPMatrix;
 var GRenderPassCmd_uniformMatrix;
 
+/**
+ * Inherited methods from GPostEffectRenderPassCmd
+ */
 GPostEffectLitRenderPassCmd.prototype.setHRec = 
     GPostEffectRenderPassCmd.prototype.setHRec;
 GPostEffectLitRenderPassCmd.prototype.addInputFrameBuffer = 
@@ -293,6 +382,10 @@ GPostEffectLitRenderPassCmd.prototype.addInputTexture =
 GPostEffectLitRenderPassCmd.prototype.drawScreenBuffer = 
     GPostEffectRenderPassCmd.prototype.drawScreenBuffer;
 
+/**
+ * Execute this pass
+ * @param {GScene} Scene object to run this pass command against
+ */
 GPostEffectLitRenderPassCmd.prototype.run = function( scene )
 { 
     this.shaderProgram.activate();

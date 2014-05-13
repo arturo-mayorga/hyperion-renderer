@@ -1,5 +1,6 @@
 /**
  * @constructor
+ * @param {Object}
  */
 function GFrameBuffer( config )
 {
@@ -19,7 +20,13 @@ function GFrameBuffer( config )
     this.cfg = config;
 }
 
-GFrameBuffer.prototype.create2dTexture = function (filter, format, type)
+/**
+ * Helper function to create a 2d texture
+ * @param {number} Filter to use for the new texture
+ * @param {number} Format to use for the new texture
+ * @param {number} Datatype for the new texture
+ */
+GFrameBuffer.prototype.create2dTexture = function ( filter, format, type )
 {
     var gl = this.cfg.gl;
     var texture = gl.createTexture();
@@ -33,6 +40,10 @@ GFrameBuffer.prototype.create2dTexture = function (filter, format, type)
     return texture;
 };
 
+/**
+ * Add a texture to this frame buffer
+ * @param {Object} configuration object for the new texture
+ */
 GFrameBuffer.prototype.addBufferTexture = function ( cfg )
 { 
     var gl = this.cfg.gl;
@@ -55,6 +66,9 @@ GFrameBuffer.prototype.addBufferTexture = function ( cfg )
     }
 };
 
+/**
+ * Complete the creation of this frame buffer and make it ready for use
+ */
 GFrameBuffer.prototype.complete = function ()
 {
     var gl = this.cfg.gl;
@@ -75,6 +89,9 @@ GFrameBuffer.prototype.complete = function ()
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 };
 
+/**
+ * Bind the current frame buffer for rendering
+ */
 GFrameBuffer.prototype.bindBuffer = function ()
 {
     var gl = this.cfg.gl;
@@ -82,19 +99,33 @@ GFrameBuffer.prototype.bindBuffer = function ()
     gl.viewport(0, 0, this.cfg.width, this.cfg.height);
 };
 
+/**
+ * Release the current buffer
+ */
 GFrameBuffer.prototype.unbindBuffer = function ()
 {
     var gl = this.cfg.gl;
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 };
 
-GFrameBuffer.prototype.bindTexture = function ( id, name )
+/**
+ * Low level texture binding for textures in this frame buffer
+ * @param {number} Texture unit to bind to
+ * @param {string} Name of the texture that we want to bind
+ */
+GFrameBuffer.prototype.bindTexture = function ( texture, name )
 {
     var gl = this.cfg.gl;
-    gl.activeTexture(id);
+    gl.activeTexture(texture);
     gl.bindTexture(gl.TEXTURE_2D, this.textures[name]);
 };
 
+/**
+ * Get the GTexture object for the requested texture in this frame buffer
+ * The texture is created at the time of the first request
+ * @param {string=} name of the texture being requested
+ * @return {GTexture}
+ */
 GFrameBuffer.prototype.getGTexture = function ( name )
 {
     var _name = (undefined == name)?"color":name;

@@ -1,7 +1,7 @@
 /**
  * @constructor
  */
-function GContext(canvas)
+function GContext( canvas )
 {
 	this.scene            = undefined;
 	this.gl               = undefined;
@@ -33,24 +33,36 @@ function GContext(canvas)
     gl.whiteTexture = whiteTexture;
 };
 	
+/**
+ * Set the Scene for this context
+ * @param {GScene} Scene that is being assigned to this context
+ */
 GContext.prototype.setScene = function (scene_)
 {
     this.scene = scene_;
     this.scene.bindToContext(this.gl);
 };
 
+/**
+ * Set the HUD for this context
+ * @param {GHudController} Controller that is being assigned to this context
+ */
 GContext.prototype.setHud = function ( hud_ )
 {
     this.hud = hud_;
     this.hud.bindToContext(this.gl);
 };
 
+/**
+ * Draw the current context with it's scene and HUD elements
+ */
 GContext.prototype.draw = function()
 {
     this.renderStrategy.draw(this.scene, this.hud);
 };
 
 /**
+ * Check if the context is ready for rendering
  * @returns {boolean}
  */
 GContext.prototype.isReady = function()
@@ -58,6 +70,10 @@ GContext.prototype.isReady = function()
     return this.renderStrategy.isReady();
 };
 
+/**
+ * Reoload the current render strategy.  This is useful for doing things like
+ * reloading the shader programs without having to restart the application
+ */
 GContext.prototype.reloadRenderStrategy = function()
 {
     this.renderStrategy.reload();

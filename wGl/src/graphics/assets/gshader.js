@@ -1,5 +1,7 @@
 /**
  * @constructor
+ * @param {string} Source for the vertex shader
+ * @param {string} Source for the fragment shader
  */
 function GShader(vertex, fragment)
 {
@@ -7,6 +9,13 @@ function GShader(vertex, fragment)
     this.fragment = fragment;
 }
 
+/**
+ * Create the shader object and send to the GPU. This has to be called once for
+ * the vertex shader and once for the fragment shader.
+ * @param {string} source for this shader
+ * @param {number} Constant containing the shader type
+ * @return {WebGLShader}
+ */
 GShader.prototype.getShader = function (shaderScript, shaderType) 
 {
     var gl = this.gl;
@@ -24,13 +33,15 @@ GShader.prototype.getShader = function (shaderScript, shaderType)
     }
 
     return shader;
-}
+};
 
-
+/**
+ * Destroy this shader and return the system resource to the GPU.
+ * NOTE: once this function is used the GShader object
+ * is no longer valid and should be discarted
+ */
 GShader.prototype.destroy = function ()
 {
-    // NOTE: once this function is used the GShader object
-    // is no longer valid and should be discarted
     var gl = this.gl;
     
     gl.detachShader(this.glProgram, this.vShader);
@@ -38,9 +49,13 @@ GShader.prototype.destroy = function ()
     gl.deleteProgram(this.glProgram);
     gl.deleteShader(this.vShader);
     gl.deleteShader(this.fShader);
-}
+};
 
-GShader.prototype.bindToContext = function (gl)
+/**
+ * Called to bind this shader program to a gl context
+ * @param {WebGLRenderingContext} Context to bind to this texture
+ */
+GShader.prototype.bindToContext = function ( gl )
 {
     this.gl = gl;
     
@@ -98,6 +113,10 @@ GShader.prototype.bindToContext = function (gl)
     this.fShader = fragmentShader;
 }
 
+/**
+ * This needs to be called when switching to a different shader program to release
+ * the attribute bindings
+ */
 GShader.prototype.deactivate = function()
 {
     var gl = this.gl;
@@ -121,6 +140,10 @@ GShader.prototype.deactivate = function()
 	}
 }
 
+/**
+ * This needs to be called when starting to use this shader program to activate
+ * the attribute bindings
+ */
 GShader.prototype.activate = function()
 {
     var gl = this.gl;

@@ -1,6 +1,8 @@
 
 /**
  * @constructor
+ * @param {Array.<string>} Array of material arguments to use while creating this texture.
+ * @param {string} Path to the location of the texture resource
  */
 function GTexture( mtlargs, path ) 
 {
@@ -9,6 +11,10 @@ function GTexture( mtlargs, path )
     this.processArgs( mtlargs );
 }
 
+/** 
+ * This function handles the arguments sent to the constructor
+ * @param {Array.<string>} Array of material arguments to use while creating this texture.
+ */
 GTexture.prototype.processArgs = function( args )
 {
     if ( undefined == args ) return;
@@ -28,6 +34,12 @@ GTexture.prototype.processArgs = function( args )
     }
 };
 	
+/**
+ * Draw the current texture
+ * @param {number}
+ * @param {WebGLUniformLocation|null} Uniform to the texture
+ * @param {WebGLUniformLocation|null} Uniform to the scale value of the texture
+ */
 GTexture.prototype.draw = function(glTextureTarget, textureUniform, scaleUniform)
 {    
     if (undefined != this.glTHandle &&
@@ -48,11 +60,18 @@ GTexture.prototype.draw = function(glTextureTarget, textureUniform, scaleUniform
     }
 }
 
+/**
+ * Stop the binding to this texture
+ */
 GTexture.prototype.release = function()
 {
     this.gl.bindTexture(this.gl.TEXTURE_2D, null);
 }
 
+/**
+ * Called to bind this texture to a gl context
+ * @param {WebGLRenderingContext} Context to bind to this texture
+ */
 GTexture.prototype.bindToContext = function( gl )
 {
     this.gl = gl;
@@ -60,11 +79,18 @@ GTexture.prototype.bindToContext = function( gl )
     this.loadTexture();
 }
 
+/**
+ * Get the name for this texture
+ * @return {string}
+ */
 GTexture.prototype.getName = function()
 {
     return this.name;
 }
 
+/**
+ * Start the loading process for this texture (usually from a web serever)
+ */
 GTexture.prototype.loadTexture = function() 
 {   
     if ( undefined != this.path &&
@@ -76,6 +102,9 @@ GTexture.prototype.loadTexture = function()
     }
 }
 
+/**
+ * This is called as an async call whenever the image has been downloaded from the web server.
+ */
 GTexture.prototype.handleTextureLoaded = function() 
 {
     if (this.gl !== undefined)
@@ -86,19 +115,27 @@ GTexture.prototype.handleTextureLoaded = function()
     this.image.loaded = true;
 }
 
+/**
+ * This function is used to send the texture data over to the GPU
+ */
 GTexture.prototype.sendTextureToGl = function()
 {
-    var _gl = this.gl;
-    this.glTHandle = _gl.createTexture();
+    var gl = this.gl;
+    this.glTHandle = gl.createTexture();
     
-    _gl.bindTexture(_gl.TEXTURE_2D, this.glTHandle);
-    _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, _gl.RGBA, _gl.UNSIGNED_BYTE, this.image);
-    _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MAG_FILTER, _gl.LINEAR);
-    _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR_MIPMAP_NEAREST);
-    _gl.generateMipmap(_gl.TEXTURE_2D);
-    _gl.bindTexture(_gl.TEXTURE_2D, null);
+    gl.bindTexture(gl.TEXTURE_2D, this.glTHandle);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
+/**
+ * This is to provide an alternate construction mechanism and lets the caller set
+ * the WebGLTexture value. Usually needed for frame buffer constructions
+ * @param {WebGLTexture}
+ */
 GTexture.prototype.setTextureHandle = function( handle )
 {
     this.glTHandle = handle;

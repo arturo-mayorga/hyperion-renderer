@@ -12,6 +12,7 @@ IGRenderPassCmdCameraController.prototype.getCamera = function() {};
 IGRenderPassCmdCameraController.prototype.bindToContext = function( gl ) {};
 
 /**
+ * @constructor
  * @implements {IGRenderPassCmdCameraController}
  */
 function GLightBasedCamCtrl()

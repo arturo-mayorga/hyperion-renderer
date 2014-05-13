@@ -1,10 +1,13 @@
 /**
  * @constructor
+ * @param {GScene}  Scene object that will receive the loaded GMaterial objects
  */
 function GMtlLoader( scene_ )
 {
     /**
      * @constructor
+     * @param {Array.<string> Contents of the mtl file.  Each element is a new line
+     * @param {string} Path to the location of the mtl resources
      */
 	this.GMtlReader = function( mtlStrA, path )
 	{
@@ -42,22 +45,36 @@ function GMtlLoader( scene_ )
             }
         }
 	}
-		
+	
+    /**
+     * Get the materials after they are loaded
+     * @return {Object} A map containing GMaterial instances (hashed by their material name.
+     */
     this.GMtlReader.prototype.getMaterials = function()
     {
         return this.materials;
-    }
+    };
     
-    this.GMtlReader.prototype.process_comment = function (lineA)
-    {
-    }
+    /**
+     * Called when processing a comment (line starting with '#')
+     * @param {Array.<string>} Current line (tokenized).
+     */
+    this.GMtlReader.prototype.process_comment = function ( lineA ){};
     
+    /**
+     * Called when processing a new material (line starting with 'newmtl')
+     * @param {Array.<string>} Current line (tokenized).
+     */
     this.GMtlReader.prototype.process_newmtl = function ( lineA )
     {
         this.currentMtl = new GMaterial( lineA[1] );
         this.materials[lineA[1]] = this.currentMtl;
     }
     
+    /**
+     * Called when processing an ambient color property (line starting with 'ka')
+     * @param {Array.<string>} Current line (tokenized).
+     */
     this.GMtlReader.prototype.process_ka = function( lineA )
     {
         this.currentMtl.setKa( [parseFloat(lineA[1]),
@@ -65,6 +82,10 @@ function GMtlLoader( scene_ )
                                 parseFloat(lineA[3])] );
     }
     
+    /**
+     * Called when processing a diffuse color property (line starting with 'kd')
+     * @param {Array.<string>} Current line (tokenized).
+     */
     this.GMtlReader.prototype.process_kd = function( lineA )
     {
         this.currentMtl.setKd( [parseFloat(lineA[1]),
@@ -72,6 +93,10 @@ function GMtlLoader( scene_ )
                                 parseFloat(lineA[3])] );
     }
     
+    /**
+     * Called when processing a specular color (line starting with 'ks')
+     * @param {Array.<string>} Current line (tokenized).
+     */
     this.GMtlReader.prototype.process_ks = function( lineA )
     {
         this.currentMtl.setKs( [parseFloat(lineA[1]),
@@ -79,6 +104,10 @@ function GMtlLoader( scene_ )
                                 parseFloat(lineA[3])] );
     }
     
+    /**
+     * Called when processing a diffuse color texture (line starting with 'map_kd')
+     * @param {Array.<string>} Current line (tokenized).
+     */
     this.GMtlReader.prototype.process_mapKd = function( lineA )
     {
         var texArgs = [];
@@ -97,6 +126,11 @@ function GMtlLoader( scene_ )
 	this.target = scene_;
 }
 	
+/**
+ * Load a new material file using the current bindings
+ * @param {string} Path to the material file and it's assets
+ * @param {string} Material file that needs to be loaded
+ */
 GMtlLoader.prototype.loadMtl = function ( path, source )
 {
     this.client.open('GET', path + source);

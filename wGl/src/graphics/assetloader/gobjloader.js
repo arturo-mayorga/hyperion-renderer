@@ -4,7 +4,8 @@
 function GObjLoaderObserver () {}
 
 /**
- * @param {GObjLoader}
+ * This function gets called whenever the observed loader completes the loading process
+ * @param {GObjLoader} Loader object completing the load operation.
  */
 GObjLoaderObserver.prototype.onObjLoaderCompleted = function ( loader ) {};
 
@@ -12,7 +13,12 @@ GObjLoaderObserver.prototype.onObjLoaderCompleted = function ( loader ) {};
  * @interface
  */
 function GObjReaderObserver () {}
-GObjReaderObserver.prototype.onNewMeshAvailable = function ( mesh ) {} 
+
+/**
+ * This function is called whenever a new VboMesh object is loaded
+ * @param {VboMesh} New object that was just made available
+ */
+GObjReaderObserver.prototype.onNewMeshAvailable = function ( mesh ) {};
 
 /**
  * @param {GObjLoader}
@@ -24,12 +30,15 @@ GObjLoaderObserver.prototype.onObjLoaderProgress = function ( loader, progress )
 /**
  * @constructor
  * @implements {GObjReaderObserver}
+ * @param {GScene} Target scene for this loader
+ * @param {GGroup} Target group for this loader
  */
 function GObjLoader( scene, group )
 {
 
     /**
      * @constructor
+     * @param {string} Name of this Vbo instance
      */
 	function VboMesh(name)
 	{
@@ -42,21 +51,37 @@ function GObjLoader( scene, group )
 		this.indices = [];
 	}
 		
+	/**
+	 * Sets the material name for this instance
+	 * @param {string} New name for this instance
+	 */
     VboMesh.prototype.setMtlName = function( matName )
     {
         this.matName = matName;
-    }
+    };
     
+    /**
+     * Returns the material name for this instance
+     * @return {string} The current name for this instance
+     */
     VboMesh.prototype.getMtlName = function()
     {
         return this.matName;
-    }
+    };
     
+    /**
+     * Returns the name of this instance
+     * @return {string} Instance name
+     */
     VboMesh.prototype.getName = function()
     {
         return this.name;
-    }
+    };
     
+    /**
+     * Returns the texture vertex buffer
+     * @return {Array.<number>} Buffer with texture vertex values
+     */
     VboMesh.prototype.getTVerBuffer = function()
     {
         var len = this.gVerts.length;
@@ -78,8 +103,12 @@ function GObjLoader( scene, group )
         }
         
         return ret;
-    }
+    };
     
+    /**
+     * Returns the vertex buffer
+     * @return {Array.<number>} Buffer with vertex values.
+     */
     VboMesh.prototype.getVertBuffer = function()
     {
         var len = this.gVerts.length;
@@ -94,8 +123,12 @@ function GObjLoader( scene, group )
         }
         
         return ret;
-    }
+    };
     
+    /**
+     * Returns the normals buffer
+     * @return {Array.<number>} Buffer with normal values.
+     */
     VboMesh.prototype.getNormBuffer = function()
     {
         var len = this.nVerts.length;
@@ -110,10 +143,15 @@ function GObjLoader( scene, group )
         }
         
         return ret;
-    }
+    };
 	
     /**
      * @constructor
+     * @param {string} Path to the location of this obj file's resources
+     * @param {Array.<string>} Lines of the obj file
+     * @param {GScene} Target scene for the loading process
+     * @param {GGroup} Target group for the loading process
+     * @param {GObjReaderObserver} Observer to the loading process
      */
 	this.GObjReader = function( path, objStrA, scene, group, observer )
 	{
@@ -140,7 +178,6 @@ function GObjLoader( scene, group )
 
 		this.currentIndex = 0;
 		
-		this.groupList = [];
 		this.groupMap = {};
 		
 		this.invertNormals = false;
@@ -161,8 +198,12 @@ function GObjLoader( scene, group )
 			"usemtl" :this.process_usemtl,
 			"invnv"  :this.process_invnv
 		}
-	}
+	};
 	
+	/**
+	 * Advance through the loading process
+	 * @param {number} Milliseconds since the last update
+	 */
 	this.GObjReader.prototype.update = function (time)
 	{
 	   
@@ -192,14 +233,14 @@ function GObjLoader( scene, group )
             this.isLoadComplete = true;
         }
         
-	}
-	
-	this.GObjReader.prototype.getMesh = function ()
-    {
-        return this.groupList;
-    }
-        
-    this.GObjReader.prototype.scrub = function(stra)
+	};
+     
+	/** 
+	 * Remove unimportant tokens from the token array
+	 * @param {Array.<string>} Token array
+	 * @return {Array.<string>} Scrubbed token array
+	 */
+    this.GObjReader.prototype.scrub = function( stra )
     {
         var len = stra.length;
         var ret = [];
@@ -211,14 +252,18 @@ function GObjLoader( scene, group )
             }
         }
         return ret;
-    }
+    };
     
+    /**
+     * This function is called while processing a comment line (starting with '#')
+     * @param {Array.<string>} 
+     */
+    this.GObjReader.prototype.process_comment = function( lineA ) {};
     
-    this.GObjReader.prototype.process_comment = function(lineA)
-    {
-    }
-    
-    
+    /**
+     * This function is called while processing a group line (starting with 'o' or 'g')
+     * @param {Array.<string>} 
+     */
     this.GObjReader.prototype.process_group = function(lineA)
     {
         this.invertNormals = false;
@@ -226,7 +271,6 @@ function GObjLoader( scene, group )
         if ( this.currentMesh != undefined )
         {
             this.groupMap[this.currentMesh.getName()] = this.currentMesh;
-            this.groupList.push(this.currentMesh);
 			this.observer.onNewMeshAvailable(this.currentMesh);
         }
         
@@ -250,32 +294,48 @@ function GObjLoader( scene, group )
         this.currentIndex = 0;	
         
         //console.debug("adding group: " + name);
-    }
+    };
     
+    /**
+     * This function is called while processing a vertex line (starting with 'v')
+     * @param {Array.<string>} 
+     */
     this.GObjReader.prototype.process_vert = function( lineA )
     {
         var vec = vec3.fromValues(parseFloat(lineA[1]),
                                   parseFloat(lineA[2]),
                                   parseFloat(lineA[3]));
         this.objGVerts.push(vec);
-    }
+    };
     
+    /**
+     * This function is called while processing a texture vertex line (starting with 'tv')
+     * @param {Array.<string>} 
+     */
     this.GObjReader.prototype.process_texVert = function( lineA )
     {
         var vec = vec2.fromValues(parseFloat(lineA[1]),
                                   parseFloat(lineA[2]));
                                   
         this.objTVerts.push(vec);
-    }
+    };
     
+    /**
+     * This function is called while processing a comment line (starting with 'vn')
+     * @param {Array.<string>} 
+     */
     this.GObjReader.prototype.process_normal = function( lineA )
     {
         var vec = vec3.fromValues(parseFloat(lineA[1]),
                                   parseFloat(lineA[2]),
                                   parseFloat(lineA[3]));
         this.objNormals.push(vec);
-    }
+    };
     
+    /**
+     * This function is called while processing a face line (starting with 'f')
+     * @param {Array.<string>} 
+     */
     this.GObjReader.prototype.process_face = function( lineA )
     {
 		++this.polyCount;
@@ -306,23 +366,35 @@ function GObjLoader( scene, group )
             this.currentMesh.tVerts.push(vtex);
             this.currentMesh.indices.push(this.currentIndex++);
         }
-    }
+    };
     
+    /**
+     * This function is called while processing a material line (starting with 'mtllib')
+     * @param {Array.<string>} 
+     */
     this.GObjReader.prototype.process_mtllib = function( lineA )
     {
         var ldr = new GMtlLoader(this.scene);
         ldr.loadMtl(this.path, lineA[1]);
-    }
+    };
     
+    /**
+     * This function is called while processing a use material line (starting with 'usemtl')
+     * @param {Array.<string>} 
+     */
     this.GObjReader.prototype.process_usemtl = function( lineA )
     {
         this.currentMesh.setMtlName( lineA[1] );
-    }
+    };
     
+    /**
+     * This function is called while processing a invert normals line (starting with 'invnv')
+     * @param {Array.<string>} 
+     */
     this.GObjReader.prototype.process_invnv = function( lineA )
     {
         this.invertNormals = true;
-    }
+    };
 
 	this.client = new XMLHttpRequest();
 	this.scene = scene;
@@ -338,7 +410,12 @@ function GObjLoader( scene, group )
 	this.objLinesProcessed = 0;
 	this.totalProgress = 0;
 }
-	
+
+/**
+ * This function loads an obj file
+ * @param {string} Path for the obj file and it's resources
+ * @source {string} Obj file that needs to be loaded
+ */
 GObjLoader.prototype.loadObj = function ( path, source )
 {
     this.isDownloadComplete = false;
@@ -364,10 +441,11 @@ GObjLoader.prototype.loadObj = function ( path, source )
 		}
     }.bind(this);
     this.client.send();
-}
+};
 
 /**
- * @param {number} time Time value
+ * Update this obj loader
+ * @param {number} Milliseconds since the last update
  */
 GObjLoader.prototype.update = function ( time )
 {
@@ -429,8 +507,12 @@ GObjLoader.prototype.update = function ( time )
 			this.isReaderReady = true;
         }
     }
-}
+};
 
+/**
+ * This function is called whenever a new VboMesh object is loaded
+ * @param {VboMesh} New object that was just made available
+ */
 GObjLoader.prototype.onNewMeshAvailable = function ( mesh )
 {
 	var obj = new GObject(mesh.getVertBuffer(),
@@ -441,15 +523,16 @@ GObjLoader.prototype.onNewMeshAvailable = function ( mesh )
                                       
 	obj.setMtlName(mesh.getMtlName());
 	this.group.addChild(obj);
-}
+};
 
 /**
+ * Set the observer for the loader
  * @param {GObjLoaderObserver} observer Observer that receives updates
  */
 GObjLoader.prototype.setObserver = function ( observer )
 {
     this.observer = observer;
-}
+};
 	
 
 

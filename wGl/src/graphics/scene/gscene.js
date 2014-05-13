@@ -9,11 +9,21 @@ function GLight()
     this.index = 0;
 }
 
+/**
+ * Set the index for this light
+ * @param {number} Index value for this light
+ */
 GLight.prototype.setIndex = function ( index )
 {
     this.index = index;
 };
 
+/**
+ * Set the position of this light
+ * @param {number} X component of the light position
+ * @param {number} Y component of the light position
+ * @param {number} Z component of the light position
+ */
 GLight.prototype.setPosition = function( x, y, z )
 {
     this.position[0] = x;
@@ -21,6 +31,10 @@ GLight.prototype.setPosition = function( x, y, z )
     this.position[2] = z;
 };
 
+/**
+ * Used to get the position of the light
+ * @param {Array.<number>} Out param that will contain the position of the light
+ */
 GLight.prototype.getPosition = function( position )
 {
     position[0] = this.position[0];
@@ -28,11 +42,19 @@ GLight.prototype.getPosition = function( position )
     position[2] = this.position[2];
 };
 
+/**
+ * Called to bind this light to a gl context
+ * @param {WebGLRenderingContext} Context to bind to this light
+ */
 GLight.prototype.bindToContext = function( gl )
 {
     this.gl = gl;
 };
 
+/**
+ * @param {Array.<number>} List of numbers representing the 4 by 4 view matrix
+ * @param {GShader} Shader to use to draw this light
+ */
 GLight.prototype.draw = function ( parentMvMat, shader )
 {
     vec3.transformMat4(this.uPosition, this.position, parentMvMat);
@@ -78,16 +100,28 @@ function GScene()
 	this.camera = undefined;
 }
 
+/**
+ * Returns the list of children attached to the scene
+ * @return {Array.<GGroup>} List of children attached to the scene
+ */
 GScene.prototype.getChildren = function()
 {
     return this.children;
 };
 
+/**
+ * Returns the list of lights attached to the scene
+ * @return {Array.<GLights>} List of lights attached to the scene
+ */
 GScene.prototype.getLights = function()
 {
     return this.lights;
 };
 
+/**
+ * Called to bind this scene to a gl context
+ * @param {WebGLRenderingContext} Context to bind to this scene
+ */
 GScene.prototype.bindToContext = function( gl )
 {
     this.gl = gl;
@@ -107,6 +141,10 @@ GScene.prototype.bindToContext = function( gl )
     }
 };
 
+/**
+ * Draw the lights on this scene
+ * @param {GShader} Shader to use for drawing the lights
+ */
 GScene.prototype.drawLights = function ( shader )
 {
     var lightCount = this.lights.length;
@@ -116,6 +154,11 @@ GScene.prototype.drawLights = function ( shader )
     }
 };
 
+/**
+ * Draw the geometry using the provided view matrix and shader
+ * @param {Array.<number>} Array of numbers that represent the 4 by 4 view matrix
+ * @param {GShader} Shader program to use for rendering
+ */
 GScene.prototype.drawGeometry = function ( parentMvMatrix, shader )
 {
     var childCount = this.children.length;
@@ -125,6 +168,11 @@ GScene.prototype.drawGeometry = function ( parentMvMatrix, shader )
     }
 };
 
+/**
+ * Draw the scene through a custom camera without having to attach it to the scene
+ * @param {GCamera} Camera to use for rendering
+ * @param {GShader} Shader to use for rendering
+ */
 GScene.prototype.drawThroughCamera = function ( camera, shader )
 {
     camera.draw( this.tempMatrix, shader );    
@@ -132,7 +180,10 @@ GScene.prototype.drawThroughCamera = function ( camera, shader )
     this.drawGeometry( this.tempMatrix, shader );
 };
 
-
+/**
+ * Render the scene with the provided shader program
+ * @param {GShader} Shader program to use for rendering
+ */
 GScene.prototype.draw = function( shader )
 {
     this.camera.draw( this.eyeMvMatrix, shader );
@@ -140,11 +191,19 @@ GScene.prototype.draw = function( shader )
     this.drawGeometry( this.eyeMvMatrix, shader );
 };
 
+/**
+ * Set the draw mode
+ * @param {number} Mode: gl.POINTS, gl.TRIANGLES etc 
+ */
 GScene.prototype.setDrawMode = function( mode )
 {
     this.drawMode = mode;
 };
 
+/**
+ * Add a new light to the scene
+ * @param {GLight} New light
+ */
 GScene.prototype.addLight = function( light )
 {
     light.bindToContext( this.gl );
@@ -152,6 +211,10 @@ GScene.prototype.addLight = function( light )
     this.lights.push( light );
 };
 
+/**
+ * Add a material to the scene
+ * @param {GMaterial} New material to add to the scene
+ */
 GScene.prototype.addMaterial = function( mat )
 {
     var gl = this.gl;
@@ -159,17 +222,29 @@ GScene.prototype.addMaterial = function( mat )
     this.materials[mat.getName()] = mat;
 };
 
+/**
+ * Add a child to the scene
+ * @param {GGroup|GObject} Child to add to the scene
+ */
 GScene.prototype.addChild = function( child )
 {
     child.bindToContext(this.gl);
     this.children.push(child);
 };
 
+/**
+ * Set the camera for the scene
+ * @param {GCamera}
+ */
 GScene.prototype.setCamera = function( camera )
 {
     this.camera = camera;
 };
 
+/**
+ * Return a reference to the camera in the scene
+ * @return {GCamera}
+ */
 GScene.prototype.getCamera = function()
 {
     return this.camera;

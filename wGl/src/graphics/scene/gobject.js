@@ -1,7 +1,12 @@
 /**
  * @constructor
+ * @param {Array.<number>} Buffer containing the vertices for this object
+ * @param {Array.<number>} Buffer containing the texture vertices for this object
+ * @param {Array.<number>} Buffer containing the normals for this object
+ * @param {Array.<number>} Buffer containing the indices for this object
+ * @param {string} Name for this object
  */
-function GObject(verts, tverts, normals, indices, name)
+function GObject( verts, tverts, normals, indices, name )
 {
     this.vertBuffer = undefined;
     this.tverBuffer = undefined;
@@ -22,22 +27,38 @@ function GObject(verts, tverts, normals, indices, name)
     this.normalMatrix = mat4.create();
 }
 
+/**
+ * Get the name of this object
+ * @param {string} The name of this object
+ */
 GObject.prototype.getName = function()
 {
     return this.name;
-}
+};
 
+/**
+ * Set the material name for this object to use
+ * @param {string} name of the material that should be used by this object
+ */
 GObject.prototype.setMtlName = function( mName )
 {
     this.mtlName = mName;
     this.material = undefined;
-}
+};
 
-GObject.prototype.setMvMatrix = function(mat)
+/**
+ * Set the model view matrix for this object
+ * @param {Array.<number>} Array of numbers representing the 4 by 4 model view matrix
+ */
+GObject.prototype.setMvMatrix = function( mat )
 {
     mat4.copy(this.mvMatrix, mat);
-}
+};
    
+/**
+ * Called to bind this object to a gl context
+ * @param {WebGLRenderingContext} Context to bind to this object
+ */
 GObject.prototype.bindToContext = function(gl_)
 {
     if (gl_ == undefined) return;
@@ -77,9 +98,16 @@ GObject.prototype.bindToContext = function(gl_)
         console.debug("gObject: index missmatch [" + this.name + "]");
         _valid = false;
     }
-}
+};
 
-GObject.prototype.draw = function(parentMvMat, materials, shader, drawMode)
+/**
+ * Draw this object
+ * @param {Array.<number>} List of numbers representing the parent 4 by 4 view matrix
+ * @param {Array.<GMaterial>} List of materials to use for rendering
+ * @param {GShader} Shader program to use for rendering
+ * @param {number} Draw mode for drawing the VBOs
+ */
+GObject.prototype.draw = function( parentMvMat, materials, shader, drawMode )
 {
    if ( !this.valid ) return;
    
@@ -149,6 +177,6 @@ GObject.prototype.draw = function(parentMvMat, materials, shader, drawMode)
     
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
     gl.drawElements(drawMode, this.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-}
+};
 
 

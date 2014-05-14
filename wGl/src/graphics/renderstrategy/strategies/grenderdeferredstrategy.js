@@ -340,34 +340,39 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     
     var cmds = [];
     
-    cmds.push( normalPass );
-    cmds.push( positionPass );
-    cmds.push( colorPass );
+    var preCmds = [];
+    var shadowCmds = [];
     
-    cmds.push( clearShadowmapPong );
+    var lightCmd = phongLightPass;
     
-    cmds.push( normalLSource );
-    cmds.push( shadowmapPassL );
-    cmds.push( normalRSource );
-    cmds.push( shadowmapPassR );
+    preCmds.push( normalPass );
+    preCmds.push( positionPass );
+    preCmds.push( colorPass );
     
-    cmds.push( normalFSource );
-    cmds.push( shadowmapPassF );
-    cmds.push( normalBSource );
-    cmds.push( shadowmapPassB );
+    shadowCmds.push( clearShadowmapPong );
     
-    cmds.push( normalUSource );
-    cmds.push( shadowmapPassU );
-    cmds.push( normalDSource );
-    cmds.push( shadowmapPassD );
+    shadowCmds.push( normalLSource );
+    shadowCmds.push( shadowmapPassL );
+    shadowCmds.push( normalRSource );
+    shadowCmds.push( shadowmapPassR );
     
-    cmds.push( clearShadowmap );
-    cmds.push( shadowBlurPing );
-    cmds.push( shadowBlurPong );
+    shadowCmds.push( normalFSource );
+    shadowCmds.push( shadowmapPassF );
+    shadowCmds.push( normalBSource );
+    shadowCmds.push( shadowmapPassB );
     
-    cmds.push( phongLightPass );
+    shadowCmds.push( normalUSource );
+    shadowCmds.push( shadowmapPassU );
+    shadowCmds.push( normalDSource );
+    shadowCmds.push( shadowmapPassD );
+    
+    shadowCmds.push( clearShadowmap );
+    shadowCmds.push( shadowBlurPing );
+    shadowCmds.push( shadowBlurPong );
      
-    this.passCmds = cmds;
+    this.preCmds = preCmds;
+    this.shadowCmds = shadowCmds;
+    this.lightCmd = lightCmd;
 };
 
 /**
@@ -384,11 +389,18 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     {
         this.lightCamControlers[key].update( scene );
     }
-  
-    for (var i = 0; i < this.passCmds.length; ++i)
+    
+    for ( var i in this.preCmds )
     {
-        this.passCmds[i].run( scene );
+        this.preCmds[i].run( scene );
     }
+    
+    for ( var i in this.shadowCmds )
+    {
+        this.shadowCmds[i].run( scene );
+    }
+    
+    this.lightCmd.run( scene );
     
     // HUD
     this.gl.disable( this.gl.DEPTH_TEST );

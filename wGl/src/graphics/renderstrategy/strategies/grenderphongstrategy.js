@@ -9,6 +9,9 @@ function GRenderPhongStrategy( gl )
     
 }
 
+/**
+ * Configures the strategy and starts the download process for the shader source
+ */
 GRenderPhongStrategy.prototype.configure = function()
 {
     this.shaderSrcMap = 
@@ -25,6 +28,9 @@ GRenderPhongStrategy.prototype.configure = function()
     }
 };
 
+/**
+ * Free and reload all the resource for this strategy
+ */
 GRenderPhongStrategy.prototype.reload = function()
 {
     this._isReady = false;
@@ -36,6 +42,10 @@ GRenderPhongStrategy.prototype.reload = function()
     this.configure();
 };
 
+/**
+ * Start the download process for the requested shader
+ * @param {string} source name of the shader that needs to be loaded
+ */
 GRenderPhongStrategy.prototype.loadShader = function(srcName)
 {
     var client = new XMLHttpRequest();
@@ -52,6 +62,10 @@ GRenderPhongStrategy.prototype.loadShader = function(srcName)
     client.send();
 };
 
+/**
+ * Checks if all the shader code has been downloaded from the web server
+ * and if so it starts the initilization process
+ */
 GRenderPhongStrategy.prototype.checkShaderDependencies = function()
 {
     for (var key in this.shaderSrcMap)
@@ -65,6 +79,9 @@ GRenderPhongStrategy.prototype.checkShaderDependencies = function()
     this.initialize();
 };
 
+/**
+ * Initialize this render strategy
+ */
 GRenderPhongStrategy.prototype.initialize = function()
 {   
     this.initTextureFramebuffer();
@@ -74,11 +91,19 @@ GRenderPhongStrategy.prototype.initialize = function()
     this._isReady = true;
 };
 
+/**
+ * Returns true if this strategy has loaded all required resource (shaders)
+ * and is ready for use
+ * @return {boolean}
+ */
 GRenderPhongStrategy.prototype.isReady = function()
 {
     return true == this._isReady;
 };
 
+/**
+ * Create the screen VBOs for drawing the screen
+ */
 GRenderPhongStrategy.prototype.initScreenVBOs = function()
 {
     var gl = this.gl;
@@ -122,6 +147,9 @@ GRenderPhongStrategy.prototype.initScreenVBOs = function()
 	this.hMatrix = mat3.create();
 };
 
+/**
+ * initialize the frame buffer and it's textures
+ */
 GRenderPhongStrategy.prototype.initTextureFramebuffer = function()
 {
     var gl = this.gl;
@@ -155,6 +183,10 @@ GRenderPhongStrategy.prototype.initTextureFramebuffer = function()
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 };
 
+/**
+ * Helper function to compile the shaders after all the source has been
+ * downloaded
+ */
 GRenderPhongStrategy.prototype.initShaders = function (shaderSrcMap) 
 {
     var gl = this.gl;
@@ -169,6 +201,10 @@ GRenderPhongStrategy.prototype.initShaders = function (shaderSrcMap)
     this.phongShader = phong;
 };
 
+/**
+ * Draw the screen buffer using the provided shader
+ * @param {GShader} Shader to use for drawing the screen buffer
+ */
 GRenderPhongStrategy.prototype.drawScreenBuffer = function(shader)
 {
     var gl = this.gl;
@@ -204,6 +240,11 @@ GRenderPhongStrategy.prototype.drawScreenBuffer = function(shader)
     gl.drawElements(gl.TRIANGLES, this.screenIndxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 };
 
+/**
+ * Draw the scene and hud elements using this strategy
+ * @param {GScene} Scene to draw with this strategy
+ * @param {GHudController} Hud to draw with this strategy
+ */
 GRenderPhongStrategy.prototype.draw = function ( scene, hud )
 {
     var gl = this.gl;

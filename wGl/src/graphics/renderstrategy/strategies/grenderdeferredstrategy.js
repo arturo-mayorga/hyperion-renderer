@@ -9,6 +9,9 @@ function GRenderDeferredStrategy( gl )
     
 }
 
+/**
+ * Configures the strategy and starts the download process for the shader source
+ */
 GRenderDeferredStrategy.prototype.configure = function()
 {
     // this map variable is to keep the closure compiler from getting confused.
@@ -38,6 +41,9 @@ GRenderDeferredStrategy.prototype.configure = function()
     }
 };
 
+/**
+ * Free and reload all the resource for this strategy
+ */
 GRenderDeferredStrategy.prototype.reload = function()
 {
     this._isReady = false;
@@ -51,7 +57,11 @@ GRenderDeferredStrategy.prototype.reload = function()
     this.configure();
 };
 
-GRenderDeferredStrategy.prototype.loadShader = function(srcName)
+/**
+ * Start the download process for the requested shader
+ * @param {string} source name of the shader that needs to be loaded
+ */
+GRenderDeferredStrategy.prototype.loadShader = function( srcName )
 {
     var client = new XMLHttpRequest();
     var _this = this;
@@ -67,6 +77,10 @@ GRenderDeferredStrategy.prototype.loadShader = function(srcName)
     client.send();
 };
 
+/**
+ * Checks if all the shader code has been downloaded from the web server
+ * and if so it starts the initilization process
+ */
 GRenderDeferredStrategy.prototype.checkShaderDependencies = function()
 {
     for (var key in this.shaderSrcMap)
@@ -80,6 +94,9 @@ GRenderDeferredStrategy.prototype.checkShaderDependencies = function()
     this.initialize();
 };
 
+/**
+ * Initialize this render strategy
+ */
 GRenderDeferredStrategy.prototype.initialize = function()
 {   
     this.initTextureFramebuffer();
@@ -90,11 +107,19 @@ GRenderDeferredStrategy.prototype.initialize = function()
     this._isReady = true;
 };
 
+/**
+ * Returns true if this strategy has loaded all required resource (shaders)
+ * and is ready for use
+ * @return {boolean}
+ */
 GRenderDeferredStrategy.prototype.isReady = function()
 {
     return true == this._isReady;
 };
 
+/**
+ * Create the screen VBOs for drawing the screen
+ */
 GRenderDeferredStrategy.prototype.initScreenVBOs = function()
 {
     var gl = this.gl;
@@ -145,6 +170,10 @@ GRenderDeferredStrategy.prototype.initScreenVBOs = function()
 	this.hMatrix = mat3.create();
 };
 
+/**
+ * Helper function to compile the shaders after all the source has been
+ * downloaded
+ */
 GRenderDeferredStrategy.prototype.initShaders = function () 
 {
     var shaderSrcMap = this.shaderSrcMap;
@@ -166,7 +195,11 @@ GRenderDeferredStrategy.prototype.initShaders = function ()
     }
 };
 
-GRenderDeferredStrategy.prototype.drawScreenBuffer = function(shader)
+/**
+ * Draw the screen buffer using the provided shader
+ * @param {GShader} Shader to use for drawing the screen buffer
+ */
+GRenderDeferredStrategy.prototype.drawScreenBuffer = function( shader )
 {
     var gl = this.gl;
     
@@ -208,6 +241,9 @@ GRenderDeferredStrategy.prototype.drawScreenBuffer = function(shader)
     gl.drawElements(gl.TRIANGLES, this.screen.indxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 };
 
+/**
+ * Create the pass command pipeline
+ */
 GRenderDeferredStrategy.prototype.initPassCmds = function()
 {
     this.passes = {};
@@ -334,6 +370,11 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     this.passCmds = cmds;
 };
 
+/**
+ * Draw the scene and hud elements using this strategy
+ * @param {GScene} Scene to draw with this strategy
+ * @param {GHudController} Hud to draw with this strategy
+ */
 GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
 {
     var gl = this.gl;
@@ -382,6 +423,13 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.programs.fullScr.deactivate();
 };
 
+/**
+ * Set the transformation parameters for rendering full screen
+ * @param {number} X component of the rectangle representing the center of the rectangle
+ * @param {number} Y component of the rectangle representing the center of the rectangle
+ * @param {number} Width component of the rectangle in screen percentage
+ * @param {number} Height component of the rectangle in screen percentage
+ */
 GRenderDeferredStrategy.prototype.setHRec = function( x, y, width, height )
 {
 	// the values passed in are meant to be between 0 and 1
@@ -389,8 +437,11 @@ GRenderDeferredStrategy.prototype.setHRec = function( x, y, width, height )
     mat3.identity(this.hMatrix);
 	mat3.translate(this.hMatrix, this.hMatrix, [x, y]);
 	mat3.scale(this.hMatrix,this.hMatrix, [width, height]);  
-}
+};
 
+/**
+ * Init the frame buffers and it's textures
+ */
 GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
 {
     var gl = this.gl;

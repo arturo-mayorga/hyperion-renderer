@@ -262,7 +262,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     leftCtrl.setUp( 0, 1, 0 ); leftCtrl.setLookAtDir( -1, 0, 0 );
     this.lightCamControlers.left = leftCtrl;
     var normalLSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, leftCtrl );
-    var shadowmapPassL = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmap, this.screen, leftCtrl.getCamera() );
+    var shadowmapPassL = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPing, this.screen, leftCtrl.getCamera() );
     shadowmapPassL.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE0 );
     shadowmapPassL.addInputTexture( this.frameBuffers.lightNormal.getGTexture(),   gl.TEXTURE1 );
     shadowmapPassL.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );
@@ -276,7 +276,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var shadowmapPassR = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPong, this.screen, rightCtrl.getCamera() );
     shadowmapPassR.addInputTexture( this.frameBuffers.position.getGTexture(),    gl.TEXTURE0 );
     shadowmapPassR.addInputTexture( this.frameBuffers.lightNormal.getGTexture(), gl.TEXTURE1 );
-    shadowmapPassR.addInputTexture( this.frameBuffers.shadowmap.getGTexture(),   gl.TEXTURE2 );
+    shadowmapPassR.addInputTexture( this.frameBuffers.shadowmapPing.getGTexture(),   gl.TEXTURE2 );
    
     
     ////
@@ -285,7 +285,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     frontCtrl.setUp( 0, 1, 0 ); frontCtrl.setLookAtDir( 0, 0, 1 );
     this.lightCamControlers.front = frontCtrl;
     var normalFSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, frontCtrl );
-    var shadowmapPassF = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmap, this.screen, frontCtrl.getCamera() );
+    var shadowmapPassF = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPing, this.screen, frontCtrl.getCamera() );
     shadowmapPassF.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE0 );
     shadowmapPassF.addInputTexture( this.frameBuffers.lightNormal.getGTexture(),   gl.TEXTURE1 );
     shadowmapPassF.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );
@@ -298,7 +298,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var shadowmapPassB = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPong, this.screen, backCtrl.getCamera() );
     shadowmapPassB.addInputTexture( this.frameBuffers.position.getGTexture(),    gl.TEXTURE0 );
     shadowmapPassB.addInputTexture( this.frameBuffers.lightNormal.getGTexture(), gl.TEXTURE1 );
-    shadowmapPassB.addInputTexture( this.frameBuffers.shadowmap.getGTexture(),   gl.TEXTURE2 );
+    shadowmapPassB.addInputTexture( this.frameBuffers.shadowmapPing.getGTexture(),   gl.TEXTURE2 );
    
     
     ////
@@ -307,7 +307,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     upCtrl.setUp( 1, 0, 0 ); upCtrl.setLookAtDir( 0, 1, 0 );
     this.lightCamControlers.up = upCtrl;
     var normalUSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, upCtrl );
-    var shadowmapPassU = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmap, this.screen, upCtrl.getCamera() );
+    var shadowmapPassU = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPing, this.screen, upCtrl.getCamera() );
     shadowmapPassU.addInputTexture( this.frameBuffers.position.getGTexture(),       gl.TEXTURE0 );
     shadowmapPassU.addInputTexture( this.frameBuffers.lightNormal.getGTexture(),    gl.TEXTURE1 );
     shadowmapPassU.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(),  gl.TEXTURE2 );
@@ -320,19 +320,19 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var shadowmapPassD = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPong, this.screen, downCtrl.getCamera() );
     shadowmapPassD.addInputTexture( this.frameBuffers.position.getGTexture(),    gl.TEXTURE0 );
     shadowmapPassD.addInputTexture( this.frameBuffers.lightNormal.getGTexture(), gl.TEXTURE1 );
-    shadowmapPassD.addInputTexture( this.frameBuffers.shadowmap.getGTexture(),   gl.TEXTURE2 );
+    shadowmapPassD.addInputTexture( this.frameBuffers.shadowmapPing.getGTexture(),   gl.TEXTURE2 );
     
-    var clearShadowmap = new GRenderPassClearCmd(this.gl, this.frameBuffers.shadowmap );
+    var clearShadowmap = new GRenderPassClearCmd(this.gl, this.frameBuffers.shadowmapPing );
     
-    var shadowBlurA = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.shadowmap, this.screen );
-    shadowBlurA.setHRec( 0, 0, 1, 1, 3.14159/2 );
-    shadowBlurA.addInputFrameBuffer( this.frameBuffers.shadowmapPong, gl.TEXTURE0 );
+    var shadowBlurPing = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.shadowmapPing, this.screen );
+    shadowBlurPing.setHRec( 0, 0, 1, 1, 3.14159/2 );
+    shadowBlurPing.addInputFrameBuffer( this.frameBuffers.shadowmapPong, gl.TEXTURE0 );
    
-    var shadowBlurB = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.shadowmapPong, this.screen );
-    shadowBlurB.setHRec( 0, 0, 1, 1, -3.14159/2 );
-    shadowBlurB.addInputFrameBuffer( this.frameBuffers.shadowmap, gl.TEXTURE0 );
+    var shadowBlurPong = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.shadowmapPong, this.screen );
+    shadowBlurPong.setHRec( 0, 0, 1, 1, -3.14159/2 );
+    shadowBlurPong.addInputFrameBuffer( this.frameBuffers.shadowmapPing, gl.TEXTURE0 );
     
-    var phongLightPass = new GPostEffectLitRenderPassCmd( this.gl, this.programs.light, this.frameBuffers.phongLight, this.screen );
+    var phongLightPass = new GPostEffectLitRenderPassCmd( this.gl, this.programs.light, this.frameBuffers.phongLightPing, this.screen );
     phongLightPass.addInputTexture( this.frameBuffers.normal.getGTexture(),        gl.TEXTURE0 );
     phongLightPass.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE1 );
     phongLightPass.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );
@@ -362,8 +362,8 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     cmds.push( shadowmapPassD );
     
     cmds.push( clearShadowmap );
-    cmds.push( shadowBlurA );
-    cmds.push( shadowBlurB );
+    cmds.push( shadowBlurPing );
+    cmds.push( shadowBlurPong );
     
     cmds.push( phongLightPass );
      
@@ -395,7 +395,7 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.programs.fullScr.activate(); 
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     
-    this.frameBuffers.phongLight.bindTexture(gl.TEXTURE0, "color");
+    this.frameBuffers.phongLightPing.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0, 0, 1, 1);
     this.drawScreenBuffer(this.programs.fullScr); 
     
@@ -482,16 +482,6 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
         ssao: frameBuffer
     };
     
-    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 256, height: 256 });
-    frameBuffer.addBufferTexture(texCfg);
-    frameBuffer.complete();
-    this.frameBuffers.ssaoBlur = frameBuffer;
-    
-    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 256, height: 256 });
-    frameBuffer.addBufferTexture(texCfg);
-    frameBuffer.complete();
-    this.frameBuffers.shadowmap = frameBuffer;
-    
     frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
@@ -515,12 +505,22 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     frameBuffer = new GFrameBuffer({ gl: this.gl, width: 256, height: 256 });
     frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
+    this.frameBuffers.shadowmapPing = frameBuffer;
+    
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 256, height: 256 });
+    frameBuffer.addBufferTexture(texCfg);
+    frameBuffer.complete();
     this.frameBuffers.shadowmapPong = frameBuffer;
     
     frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfgFloat);
     frameBuffer.complete();
-    this.frameBuffers.phongLight = frameBuffer;
+    this.frameBuffers.phongLightPing = frameBuffer;
+    
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
+    frameBuffer.addBufferTexture(texCfgFloat);
+    frameBuffer.complete();
+    this.frameBuffers.phongLightPong = frameBuffer;
 };
 
 

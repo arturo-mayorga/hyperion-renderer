@@ -6,17 +6,7 @@ function GLight()
     this.position  = vec3.create();
     this.color     = vec3.create();
     this.uPosition = vec3.create();
-    this.index = 0;
 }
-
-/**
- * Set the index for this light
- * @param {number} Index value for this light
- */
-GLight.prototype.setIndex = function ( index )
-{
-    this.index = index;
-};
 
 /**
  * Set the position of this light
@@ -54,14 +44,15 @@ GLight.prototype.bindToContext = function( gl )
 /**
  * @param {Array.<number>} List of numbers representing the 4 by 4 view matrix
  * @param {GShader} Shader to use to draw this light
+ * @param {number} Index of this light
  */
-GLight.prototype.draw = function ( parentMvMat, shader )
+GLight.prototype.draw = function ( parentMvMat, shader, index )
 {
     vec3.transformMat4(this.uPosition, this.position, parentMvMat);
     
     var uniform =  null;
     
-    switch (this.index)
+    switch (index)
     {
         case 0: uniform = shader.uniforms.lightPosition0; break;
         case 1: uniform = shader.uniforms.lightPosition1; break;
@@ -98,6 +89,8 @@ function GScene()
 	this.lights = [];
 	
 	this.camera = undefined;
+	
+	this.activeLightIndex = 0;
 }
 
 /**
@@ -111,11 +104,29 @@ GScene.prototype.getChildren = function()
 
 /**
  * Returns the list of lights attached to the scene
- * @return {Array.<GLights>} List of lights attached to the scene
+ * @return {Array.<GLight>} List of lights attached to the scene
  */
 GScene.prototype.getLights = function()
 {
     return this.lights;
+};
+
+/**
+ * Return the currently active light
+ * @return {GLight}
+ */
+GScene.prototype.getActiveLight = function()
+{
+    return this.lights[this.activeLightIndex];
+};
+
+/**
+ * Set the index of the currently active light
+ * @param {number} Index of the light that needs to be activated
+ */
+GScene.prototype.setActiveLightIndex = function( lightIndex )
+{
+    this.activeLightIndex = lightIndex;
 };
 
 /**
@@ -150,7 +161,20 @@ GScene.prototype.drawLights = function ( shader )
     var lightCount = this.lights.length;
     for (var l = 0; l < lightCount; ++l)
     {
-        this.lights[l].draw( this.eyeMvMatrix, shader );
+        this.lights[l].draw( this.eyeMvMatrix, shader, l );
+    }
+};
+
+/**
+ * Draw only the active light.  This is meant to be used by pass commands
+ * that only draw one light at a time
+ * @param {GShader} Shader program to use for drawing this light
+ */
+GScene.prototype.drawActiveLight = function ( shader )
+{
+    if (this.lights.length > this.activeLightIndex)
+    {
+        this.lights[this.activeLightIndex].draw( this.eyeMvMatrix, shader, 0 );
     }
 };
 
@@ -207,7 +231,6 @@ GScene.prototype.setDrawMode = function( mode )
 GScene.prototype.addLight = function( light )
 {
     light.bindToContext( this.gl );
-    light.setIndex( this.lights.length );
     this.lights.push( light );
 };
 

@@ -54,8 +54,8 @@ GLightBasedCamCtrl.prototype.bindToContext = function( gl )
  */
 GLightBasedCamCtrl.prototype.update = function( scene )
 {
-    var light = scene.getLights()[this.lightIndex];
-    
+    var light = scene.getActiveLight();
+     
     if ( undefined != light )
     {
         light.getPosition( this.lightLocation );
@@ -400,7 +400,7 @@ GPostEffectLitRenderPassCmd.prototype.run = function( scene )
     
   
     
-    scene.drawLights( this.shaderProgram );
+    scene.drawActiveLight( this.shaderProgram );
  
     this.sendShadowMatrix();
     

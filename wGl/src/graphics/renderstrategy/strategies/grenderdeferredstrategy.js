@@ -254,6 +254,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var colorPass = new GGeometryRenderPassCmd( this.gl, this.programs.colorspec, this.frameBuffers.color );
     var normalPass = new GGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.normal );
     var positionPass = new GGeometryRenderPassCmd( this.gl, this.programs.position, this.frameBuffers.position );
+    var clearPhongLightPong = new GRenderPassClearCmd( this.gl, this.frameBuffers.phongLightPong );
     
     var clearShadowmapPong = new GRenderPassClearCmd( this.gl, this.frameBuffers.shadowmapPong );
     
@@ -332,10 +333,17 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     shadowBlurPong.setHRec( 0, 0, 1, 1, -3.14159/2 );
     shadowBlurPong.addInputFrameBuffer( this.frameBuffers.shadowmapPing, gl.TEXTURE0 );
     
-    var phongLightPass = new GPostEffectLitRenderPassCmd( this.gl, this.programs.light, this.frameBuffers.phongLightPing, this.screen );
-    phongLightPass.addInputTexture( this.frameBuffers.normal.getGTexture(),        gl.TEXTURE0 );
-    phongLightPass.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE1 );
-    phongLightPass.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );
+    var phongLightPassPing = new GPostEffectLitRenderPassCmd( this.gl, this.programs.light, this.frameBuffers.phongLightPing, this.screen );
+    phongLightPassPing.addInputTexture( this.frameBuffers.normal.getGTexture(),        gl.TEXTURE0 );
+    phongLightPassPing.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE1 );
+    phongLightPassPing.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );
+    phongLightPassPing.addInputTexture( this.frameBuffers.phongLightPong.getGTexture(),gl.TEXTURE3 );
+    
+    var phongLightPassPong = new GPostEffectLitRenderPassCmd( this.gl, this.programs.light, this.frameBuffers.phongLightPong, this.screen );
+    phongLightPassPong.addInputTexture( this.frameBuffers.normal.getGTexture(),        gl.TEXTURE0 );
+    phongLightPassPong.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE1 );
+    phongLightPassPong.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );
+    phongLightPassPong.addInputTexture( this.frameBuffers.phongLightPing.getGTexture(),gl.TEXTURE3 );
     
     
     var cmds = [];
@@ -343,11 +351,12 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var preCmds = [];
     var shadowCmds = [];
     
-    var lightCmd = phongLightPass;
+    var lightCmds = [];
     
     preCmds.push( normalPass );
     preCmds.push( positionPass );
     preCmds.push( colorPass );
+    preCmds.push( clearPhongLightPong );
     
     shadowCmds.push( clearShadowmapPong );
     
@@ -369,10 +378,14 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     shadowCmds.push( clearShadowmap );
     shadowCmds.push( shadowBlurPing );
     shadowCmds.push( shadowBlurPong );
+    
+    lightCmds.push( phongLightPassPing );
+    lightCmds.push( phongLightPassPong );
      
     this.preCmds = preCmds;
     this.shadowCmds = shadowCmds;
-    this.lightCmd = lightCmd;
+    
+    this.lightCmds = lightCmds;
 };
 
 /**
@@ -384,30 +397,43 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
 {
     var gl = this.gl;
     gl.disable(gl.BLEND);
-    
-    for ( var key in this.lightCamControlers )
-    {
-        this.lightCamControlers[key].update( scene );
-    }
+    var lCount = scene.getLights().length;
     
     for ( var i in this.preCmds )
     {
         this.preCmds[i].run( scene );
     }
     
-    for ( var i in this.shadowCmds )
+    for ( var lIdx = 0; lIdx < lCount; ++lIdx )
     {
-        this.shadowCmds[i].run( scene );
+        scene.setActiveLightIndex( lIdx );
+        
+        for ( var key in this.lightCamControlers )
+        {
+            this.lightCamControlers[key].update( scene );
+        }
+        
+        for ( var i in this.shadowCmds )
+        {
+            this.shadowCmds[i].run( scene );
+        }
+        
+        this.lightCmds[lIdx%2].run( scene );
     }
-    
-    this.lightCmd.run( scene );
     
     // HUD
     this.gl.disable( this.gl.DEPTH_TEST );
     this.programs.fullScr.activate(); 
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     
-    this.frameBuffers.phongLightPing.bindTexture(gl.TEXTURE0, "color");
+	if ( lCount % 2 )
+	{
+	    this.frameBuffers.phongLightPing.bindTexture(gl.TEXTURE0, "color");
+	}
+	else
+	{
+	    this.frameBuffers.phongLightPong.bindTexture(gl.TEXTURE0, "color");
+    }
     this.setHRec(0, 0, 1, 1);
     this.drawScreenBuffer(this.programs.fullScr); 
     
@@ -415,10 +441,10 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.setHRec(-0.125+0.75, 0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.fullScreenProgram);*/
     
-    /*this.frameBuffers.color.bindTexture(gl.TEXTURE0, "color");
+    /*this.frameBuffers.phongLightPing.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0.125+0.75, 0.125-0.75, 0.125, 0.125);
-    this.drawScreenBuffer(this.programs.fullScr);*/
-    /*this.frameBuffers.lightNormal.bindTexture(gl.TEXTURE0, "color");  
+    this.drawScreenBuffer(this.programs.fullScr); */
+    /*this.frameBuffers.phongLightPong.bindTexture(gl.TEXTURE0, "color");  
     this.setHRec(-0.125+0.75, -0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.programs.fullScr); */
     /*this.frameBuffers.position.bindTexture(gl.TEXTURE0, "color");

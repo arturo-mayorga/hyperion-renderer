@@ -336,10 +336,10 @@ function GPostEffectLitRenderPassCmd( gl, program, frameBuffer, screenGeometry, 
     this.setHRec( 0, 0, 1, 1, 0 );
     this.lightCamera = lightCamera; 
     
-    GRenderPassCmd_sceneMvMatrix = mat4.create();
-    GRenderPassCmd_lMvMatrix = mat4.create();
-    GRenderPassCmd_lPMatrix = mat4.create();
-    GRenderPassCmd_uniformMatrix = mat4.create();
+    this.sceneMvMatrix = mat4.create();
+    this.lMvMatrix = mat4.create();
+    this.lPMatrix = mat4.create();
+    this.uniformMatrix = mat4.create();
     
     this.sendShadowMatrix = ( undefined == this.shaderProgram.uniforms.shadowMatrix ||
                               undefined == lightCamera  )?function(){}:function()
@@ -349,26 +349,21 @@ function GPostEffectLitRenderPassCmd( gl, program, frameBuffer, screenGeometry, 
         var gCamera = scene.getCamera();
         gCamera.updateMatrices();
         
-        mat4.identity(GRenderPassCmd_uniformMatrix);
+        mat4.identity(this.uniformMatrix);
         
-        gCamera.getMvMatrix( GRenderPassCmd_sceneMvMatrix );
-        camera.getMvMatrix( GRenderPassCmd_lMvMatrix );
-        camera.getPMatrix( GRenderPassCmd_lPMatrix );
+        gCamera.getMvMatrix( this.sceneMvMatrix );
+        camera.getMvMatrix( this.lMvMatrix );
+        camera.getPMatrix( this.lPMatrix );
         
-        mat4.invert( GRenderPassCmd_sceneMvMatrix, GRenderPassCmd_sceneMvMatrix );
+        mat4.invert( this.sceneMvMatrix, this.sceneMvMatrix );
         
-        mat4.multiply( GRenderPassCmd_uniformMatrix, GRenderPassCmd_uniformMatrix, GRenderPassCmd_lPMatrix );
-        mat4.multiply( GRenderPassCmd_uniformMatrix, GRenderPassCmd_uniformMatrix, GRenderPassCmd_lMvMatrix );
-        mat4.multiply( GRenderPassCmd_uniformMatrix, GRenderPassCmd_uniformMatrix, GRenderPassCmd_sceneMvMatrix );
+        mat4.multiply( this.uniformMatrix, this.uniformMatrix, this.lPMatrix );
+        mat4.multiply( this.uniformMatrix, this.uniformMatrix, this.lMvMatrix );
+        mat4.multiply( this.uniformMatrix, this.uniformMatrix, this.sceneMvMatrix );
     
-        this.gl.uniformMatrix4fv( this.shaderProgram.uniforms.shadowMatrix, false, GRenderPassCmd_uniformMatrix );
+        this.gl.uniformMatrix4fv( this.shaderProgram.uniforms.shadowMatrix, false, this.uniformMatrix );
     };
 }
-
-var GRenderPassCmd_sceneMvMatrix;
-var GRenderPassCmd_lMvMatrix;
-var GRenderPassCmd_lPMatrix;
-var GRenderPassCmd_uniformMatrix;
 
 /**
  * Inherited methods from GPostEffectRenderPassCmd

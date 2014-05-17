@@ -23,8 +23,6 @@ GRenderDeferredStrategy.prototype.configure = function()
         "fullscr-fs.c":undefined,
         "shadowmap-vs.c":undefined,
         "shadowmap-fs.c":undefined,
-        "ssao-vs.c":undefined,
-        "ssao-fs.c":undefined,
         "colorspec-vs.c":undefined,
         "colorspec-fs.c":undefined,
         "normaldepth-fs.c":undefined,
@@ -182,7 +180,6 @@ GRenderDeferredStrategy.prototype.initShaders = function ()
   
     this.programs.fullScr     = new GShader( shaderSrcMap["fullscr-vs.c"],     shaderSrcMap["fullscr-fs.c"]     );
     this.programs.shadowmap   = new GShader( shaderSrcMap["shadowmap-vs.c"],   shaderSrcMap["shadowmap-fs.c"]   );
-    this.programs.ssao        = new GShader( shaderSrcMap["ssao-vs.c"],        shaderSrcMap["ssao-fs.c"]        );
     this.programs.blur        = new GShader( shaderSrcMap["blur-vs.c"],        shaderSrcMap["blur-fs.c"]        );
     this.programs.colorspec   = new GShader( shaderSrcMap["colorspec-vs.c"],   shaderSrcMap["colorspec-fs.c"]   );
     this.programs.normaldepth = new GShader( shaderSrcMap["normaldepth-vs.c"], shaderSrcMap["normaldepth-fs.c"] );

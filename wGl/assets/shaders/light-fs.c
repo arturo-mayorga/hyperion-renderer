@@ -17,7 +17,7 @@ vec4 calcLight(vec3 normal, vec3 position, vec3 lightPosition, vec3 lightColor)
 
     highp float diffuseFactor = max(0.0, dot(normal, lightDirection)); 
     
-    diffuseFactor /= 9.0;
+    diffuseFactor /= 3.0;
     
     vec3 E = normalize(-position.xyz);
     vec3 R = reflect(-lightDirection, normal);

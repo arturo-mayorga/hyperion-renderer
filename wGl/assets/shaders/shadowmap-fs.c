@@ -28,7 +28,7 @@ void main(void)
         } 
         else
         {
-            gl_FragColor = vec4(0.5);//pingColor;
+            gl_FragColor = vec4(0.2);//pingColor;
         } 
     }
     else

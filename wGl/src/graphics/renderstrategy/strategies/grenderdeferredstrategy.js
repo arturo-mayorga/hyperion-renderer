@@ -30,7 +30,9 @@ GRenderDeferredStrategy.prototype.configure = function()
         "position-fs.c":undefined,
         "position-vs.c":undefined,
         "light-fs.c":undefined,
-        "light-vs.c":undefined
+        "light-vs.c":undefined,
+        "tonemap-fs.c":undefined,
+        "tonemap-vs.c":undefined
     };
     
     for (var key in map)
@@ -185,6 +187,7 @@ GRenderDeferredStrategy.prototype.initShaders = function ()
     this.programs.normaldepth = new GShader( shaderSrcMap["normaldepth-vs.c"], shaderSrcMap["normaldepth-fs.c"] );
     this.programs.position    = new GShader( shaderSrcMap["position-vs.c"],    shaderSrcMap["position-fs.c"]    );
     this.programs.light       = new GShader( shaderSrcMap["light-vs.c"],       shaderSrcMap["light-fs.c"]       );
+    this.programs.toneMap     = new GShader( shaderSrcMap["tonemap-vs.c"],     shaderSrcMap["tonemap-fs.c"]     );
 
     for ( var key in this.programs )
     {
@@ -342,6 +345,14 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     phongLightPassPong.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );
     phongLightPassPong.addInputTexture( this.frameBuffers.phongLightPing.getGTexture(),gl.TEXTURE3 );
     
+    var toneMapPassPing = new GPostEffectRenderPassCmd( this.gl, this.programs.toneMap, this.frameBuffers.phongLightPong, this.screen );
+    toneMapPassPing.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );
+    toneMapPassPing.addInputFrameBuffer( this.frameBuffers.phongLightPing, gl.TEXTURE1 );
+    
+    var toneMapPassPong = new GPostEffectRenderPassCmd( this.gl, this.programs.toneMap, this.frameBuffers.phongLightPing, this.screen );
+    toneMapPassPong.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );
+    toneMapPassPong.addInputFrameBuffer( this.frameBuffers.phongLightPong, gl.TEXTURE1 );
+    
     
     var cmds = [];
     
@@ -349,6 +360,8 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var shadowCmds = [];
     
     var lightCmds = [];
+    
+    var toneMapCmds = [];
     
     preCmds.push( normalPass );
     preCmds.push( positionPass );
@@ -378,11 +391,16 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     
     lightCmds.push( phongLightPassPing );
     lightCmds.push( phongLightPassPong );
+    
+    toneMapCmds.push( toneMapPassPing );
+    toneMapCmds.push( toneMapPassPong );
      
     this.preCmds = preCmds;
     this.shadowCmds = shadowCmds;
     
     this.lightCmds = lightCmds;
+    
+    this.toneMapCmds = toneMapCmds;
 };
 
 /**
@@ -416,6 +434,7 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
         }
         
         this.lightCmds[lIdx%2].run( scene );
+        this.toneMapCmds[lIdx%2].run( scene );
     }
     
     // HUD
@@ -425,11 +444,11 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     
 	if ( lCount % 2 )
 	{
-	    this.frameBuffers.phongLightPing.bindTexture(gl.TEXTURE0, "color");
+	    this.frameBuffers.phongLightPong.bindTexture(gl.TEXTURE0, "color");
 	}
 	else
 	{
-	    this.frameBuffers.phongLightPong.bindTexture(gl.TEXTURE0, "color");
+	    this.frameBuffers.phongLightPing.bindTexture(gl.TEXTURE0, "color");
     }
     this.setHRec(0, 0, 1, 1);
     this.drawScreenBuffer(this.programs.fullScr); 

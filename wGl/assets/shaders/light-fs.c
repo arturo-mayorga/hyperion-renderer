@@ -11,13 +11,13 @@ uniform vec3 uLightPosition0;
 // todo: should this be turned into a uniform variable?
 float uKsExponent = 100.0;
 
-vec4 calcLight(vec3 normal, vec3 position, vec3 lightPosition, vec3 lightColor)
+vec4 calcLight(vec3 normal, vec3 position, vec3 lightPosition, vec3 lightColor, float shadowFactor)
 {
     highp vec3 lightDirection = normalize(lightPosition - position); 
 
     highp float diffuseFactor = max(0.0, dot(normal, lightDirection)); 
     
-    diffuseFactor /= 3.0;
+    diffuseFactor *= shadowFactor;
     
     vec3 E = normalize(-position.xyz);
     vec3 R = reflect(-lightDirection, normal);
@@ -25,7 +25,7 @@ vec4 calcLight(vec3 normal, vec3 position, vec3 lightPosition, vec3 lightColor)
 
     float specularFactor = pow(specular, uKsExponent);
 
-    return vec4(lightColor* diffuseFactor, specularFactor);
+    return vec4(lightColor* max(0.2,diffuseFactor) , specularFactor);
 }
 
 
@@ -49,11 +49,12 @@ void main(void)
     vec4 lightRes = calcLight( normalize(tv4Normal.xyz), 
                                tv4Position.xyz, 
                                uLightPosition0, 
-                               lightColor );
+                               lightColor,
+                               shadowMap.x );
         
     
 	
-	gl_FragColor = (shadowMap * lightRes) + tv4Ping;
+	gl_FragColor = (lightRes) + tv4Ping;
     
     
 } 

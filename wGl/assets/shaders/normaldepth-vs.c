@@ -8,7 +8,7 @@ uniform mat4 uNMatrix;
 
 varying vec2 vKdMapCoord;
 
-varying mediump vec4 vNormal;
+varying highp vec4 vNormal;
 varying highp vec4 vPosition;
 varying highp vec4 vpPosition;
 

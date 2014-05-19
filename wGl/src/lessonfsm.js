@@ -160,13 +160,13 @@ LoadState.prototype.exit = function ()
 	light7.setPosition(24, 19.21, -2);
 	light8.setPosition(30, 19.21, 8);
 	
-	this.scene.addLight(light0);
+	//this.scene.addLight(light0);
 	//this.scene.addLight(light1);
 	//this.scene.addLight(light2);
 	this.scene.addLight(light3);
 	//this.scene.addLight(light4);
 	//this.scene.addLight(light5);
-	this.scene.addLight(light6);
+	//this.scene.addLight(light6);
 	//this.scene.addLight(light7);
 	//this.scene.addLight(light8);
 };

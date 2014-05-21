@@ -50,6 +50,25 @@ function GObjLoader( scene, group )
 		this.tVerts = [];
 		this.indices = [];
 	}
+	
+	/**
+	 * merge the provided mesh to this merge
+	 * @param {VboMesh} the mesh containing the new geometry
+	 */
+	VboMesh.prototype.merge = function( mesh )
+	{
+	    var prevIdxLen = this.indices.length;
+	    var newIdxLen = mesh.indices.length;
+	    
+	    this.gVerts = this.gVerts.concat( mesh.gVerts );
+	    this.nVerts = this.nVerts.concat( mesh.nVerts );
+	    this.tVerts = this.tVerts.concat( mesh.tVerts );
+	    
+	    for ( var i = 0; i < newIdxLen; ++i )
+	    {
+	        this.indices.push( i + prevIdxLen );
+	    }
+	};
 		
 	/**
 	 * Sets the material name for this instance
@@ -229,7 +248,7 @@ function GObjLoader( scene, group )
         }
         else
         {
-			console.debug("Loaded " + this.polyCount + " polygons.");
+			console.debug("Loaded " + this.polyCount + " polygons in " + Object.keys(this.groupMap).length + " objects.");
             this.isLoadComplete = true;
         }
         
@@ -409,7 +428,17 @@ function GObjLoader( scene, group )
 	this.objLineCount = 0;
 	this.objLinesProcessed = 0;
 	this.totalProgress = 0;
+	this.autoMergeByMaterial = false;
+	this.deferredMeshMap = {};
 }
+
+/**
+ * Enable auto merging
+ */
+GObjLoader.prototype.enableAutoMergeByMaterial = function()
+{
+    this.autoMergeByMaterial = true;;
+};
 
 /**
  * This function loads an obj file
@@ -493,6 +522,18 @@ GObjLoader.prototype.update = function ( time )
                 this.isReadComplete = true;
 				if (this.observer != undefined)
 				{
+				    // we are done processing, its time to send all deferred meshes to
+                    // the scene
+                    for ( var mtlName in this.deferredMeshMap )
+                    {
+                        var thisMeshArray = this.deferredMeshMap[mtlName];
+                        for ( var i in thisMeshArray )
+                        {
+                            this.sendMeshToGroup( thisMeshArray[i] );
+                        }
+                    }
+                    this.deferredMeshMap = {};
+                    
 					this.observer.onObjLoaderCompleted( this );
 					return;
 				}
@@ -515,14 +556,63 @@ GObjLoader.prototype.update = function ( time )
  */
 GObjLoader.prototype.onNewMeshAvailable = function ( mesh )
 {
-	var obj = new GObject(mesh.getVertBuffer(),
+	if ( this.autoMergeByMaterial )
+	{
+	    this.deferMeshForMerge( mesh );
+	}
+	else
+	{
+	    this.sendMeshToGroup( mesh );
+	}
+};
+
+/**
+ * This function is called whenever a new VboMesh object is 
+ * loaded and needs to be merged and optimized before adding to the scene.
+ * @param {VboMesh} New object that was just made available
+ */
+GObjLoader.prototype.deferMeshForMerge = function ( mesh )
+{
+    var currentMeshArray = this.deferredMeshMap[mesh.getMtlName()];
+    var MAX_INDEX_VALUE = 65535;
+    
+    if ( undefined == currentMeshArray )
+    {
+        // this is the first mesh with it's material
+        currentMeshArray = [mesh];
+        this.deferredMeshMap[mesh.getMtlName()] = currentMeshArray;
+        return;
+    }
+    
+    for ( var i in currentMeshArray )
+    {
+        if ( currentMeshArray[i].indices.length + mesh.indices.length <=  MAX_INDEX_VALUE )
+        {
+            // we found a mesh that can receive the new geometry
+            currentMeshArray[i].merge( mesh );
+            return;
+        }
+    }
+    
+    // could not find a mesh that can merge the new geometry, save it for later
+    currentMeshArray.push( mesh );
+};
+
+/**
+ * This function is called whenever a new VboMesh object is 
+ * loaded and needs to be sent directly to th e scene.
+ * @param {VboMesh} New object that was just made available
+ */
+GObjLoader.prototype.sendMeshToGroup = function ( mesh )
+{
+   var obj = new GObject(mesh.getVertBuffer(),
 						  mesh.getTVerBuffer(),
 						  mesh.getNormBuffer(),
 						  mesh.indices,
 						  mesh.getName());
                                       
 	obj.setMtlName(mesh.getMtlName());
-	this.group.addChild(obj);
+	this.group.addChild(obj); 
 };
 
 /**

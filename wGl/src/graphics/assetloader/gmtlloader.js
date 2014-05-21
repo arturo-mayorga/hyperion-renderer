@@ -44,6 +44,8 @@ function GMtlLoader( scene_ )
                 //console.debug("Cant handle [" + mtlStrA[i] + "]");
             }
         }
+        
+        console.debug("Loaded " + Object.keys(this.materials).length + " materials.");
 	}
 	
     /**

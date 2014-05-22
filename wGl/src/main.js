@@ -20,6 +20,7 @@ function animate() {
         lesson.update(elapsed);
         context.draw(elapsed);
 	}
+	
 	stats.end();
 	stats.begin();
 }

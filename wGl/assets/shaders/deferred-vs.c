@@ -1,6 +1,3 @@
-//	
-// The MIT License
-// 
 // Copyright (C) 2014 Arturo Mayorga
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy 

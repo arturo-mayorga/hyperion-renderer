@@ -68,15 +68,15 @@ GObjLoaderObserver:
 GObjLoader
 
 GObjReaderObserver:
-VboMesh, 
+GeometryTriMesh, 
 
 GObjLoader:
-GObjReaderObserver, GScene, GGroup, VboMesh, GObjReader, GObjLoaderObserver
+GObjReaderObserver, GScene, GGroup, GeometryTriMesh, GObjReader, GObjLoaderObserver
 
-VboMesh:
+GeometryTriMesh:
 
 GObjReader:
-GScene, GGroup, GObjReaderObserver, GMtlLoader, VboMesh
+GScene, GGroup, GObjReaderObserver, GMtlLoader, GeometryTriMesh
 
 GGroup:
 WebGLRenderingContext, GObject, GShader, 

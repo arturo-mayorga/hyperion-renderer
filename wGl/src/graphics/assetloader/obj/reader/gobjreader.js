@@ -24,8 +24,8 @@
 function GObjReaderObserver () {}
 
 /**
- * This function is called whenever a new VboMesh object is loaded
- * @param {VboMesh} New object that was just made available
+ * This function is called whenever a new GeometryTriMesh object is loaded
+ * @param {GeometryTriMesh} New object that was just made available
  */
 GObjReaderObserver.prototype.onNewMeshAvailable = function ( mesh ) {};
 
@@ -174,7 +174,7 @@ this.GObjReader.prototype.process_group = function(lineA)
 		name += "_";
 	}
 	
-	this.currentMesh = new VboMesh(name);
+	this.currentMesh = new GeometryTriMesh(name);
 	this.currentIndex = 0;	
 	
 	//console.debug("adding group: " + name);

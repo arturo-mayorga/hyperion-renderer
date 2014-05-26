@@ -37,9 +37,9 @@ GObjLoaderObserver.prototype.onObjLoaderProgress = function ( loader, progress )
 
 /**
  * @constructor
- * @param {string} Name of this Vbo instance
+ * @param {string} Name of this geometry instance
  */
-function VboMesh(name)
+function GeometryTriMesh(name)
 {
 	this.name = name;
 	this.matName = "";
@@ -52,9 +52,9 @@ function VboMesh(name)
 
 /**
  * merge the provided mesh to this merge
- * @param {VboMesh} the mesh containing the new geometry
+ * @param {GeometryTriMesh} the mesh containing the new geometry
  */
-VboMesh.prototype.merge = function( mesh )
+GeometryTriMesh.prototype.merge = function( mesh )
 {
 	var prevIdxLen = this.indices.length;
 	var newIdxLen = mesh.indices.length;
@@ -73,7 +73,7 @@ VboMesh.prototype.merge = function( mesh )
  * Sets the material name for this instance
  * @param {string} New name for this instance
  */
-VboMesh.prototype.setMtlName = function( matName )
+GeometryTriMesh.prototype.setMtlName = function( matName )
 {
 	this.matName = matName;
 };
@@ -82,7 +82,7 @@ VboMesh.prototype.setMtlName = function( matName )
  * Returns the material name for this instance
  * @return {string} The current name for this instance
  */
-VboMesh.prototype.getMtlName = function()
+GeometryTriMesh.prototype.getMtlName = function()
 {
 	return this.matName;
 };
@@ -91,7 +91,7 @@ VboMesh.prototype.getMtlName = function()
  * Returns the name of this instance
  * @return {string} Instance name
  */
-VboMesh.prototype.getName = function()
+GeometryTriMesh.prototype.getName = function()
 {
 	return this.name;
 };
@@ -100,7 +100,7 @@ VboMesh.prototype.getName = function()
  * Returns the texture vertex buffer
  * @return {Array.<number>} Buffer with texture vertex values
  */
-VboMesh.prototype.getTVerBuffer = function()
+GeometryTriMesh.prototype.getTVerBuffer = function()
 {
 	var len = this.gVerts.length;
 	var ret = [];
@@ -127,7 +127,7 @@ VboMesh.prototype.getTVerBuffer = function()
  * Returns the vertex buffer
  * @return {Array.<number>} Buffer with vertex values.
  */
-VboMesh.prototype.getVertBuffer = function()
+GeometryTriMesh.prototype.getVertBuffer = function()
 {
 	var len = this.gVerts.length;
 	var ret = [];
@@ -147,7 +147,7 @@ VboMesh.prototype.getVertBuffer = function()
  * Returns the normals buffer
  * @return {Array.<number>} Buffer with normal values.
  */
-VboMesh.prototype.getNormBuffer = function()
+GeometryTriMesh.prototype.getNormBuffer = function()
 {
 	var len = this.nVerts.length;
 	var ret = [];
@@ -307,8 +307,8 @@ GObjLoader.prototype.update = function ( time )
 };
 
 /**
- * This function is called whenever a new VboMesh object is loaded
- * @param {VboMesh} New object that was just made available
+ * This function is called whenever a new GeometryTriMesh object is loaded
+ * @param {GeometryTriMesh} New object that was just made available
  */
 GObjLoader.prototype.onNewMeshAvailable = function ( mesh )
 {
@@ -323,9 +323,9 @@ GObjLoader.prototype.onNewMeshAvailable = function ( mesh )
 };
 
 /**
- * This function is called whenever a new VboMesh object is 
+ * This function is called whenever a new GeometryTriMesh object is 
  * loaded and needs to be merged and optimized before adding to the scene.
- * @param {VboMesh} New object that was just made available
+ * @param {GeometryTriMesh} New object that was just made available
  */
 GObjLoader.prototype.deferMeshForMerge = function ( mesh )
 {
@@ -355,9 +355,9 @@ GObjLoader.prototype.deferMeshForMerge = function ( mesh )
 };
 
 /**
- * This function is called whenever a new VboMesh object is 
+ * This function is called whenever a new GeometryTriMesh object is 
  * loaded and needs to be sent directly to th e scene.
- * @param {VboMesh} New object that was just made available
+ * @param {GeometryTriMesh} New object that was just made available
  */
 GObjLoader.prototype.sendMeshToGroup = function ( mesh )
 {

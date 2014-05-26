@@ -37,7 +37,7 @@ GObjReaderObserver.prototype.onNewMeshAvailable = function ( mesh ) {};
  * @param {GGroup} Target group for the loading process
  * @param {GObjReaderObserver} Observer to the loading process
  */
-this.GObjReader = function( path, objStrA, scene, group, observer )
+function GObjReader( path, objStrA, scene, group, observer )
 {
 	/**
 	 * @struct
@@ -82,13 +82,13 @@ this.GObjReader = function( path, objStrA, scene, group, observer )
 		"usemtl" :this.process_usemtl,
 		"invnv"  :this.process_invnv
 	}
-};
+}
 
 /**
  * Advance through the loading process
  * @param {number} Milliseconds since the last update
  */
-this.GObjReader.prototype.update = function (time)
+GObjReader.prototype.update = function (time)
 {
    
 	
@@ -124,7 +124,7 @@ this.GObjReader.prototype.update = function (time)
  * @param {Array.<string>} Token array
  * @return {Array.<string>} Scrubbed token array
  */
-this.GObjReader.prototype.scrub = function( stra )
+GObjReader.prototype.scrub = function( stra )
 {
 	var len = stra.length;
 	var ret = [];
@@ -142,13 +142,13 @@ this.GObjReader.prototype.scrub = function( stra )
  * This function is called while processing a comment line (starting with '#')
  * @param {Array.<string>} 
  */
-this.GObjReader.prototype.process_comment = function( lineA ) {};
+GObjReader.prototype.process_comment = function( lineA ) {};
 
 /**
  * This function is called while processing a group line (starting with 'o' or 'g')
  * @param {Array.<string>} 
  */
-this.GObjReader.prototype.process_group = function(lineA)
+GObjReader.prototype.process_group = function(lineA)
 {
 	this.invertNormals = false;
 	
@@ -184,7 +184,7 @@ this.GObjReader.prototype.process_group = function(lineA)
  * This function is called while processing a vertex line (starting with 'v')
  * @param {Array.<string>} 
  */
-this.GObjReader.prototype.process_vert = function( lineA )
+GObjReader.prototype.process_vert = function( lineA )
 {
 	var vec = vec3.fromValues(parseFloat(lineA[1]),
 							  parseFloat(lineA[2]),
@@ -196,7 +196,7 @@ this.GObjReader.prototype.process_vert = function( lineA )
  * This function is called while processing a texture vertex line (starting with 'tv')
  * @param {Array.<string>} 
  */
-this.GObjReader.prototype.process_texVert = function( lineA )
+GObjReader.prototype.process_texVert = function( lineA )
 {
 	var vec = vec2.fromValues(parseFloat(lineA[1]),
 							  parseFloat(lineA[2]));
@@ -208,7 +208,7 @@ this.GObjReader.prototype.process_texVert = function( lineA )
  * This function is called while processing a comment line (starting with 'vn')
  * @param {Array.<string>} 
  */
-this.GObjReader.prototype.process_normal = function( lineA )
+GObjReader.prototype.process_normal = function( lineA )
 {
 	var vec = vec3.fromValues(parseFloat(lineA[1]),
 							  parseFloat(lineA[2]),
@@ -220,7 +220,7 @@ this.GObjReader.prototype.process_normal = function( lineA )
  * This function is called while processing a face line (starting with 'f')
  * @param {Array.<string>} 
  */
-this.GObjReader.prototype.process_face = function( lineA )
+GObjReader.prototype.process_face = function( lineA )
 {
 	++this.polyCount;
 	for (var i = 1; i <= 3; ++i)
@@ -256,7 +256,7 @@ this.GObjReader.prototype.process_face = function( lineA )
  * This function is called while processing a material line (starting with 'mtllib')
  * @param {Array.<string>} 
  */
-this.GObjReader.prototype.process_mtllib = function( lineA )
+GObjReader.prototype.process_mtllib = function( lineA )
 {
 	var ldr = new GMtlLoader(this.scene);
 	ldr.loadMtl(this.path, lineA[1]);
@@ -266,7 +266,7 @@ this.GObjReader.prototype.process_mtllib = function( lineA )
  * This function is called while processing a use material line (starting with 'usemtl')
  * @param {Array.<string>} 
  */
-this.GObjReader.prototype.process_usemtl = function( lineA )
+GObjReader.prototype.process_usemtl = function( lineA )
 {
 	this.currentMesh.setMtlName( lineA[1] );
 };
@@ -275,7 +275,7 @@ this.GObjReader.prototype.process_usemtl = function( lineA )
  * This function is called while processing a invert normals line (starting with 'invnv')
  * @param {Array.<string>} 
  */
-this.GObjReader.prototype.process_invnv = function( lineA )
+GObjReader.prototype.process_invnv = function( lineA )
 {
 	this.invertNormals = true;
 };

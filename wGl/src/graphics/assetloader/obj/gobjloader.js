@@ -37,134 +37,6 @@ GObjLoaderObserver.prototype.onObjLoaderProgress = function ( loader, progress )
 
 /**
  * @constructor
- * @param {string} Name of this geometry instance
- */
-function GeometryTriMesh(name)
-{
-	this.name = name;
-	this.matName = "";
-	
-	this.gVerts = [];
-	this.nVerts = [];
-	this.tVerts = [];
-	this.indices = [];
-}
-
-/**
- * merge the provided mesh to this merge
- * @param {GeometryTriMesh} the mesh containing the new geometry
- */
-GeometryTriMesh.prototype.merge = function( mesh )
-{
-	var prevIdxLen = this.indices.length;
-	var newIdxLen = mesh.indices.length;
-	
-	this.gVerts = this.gVerts.concat( mesh.gVerts );
-	this.nVerts = this.nVerts.concat( mesh.nVerts );
-	this.tVerts = this.tVerts.concat( mesh.tVerts );
-	
-	for ( var i = 0; i < newIdxLen; ++i )
-	{
-		this.indices.push( i + prevIdxLen );
-	}
-};
-	
-/**
- * Sets the material name for this instance
- * @param {string} New name for this instance
- */
-GeometryTriMesh.prototype.setMtlName = function( matName )
-{
-	this.matName = matName;
-};
-
-/**
- * Returns the material name for this instance
- * @return {string} The current name for this instance
- */
-GeometryTriMesh.prototype.getMtlName = function()
-{
-	return this.matName;
-};
-
-/**
- * Returns the name of this instance
- * @return {string} Instance name
- */
-GeometryTriMesh.prototype.getName = function()
-{
-	return this.name;
-};
-
-/**
- * Returns the texture vertex buffer
- * @return {Array.<number>} Buffer with texture vertex values
- */
-GeometryTriMesh.prototype.getTVerBuffer = function()
-{
-	var len = this.gVerts.length;
-	var ret = [];
-	for (var i = 0; i < len; ++i)
-	{
-		var _this = this.tVerts[i];
-		if ( _this != undefined )
-		{
-			for( var j = 0; j < 2; ++j)
-			{
-				ret.push(_this[j]); 
-			}
-		}
-		else
-		{
-			ret.push(0);
-		}
-	}
-	
-	return ret;
-};
-
-/**
- * Returns the vertex buffer
- * @return {Array.<number>} Buffer with vertex values.
- */
-GeometryTriMesh.prototype.getVertBuffer = function()
-{
-	var len = this.gVerts.length;
-	var ret = [];
-	for (var i = 0; i < len; ++i)
-	{
-		var _this = this.gVerts[i];
-		for( var j = 0; j < 3; ++j)
-		{
-			ret.push(_this[j]); 
-		}
-	}
-	
-	return ret;
-};
-
-/**
- * Returns the normals buffer
- * @return {Array.<number>} Buffer with normal values.
- */
-GeometryTriMesh.prototype.getNormBuffer = function()
-{
-	var len = this.nVerts.length;
-	var ret = [];
-	for (var i = 0; i < len; ++i)
-	{
-		var _this = this.nVerts[i];
-		for (var j = 0; j < 3; ++j)
-		{
-			ret.push(_this[j]);
-		}
-	}
-	
-	return ret;
-};
-
-/**
- * @constructor
  * @implements {GObjReaderObserver}
  * @param {GScene} Target scene for this loader
  * @param {GGroup} Target group for this loader
@@ -356,7 +228,7 @@ GObjLoader.prototype.deferMeshForMerge = function ( mesh )
 
 /**
  * This function is called whenever a new GeometryTriMesh object is 
- * loaded and needs to be sent directly to th e scene.
+ * loaded and needs to be sent directly to the scene.
  * @param {GeometryTriMesh} New object that was just made available
  */
 GObjLoader.prototype.sendMeshToGroup = function ( mesh )

@@ -5,6 +5,7 @@ module.exports = function(grunt) {
                     'src/graphics/renderstrategy/*.js',
                     'src/graphics/core/*.js',
                     'src/graphics/assets/*.js',
+					'src/graphics/assetloader/mtl/reader/*.js',
 					'src/graphics/assetloader/mtl/*.js',
 					'src/graphics/assetloader/obj/*.js',
                     'src/graphics/assetloader/*.js',

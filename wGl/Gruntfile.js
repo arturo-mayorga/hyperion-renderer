@@ -7,6 +7,7 @@ module.exports = function(grunt) {
                     'src/graphics/assets/*.js',
 					'src/graphics/assetloader/mtl/reader/*.js',
 					'src/graphics/assetloader/mtl/*.js',
+					'src/graphics/assetloader/obj/reader/*.js',
 					'src/graphics/assetloader/obj/*.js',
                     'src/graphics/assetloader/*.js',
                     'src/graphics/scene/*.js',

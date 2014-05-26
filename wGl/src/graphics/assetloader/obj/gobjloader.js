@@ -98,6 +98,9 @@ GObjLoader.prototype.loadObj = function ( path, source )
 		}
     }.bind(this);
     this.client.send();
+	
+	this.deferredObjectCount = 0;
+	this.defferedObjectsLeft = 0;
 };
 
 /**
@@ -124,7 +127,10 @@ GObjLoader.prototype.update = function ( time )
 		this.availableTime = 5;
 	}
 	
-	this.totalProgress = (this.downloadProgress + this.processProgress*10.0)/11.0;
+	
+	var defferedProgress = (this.deferredObjectCount==0)? ((this.autoMergeByMaterial)?0.0:1.0) :((this.deferredObjectCount-this.defferedObjectsLeft)/this.deferredObjectCount);
+	
+	this.totalProgress = (this.downloadProgress + this.processProgress*9.0 + defferedProgress )/11.0;
 	
 	if (this.observer != undefined)
 	{
@@ -133,37 +139,48 @@ GObjLoader.prototype.update = function ( time )
     
     while ( ( (new Date().getTime()) - timeStart) < this.availableTime )
     {
-        if ( this.isReadComplete )
+		if ( this.isIdleMode )
+		{
+			return;
+		}
+        else if ( this.isReadComplete )
         {
+			if (this.observer != undefined)
+			{
+				this.observer.onObjLoaderCompleted( this );
+			}
+			
+			this.isIdleMode = true;
 			return;
         }
         else if ( this.isReaderReady )
         {
-            if (false == this.testReader.isLoadComplete)
+            if (false == this.reader.isLoadComplete)
             {
-                this.testReader.update( time );
+                this.reader.update( time );
 				++this.objLinesProcessed;
 				this.processProgress = this.objLinesProcessed / this.objLineCount;
             }
             else
             {
-                this.isReadComplete = true;
-				if (this.observer != undefined)
+				// we are done processing, its time to send all deferred meshes to
+				// the scene
+				var keys = Object.keys(this.deferredMeshMap);
+				
+				if ( keys.length == 0 )
 				{
-				    // we are done processing, its time to send all deferred meshes to
-                    // the scene
-                    for ( var mtlName in this.deferredMeshMap )
-                    {
-                        var thisMeshArray = this.deferredMeshMap[mtlName];
-                        for ( var i in thisMeshArray )
-                        {
-                            this.sendMeshToGroup( thisMeshArray[i] );
-                        }
-                    }
-                    this.deferredMeshMap = {};
-                    
-					this.observer.onObjLoaderCompleted( this );
-					return;
+					this.isReadComplete = true;
+				}
+				else
+				{
+					var thisMeshArray = this.deferredMeshMap[keys[0]];
+					for ( var i in thisMeshArray )
+					{
+						this.sendMeshToGroup( thisMeshArray[i] );
+						--this.defferedObjectsLeft;
+					}
+					
+					delete this.deferredMeshMap[keys[0]];
 				}
             }
         }
@@ -172,7 +189,7 @@ GObjLoader.prototype.update = function ( time )
             var i = 0;
             var obj = this.client.responseText.split("\n");
 			this.objLineCount = obj.length;
-			this.testReader = new GObjReader (this.currentPath, obj, this.scene, this.group, this);
+			this.reader = new GObjReader (this.currentPath, obj, this.scene, this.group, this);
 			this.isReaderReady = true;
         }
     }
@@ -209,6 +226,8 @@ GObjLoader.prototype.deferMeshForMerge = function ( mesh )
         // this is the first mesh with it's material
         currentMeshArray = [mesh];
         this.deferredMeshMap[mesh.getMtlName()] = currentMeshArray;
+		++this.deferredObjectCount;
+		++this.defferedObjectsLeft;
         return;
     }
     
@@ -223,6 +242,8 @@ GObjLoader.prototype.deferMeshForMerge = function ( mesh )
     }
     
     // could not find a mesh that can merge the new geometry, save it for later
+	++this.deferredObjectCount;
+	++this.defferedObjectsLeft;
     currentMeshArray.push( mesh );
 };
 

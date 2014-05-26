@@ -46,6 +46,134 @@ GObjReaderObserver.prototype.onNewMeshAvailable = function ( mesh ) {};
  */
 GObjLoaderObserver.prototype.onObjLoaderProgress = function ( loader, progress ) {};
 
+/**
+ * @constructor
+ * @param {string} Name of this Vbo instance
+ */
+function VboMesh(name)
+{
+	this.name = name;
+	this.matName = "";
+	
+	this.gVerts = [];
+	this.nVerts = [];
+	this.tVerts = [];
+	this.indices = [];
+}
+
+/**
+ * merge the provided mesh to this merge
+ * @param {VboMesh} the mesh containing the new geometry
+ */
+VboMesh.prototype.merge = function( mesh )
+{
+	var prevIdxLen = this.indices.length;
+	var newIdxLen = mesh.indices.length;
+	
+	this.gVerts = this.gVerts.concat( mesh.gVerts );
+	this.nVerts = this.nVerts.concat( mesh.nVerts );
+	this.tVerts = this.tVerts.concat( mesh.tVerts );
+	
+	for ( var i = 0; i < newIdxLen; ++i )
+	{
+		this.indices.push( i + prevIdxLen );
+	}
+};
+	
+/**
+ * Sets the material name for this instance
+ * @param {string} New name for this instance
+ */
+VboMesh.prototype.setMtlName = function( matName )
+{
+	this.matName = matName;
+};
+
+/**
+ * Returns the material name for this instance
+ * @return {string} The current name for this instance
+ */
+VboMesh.prototype.getMtlName = function()
+{
+	return this.matName;
+};
+
+/**
+ * Returns the name of this instance
+ * @return {string} Instance name
+ */
+VboMesh.prototype.getName = function()
+{
+	return this.name;
+};
+
+/**
+ * Returns the texture vertex buffer
+ * @return {Array.<number>} Buffer with texture vertex values
+ */
+VboMesh.prototype.getTVerBuffer = function()
+{
+	var len = this.gVerts.length;
+	var ret = [];
+	for (var i = 0; i < len; ++i)
+	{
+		var _this = this.tVerts[i];
+		if ( _this != undefined )
+		{
+			for( var j = 0; j < 2; ++j)
+			{
+				ret.push(_this[j]); 
+			}
+		}
+		else
+		{
+			ret.push(0);
+		}
+	}
+	
+	return ret;
+};
+
+/**
+ * Returns the vertex buffer
+ * @return {Array.<number>} Buffer with vertex values.
+ */
+VboMesh.prototype.getVertBuffer = function()
+{
+	var len = this.gVerts.length;
+	var ret = [];
+	for (var i = 0; i < len; ++i)
+	{
+		var _this = this.gVerts[i];
+		for( var j = 0; j < 3; ++j)
+		{
+			ret.push(_this[j]); 
+		}
+	}
+	
+	return ret;
+};
+
+/**
+ * Returns the normals buffer
+ * @return {Array.<number>} Buffer with normal values.
+ */
+VboMesh.prototype.getNormBuffer = function()
+{
+	var len = this.nVerts.length;
+	var ret = [];
+	for (var i = 0; i < len; ++i)
+	{
+		var _this = this.nVerts[i];
+		for (var j = 0; j < 3; ++j)
+		{
+			ret.push(_this[j]);
+		}
+	}
+	
+	return ret;
+};
+
 
 /**
  * @constructor
@@ -56,133 +184,7 @@ GObjLoaderObserver.prototype.onObjLoaderProgress = function ( loader, progress )
 function GObjLoader( scene, group )
 {
 
-    /**
-     * @constructor
-     * @param {string} Name of this Vbo instance
-     */
-	function VboMesh(name)
-	{
-		this.name = name;
-		this.matName = "";
-		
-		this.gVerts = [];
-		this.nVerts = [];
-		this.tVerts = [];
-		this.indices = [];
-	}
-	
-	/**
-	 * merge the provided mesh to this merge
-	 * @param {VboMesh} the mesh containing the new geometry
-	 */
-	VboMesh.prototype.merge = function( mesh )
-	{
-	    var prevIdxLen = this.indices.length;
-	    var newIdxLen = mesh.indices.length;
-	    
-	    this.gVerts = this.gVerts.concat( mesh.gVerts );
-	    this.nVerts = this.nVerts.concat( mesh.nVerts );
-	    this.tVerts = this.tVerts.concat( mesh.tVerts );
-	    
-	    for ( var i = 0; i < newIdxLen; ++i )
-	    {
-	        this.indices.push( i + prevIdxLen );
-	    }
-	};
-		
-	/**
-	 * Sets the material name for this instance
-	 * @param {string} New name for this instance
-	 */
-    VboMesh.prototype.setMtlName = function( matName )
-    {
-        this.matName = matName;
-    };
     
-    /**
-     * Returns the material name for this instance
-     * @return {string} The current name for this instance
-     */
-    VboMesh.prototype.getMtlName = function()
-    {
-        return this.matName;
-    };
-    
-    /**
-     * Returns the name of this instance
-     * @return {string} Instance name
-     */
-    VboMesh.prototype.getName = function()
-    {
-        return this.name;
-    };
-    
-    /**
-     * Returns the texture vertex buffer
-     * @return {Array.<number>} Buffer with texture vertex values
-     */
-    VboMesh.prototype.getTVerBuffer = function()
-    {
-        var len = this.gVerts.length;
-        var ret = [];
-        for (var i = 0; i < len; ++i)
-        {
-            var _this = this.tVerts[i];
-            if ( _this != undefined )
-            {
-                for( var j = 0; j < 2; ++j)
-                {
-                    ret.push(_this[j]); 
-                }
-            }
-            else
-            {
-                ret.push(0);
-            }
-        }
-        
-        return ret;
-    };
-    
-    /**
-     * Returns the vertex buffer
-     * @return {Array.<number>} Buffer with vertex values.
-     */
-    VboMesh.prototype.getVertBuffer = function()
-    {
-        var len = this.gVerts.length;
-        var ret = [];
-        for (var i = 0; i < len; ++i)
-        {
-            var _this = this.gVerts[i];
-            for( var j = 0; j < 3; ++j)
-            {
-                ret.push(_this[j]); 
-            }
-        }
-        
-        return ret;
-    };
-    
-    /**
-     * Returns the normals buffer
-     * @return {Array.<number>} Buffer with normal values.
-     */
-    VboMesh.prototype.getNormBuffer = function()
-    {
-        var len = this.nVerts.length;
-        var ret = [];
-        for (var i = 0; i < len; ++i)
-        {
-            var _this = this.nVerts[i];
-            for (var j = 0; j < 3; ++j)
-            {
-                ret.push(_this[j]);
-            }
-        }
-        
-        return ret;
-    };
 	
     /**
      * @constructor

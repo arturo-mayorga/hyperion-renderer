@@ -23,7 +23,7 @@
  * @param {Array.<string> Contents of the mtl file.  Each element is a new line
  * @param {string} Path to the location of the mtl resources
  */
-this.GMtlReader = function( mtlStrA, path )
+function GMtlReader( mtlStrA, path )
 {
 	this.path = path;
 	this.materials = {};
@@ -41,8 +41,7 @@ this.GMtlReader = function( mtlStrA, path )
 		"Ks":     this.process_ks,
 		"map_kd": this.process_mapKd
 	}
-	
-	
+
 	var size = mtlStrA.length;
 	for ( var i = 0; i < size; ++i )
 	{
@@ -66,7 +65,7 @@ this.GMtlReader = function( mtlStrA, path )
  * Get the materials after they are loaded
  * @return {Object} A map containing GMaterial instances (hashed by their material name.
  */
-this.GMtlReader.prototype.getMaterials = function()
+GMtlReader.prototype.getMaterials = function()
 {
 	return this.materials;
 };
@@ -75,56 +74,56 @@ this.GMtlReader.prototype.getMaterials = function()
  * Called when processing a comment (line starting with '#')
  * @param {Array.<string>} Current line (tokenized).
  */
-this.GMtlReader.prototype.process_comment = function ( lineA ){};
+GMtlReader.prototype.process_comment = function ( lineA ){};
 
 /**
  * Called when processing a new material (line starting with 'newmtl')
  * @param {Array.<string>} Current line (tokenized).
  */
-this.GMtlReader.prototype.process_newmtl = function ( lineA )
+GMtlReader.prototype.process_newmtl = function ( lineA )
 {
 	this.currentMtl = new GMaterial( lineA[1] );
 	this.materials[lineA[1]] = this.currentMtl;
-}
+};
 
 /**
  * Called when processing an ambient color property (line starting with 'ka')
  * @param {Array.<string>} Current line (tokenized).
  */
-this.GMtlReader.prototype.process_ka = function( lineA )
+GMtlReader.prototype.process_ka = function( lineA )
 {
 	this.currentMtl.setKa( [parseFloat(lineA[1]),
 							parseFloat(lineA[2]),
 							parseFloat(lineA[3])] );
-}
+};
 
 /**
  * Called when processing a diffuse color property (line starting with 'kd')
  * @param {Array.<string>} Current line (tokenized).
  */
-this.GMtlReader.prototype.process_kd = function( lineA )
+GMtlReader.prototype.process_kd = function( lineA )
 {
 	this.currentMtl.setKd( [parseFloat(lineA[1]),
 							parseFloat(lineA[2]),
 							parseFloat(lineA[3])] );
-}
+};
 
 /**
  * Called when processing a specular color (line starting with 'ks')
  * @param {Array.<string>} Current line (tokenized).
  */
-this.GMtlReader.prototype.process_ks = function( lineA )
+GMtlReader.prototype.process_ks = function( lineA )
 {
 	this.currentMtl.setKs( [parseFloat(lineA[1]),
 							parseFloat(lineA[2]),
 							parseFloat(lineA[3])] );
-}
+};
 
 /**
  * Called when processing a diffuse color texture (line starting with 'map_kd')
  * @param {Array.<string>} Current line (tokenized).
  */
-this.GMtlReader.prototype.process_mapKd = function( lineA )
+GMtlReader.prototype.process_mapKd = function( lineA )
 {
 	var texArgs = [];
 	
@@ -136,7 +135,7 @@ this.GMtlReader.prototype.process_mapKd = function( lineA )
 	var texture = new GTexture(texArgs, this.path);
 	
 	this.currentMtl.setMapKd(texture);
-}
+};
 
 /**
  * @constructor
@@ -144,8 +143,6 @@ this.GMtlReader.prototype.process_mapKd = function( lineA )
  */
 function GMtlLoader( scene )
 {
-    
-
 	this.client = new XMLHttpRequest();
 	this.target = scene;
 }
@@ -176,6 +173,6 @@ GMtlLoader.prototype.loadMtl = function ( path, source )
         }
     }.bind(this);
     this.client.send();
-}
+};
 
 

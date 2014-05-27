@@ -122,7 +122,7 @@ ThreejsLoader.prototype.update = function ( time )
     
     while ( ( (new Date().getTime()) - timeStart) < this.availableTime )
     {
-        if ( this.isDownloadComplete )
+        if ( this.isReadComplete )
         {
         }
         else if ( this.isReaderReady )

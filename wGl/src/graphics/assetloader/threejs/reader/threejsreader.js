@@ -18,6 +18,104 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 // SOFTWARE.
 
+
+// JSON Model format
+// 
+// Type bitmask
+// 
+// 00 00 00 00 = TRIANGLE
+// 00 00 00 01 = QUAD
+// 00 00 00 10 = FACE_MATERIAL
+// 00 00 01 00 = FACE_UV
+// 00 00 10 00 = FACE_VERTEX_UV
+// 00 01 00 00 = FACE_NORMAL
+// 00 10 00 00 = FACE_VERTEX_NORMAL
+// 01 00 00 00 = FACE_COLOR
+// 10 00 00 00 = FACE_VERTEX_COLOR
+// 
+// 0: 0 = triangle (3 indices), 1 = quad (4 indices)
+// 1: 0 = no face material, 1 = face material (1 index)
+// 2: 0 = no face uvs, 1 = face uvs (1 index)
+// 3: 0 = no face vertex uvs, 1 = face vertex uvs (3 indices or 4 indices)
+// 4: 0 = no face normal, 1 = face normal (1 index)
+// 5: 0 = no face vertex normals, 1 = face vertex normals (3 indices or 4 indices)
+// 6: 0 = no face color, 1 = face color (1 index)
+// 7: 0 = no face vertex colors, 1 = face vertex colors (3 indices or 4 indices)
+// 
+// Skinning is the result of three properties, influencesPerVertex, skinIndices,
+// and skinWeights. The value influencesPerVertex will determine the number of 
+// elements in the other two. For every vertex, there should be an appropriate 
+// number of entries in skinIndices where the value is the index of the bone 
+// which is influencing the vertex. If there are 2 influences per vertex, 
+// index 0 and 1 of skinIndices and skinWeights will be applied to vertex 0, 
+// 2 and 3 will be applied to vertex 1, etc.
+// 
+// Examples
+// {
+//     "metadata": { "formatVersion" : 3 },    
+// 
+//     "materials": [ {
+//         "DbgColor" : 15658734, // => 0xeeeeee
+//         "DbgIndex" : 0,
+//         "DbgName" : "dummy",
+//         "colorDiffuse" : [ 1, 0, 0 ],
+//     } ],
+// 
+//     "vertices": [ 0,0,0, 0,0,1, 1,0,1, 1,0,0, ... ],
+//     "normals":  [ 0,1,0, ... ],
+//     "colors":   [ 1,0,0, 0,1,0, 0,0,1, 1,1,0, ... ],
+//     "uvs":      [ [ 0,0, 0,1, 1,0, 1,1 ], ... ],
+// 
+//     "faces": [ 
+// 
+//         // triangle
+//         // 00 00 00 00 = 0
+//         // 0, [vertex_index, vertex_index, vertex_index]
+//         0, 0,1,2,
+// 
+//         // quad
+//         // 00 00 00 01 = 1
+//         // 1, [vertex_index, vertex_index, vertex_index, vertex_index]
+//         1, 0,1,2,3,
+// 
+//         // triangle with material
+//         // 00 00 00 10 = 2
+//         // 2, [vertex_index, vertex_index, vertex_index],
+//         // [material_index]
+//         2, 0,1,2, 0,
+// 
+//         // triangle with material, vertex uvs and face normal
+//         // 00 10 01 10 = 38
+//         // 38, [vertex_index, vertex_index, vertex_index],
+//         // [material_index],
+//         // [vertex_uv, vertex_uv, vertex_uv],
+//         // [face_normal]
+//         38, 0,1,2, 0, 0,1,2, 0,
+// 
+//         // triangle with material, vertex uvs and vertex normals
+//         // 00 10 10 10 = 42
+//         // 42, [vertex_index, vertex_index, vertex_index],
+//         // [material_index],
+//         // [vertex_uv, vertex_uv, vertex_uv],
+//         // [vertex_normal, vertex_normal, vertex_normal]
+//         42, 0,1,2, 0, 0,1,2, 0,1,2,
+// 
+//         // quad with everything
+//         // 11 11 11 11 = 255
+//         // 255, [vertex_index, vertex_index, vertex_index, vertex_index],
+//         //  [material_index],
+//         //  [face_uv],
+//         //  [face_vertex_uv, face_vertex_uv, face_vertex_uv, face_vertex_uv],
+//         //  [face_normal],
+//         //  [face_vertex_normal, face_vertex_normal,
+//         //   face_vertex_normal, face_vertex_normal],
+//         //  [face_color]
+//         //  [face_vertex_color, face_vertex_color,
+//         //   face_vertex_color, face_vertex_color],
+//         255, 0,1,2,3, 0, 0, 0,1,2,3, 0, 0,1,2,3, 0, 0,1,2,3,
+//     ]
+// }
+
 /**
  * @interface
  */
@@ -57,7 +155,7 @@ function ThreejsReader( path, json, scene, group, observer )
 	this.scene = scene;
 	this.group = group;
 	this.path = path;
-	this.objStrA = objStrA;
+	this.json = json;
 	this.observer = observer;
 
 	this.currentIndex = 0;

@@ -41,7 +41,7 @@ ThreejsLoaderObserver.prototype.onObjLoaderProgress = function ( loader, progres
  * @param {GScene} Target scene for this loader
  * @param {GGroup} Target group for this loader
  */
-function ThrejsLoader( scene, group )
+function ThreejsLoader( scene, group )
 {
 	this.client = new XMLHttpRequest();
 	this.scene = scene;
@@ -72,6 +72,7 @@ ThreejsLoader.prototype.loadJson = function ( path, source )
 		var status = this.client.status;
 		if (status == 200) {
 			this.jsonToRead = this.client.response;
+			this.isDownloadComplete = true;
 		} else {
 			// ...something went wrong.
 		}
@@ -80,13 +81,11 @@ ThreejsLoader.prototype.loadJson = function ( path, source )
 };
 
 /**
- * Update this json loader
- * @param {number} Milliseconds since the last update
+ * Update the available time and current progress
+ * @param {number} Milliseconds sine the last update
  */
-ThreejsLoader.prototype.update = function ( time )
+ThreejsLoader.prototype.updateTimeAndProgress = function ( time )
 {
-    var timeStart = new Date().getTime();
-    
     var targetTime = 17;
     
     if (time > targetTime)
@@ -109,10 +108,36 @@ ThreejsLoader.prototype.update = function ( time )
 	{
 		this.observer.onObjLoaderProgress(this, this.totalProgress);
 	}
+};
+
+/**
+ * Update this json loader
+ * @param {number} Milliseconds since the last update
+ */
+ThreejsLoader.prototype.update = function ( time )
+{
+    var timeStart = new Date().getTime();
+    
+    this.updateTimeAndProgress( time );
     
     while ( ( (new Date().getTime()) - timeStart) < this.availableTime )
     {
-		
+        if ( this.isDownloadComplete )
+        {
+        }
+        else if ( this.isReaderReady )
+        {
+            this.reader.update( time );
+            if ( this.reader.isComplete() )
+            {
+                this.isReadComplete = true;
+            }
+        }
+		else if ( this.isDownloadComplete )
+		{
+		    this.reader = new ThreejsReader( this.currentPath, this.jsonToRead, this.scene, this );
+		    this.isReaderReady = true;
+		}
     }
 };
 

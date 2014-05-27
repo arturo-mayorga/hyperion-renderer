@@ -238,6 +238,7 @@ LoadState.prototype.onObjLoaderProgress = function ( loader, progress )
 /**
  * @constructor
  * @implements {FsmState}
+ * @implements {ThreejsLoaderObserver}
  * @param {GScene} scene Scene that is driven by this state
  * @param {GHudController} hud  Hud to be driven by this state
  */
@@ -245,6 +246,9 @@ function ExploreState( scene, hud )
 {
     this.scene = scene;
 	this.hud = hud;
+	
+	this.humanoidGroup = new GGroup( "humanoidGroup" );
+	this.tjsLoader = new ThreejsLoader(this.scene, this.humanoidGroup )
 }
 /**
  * Set the signal observer
@@ -265,6 +269,8 @@ ExploreState.prototype.enter = function ()
 	console.debug("entering ExploreState");
 	this.camController = new GCameraController();
 	this.camController.bindCamera(this.scene.getCamera());
+	
+	this.tjsLoader.loadJson( "assets/3d/animtest/", "humanoid.js" );
 };
 
 /**
@@ -284,6 +290,7 @@ ExploreState.prototype.update = function (time)
 {
 	//this.fireSignal("startAsm");
 	this.camController.update(time);
+	this.tjsLoader.update(time);
 };
 
 

@@ -32,12 +32,12 @@ ThreejsReaderObserver.prototype.onNewMeshAvailable = function ( mesh ) {};
 /**
  * @constructor
  * @param {string} Path to the location of this obj file's resources
- * @param {Array.<string>} Lines of the obj file
+ * @param {Object} Lines of the obj file
  * @param {GScene} Target scene for the loading process
  * @param {GGroup} Target group for the loading process
  * @param {ThreejsReaderObserver} Observer to the loading process
  */
-function ThreejsReader( path, objStrA, scene, group, observer )
+function ThreejsReader( path, json, scene, group, observer )
 {
 	/**
 	 * @struct
@@ -70,6 +70,15 @@ function ThreejsReader( path, objStrA, scene, group, observer )
 	this.polyCount = 0;
 	
 }
+
+/**
+ * Returns true if the reader is done 
+ * @return {boolean}
+ */
+ThreejsReader.prototype.isComplete = function()
+{
+    return false;
+};
 
 /**
  * Advance through the loading process

@@ -31,7 +31,8 @@ function createLesson( scene, hud )
 	ret.addState("Explore", new ExploreState( scene, hud ));
 	ret.addState("Asm", new AsmState( scene, hud ));
 	
-	ret.addTransition( "Load", "loadComplete", "Asm" );
+	//ret.addTransition( "Load", "loadComplete", "Asm" );
+	ret.addTransition( "Load", "loadComplete", "Explore" );
 	ret.addTransition( "Asm", "exitAsm", "Explore" );
 	ret.addTransition( "Explore", "startAsm", "Asm" );
 	ret.setState("Load");

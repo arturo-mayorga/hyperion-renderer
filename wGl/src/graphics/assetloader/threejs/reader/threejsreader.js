@@ -215,6 +215,33 @@ ThreejsReader.prototype.update = function (time)
 };
 
 /**
+ * Populates an out vector with the vertex at the requested index
+ * @param {number} index to get the vector value from
+ * @param {Array.<number>} out vector
+ */
+ThreejsReader.prototype.getVertexAtIndex = function ( idx, outV )
+{
+};
+
+/**
+ * Populates an out vector with the normal at the requested index
+ * @param {number} index to get the vector value from
+ * @param {Array.<number>} out vector
+ */
+ThreejsReader.prototype.getNormalAtIndex = function ( idx, outV )
+{
+};
+
+/**
+ * Populates an out vector with the color at the requested index
+ * @param {number} index to get the vector value from
+ * @param {Array.<number>} out vector
+ */
+ThreejsReader.prototype.getColorAtIndex = function ( idx, outV )
+{
+};
+
+/**
  * process a quad face
  * @param {number} bit field for this face
  */

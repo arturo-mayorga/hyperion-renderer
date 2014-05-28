@@ -158,7 +158,7 @@ function ThreejsReader( path, json, scene, group, observer )
 	this.json = json;
 	this.observer = observer;
 
-	this.currentIndex = 0;
+	this.pIdx = 0;
 	
 	this.groupMap = {};
 	
@@ -167,6 +167,21 @@ function ThreejsReader( path, json, scene, group, observer )
 	this.updateIndex = 0;
 	this.polyCount = 0;
 	
+	/**
+	 * @struct
+	 */
+	 this.BITMASK = 
+	 {
+	     TRIANGLE:             0,
+	     QUAD:                 1,
+	     FACE_MATERIAL:        2,
+	     FACE_UV:              4,
+	     FACE_VERTEX_UV:       8,
+	     FACE_NORMAL:         16,
+	     FACE_VERTEX_NORMAL:  32,
+	     FACE_COLOR:          64,
+	     FACE_VERTEX_COLOR:  128
+     };
 }
 
 /**
@@ -184,5 +199,35 @@ ThreejsReader.prototype.isComplete = function()
  */
 ThreejsReader.prototype.update = function (time)
 {
+    if ( this.pIndex < this.json.faces.length )
+    {
+        var bitField = this.json.faces[this.pIndex];
+        ++this.pIndex;
+        if ( bitField & this.BITMASK.QUAD )
+        {
+            this.processQuad( bitField );
+        }
+        else
+        {
+            this.procesTri( bitField );
+        }
+    }
+};
+
+/**
+ * process a quad face
+ * @param {number} bit field for this face
+ */
+ThreejsReader.prototype.processQuad = function ( bitField )
+{
+    this.polyCount += 2;
 };
  
+/**
+ * process a tri face
+ * @param {number} bit field for this face
+ */
+ThreejsReader.prototype.processTri = function ( bitField )
+{
+    this.polyCount += 1;
+};

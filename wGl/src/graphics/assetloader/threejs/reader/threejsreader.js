@@ -221,6 +221,17 @@ ThreejsReader.prototype.update = function (time)
  */
 ThreejsReader.prototype.getVertexAtIndex = function ( idx, outV )
 {
+    var len = this.json.vertices.length;
+    
+    if ( idx*3 + 2 > len )
+    {
+        outV[0] = outV[1] = outV[2] = 0;
+        return;
+    }
+    
+    outV[0] = this.json.vertices[ idx*3 + 0 ];
+    outV[1] = this.json.vertices[ idx*3 + 1 ];
+    outV[2] = this.json.vertices[ idx*3 + 2 ];
 };
 
 /**
@@ -230,6 +241,7 @@ ThreejsReader.prototype.getVertexAtIndex = function ( idx, outV )
  */
 ThreejsReader.prototype.getNormalAtIndex = function ( idx, outV )
 {
+    this.json.normals
 };
 
 /**
@@ -239,6 +251,7 @@ ThreejsReader.prototype.getNormalAtIndex = function ( idx, outV )
  */
 ThreejsReader.prototype.getColorAtIndex = function ( idx, outV )
 {
+    this.json.colors
 };
 
 /**

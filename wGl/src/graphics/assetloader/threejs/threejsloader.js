@@ -27,13 +27,13 @@ function ThreejsLoaderObserver () {}
  * This function gets called whenever the observed loader completes the loading process
  * @param {ThreejsLoader} Loader object completing the load operation.
  */
-ThreejsLoaderObserver.prototype.onObjLoaderCompleted = function ( loader ) {};
+ThreejsLoaderObserver.prototype.onThreejsLoaderCompleted = function ( loader ) {};
 
 /**
  * @param {ThrejsLoader}
  * @param {number} progress Progress value
  */
-ThreejsLoaderObserver.prototype.onObjLoaderProgress = function ( loader, progress ) {};
+ThreejsLoaderObserver.prototype.onThreejsLoaderProgress = function ( loader, progress ) {};
 
 /**
  * @constructor
@@ -102,11 +102,11 @@ ThreejsLoader.prototype.updateTimeAndProgress = function ( time )
 		this.availableTime = 5;
 	}
 	
-	this.totalProgress = 0;
-	
-	if (this.observer != undefined)
+	if ( undefined != this.observer &&
+	     undefined != this.reader )
 	{
-		this.observer.onObjLoaderProgress(this, this.totalProgress);
+	    this.totalProgress = this.reader.getProgress();
+		this.observer.onThreejsLoaderProgress(this, this.totalProgress);
 	}
 };
 
@@ -124,6 +124,7 @@ ThreejsLoader.prototype.update = function ( time )
     {
         if ( this.isReadComplete )
         {
+            return;
         }
         else if ( this.isReaderReady )
         {
@@ -131,6 +132,11 @@ ThreejsLoader.prototype.update = function ( time )
             if ( this.reader.isComplete() )
             {
                 this.isReadComplete = true;
+                
+                if ( undefined != this.observer )
+                {
+                    this.observer.onThreejsLoaderCompleted( this );
+                }
             }
         }
 		else if ( this.isDownloadComplete )

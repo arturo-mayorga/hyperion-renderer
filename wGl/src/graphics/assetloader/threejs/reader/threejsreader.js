@@ -148,10 +148,7 @@ function ThreejsReader( path, json, scene, group, observer )
 		this.normIdx = parseFloat(tokens[2])-1;			
 	}
 
-	this.objGVerts = [];
-	this.objTVerts = [];
-	this.objNormals = [];
-	this.currentMesh = undefined;
+	
 	this.scene = scene;
 	this.group = group;
 	this.path = path;
@@ -162,13 +159,15 @@ function ThreejsReader( path, json, scene, group, observer )
 	
 	this.groupMap = {};
 	
-	this.invertNormals = false;
+	
 	this.isLoadComplete = false;
 	this.updateIndex = 0;
 	this.polyCount = 0;
 	
 	this.currentMesh = new GeometryTriMesh( "name" );
 	this.currentIndex = 0;
+	
+	this.totalProgress = 0;
 	
 	/**
 	 * @struct
@@ -197,6 +196,15 @@ ThreejsReader.prototype.isComplete = function()
 };
 
 /**
+ * Get the current progress value
+ * @return {number} Total progress
+ */
+ThreejsReader.prototype.getProgress = function()
+{
+    return this.totalProgress;
+};
+
+/**
  * Advance through the loading process
  * @param {number} Milliseconds since the last update
  */
@@ -216,10 +224,13 @@ ThreejsReader.prototype.update = function (time)
         {
             this.processTri( bitField );
         }
+        
+        this.totalProgress = this.pIdx / this.json.faces.length;
     }
     else
     {
         this.isLoadComplete = true;
+        this.totalProgress = 1;
         this.observer.onNewMeshAvailable( this.currentMesh );
         console.debug("Loaded " + this.polyCount + " polygons in 1 object.");
     }

@@ -167,6 +167,9 @@ function ThreejsReader( path, json, scene, group, observer )
 	this.updateIndex = 0;
 	this.polyCount = 0;
 	
+	this.currentMesh = new GeometryTriMesh( "name" );
+	this.currentIndex = 0;
+	
 	/**
 	 * @struct
 	 */
@@ -199,17 +202,17 @@ ThreejsReader.prototype.isComplete = function()
  */
 ThreejsReader.prototype.update = function (time)
 {
-    if ( this.pIndex < this.json.faces.length )
+    if ( this.pIdx < this.json.faces.length )
     {
-        var bitField = this.json.faces[this.pIndex];
-        ++this.pIndex;
+        var bitField = this.json.faces[this.pIdx];
+        ++this.pIdx;
         if ( bitField & this.BITMASK.QUAD )
         {
             this.processQuad( bitField );
         }
         else
         {
-            this.procesTri( bitField );
+            this.processTri( bitField );
         }
     }
 };
@@ -241,7 +244,17 @@ ThreejsReader.prototype.getVertexAtIndex = function ( idx, outV )
  */
 ThreejsReader.prototype.getNormalAtIndex = function ( idx, outV )
 {
-    this.json.normals
+    var len = this.json.normals.length;
+	
+	if ( idx*3 + 2 > len )
+	{
+		outV[0] = outV[1] = outV[2] = 0;
+		return;
+	}
+	
+	outV[0] = this.json.normals[ idx*3 + 0 ];
+	outV[1] = this.json.normals[ idx*3 + 1 ];
+	outV[2] = this.json.normals[ idx*3 + 2 ];
 };
 
 /**
@@ -251,7 +264,17 @@ ThreejsReader.prototype.getNormalAtIndex = function ( idx, outV )
  */
 ThreejsReader.prototype.getColorAtIndex = function ( idx, outV )
 {
-    this.json.colors
+    var len = this.json.colors.length;
+	
+	if ( idx*3 + 2 > len )
+	{
+		outV[0] = outV[1] = outV[2] = 0;
+		return;
+	}
+	
+	outV[0] = this.json.colors[ idx*3 + 0 ];
+	outV[1] = this.json.colors[ idx*3 + 1 ];
+	outV[2] = this.json.colors[ idx*3 + 2 ];
 };
 
 /**
@@ -261,6 +284,59 @@ ThreejsReader.prototype.getColorAtIndex = function ( idx, outV )
 ThreejsReader.prototype.processQuad = function ( bitField )
 {
     this.polyCount += 2;
+	
+	var vert = [ [0,0,0],[0,0,0],[0,0,0],[0,0,0] ];
+	var norm = [ [0,0,0],[0,0,0],[0,0,0],[0,0,0] ];
+	var vtex = [ [0,0],[0,0],[0,0],[0,0] ];
+	
+	// verts go first
+	this.pIdx += 4;
+	
+	if ( bitField & this.BITMASK.FACE_MATERIAL )
+	{
+		this.pIdx += 1;
+	}
+	if ( bitField & this.BITMASK.FACE_UV ) 
+	{
+		this.pIdx += 1;
+	}
+	if ( bitField & this.BITMASK.FACE_VERTEX_UV )
+	{
+		this.pIdx += 4;
+	}
+	if ( bitField & this.BITMASK.FACE_NORMAL )
+	{
+		this.pIdx += 1;
+	}
+	if ( bitField & this.BITMASK.FACE_VERTEX_NORMAL )
+	{
+		//
+		this.pIdx += 4;
+	}
+	if ( bitField & this.BITMASK.FACE_COLOR )
+	{
+		this.pIdx += 1;
+	}
+	if ( bitField & this.BITMASK.FACE_VERTEX_COLOR )
+	{
+		this.pIdx += 4;
+	}
+	
+	for ( var i = 0; i < 3; ++i )
+	{
+		this.currentMesh.gVerts.push(vert[i]);
+		this.currentMesh.nVerts.push(norm[i]);
+		this.currentMesh.tVerts.push(vtex[i]);
+		this.currentMesh.indices.push(this.currentIndex++);
+	}
+	
+	for ( var i = 2; i < 5; ++i )
+	{
+		this.currentMesh.gVerts.push(vert[i%4]);
+		this.currentMesh.nVerts.push(norm[i%4]);
+		this.currentMesh.tVerts.push(vtex[i%4]);
+		this.currentMesh.indices.push(this.currentIndex++);
+	}
 };
  
 /**
@@ -270,4 +346,48 @@ ThreejsReader.prototype.processQuad = function ( bitField )
 ThreejsReader.prototype.processTri = function ( bitField )
 {
     this.polyCount += 1;
+	
+	var vert = [ [0,0,0],[0,0,0],[0,0,0] ];
+	var norm = [ [0,0,0],[0,0,0],[0,0,0] ];
+	var vtex = [ [0,0],[0,0],[0,0] ];
+	
+	// verts go first
+	this.pIdx += 3;
+	
+	if ( bitField & this.BITMASK.FACE_MATERIAL )
+	{
+		this.pIdx += 1;
+	}
+	if ( bitField & this.BITMASK.FACE_UV ) 
+	{
+		this.pIdx += 1;
+	}
+	if ( bitField & this.BITMASK.FACE_VERTEX_UV )
+	{
+		this.pIdx += 3;
+	}
+	if ( bitField & this.BITMASK.FACE_NORMAL )
+	{
+		this.pIdx += 1;
+	}
+	if ( bitField & this.BITMASK.FACE_VERTEX_NORMAL )
+	{
+		this.pIdx += 3;
+	}
+	if ( bitField & this.BITMASK.FACE_COLOR )
+	{
+		this.pIdx += 1;
+	}
+	if ( bitField & this.BITMASK.FACE_VERTEX_COLOR )
+	{
+		this.pIdx += 4;
+	}
+	
+	for ( var i = 0; i < 3; ++i )
+	{
+		this.currentMesh.gVerts.push(vert[i]);
+		this.currentMesh.nVerts.push(norm[i]);
+		this.currentMesh.tVerts.push(vtex[i]);
+		this.currentMesh.indices.push(this.currentIndex++);
+	} 
 };

@@ -250,6 +250,13 @@ function ExploreState( scene, hud )
 	
 	this.humanoidGroup = new GGroup( "humanoidGroup" );
 	this.tjsLoader = new ThreejsLoader(this.scene, this.humanoidGroup )
+	this.scene.addChild(this.humanoidGroup);
+	
+	var humanoidTransform = mat4.create();
+	mat4.scale(humanoidTransform, humanoidTransform, [4, 4, 4]);
+	mat4.rotate(humanoidTransform, humanoidTransform, -2, [0, 1, 0]);
+	mat4.translate(humanoidTransform, humanoidTransform, [30, 0, 25]);
+	this.humanoidGroup.setMvMatrix(humanoidTransform);
 }
 /**
  * Set the signal observer

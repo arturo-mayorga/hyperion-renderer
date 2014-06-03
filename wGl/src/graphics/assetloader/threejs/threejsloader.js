@@ -135,7 +135,8 @@ ThreejsLoader.prototype.update = function ( time )
         }
 		else if ( this.isDownloadComplete )
 		{
-		    this.reader = new ThreejsReader( this.currentPath, this.jsonToRead, this.scene, this );
+		    this.reader = new ThreejsReader( this.currentPath, this.jsonToRead, 
+		                                     this.scene, this.group, this );
 		    this.isReaderReady = true;
 		}
     }

@@ -193,7 +193,7 @@ function ThreejsReader( path, json, scene, group, observer )
  */
 ThreejsReader.prototype.isComplete = function()
 {
-    return false;
+    return this.isLoadComplete;
 };
 
 /**
@@ -202,6 +202,8 @@ ThreejsReader.prototype.isComplete = function()
  */
 ThreejsReader.prototype.update = function (time)
 {
+    if ( this.isLoadComplete ) return;
+    
     if ( this.pIdx < this.json.faces.length )
     {
         var bitField = this.json.faces[this.pIdx];
@@ -214,6 +216,12 @@ ThreejsReader.prototype.update = function (time)
         {
             this.processTri( bitField );
         }
+    }
+    else
+    {
+        this.isLoadComplete = true;
+        this.observer.onNewMeshAvailable( this.currentMesh );
+        console.debug("Loaded " + this.polyCount + " polygons in 1 object.");
     }
 };
 
@@ -290,6 +298,10 @@ ThreejsReader.prototype.processQuad = function ( bitField )
 	var vtex = [ [0,0],[0,0],[0,0],[0,0] ];
 	
 	// verts go first
+	for ( var i = 0; i < 4; ++i )
+	{
+	    this.getVertexAtIndex( this.json.faces[this.pIdx + i], vert[i] );
+	}
 	this.pIdx += 4;
 	
 	if ( bitField & this.BITMASK.FACE_MATERIAL )
@@ -310,7 +322,10 @@ ThreejsReader.prototype.processQuad = function ( bitField )
 	}
 	if ( bitField & this.BITMASK.FACE_VERTEX_NORMAL )
 	{
-		//
+		for ( var i = 0; i < 4; ++i )
+        {
+            this.getVertexAtIndex( this.json.faces[this.pIdx + i], norm[i] );
+        }
 		this.pIdx += 4;
 	}
 	if ( bitField & this.BITMASK.FACE_COLOR )

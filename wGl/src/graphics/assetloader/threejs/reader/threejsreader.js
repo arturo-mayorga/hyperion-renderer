@@ -324,7 +324,7 @@ ThreejsReader.prototype.processQuad = function ( bitField )
 	{
 		for ( var i = 0; i < 4; ++i )
         {
-            this.getVertexAtIndex( this.json.faces[this.pIdx + i], norm[i] );
+            this.getNormalAtIndex( this.json.faces[this.pIdx + i], norm[i] );
         }
 		this.pIdx += 4;
 	}

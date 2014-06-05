@@ -20,31 +20,57 @@
 
 /**
  * @constructor
- * @param {string} Name for this group
+ * @param {Array.<number>} Buffer containing the vertices for this object
+ * @param {Array.<number>} Buffer containing the texture vertices for this object
+ * @param {Array.<number>} Buffer containing the normals for this object
+ * @param {Array.<number>} Buffer containing the indices for this object
+ * @param {string} Name for this object
  */
-function GGroup( name )
+function GObject( verts, tverts, normals, indices, name )
 {
-	this.name = name;
-	this.children = [];
-    this.drawMvMatrix = mat4.create(); 
-	this.mvMatrix = mat4.create();
-	this.gl = undefined;
-} 
+    this.vertBuffer = undefined;
+    this.tverBuffer = undefined;
+    this.normlBuffer = undefined;
+    this.indexBuffer = undefined;
+    this.vertA = verts;
+    this.tverA = tverts;
+    this.normA = normals;
+    this.indxA = indices; 
+    this.mvMatrix = mat4.create(); 
+    mat4.identity(this.mvMatrix);
+    this.gl = undefined;
+    this.name = name;
+    this.mtlName = undefined;
+    this.material = undefined;
+    this.valid = true;
+    this.drawMvMatrix = mat4.create();
+    this.normalMatrix = mat4.create();
+}
 
 /**
- * Get the name of this group
+ * Get the name of this object
  * @param {string} The name of this object
  */
-GGroup.prototype.getName = function()
+GObject.prototype.getName = function()
 {
     return this.name;
 };
 
 /**
- * Set the model view matrix for this group
+ * Set the material name for this object to use
+ * @param {string} name of the material that should be used by this object
+ */
+GObject.prototype.setMtlName = function( mName )
+{
+    this.mtlName = mName;
+    this.material = undefined;
+};
+
+/**
+ * Set the model view matrix for this object
  * @param {Array.<number>} Array of numbers representing the 4 by 4 model view matrix
  */
-GGroup.prototype.setMvMatrix = function(mat)
+GObject.prototype.setMvMatrix = function( mat )
 {
     mat4.copy(this.mvMatrix, mat);
 };
@@ -53,52 +79,124 @@ GGroup.prototype.setMvMatrix = function(mat)
  * Called to bind this object to a gl context
  * @param {WebGLRenderingContext} Context to bind to this object
  */
-GGroup.prototype.bindToContext = function( gl )
+GObject.prototype.bindToContext = function(gl_)
 {
-	this.gl = gl;
-	var childCount = this.children.length;
-	for (var i = 0; i < childCount; ++i)
-	{
-		this.children[i].bindToContext(gl);
-	}
-};
-
-/**
- * Add a child to this group
- * @param {GGroup|GObject} Child to add to this group
- */
-GGroup.prototype.addChild = function( child )
-{
-	child.bindToContext(this.gl);
-	this.children.push(child);
-};
-
-/**
- * Remove the child from this group
- * @param {GGroup|GObject} child to remove from this group
- */
-GGroup.prototype.removeChild = function( child )
-{
-    this.children.splice( this.children.indexOf( child ), 1 );
+    if (gl_ == undefined) return;
+    if (gl_ == this.gl) return;
     
-    return child;
+    this.gl = gl_;
+    var gl = this.gl;
+    
+    this.vertBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer); 
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertA), gl.STATIC_DRAW);
+    this.vertBuffer.itemSize = 3;
+    this.vertBuffer.numItems = this.vertA.length/3;
+    
+    this.tverBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.tverBuffer); 
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.tverA), gl.STATIC_DRAW);
+    this.tverBuffer.itemSize = 2;
+    this.tverBuffer.numItems = this.tverA.length/2;
+
+    this.normlBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.normlBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.normA), gl.STATIC_DRAW);
+    this.normlBuffer.itemSize = 3;
+    this.normlBuffer.numItems = this.normA.length/3;
+    
+    this.indexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indxA), gl.STATIC_DRAW);
+    this.indexBuffer.itemSize = 1;
+    this.indexBuffer.numItems = this.indxA.length;
+    
+    if (this.indexBuffer.numItems !=  this.normlBuffer.numItems  ||
+        this.indexBuffer.numItems !=  this.tverBuffer.numItems || 
+        this.indexBuffer.numItems != this.vertBuffer.numItems)
+    {
+        console.debug("gObject: index missmatch [" + this.name + "]");
+        _valid = false;
+    }
 };
 
 /**
- * Draw this group
+ * Draw this object
  * @param {Array.<number>} List of numbers representing the parent 4 by 4 view matrix
  * @param {Array.<GMaterial>} List of materials to use for rendering
  * @param {GShader} Shader program to use for rendering
  * @param {number} Draw mode for drawing the VBOs
  */
-GGroup.prototype.draw = function( parentMvMat, materials, shader, drawMode )
+GObject.prototype.draw = function( parentMvMat, materials, shader, drawMode )
 {
-	mat4.multiply(this.drawMvMatrix, parentMvMat, this.mvMatrix);
-	var childCount = this.children.length;
-	for (var i = 0; i < childCount; ++i)
-	{
-		this.children[i].draw(this.drawMvMatrix, materials, shader, drawMode);
-	}
+   if ( !this.valid ) return;
+   
+   var gl = this.gl;
+   
+    if (shader.attributes.positionVertexAttribute > -1)
+    {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
+        gl.vertexAttribPointer(shader.attributes.positionVertexAttribute, 
+                               this.vertBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    }
+
+    if (shader.attributes.normalVertexAttribute > -1)
+    {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.normlBuffer);
+        gl.vertexAttribPointer(shader.attributes.normalVertexAttribute, 
+                               this.normlBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    }
+    
+    if (shader.attributes.textureVertexAttribute > -1)
+    {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.tverBuffer);
+        gl.vertexAttribPointer(shader.attributes.textureVertexAttribute, 
+                               this.tverBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    }
+    
+    var isDrawMvMatrixReady = false;
+    if ( null != shader.uniforms.mvMatrixUniform )
+    {
+        mat4.multiply(this.drawMvMatrix, parentMvMat, this.mvMatrix);
+        isDrawMvMatrixReady = true;
+        gl.uniformMatrix4fv(shader.uniforms.mvMatrixUniform, false, this.drawMvMatrix);
+    }
+    
+    if ( null != shader.uniforms.nMatrixUniform )
+    {
+        if ( !isDrawMvMatrixReady )
+        {
+            mat4.multiply(this.drawMvMatrix, parentMvMat, this.mvMatrix);
+        }
+        
+        // mat4 normalMatrix = transpose(inverse(modelView));
+        mat4.invert(this.normalMatrix, this.drawMvMatrix);
+        mat4.transpose(this.normalMatrix, this.normalMatrix);
+        
+        gl.uniformMatrix4fv(shader.uniforms.nMatrixUniform, false, this.normalMatrix);
+    }
+    
+    if ( this.material == undefined &&
+         this.mtlName != undefined )
+    {
+        this.material = materials[this.mtlName];
+    }
+    
+    if ( this.material != undefined )
+    {
+        this.material.draw( shader );
+    }
+    
+    if (this.indexBuffer.numItems !=  this.normlBuffer.numItems  ||
+        this.indexBuffer.numItems !=  this.tverBuffer.numItems || 
+        this.indexBuffer.numItems != this.vertBuffer.numItems)
+    {
+        console.debug("gObject: index missmatch [" + this.name + "]");
+        this.valid = false;
+    }
+    
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+    gl.drawElements(drawMode, this.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 };
 
 

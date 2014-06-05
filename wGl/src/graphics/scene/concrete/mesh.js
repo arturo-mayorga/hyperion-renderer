@@ -26,7 +26,7 @@
  * @param {Array.<number>} Buffer containing the indices for this object
  * @param {string} Name for this object
  */
-function GObject( verts, tverts, normals, indices, name )
+function Mesh( verts, tverts, normals, indices, name )
 {
     this.vertBuffer = undefined;
     this.tverBuffer = undefined;
@@ -51,7 +51,7 @@ function GObject( verts, tverts, normals, indices, name )
  * Get the name of this object
  * @param {string} The name of this object
  */
-GObject.prototype.getName = function()
+Mesh.prototype.getName = function()
 {
     return this.name;
 };
@@ -60,7 +60,7 @@ GObject.prototype.getName = function()
  * Set the material name for this object to use
  * @param {string} name of the material that should be used by this object
  */
-GObject.prototype.setMtlName = function( mName )
+Mesh.prototype.setMtlName = function( mName )
 {
     this.mtlName = mName;
     this.material = undefined;
@@ -70,7 +70,7 @@ GObject.prototype.setMtlName = function( mName )
  * Set the model view matrix for this object
  * @param {Array.<number>} Array of numbers representing the 4 by 4 model view matrix
  */
-GObject.prototype.setMvMatrix = function( mat )
+Mesh.prototype.setMvMatrix = function( mat )
 {
     mat4.copy(this.mvMatrix, mat);
 };
@@ -79,7 +79,7 @@ GObject.prototype.setMvMatrix = function( mat )
  * Called to bind this object to a gl context
  * @param {WebGLRenderingContext} Context to bind to this object
  */
-GObject.prototype.bindToContext = function(gl_)
+Mesh.prototype.bindToContext = function(gl_)
 {
     if (gl_ == undefined) return;
     if (gl_ == this.gl) return;
@@ -115,7 +115,7 @@ GObject.prototype.bindToContext = function(gl_)
         this.indexBuffer.numItems !=  this.tverBuffer.numItems || 
         this.indexBuffer.numItems != this.vertBuffer.numItems)
     {
-        console.debug("gObject: index missmatch [" + this.name + "]");
+        console.debug("Mesh: index missmatch [" + this.name + "]");
         _valid = false;
     }
 };
@@ -127,7 +127,7 @@ GObject.prototype.bindToContext = function(gl_)
  * @param {GShader} Shader program to use for rendering
  * @param {number} Draw mode for drawing the VBOs
  */
-GObject.prototype.draw = function( parentMvMat, materials, shader, drawMode )
+Mesh.prototype.draw = function( parentMvMat, materials, shader, drawMode )
 {
    if ( !this.valid ) return;
    
@@ -191,7 +191,7 @@ GObject.prototype.draw = function( parentMvMat, materials, shader, drawMode )
         this.indexBuffer.numItems !=  this.tverBuffer.numItems || 
         this.indexBuffer.numItems != this.vertBuffer.numItems)
     {
-        console.debug("gObject: index missmatch [" + this.name + "]");
+        console.debug("Mesh: index missmatch [" + this.name + "]");
         this.valid = false;
     }
     

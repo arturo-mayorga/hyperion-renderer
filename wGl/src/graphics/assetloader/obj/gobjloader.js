@@ -254,11 +254,11 @@ GObjLoader.prototype.deferMeshForMerge = function ( mesh )
  */
 GObjLoader.prototype.sendMeshToGroup = function ( mesh )
 {
-   var obj = new GObject(mesh.getVertBuffer(),
-						  mesh.getTVerBuffer(),
-						  mesh.getNormBuffer(),
-						  mesh.indices,
-						  mesh.getName());
+   var obj = new Mesh( mesh.getVertBuffer(),
+					   mesh.getTVerBuffer(),
+					   mesh.getNormBuffer(),
+					   mesh.indices,
+					   mesh.getName());
                                       
 	obj.setMtlName(mesh.getMtlName());
 	this.group.addChild(obj); 

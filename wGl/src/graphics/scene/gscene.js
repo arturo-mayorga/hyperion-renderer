@@ -267,7 +267,7 @@ GScene.prototype.addMaterial = function( mat )
 
 /**
  * Add a child to the scene
- * @param {GGroup|GObject} Child to add to the scene
+ * @param {GGroup|Mesh} Child to add to the scene
  */
 GScene.prototype.addChild = function( child )
 {

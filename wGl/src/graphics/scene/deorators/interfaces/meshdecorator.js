@@ -20,6 +20,7 @@
 
 /**
  * @constructor
+ * @extends {Mesh}
  * @param {Mesh} Mesh that needs to be decorated
  * @param {string} Name for this object
  */

@@ -20,6 +20,7 @@
 
 /**
  * @constructor
+ * @extends {MeshDecorator}
  * @param {Mesh} Name for this group
  */
 function ArmatureMeshDecorator( mesh )

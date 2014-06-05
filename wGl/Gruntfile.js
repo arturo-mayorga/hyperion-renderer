@@ -11,6 +11,7 @@ module.exports = function(grunt) {
 					'src/graphics/assetloader/obj/reader/*.js',
 					'src/graphics/assetloader/obj/*.js',
                     'src/graphics/assetloader/*.js',
+					'src/graphics/scene/concrete/*.js',
                     'src/graphics/scene/*.js',
                     'src/graphics/hud/*.js',
                     'src/graphics/*.js',

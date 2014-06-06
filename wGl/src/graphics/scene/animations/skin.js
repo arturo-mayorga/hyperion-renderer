@@ -20,9 +20,11 @@
 
 /**
  * @constructor
+ * @param {Array.<number>} Buffer containing the skin properties
  */
-function Skin()
+function Skin( sverts )
 {
+    this.svertA = sverts;
 } 
 
 

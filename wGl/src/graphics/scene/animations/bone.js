@@ -20,8 +20,13 @@
 
 /**
  * @constructor
+ * @param {string} name of this bone 
+ * @param {number} parent id for this bone
+ * @param {Array.<number>} possition for this bone
+ * @param {Array.<number>} rotation quaternion
+ * @param {Array.<number>} scale factors
  */
-function Bone()
+function Bone( name, parentId, position, rotQuat, scale )
 {
 } 
 

@@ -150,28 +150,45 @@ ThreejsLoader.prototype.update = function ( time )
 
 /**
  * This function is called whenever a new GeometryTriMesh object is loaded
- * @param {GeometryTriMesh} New object that was just made available
+ * @param {GeometryTriMesh} New mesh that was just made available
+ * @param {GeometrySkin} Skin complementing the mesh
  */
-ThreejsLoader.prototype.onNewMeshAvailable = function ( mesh )
+ThreejsLoader.prototype.onNewMeshAvailable = function ( proxyMesh, proxySkin )
 {
-	this.sendMeshToGroup( mesh ); 
+	var mesh = new Mesh( proxyMesh.getVertBuffer(),
+		 			     proxyMesh.getTVerBuffer(),
+					     proxyMesh.getNormBuffer(),
+					     proxyMesh.indices,
+					     proxyMesh.getName() );
+	
+	var skin = new Skin( proxySkin.getSkinBuffer() );
+	
+	var bones = this.createBones();
+	
+	var armature = new ArmatureMeshDecorator( mesh, skin, bones );
+                                      
+	mesh.setMtlName(proxyMesh.getMtlName());
+	this.group.addChild(mesh); 
 };
 
 /**
- * This function is called whenever a new GeometryTriMesh object is 
- * loaded and needs to be sent directly to the scene.
- * @param {GeometryTriMesh} New object that was just made available
+ * Return a list of bone objects as defined in the loaded json
+ * @return {Array.<Bone>} Array of bones defined in the json
  */
-ThreejsLoader.prototype.sendMeshToGroup = function ( mesh )
+ThreejsLoader.prototype.createBones = function ()
 {
-   var obj = new Mesh( mesh.getVertBuffer(),
-					   mesh.getTVerBuffer(),
-					   mesh.getNormBuffer(),
-					   mesh.indices,
-					   mesh.getName());
-                                      
-	obj.setMtlName(mesh.getMtlName());
-	this.group.addChild(obj); 
+    var bones = [];
+    var jsonBones = this.jsonToRead.bones;
+    
+    for ( var i = 0; i < jsonBones.length; ++i )
+    {
+        var newBone = new Bone( jsonBones.name, jsonBones.parent, jsonBones.pos, 
+                                jsonBones.rotq, jsonBones.scl );
+        
+        bones.push( newBone );
+    }
+    
+    return bones;
 };
 
 /**

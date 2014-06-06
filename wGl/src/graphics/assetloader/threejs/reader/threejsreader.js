@@ -123,9 +123,10 @@ function ThreejsReaderObserver () {}
 
 /**
  * This function is called whenever a new GeometryTriMesh object is loaded
- * @param {GeometryTriMesh} New object that was just made available
+ * @param {GeometryTriMesh} New mesh that was just made available
+ * @param {GeometrySkin} Skin complementing the mesh
  */
-ThreejsReaderObserver.prototype.onNewMeshAvailable = function ( mesh ) {};
+ThreejsReaderObserver.prototype.onNewMeshAvailable = function ( mesh, skin ) {};
 
 /**
  * @constructor
@@ -165,6 +166,7 @@ function ThreejsReader( path, json, scene, group, observer )
 	this.polyCount = 0;
 	
 	this.currentMesh = new GeometryTriMesh( "name" );
+	this.currentSkin = new GeometrySkin();
 	this.currentIndex = 0;
 	
 	this.totalProgress = 0;
@@ -231,7 +233,7 @@ ThreejsReader.prototype.update = function (time)
     {
         this.isLoadComplete = true;
         this.totalProgress = 1;
-        this.observer.onNewMeshAvailable( this.currentMesh );
+        this.observer.onNewMeshAvailable( this.currentMesh, this.currentSkin );
         console.debug("Loaded " + this.polyCount + " polygons in 1 object.");
     }
 };
@@ -297,6 +299,31 @@ ThreejsReader.prototype.getColorAtIndex = function ( idx, outV )
 };
 
 /**
+ * Populates an out vector with the skin information
+ * @param {number} index to get the vector value from
+ * @param {Array.<number>} out vector
+ */
+ThreejsReader.prototype.getSkinAtIndex = function ( idx, outV )
+{
+    var lenI = this.json.skinIndices.length;
+    var lenW = this.json.skinWeights.length;
+    
+    outV[0] = outV[1] = outV[2] = outV[3] = 0;
+    
+    if ( idx*2 + 1 <= lenI )
+    {
+        outV[0] = this.json.skinIndices[ idx*2 + 0 ];
+        outV[1] = this.json.skinIndices[ idx*2 + 1 ];
+    }
+    
+    if ( idx*2 + 1 <= lenW )
+    {
+        outV[2] = this.json.skinWeights[ idx*2 + 0 ];
+        outV[3] = this.json.skinWeights[ idx*2 + 1 ];
+    }
+};
+
+/**
  * process a quad face
  * @param {number} bit field for this face
  */
@@ -304,6 +331,7 @@ ThreejsReader.prototype.processQuad = function ( bitField )
 {
     this.polyCount += 2;
 	
+    var skin = [ [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0] ];
 	var vert = [ [0,0,0],[0,0,0],[0,0,0],[0,0,0] ];
 	var norm = [ [0,0,0],[0,0,0],[0,0,0],[0,0,0] ];
 	var vtex = [ [0,0],[0,0],[0,0],[0,0] ];
@@ -312,6 +340,7 @@ ThreejsReader.prototype.processQuad = function ( bitField )
 	for ( var i = 0; i < 4; ++i )
 	{
 	    this.getVertexAtIndex( this.json.faces[this.pIdx + i], vert[i] );
+	    this.getSkinAtIndex( this.json.faces[this.pIdx + i], skin[i] );
 	}
 	this.pIdx += 4;
 	
@@ -354,6 +383,8 @@ ThreejsReader.prototype.processQuad = function ( bitField )
 		this.currentMesh.nVerts.push(norm[i]);
 		this.currentMesh.tVerts.push(vtex[i]);
 		this.currentMesh.indices.push(this.currentIndex++);
+		
+		this.currentSkin.sVerts.push(skin[i]);
 	}
 	
 	for ( var i = 2; i < 5; ++i )
@@ -362,6 +393,8 @@ ThreejsReader.prototype.processQuad = function ( bitField )
 		this.currentMesh.nVerts.push(norm[i%4]);
 		this.currentMesh.tVerts.push(vtex[i%4]);
 		this.currentMesh.indices.push(this.currentIndex++);
+		
+		this.currentSkin.sVerts.push(skin[i%4]);
 	}
 };
  

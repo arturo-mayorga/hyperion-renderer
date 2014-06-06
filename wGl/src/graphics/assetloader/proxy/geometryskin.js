@@ -20,13 +20,37 @@
 
 /**
  * @constructor
- * @extends {MeshDecorator}
- * @param {Mesh} Name for this group
  */
-function ArmatureMeshDecorator( mesh, skin, bones )
+function GeometrySkin()
 {
-} 
+	this.sVerts = [];
+}
 
+/**
+ * Returns the skin vertex buffer
+ * @return {Array.<number>} Buffer with texture vertex values
+ */
+GeometrySkin.prototype.getSkinBuffer = function()
+{
+	var len = this.sVerts.length;
+	var ret = [];
+	for (var i = 0; i < len; ++i)
+	{
+		var _this = this.sVerts[i];
+		if ( _this != undefined )
+		{
+			for( var j = 0; j < 4; ++j)
+			{
+				ret.push(_this[j]); 
+			}
+		}
+		else
+		{
+			ret.push(0); ret.push(0); ret.push(0); ret.push(0);
+		}
+	}
+	
+	return ret;
+};
 
-
-
+ 

@@ -25,8 +25,44 @@
  */
 function ArmatureMeshDecorator( mesh, skin, bones )
 {
+    this.mesh = mesh; 
 } 
 
+/**
+ * Get the name of this object
+ * @param {string} The name of this object
+ */
+ArmatureMeshDecorator.prototype.getName = 
+    MeshDecorator.prototype.getName;
 
+/**
+ * Set the material name for this object to use
+ * @param {string} name of the material that should be used by this object
+ */
+ArmatureMeshDecorator.prototype.setMtlName = 
+    MeshDecorator.prototype.setMtlName;
 
+/**
+ * Set the model view matrix for this object
+ * @param {Array.<number>} Array of numbers representing the 4 by 4 model view matrix
+ */
+ArmatureMeshDecorator.prototype.setMvMatrix = 
+    MeshDecorator.prototype.setMvMatrix;
+   
+/**
+ * Called to bind this object to a gl context
+ * @param {WebGLRenderingContext} Context to bind to this object
+ */
+ArmatureMeshDecorator.prototype.bindToContext = 
+    MeshDecorator.prototype.bindToContext;
+
+/**
+ * Draw this object
+ * @param {Array.<number>} List of numbers representing the parent 4 by 4 view matrix
+ * @param {Array.<GMaterial>} List of materials to use for rendering
+ * @param {GShader} Shader program to use for rendering
+ * @param {number} Draw mode for drawing the VBOs
+ */
+ArmatureMeshDecorator.prototype.draw = 
+    MeshDecorator.prototype.draw;
 

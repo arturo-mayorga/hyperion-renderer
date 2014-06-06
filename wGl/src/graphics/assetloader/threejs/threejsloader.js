@@ -160,15 +160,14 @@ ThreejsLoader.prototype.onNewMeshAvailable = function ( proxyMesh, proxySkin )
 					     proxyMesh.getNormBuffer(),
 					     proxyMesh.indices,
 					     proxyMesh.getName() );
+	mesh.setMtlName( proxyMesh.getMtlName() );
 	
 	var skin = new Skin( proxySkin.getSkinBuffer() );
-	
 	var bones = this.createBones();
 	
 	var armature = new ArmatureMeshDecorator( mesh, skin, bones );
-                                      
-	mesh.setMtlName(proxyMesh.getMtlName());
-	this.group.addChild(mesh); 
+	
+	this.group.addChild( armature ); 
 };
 
 /**

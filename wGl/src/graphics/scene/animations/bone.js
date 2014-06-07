@@ -28,7 +28,78 @@
  */
 function Bone( name, parentId, position, rotQuat, scale )
 {
+    this.name = name;
+    this.parentId = parentId; 
+    
+    this.startPosition = vec3.fromValues( position[0], position[1], position[2] );
+    this.startRotQuat  = vec4.fromValues( rotQuat[0], rotQuat[1], rotQuat[2] );
+    this.startScale    = vec3.fromValues( scale[0], scale[1], scale[2] );
+    
+    this.currentPosition = vec3.fromValues( position[0], position[1], position[2] );
+    this.currentRotQuat  = vec4.fromValues( rotQuat[0], rotQuat[1], rotQuat[2] );
+    this.currentScale    = vec3.fromValues( scale[0], scale[1], scale[2] );
+    
+    this.children = [];
+    this.parent = undefined;
+    
+    this.boneMatrix = mat4.create();
 } 
+
+/** 
+ * Add a child bone to this bone hirearchy
+ * @param {Bone} child bone to add to the hirearchy
+ */
+Bone.prototype.addChild = function ( childBone )
+{
+    if ( undefined != childBone.parent )
+    {
+        childBone.parent.children.splice 
+        (
+            childBone.parent.children.indexOf( childBone ),
+            1
+        );
+    }
+    
+    this.children.push( childBone );
+    childBone.parent = this;
+};
+
+/**
+ * Get the parent id for this bone
+ * @return {number} Id for the parent bone
+ */
+Bone.prototype.getParentId = function()
+{
+    return this.parentId;
+};
+
+/**
+ * Iterage through the entire hirearchy and calculate the matrices for each
+ * bone.
+ * @param {Array.<number>} parent matrix
+ */
+Bone.prototype.calculateMatrices = function( parentMat )
+{
+    for ( var i in this.children )
+    {
+        this.children[i].calculateMatrices( this.boneMatrix );
+    }
+};
+
+/**
+ * Populate the matrix collection into the procided index
+ * @param {Array.<number>} array containing the matrix collection
+ * @param {number} index representing the position on the matrix collection
+ */
+Bone.prototype.populateMatrixCollection = function( matrixCollection, idx )
+{
+    var sIdx = idx*16;
+    
+    for ( var i = 0; i < 16; ++i )
+    {
+        matrixCollection[ i + sIdx ] = this.boneMatrix[i];
+    }
+};
 
 
 

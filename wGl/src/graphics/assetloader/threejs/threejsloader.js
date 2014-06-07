@@ -179,10 +179,10 @@ ThreejsLoader.prototype.createBones = function ()
     var bones = [];
     var jsonBones = this.jsonToRead.bones;
     
-    for ( var i = 0; i < jsonBones.length; ++i )
+    for ( var i in jsonBones )
     {
-        var newBone = new Bone( jsonBones.name, jsonBones.parent, jsonBones.pos, 
-                                jsonBones.rotq, jsonBones.scl );
+        var newBone = new Bone( jsonBones[i].name, jsonBones[i].parent, jsonBones[i].pos, 
+                                jsonBones[i].rotq, jsonBones[i].scl );
         
         bones.push( newBone );
     }

@@ -21,40 +21,39 @@
 /**
  * @constructor
  * @extends {MeshDecorator}
- * @param {Mesh} Name for this group
+ * @param {Mesh} mesh that is being decorated
+ * @param {Skin} Skin to apply to the mesh
+ * @param {Array.<Bone>} Array of bones
  */
 function ArmatureMeshDecorator( mesh, skin, bones )
 {
-    this.mesh = mesh; 
+    this.rootBones = [];
+    this.bones = bones;
+    this.skin = skin;
+    
+    this.identMat = mat4.create();
+    
+    for ( var i in bones )
+    {
+        var thisBone = bones[i];
+        var parentId = thisBone.getParentId();
+        
+        if ( parentId >= 0 )
+        {
+            bones[parentId].addChild( thisBone );
+        }
+        else
+        {
+            this.rootBones.push(thisBone);
+        }
+    }
+    
+    this.boneMatrixCollection = new Float32Array( this.bones.length * 16 );
+    
+    MeshDecorator.call( this, mesh );
 } 
 
-/**
- * Get the name of this object
- * @param {string} The name of this object
- */
-ArmatureMeshDecorator.prototype.getName = 
-    MeshDecorator.prototype.getName;
-
-/**
- * Set the material name for this object to use
- * @param {string} name of the material that should be used by this object
- */
-ArmatureMeshDecorator.prototype.setMtlName = 
-    MeshDecorator.prototype.setMtlName;
-
-/**
- * Set the model view matrix for this object
- * @param {Array.<number>} Array of numbers representing the 4 by 4 model view matrix
- */
-ArmatureMeshDecorator.prototype.setMvMatrix = 
-    MeshDecorator.prototype.setMvMatrix;
-   
-/**
- * Called to bind this object to a gl context
- * @param {WebGLRenderingContext} Context to bind to this object
- */
-ArmatureMeshDecorator.prototype.bindToContext = 
-    MeshDecorator.prototype.bindToContext;
+ArmatureMeshDecorator.prototype = Object.create( MeshDecorator.prototype );
 
 /**
  * Draw this object
@@ -63,6 +62,37 @@ ArmatureMeshDecorator.prototype.bindToContext =
  * @param {GShader} Shader program to use for rendering
  * @param {number} Draw mode for drawing the VBOs
  */
-ArmatureMeshDecorator.prototype.draw = 
-    MeshDecorator.prototype.draw;
+ArmatureMeshDecorator.prototype.draw = function( parentMvMat, materials, shader, drawMode )
+{
+    this.skin.draw( shader );
+    
+    for ( var i in this.rootBones )
+    {
+        this.rootBones[i].calculateMatrices( this.identMat );
+    }
+    
+    for ( var i in this.bones )
+    {
+        this.bones[i].populateMatrixCollection( this.boneMatrixCollection, i|0 );
+    }
+    
+    if ( null != shader.uniforms.boneMatrices )
+    {
+        gl.uniformMatrix4fv( shader.uniforms.boneMatrices, false, 
+                             this.boneMatricCollection );
+    }
+    
+    MeshDecorator.prototype.draw.call( this, parentMvMat, materials, shader, drawMode );
+};
+
+/**
+ * Called to bind this object to a gl context
+ * @param {WebGLRenderingContext} Context to bind to this object
+ */
+ArmatureMeshDecorator.prototype.bindToContext = function( gl )
+{
+    MeshDecorator.prototype.bindToContext.call( this, gl );
+    this.gl = gl;
+};
+
 

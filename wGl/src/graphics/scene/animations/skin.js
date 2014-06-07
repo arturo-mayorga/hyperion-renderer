@@ -27,6 +27,12 @@ function Skin( sverts )
     this.svertA = sverts;
 } 
 
-
+/**
+ * Draw this object
+ * @param {GShader} Shader program to use for rendering
+ */
+Skin.prototype.draw = function( shader )
+{
+};
 
 

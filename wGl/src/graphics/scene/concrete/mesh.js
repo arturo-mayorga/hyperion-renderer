@@ -111,8 +111,8 @@ Mesh.prototype.bindToContext = function(gl_)
     this.indexBuffer.itemSize = 1;
     this.indexBuffer.numItems = this.indxA.length;
     
-    if (this.indexBuffer.numItems !=  this.normlBuffer.numItems  ||
-        this.indexBuffer.numItems !=  this.tverBuffer.numItems || 
+    if (this.indexBuffer.numItems != this.normlBuffer.numItems  ||
+        this.indexBuffer.numItems != this.tverBuffer.numItems || 
         this.indexBuffer.numItems != this.vertBuffer.numItems)
     {
         console.debug("Mesh: index missmatch [" + this.name + "]");

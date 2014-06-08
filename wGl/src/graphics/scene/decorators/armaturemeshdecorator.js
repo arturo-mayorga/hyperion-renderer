@@ -76,9 +76,9 @@ ArmatureMeshDecorator.prototype.draw = function( parentMvMat, materials, shader,
         this.bones[i].populateMatrixCollection( this.boneMatrixCollection, i|0 );
     }
     
-    if ( null != shader.uniforms.boneMatrices )
+    if ( null != shader.uniforms.aMatrixUniform )
     {
-        gl.uniformMatrix4fv( shader.uniforms.boneMatrices, false, 
+        gl.uniformMatrix4fv( shader.uniforms.aMatrixUniform, false, 
                              this.boneMatricCollection );
     }
     
@@ -92,6 +92,7 @@ ArmatureMeshDecorator.prototype.draw = function( parentMvMat, materials, shader,
 ArmatureMeshDecorator.prototype.bindToContext = function( gl )
 {
     MeshDecorator.prototype.bindToContext.call( this, gl );
+    this.skin.bindToContext( gl );
     this.gl = gl;
 };
 

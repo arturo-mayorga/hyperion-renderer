@@ -33,6 +33,27 @@ function Skin( sverts )
  */
 Skin.prototype.draw = function( shader )
 {
+    
+    if ( shader.attributes.skinVertexAttribute > -1 )
+    {
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.svertBuffer );
+        gl.vertexAttribPointer( shader.attributes.skinVertexAttribute, 
+                                this.svertBuffer.itemSize, gl.FLOAT, false, 0, 0 );
+    } 
 };
 
+/**
+ * Called to bind this object to a gl context
+ * @param {WebGLRenderingContext} Context to bind to this object
+ */
+Skin.prototype.bindToContext = function( gl )
+{
+    this.gl = gl;
+    
+    this.svertBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.svertBuffer); 
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.svertA), gl.STATIC_DRAW);
+    this.svertBuffer.itemSize = 4;
+    this.svertBuffer.numItems = this.svertA.length/4;
+};
 

@@ -31,13 +31,19 @@ function Bone( name, parentId, position, rotQuat, scale )
     this.name = name;
     this.parentId = parentId; 
     
-    this.startPosition = vec3.fromValues( position[0], position[1], position[2] );
-    this.startRotQuat  = vec4.fromValues( rotQuat[0], rotQuat[1], rotQuat[2] );
-    this.startScale    = vec3.fromValues( scale[0], scale[1], scale[2] );
+    // Setting the conjugate/inverse/etc to have a pre calculated point of reference
+    // for the animation in relation to the starting pose of the armature.
+    this.startPosition = vec3.fromValues( -1*position[0], -1*position[1], -1*position[2] );
+    this.startRotQuat  = quat.fromValues( rotQuat[0], rotQuat[1], rotQuat[2], rotQuat[3] );
+    quat.conjugate( this.startRotQuat, this.startRotQuat );
+    this.startScale    = vec3.fromValues( 1/scale[0], 1/scale[1], 1/scale[2] );
     
     this.currentPosition = vec3.fromValues( position[0], position[1], position[2] );
-    this.currentRotQuat  = vec4.fromValues( rotQuat[0], rotQuat[1], rotQuat[2] );
+    this.currentRotQuat  = quat.fromValues( rotQuat[0], rotQuat[1], rotQuat[2], rotQuat[3] );
     this.currentScale    = vec3.fromValues( scale[0], scale[1], scale[2] );
+    
+    this.tempQuat = quat.create();
+    this.tempV3 = vec4.create();
     
     this.children = [];
     this.parent = undefined;
@@ -80,6 +86,14 @@ Bone.prototype.getParentId = function()
  */
 Bone.prototype.calculateMatrices = function( parentMat )
 {
+    // ignoring scale for now
+    
+    quat.multiply( this.tempQuat, this.currentRotQuat, this.startRotQuat );
+    vec3.add( this.tempV3, this.startPosition, this.currentPosition );
+    
+    mat4.fromRotationTranslation( this.boneMatrix, this.tempQuat, this.tempV3 );
+    mat4.multiply(this.boneMatrix, parentMat, this.boneMatrix);
+    
     for ( var i in this.children )
     {
         this.children[i].calculateMatrices( this.boneMatrix );

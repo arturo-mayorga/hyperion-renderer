@@ -24,7 +24,7 @@
  */
 function Skin( sverts )
 {
-    this.svertA = sverts;
+    this.svertA = sverts; // [ index, index, weight, weight...
 } 
 
 /**
@@ -33,6 +33,7 @@ function Skin( sverts )
  */
 Skin.prototype.draw = function( shader )
 {
+    var gl = this.gl;
     
     if ( shader.attributes.skinVertexAttribute > -1 )
     {

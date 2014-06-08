@@ -64,6 +64,8 @@ ArmatureMeshDecorator.prototype = Object.create( MeshDecorator.prototype );
  */
 ArmatureMeshDecorator.prototype.draw = function( parentMvMat, materials, shader, drawMode )
 {
+    var gl = this.gl; 
+    
     this.skin.draw( shader );
     
     for ( var i in this.rootBones )
@@ -79,7 +81,7 @@ ArmatureMeshDecorator.prototype.draw = function( parentMvMat, materials, shader,
     if ( null != shader.uniforms.aMatrixUniform )
     {
         gl.uniformMatrix4fv( shader.uniforms.aMatrixUniform, false, 
-                             this.boneMatricCollection );
+                             this.boneMatrixCollection );
     }
     
     MeshDecorator.prototype.draw.call( this, parentMvMat, materials, shader, drawMode );

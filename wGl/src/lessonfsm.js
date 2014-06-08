@@ -73,8 +73,8 @@ function LoadState( scene, hud )
 	mat4.translate(humanoidTransform, humanoidTransform, [30, 0, 25]);
 	this.humanoidGroup.setMvMatrix(humanoidTransform);
 	
-	this.scene.addChild(this.officeGroup);
-	this.scene.addChild(this.penGroup);
+	//this.scene.addChild(this.officeGroup);
+	//this.scene.addChild(this.penGroup);
 	this.scene.addChild(this.humanoidGroup);
 	
 	this.envLoader = new GObjLoader(this.scene, this.officeGroup);

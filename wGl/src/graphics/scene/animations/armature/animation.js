@@ -18,15 +18,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 // SOFTWARE.
 
-/**
+/** 
  * @constructor
  */
-function Animation()
+function Keyframe()
 {
-    
+    this.positions = [];
+    this.rotations = [];
+    this.scales = [];
+}
+
+/**
+ * Add bone information to the keyframe hirearchy.
+ * {Array.<number>} position for this bone 
+ * {Array.<number>} rotation quaternion for this bone
+ * {Array.<number>} scale for this bone
+ */
+Keyframe.prototype.addBoneInformation = function ( position, rotation, scale )
+{
+    this.positions.push( position );
+    this.rotation.push( rotation );
+    this.scale.push( scale );
+};
+
+/**
+ * @constructor
+ * @param {string} name of this animation
+ * @param {number} frames per second
+ * @param {number} length in seconds
+ */
+function Animation( name, fps, length )
+{
+    this.name = name;
+    this.fps = fps;
+    this.length = length;
+    this.keyframes = [];
 } 
 
-
+/**
+ * Add a keyframe to this animation
+ * @param {Keyframe} keyframe to add to this animation
+ */
+Animation.prototype.addKeyframe = function( keyframe )
+{
+    this.keyframes.push( keyframe );
+};
 
 
 

@@ -128,16 +128,7 @@ ThreejsLoader.prototype.update = function ( time )
         }
         else if ( this.isReaderReady )
         {
-            this.reader.update( time );
-            if ( this.reader.isComplete() )
-            {
-                this.isReadComplete = true;
-                
-                if ( undefined != this.observer )
-                {
-                    this.observer.onThreejsLoaderCompleted( this );
-                }
-            }
+            updateReaderReady( time );
         }
 		else if ( this.isDownloadComplete )
 		{
@@ -146,6 +137,27 @@ ThreejsLoader.prototype.update = function ( time )
 		    this.isReaderReady = true;
 		}
     }
+};
+
+/**
+ * Update this json loader when the reader is ready
+ * @param {number} Milliseconds since the last update
+ */
+ThreejsLoader.prototype.updateReaderReady = function ( time )
+{
+    this.reader.update( time );
+    
+    if ( this.reader.isComplete() )
+    {
+        this.isReadComplete = true;
+        
+        this.assembleAnimator();
+        
+        if ( undefined != this.observer )
+        {
+            this.observer.onThreejsLoaderCompleted( this );
+        }
+    } 
 };
 
 /**

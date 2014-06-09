@@ -22,7 +22,7 @@
  * @constructor
  * @param {string} name of this bone 
  * @param {number} parent id for this bone
- * @param {Array.<number>} possition for this bone
+ * @param {Array.<number>} position for this bone
  * @param {Array.<number>} rotation quaternion
  * @param {Array.<number>} scale factors
  */
@@ -50,6 +50,28 @@ function Bone( name, parentId, position, rotQuat, scale )
     
     this.boneMatrix = mat4.create();
 } 
+
+/**
+ * Set the current values for the bone
+ * @param {Array.<number>} position for this bone
+ * @param {Array.<number>} rotation quaternion
+ * @param {Array.<number>} scale factors
+ */
+Bone.prototype.setCurrentValues = function ( position, rotation, scale )
+{
+    this.currentPosition[0] = position[0];
+    this.currentPosition[1] = position[1];
+    this.currentPosition[2] = position[2];
+    
+    this.currentRotQuat[0] = rotation[0];
+    this.currentRotQuat[1] = rotation[1];
+    this.currentRotQuat[2] = rotation[2];
+    this.currentRotQuat[3] = rotation[3];
+    
+    this.currentScale[0] = scale[0];
+    this.currentScale[1] = scale[1];
+    this.currentScale[2] = scale[2];
+};
 
 /** 
  * Add a child bone to this bone hirearchy

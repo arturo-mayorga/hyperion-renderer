@@ -51,12 +51,13 @@ void main(void)
     float f = aSkinVertex.x;
     
 	vNormal = uNMatrix * vec4(aNormalVertex, 1.0);
-	vPosition = uMVMatrix * vec4(aPositionVertex, 1.0);
+	vPosition = vec4(aPositionVertex, 1.0);
 	
 	vec4 position0 = m0 * vPosition;
 	vec4 position1 = m1 * vPosition;
-	
+    
 	vPosition = (position0 * w0) + (position1 * w1);
+    vPosition = uMVMatrix * vPosition;
 	
 	gl_Position = uPMatrix * vPosition;
 	lightPosition = uMVMatrix * vec4(0, 5, 0, 1.0);	

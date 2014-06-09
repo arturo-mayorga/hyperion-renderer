@@ -113,8 +113,9 @@ Bone.prototype.calculateMatrices = function( parentMat )
     quat.multiply( this.tempQuat, this.currentRotQuat, this.startRotQuat );
     vec3.add( this.tempV3, this.startPosition, this.currentPosition );
     
-    mat4.fromRotationTranslation( this.boneMatrix, this.tempQuat, this.tempV3 );
-    mat4.multiply(this.boneMatrix, parentMat, this.boneMatrix);
+    //mat4.fromQuat( this.boneMatrix, this.tempQuat, this.tempV3 );
+    mat4.fromRotationTranslation(  this.boneMatrix, this.tempQuat, this.tempV3 );
+    //mat4.multiply(this.boneMatrix, parentMat, this.boneMatrix);
     
     for ( var i in this.children )
     {

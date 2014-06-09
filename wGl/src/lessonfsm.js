@@ -267,6 +267,16 @@ LoadState.prototype.onThreejsLoaderProgress = function ( loader, progress )
     this.onObjLoaderProgress( loader, progress );
 };
 
+var _humanoidAnimator = undefined;
+/**
+ * @param {ArmatureAnimator} New armature animator connected to the loaded mesh
+ */
+LoadState.prototype.onThreejsLoaderArmatureAnimatorLoaded = function ( animator ) 
+{
+    _humanoidAnimator = animator;
+};
+
+
 
 
 
@@ -302,6 +312,7 @@ ExploreState.prototype.enter = function ()
 	console.debug("entering ExploreState");
 	this.camController = new GCameraController();
 	this.camController.bindCamera(this.scene.getCamera());
+    _humanoidAnimator.play();
 };
 
 /**
@@ -317,10 +328,11 @@ ExploreState.prototype.exit = function ()
  * This is the update function for the explore state
  * @param {number} number of milliseconds since the last update
  */
-ExploreState.prototype.update = function (time) 
+ExploreState.prototype.update = function ( time ) 
 {
 	//this.fireSignal("startAsm");
-	this.camController.update(time);
+	this.camController.update( time );
+    _humanoidAnimator.update( time );
 };
 
 

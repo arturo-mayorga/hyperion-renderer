@@ -37,8 +37,8 @@ function Keyframe()
 Keyframe.prototype.addBoneInformation = function ( position, rotation, scale )
 {
     this.positions.push( position );
-    this.rotation.push( rotation );
-    this.scale.push( scale );
+    this.rotations.push( rotation );
+    this.scales.push( scale );
 };
 
 /**

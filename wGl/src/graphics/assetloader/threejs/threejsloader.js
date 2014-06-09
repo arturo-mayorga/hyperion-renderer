@@ -36,6 +36,11 @@ ThreejsLoaderObserver.prototype.onThreejsLoaderCompleted = function ( loader ) {
 ThreejsLoaderObserver.prototype.onThreejsLoaderProgress = function ( loader, progress ) {};
 
 /**
+ * @param {ArmatureAnimator} New armature animator connected to the loaded mesh
+ */
+ThreejsLoaderObserver.prototype.onThreejsLoaderArmatureAnimatorLoaded = function ( animator ) {};
+
+/**
  * @constructor
  * @implements {ThreejsReaderObserver}
  * @param {GScene} Target scene for this loader
@@ -128,7 +133,7 @@ ThreejsLoader.prototype.update = function ( time )
         }
         else if ( this.isReaderReady )
         {
-            updateReaderReady( time );
+            this.updateReaderReady( time );
         }
 		else if ( this.isDownloadComplete )
 		{
@@ -160,6 +165,43 @@ ThreejsLoader.prototype.updateReaderReady = function ( time )
     } 
 };
 
+ThreejsLoader.prototype.assembleAnimator = function()
+{
+	var jAnimations = this.jsonToRead.animations;
+	var animator = new ArmatureAnimator();
+    
+	for (var i in jAnimations )
+    {
+        var jAnim = jAnimations[i];
+        var frameCount = jAnim. hierarchy[0].keys.length;
+        var boneCount = jAnim. hierarchy.length;
+        
+        var animation = new Animation( jAnim.name, jAnim.fps, jAnim.length );
+        
+        for ( var f = 0; f < frameCount; ++f )
+        {
+            var keyframe = new Keyframe();
+            
+            for ( var b = 0; b < boneCount; ++b )
+            {
+                var bone = jAnim. hierarchy[b].keys[f];
+                keyframe.addBoneInformation( bone.pos, bone.rot, bone.scl );
+            }
+            
+            animation.addKeyframe( keyframe );
+        }
+        
+        animator.addAnimation( animation );
+    }
+    
+    animator.setTarget( this.armature );
+    
+    if ( undefined != this.observer )
+    {
+        this.observer.onThreejsLoaderArmatureAnimatorLoaded( animator );
+    }
+};
+
 /**
  * This function is called whenever a new GeometryTriMesh object is loaded
  * @param {GeometryTriMesh} New mesh that was just made available
@@ -177,9 +219,9 @@ ThreejsLoader.prototype.onNewMeshAvailable = function ( proxyMesh, proxySkin )
 	var skin = new Skin( proxySkin.getSkinBuffer() );
 	var bones = this.createBones();
 	
-	var armature = new ArmatureMeshDecorator( mesh, skin, bones );
+	this.armature = new ArmatureMeshDecorator( mesh, skin, bones );
 	
-	this.group.addChild( armature ); 
+	this.group.addChild( this.armature ); 
 };
 
 /**

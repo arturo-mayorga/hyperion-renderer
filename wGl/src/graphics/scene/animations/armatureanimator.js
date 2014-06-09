@@ -23,10 +23,39 @@
  */
 function ArmatureAnimator()
 {
-    
+    this.animations = [];
 } 
 
+/**
+ * Add an animation to this animator
+ * @param {Animation} animation being added to this animator
+ */
+ArmatureAnimator.prototype.addAnimation = function ( animation )
+{
+    this.animations.push( animation );
+};
 
+/**
+ * Set the target for this animator
+ * @param {ArmatureMeshDecorator} target for this animator
+ */
+ArmatureAnimator.prototype.setTarget = function ( target )
+{
+    this.target = target;
+};
 
+/**
+ * This is the update function for this animator
+ * @param {number} number of milliseconds since the last update
+ */
+ArmatureAnimator.prototype.update = function ( time ) 
+{
+};
 
+/**
+ * Set the animator to the play state
+ */
+ArmatureAnimator.prototype.play = function ( )
+{
+};
 

@@ -52,10 +52,10 @@ ArmatureAnimator.prototype.setTarget = function ( target )
  */
 ArmatureAnimator.prototype.update = function ( time ) 
 {
-    return;
+    //return;
     this.lastFrame += 1;
     this.lastFrame %= this.animations[0].keyframes.length;
-    this.lastFrame = 0;
+   // this.lastFrame = 0;
     
     if ( this.lastFrame == 0 )
     {
@@ -64,13 +64,13 @@ ArmatureAnimator.prototype.update = function ( time )
     
     var currentFrame = this.animations[0].keyframes[ this.lastFrame ];
     
-    //for ( var i = 0; i < 22 ; ++i ) // iterate through all the bones
-    //{
-        var i = 3;
+    for ( var i = 0; i < 22 ; ++i ) // iterate through all the bones
+    {
+       // var i = 3;
         this.target.bones[i].setCurrentValues( currentFrame.positions[i],
                                                currentFrame.rotations[i],
                                                currentFrame.scales[i] );
-    //}
+    }
 };
 
 /**

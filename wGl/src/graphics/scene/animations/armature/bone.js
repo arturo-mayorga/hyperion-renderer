@@ -33,10 +33,9 @@ function Bone( name, parentId, position, rotQuat, scale )
     
     // Setting the conjugate/inverse/etc to have a pre calculated point of reference
     // for the animation in relation to the starting pose of the armature.
-    this.startPosition = vec3.fromValues( -1*position[0], -1*position[1], -1*position[2] );
+    this.startPosition = vec3.fromValues( position[0], position[1], position[2] );
     this.startRotQuat  = quat.fromValues( rotQuat[0], rotQuat[1], rotQuat[2], rotQuat[3] );
-    quat.conjugate( this.startRotQuat, this.startRotQuat );
-    this.startScale    = vec3.fromValues( 1/scale[0], 1/scale[1], 1/scale[2] );
+    this.startScale    = vec3.fromValues( scale[0], scale[1], scale[2] );
     
     this.currentPosition = vec3.fromValues( position[0], position[1], position[2] );
     this.currentRotQuat  = quat.fromValues( rotQuat[0], rotQuat[1], rotQuat[2], rotQuat[3] );
@@ -49,6 +48,7 @@ function Bone( name, parentId, position, rotQuat, scale )
     this.parent = undefined;
     
     this.boneMatrix = mat4.create();
+    this.restPoseMatrix = mat4.create();
 } 
 
 /**
@@ -101,26 +101,43 @@ Bone.prototype.getParentId = function()
     return this.parentId;
 };
 
+
 /**
- * Iterage through the entire hirearchy and calculate the matrices for each
+ * Iterate through the entire hirearchy and calculate the rest-pose matrices for 
+ * each bone.
+ * @param {Array.<number>} parent matrix
+ */
+Bone.prototype.calculateRestPoseMatrix = function ( parentMat )
+{
+    mat4.fromRotationTranslation( this.restPoseMatrix, this.startRotQuat, this.startPosition );
+   
+    mat4.multiply(this.restPoseMatrix, parentMat, this.restPoseMatrix);
+    
+    for ( var i in this.children )
+    {
+        this.children[i].calculateRestPoseMatrix( this.restPoseMatrix );
+    }
+    
+    mat4.invert(this.restPoseMatrix, this.restPoseMatrix); 
+};
+
+/**
+ * Iterate through the entire hirearchy and calculate the matrices for each
  * bone.
  * @param {Array.<number>} parent matrix
  */
 Bone.prototype.calculateMatrices = function( parentMat )
 {
-    // ignoring scale for now
+    mat4.fromRotationTranslation( this.boneMatrix, this.currentRotQuat, this.currentPosition );
     
-    quat.multiply( this.tempQuat, this.currentRotQuat, this.startRotQuat );
-    vec3.add( this.tempV3, this.startPosition, this.currentPosition );
-    
-    //mat4.fromQuat( this.boneMatrix, this.tempQuat, this.tempV3 );
-    mat4.fromRotationTranslation(  this.boneMatrix, this.tempQuat, this.tempV3 );
-    //mat4.multiply(this.boneMatrix, parentMat, this.boneMatrix);
+    mat4.multiply(this.boneMatrix, parentMat, this.boneMatrix);
     
     for ( var i in this.children )
     {
         this.children[i].calculateMatrices( this.boneMatrix );
     }
+    
+    mat4.multiply(this.boneMatrix, this.boneMatrix, this.restPoseMatrix);
 };
 
 /**

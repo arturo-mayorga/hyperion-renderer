@@ -48,6 +48,11 @@ function ArmatureMeshDecorator( mesh, skin, bones )
         }
     }
     
+    for ( var i in this.rootBones )
+    {
+        this.rootBones[i].calculateRestPoseMatrix( this.identMat );
+    }
+    
     this.boneMatrixCollection = new Float32Array( this.bones.length * 16 );
     
     MeshDecorator.call( this, mesh );

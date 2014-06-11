@@ -52,21 +52,13 @@ ArmatureAnimator.prototype.setTarget = function ( target )
  */
 ArmatureAnimator.prototype.update = function ( time ) 
 {
-    //return;
     this.lastFrame += 1;
     this.lastFrame %= this.animations[0].keyframes.length;
-   // this.lastFrame = 0;
-    
-    if ( this.lastFrame == 0 )
-    {
-        var s = "starting";
-    }
     
     var currentFrame = this.animations[0].keyframes[ this.lastFrame ];
     
-    for ( var i = 0; i < 22 ; ++i ) // iterate through all the bones
+    for ( var i in this.target.bones )
     {
-       // var i = 3;
         this.target.bones[i].setCurrentValues( currentFrame.positions[i],
                                                currentFrame.rotations[i],
                                                currentFrame.scales[i] );

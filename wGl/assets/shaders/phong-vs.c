@@ -27,7 +27,7 @@ attribute vec4 aSkinVertex;
 uniform mat4 uPMatrix;
 uniform mat4 uMVMatrix;
 uniform mat4 uNMatrix;
-uniform mat4 uAMatrix[22];
+uniform mat4 uAMatrix[44];
 uniform int  uArmatureEnable; 
 
 varying vec2 vKdMapCoord;
@@ -41,23 +41,31 @@ varying highp vec4 lightPosition;
 void main(void) 
 {
     int i0   = int( aSkinVertex[0] );
-    mat4 m0  = uAMatrix[i0];
+    mat4 m0  = uAMatrix[i0*2];
+    mat4 n0  = uAMatrix[i0*2 + 1];
     float w0 = aSkinVertex[2];
     
     int i1   = int( aSkinVertex[1] );
-    mat4 m1  = uAMatrix[i1];
+    mat4 m1  = uAMatrix[i1*2];
+    mat4 n1  = uAMatrix[i1*2 + 1];
     float w1 = aSkinVertex[3];
     
     float f = aSkinVertex.x;
     
-	vNormal = uNMatrix * vec4(aNormalVertex, 1.0);
+	vNormal = vec4(aNormalVertex, 1.0);
 	vPosition = vec4(aPositionVertex, 1.0);
 	
 	vec4 position0 = m0 * vPosition;
+	vec4 normal0 = n0 * vNormal;
+	
 	vec4 position1 = m1 * vPosition;
+	vec4 normal1 = n1 * vNormal;
     
 	vPosition = (position0 * w0) + (position1 * w1);
-    vPosition = uMVMatrix * vPosition;
+	vNormal = (normal0 * w0) + (normal1 * w1);
+    
+	vNormal = uNMatrix * vNormal;
+	vPosition = uMVMatrix * vPosition;
 	
 	gl_Position = uPMatrix * vPosition;
 	lightPosition = uMVMatrix * vec4(0, 5, 0, 1.0);	

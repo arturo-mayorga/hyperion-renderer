@@ -31,23 +31,15 @@ function Bone( name, parentId, position, rotQuat, scale )
     this.name = name;
     this.parentId = parentId; 
     
-    // Setting the conjugate/inverse/etc to have a pre calculated point of reference
-    // for the animation in relation to the starting pose of the armature.
-    this.startPosition = vec3.fromValues( position[0], position[1], position[2] );
-    this.startRotQuat  = quat.fromValues( rotQuat[0], rotQuat[1], rotQuat[2], rotQuat[3] );
-    this.startScale    = vec3.fromValues( scale[0], scale[1], scale[2] );
-    
     this.currentPosition = vec3.fromValues( position[0], position[1], position[2] );
     this.currentRotQuat  = quat.fromValues( rotQuat[0], rotQuat[1], rotQuat[2], rotQuat[3] );
     this.currentScale    = vec3.fromValues( scale[0], scale[1], scale[2] );
-    
-    this.tempQuat = quat.create();
-    this.tempV3 = vec4.create();
-    
+      
     this.children = [];
     this.parent = undefined;
     
-    this.boneMatrix = mat4.create();
+    this.normalMatrix   = mat4.create();
+    this.boneMatrix     = mat4.create();
     this.restPoseMatrix = mat4.create();
 } 
 
@@ -109,7 +101,7 @@ Bone.prototype.getParentId = function()
  */
 Bone.prototype.calculateRestPoseMatrix = function ( parentMat )
 {
-    mat4.fromRotationTranslation( this.restPoseMatrix, this.startRotQuat, this.startPosition );
+    mat4.fromRotationTranslation( this.restPoseMatrix, this.currentRotQuat, this.currentPosition );
    
     mat4.multiply(this.restPoseMatrix, parentMat, this.restPoseMatrix);
     
@@ -138,6 +130,10 @@ Bone.prototype.calculateMatrices = function( parentMat )
     }
     
     mat4.multiply(this.boneMatrix, this.boneMatrix, this.restPoseMatrix);
+    
+    // mat4 normalMatrix = transpose(inverse(modelView));
+    mat4.invert(this.normalMatrix, this.boneMatrix);
+    mat4.transpose(this.normalMatrix, this.normalMatrix);
 };
 
 /**
@@ -147,11 +143,12 @@ Bone.prototype.calculateMatrices = function( parentMat )
  */
 Bone.prototype.populateMatrixCollection = function( matrixCollection, idx )
 {
-    var sIdx = idx*16;
+    var sIdx = idx*32;
     
     for ( var i = 0; i < 16; ++i )
     {
         matrixCollection[ i + sIdx ] = this.boneMatrix[i];
+        matrixCollection[ i + sIdx + 16 ] = this.normalMatrix[i];
     }
 };
 

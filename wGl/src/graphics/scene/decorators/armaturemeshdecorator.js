@@ -53,7 +53,7 @@ function ArmatureMeshDecorator( mesh, skin, bones )
         this.rootBones[i].calculateRestPoseMatrix( this.identMat );
     }
     
-    this.boneMatrixCollection = new Float32Array( this.bones.length * 16 );
+    this.boneMatrixCollection = new Float32Array( this.bones.length * 32 ); // 16 for vert mat and 16 for normal mat
     
     MeshDecorator.call( this, mesh );
 } 

@@ -1,3 +1,4 @@
+#define ARMATURE_SUPPORT
 // Copyright (C) 2014 Arturo Mayorga
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
@@ -21,13 +22,17 @@
 attribute vec3 aPositionVertex;
 attribute vec3 aNormalVertex;
 attribute vec2 aTextureVertex;
-attribute vec4 aSkinVertex;
+
 
 
 uniform mat4 uPMatrix;
 uniform mat4 uMVMatrix;
 uniform mat4 uNMatrix;
+
+#ifdef ARMATURE_SUPPORT
+attribute vec4 aSkinVertex;
 uniform mat4 uAMatrix[64]; 
+#endif
 
 varying vec2 vKdMapCoord;
 
@@ -37,6 +42,7 @@ varying highp vec4 vPosition;
 // todo: this should be a uniform passed in by the scene object
 varying highp vec4 lightPosition;
 
+#ifdef ARMATURE_SUPPORT
 void applyArmature()
 {
     int i0   = int( aSkinVertex[0] );
@@ -58,13 +64,16 @@ void applyArmature()
 	vPosition = (position0 * w0) + (position1 * w1);
 	vNormal   = (normal0 * w0)   + (normal1 * w1);
 }
+#endif
 
 void main(void) 
 {
     vNormal = vec4(aNormalVertex, 1.0);
 	vPosition = vec4(aPositionVertex, 1.0);
 	
+#ifdef ARMATURE_SUPPORT	
 	applyArmature();
+#endif
     
 	vNormal = uNMatrix * vNormal;
 	vPosition = uMVMatrix * vPosition;

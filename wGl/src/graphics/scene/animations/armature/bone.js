@@ -137,7 +137,7 @@ Bone.prototype.calculateMatrices = function( parentMat )
 };
 
 /**
- * Populate the matrix collection into the procided index
+ * Populate the matrix collection into the provided index
  * @param {Array.<number>} array containing the matrix collection
  * @param {number} index representing the position on the matrix collection
  */

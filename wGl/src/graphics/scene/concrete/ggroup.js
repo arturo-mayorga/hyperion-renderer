@@ -65,7 +65,7 @@ GGroup.prototype.bindToContext = function( gl )
 
 /**
  * Add a child to this group
- * @param {GGroup|Mesh} Child to add to this group
+ * @param {SceneDrawable} Child to add to this group
  */
 GGroup.prototype.addChild = function( child )
 {
@@ -75,7 +75,7 @@ GGroup.prototype.addChild = function( child )
 
 /**
  * Remove the child from this group
- * @param {GGroup|Mesh} child to remove from this group
+ * @param {SceneDrawable} child to remove from this group
  */
 GGroup.prototype.removeChild = function( child )
 {

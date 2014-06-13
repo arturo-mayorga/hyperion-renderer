@@ -14,11 +14,26 @@
         <script src="src/graphics/assets/gtexture.js"></script>	
         <script src="src/graphics/assets/gmaterial.js"></script>
         
-        <script src="src/graphics/assetloader/gmtlloader.js"></script>
-        <script src="src/graphics/assetloader/gobjloader.js"></script>
+        <script src="src/graphics/assetloader/proxy/geometryskin.js"></script>
+		<script src="src/graphics/assetloader/proxy/geometrytrimesh.js"></script>
+		<script src="src/graphics/assetloader/mtl/reader/gmtlreader.js"></script>
+        <script src="src/graphics/assetloader/mtl/gmtlloader.js"></script>
+		<script src="src/graphics/assetloader/obj/reader/gobjreader.js"></script>
+        <script src="src/graphics/assetloader/obj/gobjloader.js"></script>
+        <script src="src/graphics/assetloader/threejs/reader/threejsreader.js"></script>
+        <script src="src/graphics/assetloader/threejs/threejsloader.js"></script>
          
-        <script src="src/graphics/scene/ggroup.js"></script>
-        <script src="src/graphics/scene/gobject.js"></script>
+        <script src="src/graphics/scene/interfaces/scenedrawable.js"></script>
+        <script src="src/graphics/scene/drawordering/drawcommand.js"></script>
+        <script src="src/graphics/scene/drawordering/shadercomposite.js"></script>
+        <script src="src/graphics/scene/concrete/ggroup.js"></script>
+        <script src="src/graphics/scene/concrete/mesh.js"></script>
+		<script src="src/graphics/scene/animations/armature/skin.js"></script>
+		<script src="src/graphics/scene/animations/armature/bone.js"></script>
+		<script src="src/graphics/scene/animations/armature/animation.js"></script>
+		<script src="src/graphics/scene/animations/armatureanimator.js"></script>
+		<script src="src/graphics/scene/decorators/interfaces/meshdecorator.js"></script>
+		<script src="src/graphics/scene/decorators/armaturemeshdecorator.js"></script>
         <script src="src/graphics/scene/gscene.js"></script>
           
         <script src="src/graphics/hud/ghudcontroller.js"></script>
@@ -33,9 +48,9 @@
     </head>
     <title></title>
     <body style="margin:auto">
-        <canvas id="glcanvas" width="1280" height="720">
+        <canvas id="glcanvas" width="1280" height="720" style="width: 100%; height: 100%;">
             Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
         </canvas>
-		<button onclick="var c = document.getElementById('glcanvas');if(c.webkitRequestFullscreen ){c.webkitRequestFullscreen();}else if(c.mozRequestFullScreen){c.mozRequestFullScreen();}">Full Screen</button>
+		<!-- <button onclick="var c = document.getElementById('glcanvas');if(c.webkitRequestFullscreen ){c.webkitRequestFullscreen();}else if(c.mozRequestFullScreen){c.mozRequestFullScreen();}">Full Screen</button> -->
     </body>
 </html>

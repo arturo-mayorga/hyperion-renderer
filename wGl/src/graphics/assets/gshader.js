@@ -97,12 +97,15 @@ GShader.prototype.bindToContext = function ( gl )
     attr.positionVertexAttribute = gl.getAttribLocation( shaderProgram, "aPositionVertex" );
     attr.textureVertexAttribute  = gl.getAttribLocation( shaderProgram, "aTextureVertex" );
     attr.normalVertexAttribute   = gl.getAttribLocation( shaderProgram, "aNormalVertex" );
+    attr.skinVertexAttribute     = gl.getAttribLocation( shaderProgram, "aSkinVertex" );
     
     var uniforms = {};
+    uniforms.aMatrixUniform  = gl.getUniformLocation( shaderProgram, "uAMatrix" );
     uniforms.pMatrixUniform  = gl.getUniformLocation( shaderProgram, "uPMatrix" );
     uniforms.mvMatrixUniform = gl.getUniformLocation( shaderProgram, "uMVMatrix" );
     uniforms.nMatrixUniform  = gl.getUniformLocation( shaderProgram, "uNMatrix" );
     uniforms.hMatrixUniform  = gl.getUniformLocation( shaderProgram, "uHMatrix" );
+    
     uniforms.Ka              = gl.getUniformLocation( shaderProgram, "uKa" );
     uniforms.Kd              = gl.getUniformLocation( shaderProgram, "uKd" );
     uniforms.mapKd           = gl.getUniformLocation( shaderProgram, "uMapKd" );
@@ -157,6 +160,11 @@ GShader.prototype.deactivate = function()
 		{
 			gl.disableVertexAttribArray(this.attributes.normalVertexAttribute);
 		}
+		
+		if ( -1 < this.attributes.skinVertexAttribute)
+        {
+            gl.disableVertexAttribArray(this.attributes.skinVertexAttribute);
+        }
 	}
 }
 
@@ -183,6 +191,11 @@ GShader.prototype.activate = function()
     if ( -1 < this.attributes.normalVertexAttribute)
     {
         gl.enableVertexAttribArray(this.attributes.normalVertexAttribute);
+    } 
+    
+    if ( -1 < this.attributes.skinVertexAttribute)
+    {
+        gl.enableVertexAttribArray(this.attributes.skinVertexAttribute);
     } 
 }
 

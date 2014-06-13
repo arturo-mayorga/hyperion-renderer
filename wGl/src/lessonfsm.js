@@ -44,6 +44,7 @@ var __pgGroup = undefined;
  * @constructor
  * @implements {FsmState}
  * @implements {GObjLoaderObserver}
+ * @implements {ThreejsLoaderObserver}
  * @param {GScene} scene Scene that is driven by this state
  * @param {GHudController}
  */
@@ -54,6 +55,7 @@ function LoadState( scene, hud )
 	
 	this.officeGroup = new GGroup( "officeGroup" );
 	this.penGroup = new GGroup( "penGroup" );
+	this.humanoidGroup = new GGroup( "humanoidGroup" );
 	
 	var officeTransform = mat4.create();
 	mat4.scale(officeTransform, officeTransform, [4, 4, 4]);
@@ -62,11 +64,17 @@ function LoadState( scene, hud )
 	this.penTransform = mat4.create();
 	mat4.translate(this.penTransform, this.penTransform, [1.5, 5.609, 11.5]);
 	this.penGroup.setMvMatrix(this.penTransform);
-	
 	__pgGroup = this.penGroup;
+	
+	var humanoidTransform = mat4.create();
+	mat4.scale(humanoidTransform, humanoidTransform, [4, 4, 4]);
+	mat4.rotate(humanoidTransform, humanoidTransform, -2, [0, 1, 0]);
+	mat4.translate(humanoidTransform, humanoidTransform, [30, 0, 25]);
+	this.humanoidGroup.setMvMatrix(humanoidTransform);
 	
 	this.scene.addChild(this.officeGroup);
 	this.scene.addChild(this.penGroup);
+	this.scene.addChild(this.humanoidGroup);
 	
 	this.envLoader = new GObjLoader(this.scene, this.officeGroup);
 	this.envLoader.setObserver(this);
@@ -74,6 +82,9 @@ function LoadState( scene, hud )
 	
 	this.penLoader = new GObjLoader(this.scene, this.penGroup);
 	this.penLoader.setObserver(this);
+	
+	this.tjsLoader = new ThreejsLoader(this.scene, this.humanoidGroup );
+	this.tjsLoader.setObserver(this);
 }
 
 /**
@@ -95,6 +106,7 @@ LoadState.prototype.enter = function ()
 {
 	this.envLoader.loadObj("assets/3d/office3d/18361-obj-4/", "OfficeOBJ.obj");
 	this.penLoader.loadObj("assets/3d/stylus/", "stylus.obj");
+	this.tjsLoader.loadJson( "assets/3d/animtest/", "humanoid.js" );
 
 	this.ui = {};
 	var bg = new GHudRectangle();
@@ -199,6 +211,7 @@ LoadState.prototype.update = function ( time )
 {
     this.envLoader.update(time);
 	this.penLoader.update(time);
+	this.tjsLoader.update(time);
 };
  
  /**
@@ -207,7 +220,7 @@ LoadState.prototype.update = function ( time )
   */
 LoadState.prototype.onObjLoaderCompleted = function ( loader ) 
 {
-	// wait for 2 loaders
+	// wait for 3 loaders
 	if (this.loadCount == undefined)
 	{
 		this.loadCount = 1;
@@ -217,7 +230,7 @@ LoadState.prototype.onObjLoaderCompleted = function ( loader )
 		++this.loadCount;
 	}
 	
-	if (this.loadCount >= 2)
+	if (this.loadCount >= 3)
 	{
 		this.fireSignal("loadComplete");
 	}
@@ -230,9 +243,40 @@ LoadState.prototype.onObjLoaderCompleted = function ( loader )
  */
 LoadState.prototype.onObjLoaderProgress = function ( loader, progress ) 
 {
-	var tProgress = this.penLoader.totalProgress * this.envLoader.totalProgress;
+	var tProgress = (this.penLoader.totalProgress + this.envLoader.totalProgress + this.tjsLoader.totalProgress)/3;
 	this.ui.pFg.setDrawRec( .7*(tProgress-1), 0, tProgress*.7, .05);
 };
+
+/**
+  * This function gets called whenever the observed loader completes the loading process
+  * @param {ThreejsLoader} Loader object that just finished loading its assets
+  */
+LoadState.prototype.onThreejsLoaderCompleted = function ( loader ) 
+{
+	this.onObjLoaderCompleted( loader );
+};
+
+/**
+ * This function gets called whenever the observed loader makes progress
+ * @param {ThreejsLoader} Loader object that is being observed
+ * @param {number} progress Progress value
+ */
+LoadState.prototype.onThreejsLoaderProgress = function ( loader, progress ) 
+{
+    this.onObjLoaderProgress( loader, progress );
+};
+
+var _humanoidAnimator = undefined;
+/**
+ * @param {ArmatureAnimator} New armature animator connected to the loaded mesh
+ */
+LoadState.prototype.onThreejsLoaderArmatureAnimatorLoaded = function ( animator ) 
+{
+    _humanoidAnimator = animator;
+};
+
+
+
 
 
 /**
@@ -245,6 +289,8 @@ function ExploreState( scene, hud )
 {
     this.scene = scene;
 	this.hud = hud;
+	
+	
 }
 /**
  * Set the signal observer
@@ -265,6 +311,7 @@ ExploreState.prototype.enter = function ()
 	console.debug("entering ExploreState");
 	this.camController = new GCameraController();
 	this.camController.bindCamera(this.scene.getCamera());
+    _humanoidAnimator.play();
 };
 
 /**
@@ -280,10 +327,11 @@ ExploreState.prototype.exit = function ()
  * This is the update function for the explore state
  * @param {number} number of milliseconds since the last update
  */
-ExploreState.prototype.update = function (time) 
+ExploreState.prototype.update = function ( time ) 
 {
 	//this.fireSignal("startAsm");
-	this.camController.update(time);
+	this.camController.update( time );
+    _humanoidAnimator.update( time );
 };
 
 

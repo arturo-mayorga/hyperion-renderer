@@ -54,10 +54,10 @@ GRenderPhongStrategy.prototype.configure = function()
 GRenderPhongStrategy.prototype.reload = function()
 {
     this._isReady = false;
-    this.phongShader.destroy();
+    this.phongComposite.destroy();
     this.fullScreenProgram.destroy();
     
-    this.phongShader = undefined;
+    this.phongComposite = undefined;
     this.fullScreenProgram = undefined;
     this.configure();
 };
@@ -211,14 +211,16 @@ GRenderPhongStrategy.prototype.initShaders = function (shaderSrcMap)
 {
     var gl = this.gl;
       
-    var phong = new GShader(shaderSrcMap["phong-vs.c"], shaderSrcMap["phong-fs.c"]);
-    phong.bindToContext(gl);
+    var phongComposite = new ShaderComposite(shaderSrcMap["phong-vs.c"], shaderSrcMap["phong-fs.c"]);
+    phongComposite.bindToContext(gl);
     
     var fullScr = new GShader(shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
     fullScr.bindToContext(gl);
     
     this.fullScreenProgram = fullScr;
-    this.phongShader = phong;
+   
+    
+    this.phongComposite = phongComposite;
 };
 
 /**
@@ -268,14 +270,18 @@ GRenderPhongStrategy.prototype.drawScreenBuffer = function(shader)
 GRenderPhongStrategy.prototype.draw = function ( scene, hud )
 {
     var gl = this.gl;
-    this.phongShader.activate();
+   
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.rttFramebuffer);
     gl.viewport(0, 0, 1024, 1024);
     gl.enable(gl.DEPTH_TEST);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	
-    scene.draw(this.phongShader);
+    
+    
+    scene.draw(this.phongComposite);
+    
+    
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    this.phongShader.deactivate();
+    
     
     this.fullScreenProgram.activate();
     

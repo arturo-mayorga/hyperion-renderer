@@ -96,6 +96,7 @@ GLight.prototype.draw = function ( parentMvMat, shader, index )
 
 /**
  * @constructor
+ * @implements {SceneDrawableObserver}
  */
 function GScene()
 {
@@ -111,7 +112,41 @@ function GScene()
 	this.camera = undefined;
 	
 	this.activeLightIndex = 0;
+	
+	this.drawSectionEnum = 
+	{
+	    STATIC: 0,
+	    ARMATURE: 1
+	};
+	
+	this.drawSection = this.drawSectionEnum.STATIC;
+	this.deferredDrawCommands = [];
 }
+
+/**
+ * This function is part of SceneDrawableObserver sends a defer request to the 
+ * observer.  This is useful, for example, in situations where the Drawable is 
+ * not provided a shader that accepts all the attributes it can offer.  The idea 
+ * is to defer drawing until a more suitable shader becomes available.
+ * The observer needs to report on it's ability to service 
+ * the deferral request.  If the observer can't service the deferral request, the
+ * Drawable needs to make do with whatever shader is available at the moment.
+ * @param {DrawCommand} Draw command being requested for deferral
+ * @param {number} Condition code as defined by SceneDrawableDeferConditionCode that is cause for the deferral
+ * @return {boolean} True if the draw can be deferred, false otherwise
+ */
+GScene.prototype.onDeferredDrawRequested = function ( command, conditionCode ) 
+{ 
+    if ( conditionCode == SceneDrawableDeferConditionCode.ARMATURE_REQUEST &&
+         this.drawSection == this.drawSectionEnum.STATIC )
+    {
+        this.deferredDrawCommands.push( command );
+        return true;
+    }
+    
+    return false; 
+};
+
 
 /**
  * Returns the list of children attached to the scene
@@ -215,24 +250,72 @@ GScene.prototype.drawGeometry = function ( parentMvMatrix, shader )
 /**
  * Draw the scene through a custom camera without having to attach it to the scene
  * @param {GCamera} Camera to use for rendering
- * @param {GShader} Shader to use for rendering
+ * @param {ShaderComposite} Shader to use for rendering
  */
-GScene.prototype.drawThroughCamera = function ( camera, shader )
+GScene.prototype.drawThroughCamera = function ( camera, shaderComposite )
 {
+    this.drawSection = this.drawSectionEnum.STATIC;
+    
+    var shader = shaderComposite.getStaticShader();
+    shader.activate();
+    
     camera.draw( this.tempMatrix, shader );    
     this.drawLights( shader );    
     this.drawGeometry( this.tempMatrix, shader );
+    
+    shader.deactivate();
+    
+    this.drawSection = this.drawSectionEnum.ARMATURE;
+    
+    shader = shaderComposite.getArmatureShader();
+    shader.activate();
+    
+    camera.draw( this.tempMatrix, shader );
+    this.drawLights( shader );
+    
+    for ( var i in this.deferredDrawCommands )
+    {
+        this.deferredDrawCommands[i].run( shader );
+    }
+    
+    shader.deactivate();
+    
+    this.deferredDrawCommands = [];
 };
 
 /**
  * Render the scene with the provided shader program
- * @param {GShader} Shader program to use for rendering
+ * @param {ShaderComposite} Shader program to use for rendering
  */
-GScene.prototype.draw = function( shader )
+GScene.prototype.draw = function( shaderComposite )
 {
+    this.drawSection = this.drawSectionEnum.STATIC;
+    
+    var shader = shaderComposite.getStaticShader();
+    shader.activate();
+    
     this.camera.draw( this.eyeMvMatrix, shader );
     this.drawLights( shader );
     this.drawGeometry( this.eyeMvMatrix, shader );
+    
+    shader.deactivate();
+    
+    this.drawSection = this.drawSectionEnum.ARMATURE;
+    
+    shader = shaderComposite.getArmatureShader();
+    shader.activate();
+    
+    this.camera.draw( this.eyeMvMatrix, shader );
+    this.drawLights( shader );
+    
+    for ( var i in this.deferredDrawCommands )
+    {
+        this.deferredDrawCommands[i].run( shader );
+    }
+    
+    shader.deactivate();
+    
+    this.deferredDrawCommands = [];
 };
 
 /**
@@ -267,12 +350,13 @@ GScene.prototype.addMaterial = function( mat )
 
 /**
  * Add a child to the scene
- * @param {GGroup|GObject} Child to add to the scene
+ * @param {SceneDrawable} Child to add to the scene
  */
 GScene.prototype.addChild = function( child )
 {
-    child.bindToContext(this.gl);
-    this.children.push(child);
+    child.bindToContext( this.gl );
+    child.setObserver( this );
+    this.children.push( child );
 };
 
 /**

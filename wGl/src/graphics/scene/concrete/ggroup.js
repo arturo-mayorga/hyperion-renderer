@@ -34,6 +34,20 @@ function GGroup( name )
 GGroup.prototype = Object.create( SceneDrawable.prototype );
 
 /**
+ * Set the observer for this group
+ * @param {SceneDrawableObserver} new observer for this drawable
+ */
+GGroup.prototype.setObserver = function ( observer )
+{
+    SceneDrawable.prototype.setObserver.call( this, observer );
+    
+    for ( var i in this.children )
+    {
+        this.children[i].setObserver( observer );
+    }
+};
+
+/**
  * Get the name of this group
  * @param {string} The name of this object
  */
@@ -71,8 +85,9 @@ GGroup.prototype.bindToContext = function( gl )
  */
 GGroup.prototype.addChild = function( child )
 {
-	child.bindToContext(this.gl);
-	this.children.push(child);
+	child.bindToContext( this.gl );
+	child.setObserver( this.observer );
+	this.children.push( child );
 };
 
 /**

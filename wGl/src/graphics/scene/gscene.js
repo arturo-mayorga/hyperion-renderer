@@ -96,6 +96,7 @@ GLight.prototype.draw = function ( parentMvMat, shader, index )
 
 /**
  * @constructor
+ * @implements {SceneDrawableObserver}
  */
 function GScene()
 {
@@ -112,6 +113,24 @@ function GScene()
 	
 	this.activeLightIndex = 0;
 }
+
+/**
+ * This function is part of SceneDrawableObserver sends a defer request to the 
+ * observer.  This is useful, for example, in situations where the Drawable is 
+ * not provided a shader that accepts all the attributes it can offer.  The idea 
+ * is to defer drawing until a more suitable shader becomes available.
+ * The observer needs to report on it's ability to service 
+ * the deferral request.  If the observer can't service the deferral request, the
+ * Drawable needs to make do with whatever shader is available at the moment.
+ * @param {DrawCommand} Draw command being requested for deferral
+ * @param {number} Condition code as defined by SceneDrawableDeferConditionCode that is cause for the deferral
+ * @return {boolean} True if the draw can be deferred, false otherwise
+ */
+GScene.prototype.onDeferredDrawRequested = function ( command, conditionCode ) 
+{ 
+    return false; 
+};
+
 
 /**
  * Returns the list of children attached to the scene
@@ -271,8 +290,9 @@ GScene.prototype.addMaterial = function( mat )
  */
 GScene.prototype.addChild = function( child )
 {
-    child.bindToContext(this.gl);
-    this.children.push(child);
+    child.bindToContext( this.gl );
+    child.setObserver( this );
+    this.children.push( child );
 };
 
 /**

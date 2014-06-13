@@ -112,6 +112,15 @@ function GScene()
 	this.camera = undefined;
 	
 	this.activeLightIndex = 0;
+	
+	this.drawSectionEnum = 
+	{
+	    STATIC: 0,
+	    ARMATURE: 1
+	};
+	
+	this.drawSection = this.drawSectionEnum.STATIC;
+	this.deferredDrawCommands = [];
 }
 
 /**
@@ -128,6 +137,13 @@ function GScene()
  */
 GScene.prototype.onDeferredDrawRequested = function ( command, conditionCode ) 
 { 
+    if ( conditionCode == SceneDrawableDeferConditionCode.ARMATURE_REQUEST &&
+         this.drawSection == this.drawSectionEnum.STATIC )
+    {
+        this.deferredDrawCommands.push( command );
+        return true;
+    }
+    
     return false; 
 };
 
@@ -249,13 +265,33 @@ GScene.prototype.drawThroughCamera = function ( camera, shader )
  */
 GScene.prototype.draw = function( shaderComposite )
 {
-    shaderComposite.getStaticShader().activate();
+    this.drawSection = this.drawSectionEnum.STATIC;
     
-    this.camera.draw( this.eyeMvMatrix, shaderComposite.getStaticShader() );
-    this.drawLights( shaderComposite.getStaticShader() );
-    this.drawGeometry( this.eyeMvMatrix, shaderComposite.getStaticShader() );
+    var shader = shaderComposite.getStaticShader();
+    shader.activate();
     
-    shaderComposite.getStaticShader().deactivate();
+    this.camera.draw( this.eyeMvMatrix, shader );
+    this.drawLights( shader );
+    this.drawGeometry( this.eyeMvMatrix, shader );
+    
+    shader.deactivate();
+    
+    this.drawSection = this.drawSectionEnum.ARMATURE;
+    
+    shader = shaderComposite.getArmatureShader();
+    shader.activate();
+    
+    this.camera.draw( this.eyeMvMatrix, shader );
+    this.drawLights( shader );
+    
+    for ( var i in this.deferredDrawCommands )
+    {
+        this.deferredDrawCommands[i].run( shader );
+    }
+    
+    shader.deactivate();
+    
+    this.deferredDrawCommands = [];
 };
 
 /**

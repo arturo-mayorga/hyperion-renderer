@@ -22,8 +22,6 @@ attribute vec3 aPositionVertex;
 attribute vec3 aNormalVertex;
 attribute vec2 aTextureVertex;
 
-
-
 uniform mat4 uPMatrix;
 uniform mat4 uMVMatrix;
 uniform mat4 uNMatrix;

@@ -142,7 +142,7 @@ GRenderPassClearCmd.prototype.run = function( scene )
 /**
  * @constructor
  * @param {WebGLRenderingContext} Context to use for rendering
- * @param {GShader} Shader program to use for this pass
+ * @param {ShaderComposite} Shader program composite to use for this pass
  * @param {GFrameBuffer} Target frame buffer object for this pass
  */
 function GGeometryRenderPassCmd( gl, program, frameBuffer )
@@ -161,20 +161,18 @@ GGeometryRenderPassCmd.prototype.run = function( scene )
     var gl = this.gl; 
     gl.enable( this.gl.DEPTH_TEST );
     
-    this.shaderProgram.activate();
     this.frameBuffer.bindBuffer();
     
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
     scene.draw( this.shaderProgram );
     
     this.frameBuffer.unbindBuffer();
-    this.shaderProgram.deactivate();
 };
 
 /**
  * @constructor
  * @param {WebGLRenderingContext} Context to use for rendering
- * @param {GShader} Shader program to use for this pass
+ * @param {ShaderComposite} Shader program composite to use for this pass
  * @param {GFrameBuffer} Target frame buffer object for this pass
  * @param {IGRenderPassCmdCameraController} camera controller for this pass
  */
@@ -195,14 +193,12 @@ GCustomCamGeometryRenderPassCmd.prototype.run = function( scene )
     var gl = this.gl; 
     gl.enable( this.gl.DEPTH_TEST );
     
-    this.shaderProgram.activate();
     this.frameBuffer.bindBuffer();
     
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
     scene.drawThroughCamera( this.customCameraController.getCamera(), this.shaderProgram );
     
     this.frameBuffer.unbindBuffer();
-    this.shaderProgram.deactivate();
 };
 
 

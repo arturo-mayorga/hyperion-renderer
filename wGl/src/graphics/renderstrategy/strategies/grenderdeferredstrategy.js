@@ -203,11 +203,14 @@ GRenderDeferredStrategy.prototype.initShaders = function ()
     this.programs.fullScr     = new GShader( shaderSrcMap["fullscr-vs.c"],     shaderSrcMap["fullscr-fs.c"]     );
     this.programs.shadowmap   = new GShader( shaderSrcMap["shadowmap-vs.c"],   shaderSrcMap["shadowmap-fs.c"]   );
     this.programs.blur        = new GShader( shaderSrcMap["blur-vs.c"],        shaderSrcMap["blur-fs.c"]        );
-    this.programs.colorspec   = new GShader( shaderSrcMap["colorspec-vs.c"],   shaderSrcMap["colorspec-fs.c"]   );
-    this.programs.normaldepth = new GShader( shaderSrcMap["normaldepth-vs.c"], shaderSrcMap["normaldepth-fs.c"] );
-    this.programs.position    = new GShader( shaderSrcMap["position-vs.c"],    shaderSrcMap["position-fs.c"]    );
     this.programs.light       = new GShader( shaderSrcMap["light-vs.c"],       shaderSrcMap["light-fs.c"]       );
     this.programs.toneMap     = new GShader( shaderSrcMap["tonemap-vs.c"],     shaderSrcMap["tonemap-fs.c"]     );
+    
+    
+    this.programs.colorspec   = new ShaderComposite( shaderSrcMap["colorspec-vs.c"],   shaderSrcMap["colorspec-fs.c"]   );
+    this.programs.normaldepth = new ShaderComposite( shaderSrcMap["normaldepth-vs.c"], shaderSrcMap["normaldepth-fs.c"] );
+    this.programs.position    = new ShaderComposite( shaderSrcMap["position-vs.c"],    shaderSrcMap["position-fs.c"]    );
+    
 
     for ( var key in this.programs )
     {

@@ -250,13 +250,37 @@ GScene.prototype.drawGeometry = function ( parentMvMatrix, shader )
 /**
  * Draw the scene through a custom camera without having to attach it to the scene
  * @param {GCamera} Camera to use for rendering
- * @param {GShader} Shader to use for rendering
+ * @param {ShaderComposite} Shader to use for rendering
  */
-GScene.prototype.drawThroughCamera = function ( camera, shader )
+GScene.prototype.drawThroughCamera = function ( camera, shaderComposite )
 {
+    this.drawSection = this.drawSectionEnum.STATIC;
+    
+    var shader = shaderComposite.getStaticShader();
+    shader.activate();
+    
     camera.draw( this.tempMatrix, shader );    
     this.drawLights( shader );    
     this.drawGeometry( this.tempMatrix, shader );
+    
+    shader.deactivate();
+    
+    this.drawSection = this.drawSectionEnum.ARMATURE;
+    
+    shader = shaderComposite.getArmatureShader();
+    shader.activate();
+    
+    camera.draw( this.tempMatrix, shader );
+    this.drawLights( shader );
+    
+    for ( var i in this.deferredDrawCommands )
+    {
+        this.deferredDrawCommands[i].run( shader );
+    }
+    
+    shader.deactivate();
+    
+    this.deferredDrawCommands = [];
 };
 
 /**

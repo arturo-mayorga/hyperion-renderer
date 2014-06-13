@@ -54,10 +54,10 @@ GRenderPhongStrategy.prototype.configure = function()
 GRenderPhongStrategy.prototype.reload = function()
 {
     this._isReady = false;
-    this.phongShader.destroy();
+    this.phongComposite.destroy();
     this.fullScreenProgram.destroy();
     
-    this.phongShader = undefined;
+    this.phongComposite = undefined;
     this.fullScreenProgram = undefined;
     this.configure();
 };
@@ -211,11 +211,8 @@ GRenderPhongStrategy.prototype.initShaders = function (shaderSrcMap)
 {
     var gl = this.gl;
       
-    var phongStatic = new GShader(shaderSrcMap["phong-vs.c"], shaderSrcMap["phong-fs.c"]);
-    phongStatic.bindToContext(gl);
-    
-    var phongArmature = new GShader("#define ARMATURE_SUPPORT\n" + shaderSrcMap["phong-vs.c"], shaderSrcMap["phong-fs.c"]);
-    phongArmature.bindToContext(gl);
+    var phongComposite = new ShaderComposite(shaderSrcMap["phong-vs.c"], shaderSrcMap["phong-fs.c"]);
+    phongComposite.bindToContext(gl);
     
     var fullScr = new GShader(shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
     fullScr.bindToContext(gl);
@@ -223,7 +220,7 @@ GRenderPhongStrategy.prototype.initShaders = function (shaderSrcMap)
     this.fullScreenProgram = fullScr;
    
     
-    this.phongComposite = new ShaderComposite( phongStatic, phongArmature );
+    this.phongComposite = phongComposite;
 };
 
 /**

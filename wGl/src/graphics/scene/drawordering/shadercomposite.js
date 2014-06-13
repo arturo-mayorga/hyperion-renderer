@@ -20,21 +20,48 @@
 
 /**
  * This composite is to keep track of different variants of the same shader
- * @param {GShader} Shader to use when rendering static mesh models
- * @param {GShader} Shader to use when rendering skinned mesh models with armatures
+ * @param {string} Source for the vertex shader
+ * @param {string} Source for the fragment shader
  */
-function ShaderComposite ( staticShader, armatureShader )
+function ShaderComposite ( vertexSource, fragmentSource )
 {
-    this.staticS = staticShader;
-    this.armatureS = armatureShader;
+    this.staticS = new GShader(vertexSource, fragmentSource);
+    this.armatureS = new GShader("#define ARMATURE_SUPPORT\n"+vertexSource, fragmentSource);
 }
 
+/**
+ * Access to the static shader
+ * @return {GShader}
+ */
 ShaderComposite.prototype.getStaticShader = function ()
 {
     return this.staticS;
 };
 
+/**
+ * Access to the armature shader
+ * @return {GShader}
+ */
 ShaderComposite.prototype.getArmatureShader = function ()
 {
     return this.armatureS;
+};
+
+/**
+ * Called to bind the shaders to a gl context
+ * @param {WebGLRenderingContext} Context to bind to this object
+ */
+ShaderComposite.prototype.bindToContext = function ( gl )
+{
+    this.staticS.bindToContext( gl );
+    this.armatureS.bindToContext( gl );
+};
+
+/**
+ * prepare the shaders for deletion
+ */
+ShaderComposite.prototype.destroy = function ()
+{
+    this.staticS.destroy();
+    this.armatureS.destroy();
 };

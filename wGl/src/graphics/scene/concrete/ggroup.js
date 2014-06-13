@@ -31,6 +31,8 @@ function GGroup( name )
 	this.gl = undefined;
 } 
 
+GGroup.prototype = Object.create( SceneDrawable.prototype );
+
 /**
  * Get the name of this group
  * @param {string} The name of this object

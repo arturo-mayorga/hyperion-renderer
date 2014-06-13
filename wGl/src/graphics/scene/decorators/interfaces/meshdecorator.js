@@ -29,6 +29,8 @@ function MeshDecorator( mesh )
     this.mesh = mesh;
 }
 
+MeshDecorator.prototype = Object.create( Mesh.prototype );
+
 /**
  * Get the name of this object
  * @param {string} The name of this object

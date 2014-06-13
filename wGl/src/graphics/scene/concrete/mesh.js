@@ -47,6 +47,8 @@ function Mesh( verts, tverts, normals, indices, name )
     this.normalMatrix = mat4.create();
 }
 
+Mesh.prototype = Object.create( SceneDrawable.prototype );
+
 /**
  * Get the name of this object
  * @param {string} The name of this object

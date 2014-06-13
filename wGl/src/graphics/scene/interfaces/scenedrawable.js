@@ -31,7 +31,7 @@ var SceneDrawableDeferConditionCode =
  * @interface
  */
 function SceneDrawableObserver()
-{
+{ 
 }
 
 /**
@@ -52,6 +52,34 @@ SceneDrawableObserver.prototype.onDeferredDrawRequested = function ( command, co
  */
 function SceneDrawable()
 {
+    this.observer = undefined;
+}
+
+
+/**
+ * Set the observer for this drawable
+ * @param {SceneDrawableObserver} new observer for this drawable
+ */
+SceneDrawable.prototype.setObserver = function ( observer )
+{
+    this.observer = observer;
+};
+
+/**
+ * Send out a deferred draw request to the observer.  See notes for 
+ * SceneDrawableObserver.onDeferredDrawRequested()
+ * @param {DrawCommand} Draw command being requested for deferral
+ * @param {number} Condition code as defined by SceneDrawableDeferConditionCode that is cause for the deferral
+ * @return {boolean} True if the draw can be deferred, false otherwise
+ */
+SceneDrawable.prototype.requestDeferredDraw = function( command, conditionCode )
+{
+    if ( undefined != this.observer )
+    {
+        return this.observer.onDeferredDrawRequested( command, conditionCode );
+    }
+    
+    return false;
 }
 
 /**

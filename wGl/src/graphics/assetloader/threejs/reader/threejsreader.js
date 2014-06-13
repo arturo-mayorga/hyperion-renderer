@@ -214,9 +214,9 @@ ThreejsReader.prototype.update = function (time)
 {
     if ( this.isLoadComplete ) return;
     
-    if ( this.pIdx < this.json.faces.length )
+    if ( this.pIdx < this.json['faces'].length )
     {
-        var bitField = this.json.faces[this.pIdx];
+        var bitField = this.json['faces'][this.pIdx];
         ++this.pIdx;
         if ( bitField & this.BITMASK.QUAD )
         {
@@ -227,7 +227,7 @@ ThreejsReader.prototype.update = function (time)
             this.processTri( bitField );
         }
         
-        this.totalProgress = this.pIdx / this.json.faces.length;
+        this.totalProgress = this.pIdx / this.json['faces'].length;
     }
     else
     {
@@ -245,7 +245,7 @@ ThreejsReader.prototype.update = function (time)
  */
 ThreejsReader.prototype.getVertexAtIndex = function ( idx, outV )
 {
-    var len = this.json.vertices.length;
+    var len = this.json['vertices'].length;
     
     if ( idx*3 + 2 > len )
     {
@@ -253,9 +253,9 @@ ThreejsReader.prototype.getVertexAtIndex = function ( idx, outV )
         return;
     }
     
-    outV[0] = this.json.vertices[ idx*3 + 0 ];
-    outV[1] = this.json.vertices[ idx*3 + 1 ];
-    outV[2] = this.json.vertices[ idx*3 + 2 ];
+    outV[0] = this.json['vertices'][ idx*3 + 0 ];
+    outV[1] = this.json['vertices'][ idx*3 + 1 ];
+    outV[2] = this.json['vertices'][ idx*3 + 2 ];
 };
 
 /**
@@ -265,7 +265,7 @@ ThreejsReader.prototype.getVertexAtIndex = function ( idx, outV )
  */
 ThreejsReader.prototype.getNormalAtIndex = function ( idx, outV )
 {
-    var len = this.json.normals.length;
+    var len = this.json['normals'].length;
 	
 	if ( idx*3 + 2 > len )
 	{
@@ -273,9 +273,9 @@ ThreejsReader.prototype.getNormalAtIndex = function ( idx, outV )
 		return;
 	}
 	
-	outV[0] = this.json.normals[ idx*3 + 0 ];
-	outV[1] = this.json.normals[ idx*3 + 1 ];
-	outV[2] = this.json.normals[ idx*3 + 2 ];
+	outV[0] = this.json['normals'][ idx*3 + 0 ];
+	outV[1] = this.json['normals'][ idx*3 + 1 ];
+	outV[2] = this.json['normals'][ idx*3 + 2 ];
 };
 
 /**
@@ -285,7 +285,7 @@ ThreejsReader.prototype.getNormalAtIndex = function ( idx, outV )
  */
 ThreejsReader.prototype.getColorAtIndex = function ( idx, outV )
 {
-    var len = this.json.colors.length;
+    var len = this.json['colors'].length;
 	
 	if ( idx*3 + 2 > len )
 	{
@@ -293,9 +293,9 @@ ThreejsReader.prototype.getColorAtIndex = function ( idx, outV )
 		return;
 	}
 	
-	outV[0] = this.json.colors[ idx*3 + 0 ];
-	outV[1] = this.json.colors[ idx*3 + 1 ];
-	outV[2] = this.json.colors[ idx*3 + 2 ];
+	outV[0] = this.json['colors'][ idx*3 + 0 ];
+	outV[1] = this.json['colors'][ idx*3 + 1 ];
+	outV[2] = this.json['colors'][ idx*3 + 2 ];
 };
 
 /**
@@ -305,21 +305,21 @@ ThreejsReader.prototype.getColorAtIndex = function ( idx, outV )
  */
 ThreejsReader.prototype.getSkinAtIndex = function ( idx, outV )
 {
-    var lenI = this.json.skinIndices.length;
-    var lenW = this.json.skinWeights.length;
+    var lenI = this.json['skinIndices'].length;
+    var lenW = this.json['skinWeights'].length;
     
     outV[0] = outV[1] = outV[2] = outV[3] = 0;
     
     if ( idx*2 + 1 <= lenI )
     {
-        outV[0] = this.json.skinIndices[ idx*2 + 0 ];
-        outV[1] = this.json.skinIndices[ idx*2 + 1 ];
+        outV[0] = this.json['skinIndices'][ idx*2 + 0 ];
+        outV[1] = this.json['skinIndices'][ idx*2 + 1 ];
     }
     
     if ( idx*2 + 1 <= lenW )
     {
-        outV[2] = this.json.skinWeights[ idx*2 + 0 ];
-        outV[3] = this.json.skinWeights[ idx*2 + 1 ];
+        outV[2] = this.json['skinWeights'][ idx*2 + 0 ];
+        outV[3] = this.json['skinWeights'][ idx*2 + 1 ];
     }
 };
 
@@ -339,8 +339,8 @@ ThreejsReader.prototype.processQuad = function ( bitField )
 	// verts go first
 	for ( var i = 0; i < 4; ++i )
 	{
-	    this.getVertexAtIndex( this.json.faces[this.pIdx + i], vert[i] );
-	    this.getSkinAtIndex( this.json.faces[this.pIdx + i], skin[i] );
+	    this.getVertexAtIndex( this.json['faces'][this.pIdx + i], vert[i] );
+	    this.getSkinAtIndex( this.json['faces'][this.pIdx + i], skin[i] );
 	}
 	this.pIdx += 4;
 	
@@ -364,7 +364,7 @@ ThreejsReader.prototype.processQuad = function ( bitField )
 	{
 		for ( var i = 0; i < 4; ++i )
         {
-            this.getNormalAtIndex( this.json.faces[this.pIdx + i], norm[i] );
+            this.getNormalAtIndex( this.json['faces'][this.pIdx + i], norm[i] );
         }
 		this.pIdx += 4;
 	}

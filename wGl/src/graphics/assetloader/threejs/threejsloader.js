@@ -167,16 +167,16 @@ ThreejsLoader.prototype.updateReaderReady = function ( time )
 
 ThreejsLoader.prototype.assembleAnimator = function()
 {
-	var jAnimations = this.jsonToRead.animations;
+	var jAnimations = this.jsonToRead['animations'];
 	var animator = new ArmatureAnimator();
     
 	for (var i in jAnimations )
     {
         var jAnim = jAnimations[i];
-        var frameCount = jAnim. hierarchy[0].keys.length;
-        var boneCount = jAnim. hierarchy.length;
+        var frameCount = jAnim['hierarchy'][0]['keys'].length;
+        var boneCount = jAnim['hierarchy'].length;
         
-        var animation = new Animation( jAnim.name, jAnim.fps, jAnim.length );
+        var animation = new Animation( jAnim['name'], jAnim['fps'], jAnim['length'] );
         
         for ( var f = 0; f < frameCount; ++f )
         {
@@ -184,8 +184,8 @@ ThreejsLoader.prototype.assembleAnimator = function()
             
             for ( var b = 0; b < boneCount; ++b )
             {
-                var bone = jAnim. hierarchy[b].keys[f];
-                keyframe.addBoneInformation( bone.pos, bone.rot, bone.scl );
+                var bone = jAnim['hierarchy'][b]['keys'][f];
+                keyframe.addBoneInformation( bone['pos'], bone['rot'], bone['scl'] );
             }
             
             animation.addKeyframe( keyframe );
@@ -231,12 +231,12 @@ ThreejsLoader.prototype.onNewMeshAvailable = function ( proxyMesh, proxySkin )
 ThreejsLoader.prototype.createBones = function ()
 {
     var bones = [];
-    var jsonBones = this.jsonToRead.bones;
+    var jsonBones = this.jsonToRead['bones'];
     
     for ( var i in jsonBones )
     {
-        var newBone = new Bone( jsonBones[i].name, jsonBones[i].parent, jsonBones[i].pos, 
-                                jsonBones[i].rotq, jsonBones[i].scl );
+        var newBone = new Bone( jsonBones[i]['name'], jsonBones[i]['parent'], jsonBones[i]['pos'], 
+                                jsonBones[i]['rotq'], jsonBones[i]['scl'] );
         
         bones.push( newBone );
     }

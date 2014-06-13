@@ -20,6 +20,7 @@
 
 /**
  * This composite is to keep track of different variants of the same shader
+ * @constructor
  * @param {string} Source for the vertex shader
  * @param {string} Source for the fragment shader
  */

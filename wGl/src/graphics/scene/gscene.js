@@ -245,13 +245,17 @@ GScene.prototype.drawThroughCamera = function ( camera, shader )
 
 /**
  * Render the scene with the provided shader program
- * @param {GShader} Shader program to use for rendering
+ * @param {ShaderComposite} Shader program to use for rendering
  */
-GScene.prototype.draw = function( shader )
+GScene.prototype.draw = function( shaderComposite )
 {
-    this.camera.draw( this.eyeMvMatrix, shader );
-    this.drawLights( shader );
-    this.drawGeometry( this.eyeMvMatrix, shader );
+    shaderComposite.getStaticShader().activate();
+    
+    this.camera.draw( this.eyeMvMatrix, shaderComposite.getStaticShader() );
+    this.drawLights( shaderComposite.getStaticShader() );
+    this.drawGeometry( this.eyeMvMatrix, shaderComposite.getStaticShader() );
+    
+    shaderComposite.getStaticShader().deactivate();
 };
 
 /**

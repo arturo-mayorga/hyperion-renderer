@@ -218,7 +218,9 @@ GRenderPhongStrategy.prototype.initShaders = function (shaderSrcMap)
     fullScr.bindToContext(gl);
     
     this.fullScreenProgram = fullScr;
-    this.phongShader = phong;
+   
+    
+    this.phongComposite = new ShaderComposite( phong, phong );
 };
 
 /**
@@ -268,14 +270,18 @@ GRenderPhongStrategy.prototype.drawScreenBuffer = function(shader)
 GRenderPhongStrategy.prototype.draw = function ( scene, hud )
 {
     var gl = this.gl;
-    this.phongShader.activate();
+   
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.rttFramebuffer);
     gl.viewport(0, 0, 1024, 1024);
     gl.enable(gl.DEPTH_TEST);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	
-    scene.draw(this.phongShader);
+    
+    
+    scene.draw(this.phongComposite);
+    
+    
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    this.phongShader.deactivate();
+    
     
     this.fullScreenProgram.activate();
     

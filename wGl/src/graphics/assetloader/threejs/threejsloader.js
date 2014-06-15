@@ -157,6 +157,7 @@ ThreejsLoader.prototype.updateReaderReady = function ( time )
         this.isReadComplete = true;
         
         this.assembleAnimator();
+        this.assembleMaterial();
         
         if ( undefined != this.observer )
         {
@@ -165,6 +166,30 @@ ThreejsLoader.prototype.updateReaderReady = function ( time )
     } 
 };
 
+/** 
+ * Form the material object
+ */
+ThreejsLoader.prototype.assembleMaterial = function()
+{
+    var newMat = new GMaterial( this.path + this.source );
+    
+    var jsonMat = this.jsonToRead['materials'][0];
+    
+    var ambient = jsonMat['colorAmbient'];
+    newMat.setKa( ambient );
+    
+    var diffuse = jsonMat['colorDiffuse'];
+    newMat.setKd( diffuse );
+    
+    var specular = jsonMat['colorSpecular'];
+    newMat.setKs( specular );
+    
+    this.scene.addMaterial( newMat );
+};
+
+/**
+ * Form the animation and animator objects
+ */
 ThreejsLoader.prototype.assembleAnimator = function()
 {
 	var jAnimations = this.jsonToRead['animations'];
@@ -213,8 +238,8 @@ ThreejsLoader.prototype.onNewMeshAvailable = function ( proxyMesh, proxySkin )
 		 			     proxyMesh.getTVerBuffer(),
 					     proxyMesh.getNormBuffer(),
 					     proxyMesh.indices,
-					     proxyMesh.getName() );
-	mesh.setMtlName( proxyMesh.getMtlName() );
+					     this.source );
+	mesh.setMtlName( this.path + this.source );
 	
 	var skin = new Skin( proxySkin.getSkinBuffer() );
 	var bones = this.createBones();

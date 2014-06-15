@@ -34,7 +34,7 @@ function GContext( canvas )
 	
 	var whiteTexture = new GTexture(["white.jpg"], "assets/2d/");
     
-    this.gl = canvas.getContext("experimental-webgl", { antialias: true } );
+    this.gl = canvas.getContext("webgl", { antialias: true } );
 	
     var gl = this.gl;
     

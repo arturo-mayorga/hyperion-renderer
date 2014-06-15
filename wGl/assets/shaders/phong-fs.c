@@ -30,13 +30,12 @@ uniform vec2 uMapKdScale;
 varying mediump vec4 vNormal;
 varying highp vec4 vPosition;
 
-varying highp vec4 lightPosition; 
+uniform vec3 uLightPosition0;
 
 void main(void)
 {
 // todo: should this be turned into a uniform variable?
 float uKsExponent = 100.0;
-vec4 lightPosition_ = vec4(0);
 
     highp vec3 materialDiffuseColor = mix(texture2D(uMapKd, 
 										  vec2(vKdMapCoord.s / uMapKdScale.s, 
@@ -44,7 +43,7 @@ vec4 lightPosition_ = vec4(0);
 										  uKd, 
 										  uKd.a).xyz;
 
-    highp vec3 lightDirection = normalize(vec3(lightPosition_ - vPosition)); 
+    highp vec3 lightDirection = normalize(uLightPosition0 - vPosition.xyz); 
     highp vec3 normal = normalize(vNormal.xyz);
 
     highp float diffuseFactor = max(0.0, dot(normal, lightDirection)); 

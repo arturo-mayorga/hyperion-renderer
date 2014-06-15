@@ -36,9 +36,6 @@ varying vec2 vKdMapCoord;
 varying mediump vec4 vNormal;
 varying highp vec4 vPosition;
 
-// todo: this should be a uniform passed in by the scene object
-varying highp vec4 lightPosition;
-
 #ifdef ARMATURE_SUPPORT
 void applyArmature()
 {
@@ -76,7 +73,6 @@ void main(void)
 	vPosition = uMVMatrix * vPosition;
 	
 	gl_Position = uPMatrix * vPosition;
-	lightPosition = uMVMatrix * vec4(0, 5, 0, 1.0);	
 	vKdMapCoord = aTextureVertex;
 }
 

@@ -26,6 +26,10 @@ function ArmatureAnimator()
     this.animations = [];
     
     this.playTime = 0;
+    
+    this.tempPosV = vec3.create();
+    this.tempRotV = quat.create();
+    this.tempSclV = vec3.create();
 } 
 
 /**
@@ -57,16 +61,20 @@ ArmatureAnimator.prototype.update = function ( time )
     
     var progress = frameCount * this.playTime / aniLen;
     
+    var prevFrameI = Math.floor(progress);
+    var nextFrameI = Math.ceil(progress);
+    var weight = progress - prevFrameI;
     
-    progress %= frameCount;
-    
-    var currentFrame = this.animations[0].keyframes[ Math.floor(progress) ];
+    var prevFrame = this.animations[0].keyframes[ prevFrameI % frameCount ];
+    var nextFrame = this.animations[0].keyframes[ nextFrameI % frameCount ];
     
     for ( var i in this.target.bones )
     {
-        this.target.bones[i].setCurrentValues( currentFrame.positions[i],
-                                               currentFrame.rotations[i],
-                                               currentFrame.scales[i] );
+        vec3.lerp( this.tempPosV, prevFrame.positions[i], nextFrame.positions[i], weight );
+        quat.slerp( this.tempRotV, prevFrame.rotations[i], nextFrame.rotations[i], weight );
+        vec3.lerp( this.tempSclV, prevFrame.scales[i], nextFrame.scales[i], weight );
+        
+        this.target.bones[i].setCurrentValues( this.tempPosV, this.tempRotV, this.tempSclV ); 
     }
     
     this.playTime += time;

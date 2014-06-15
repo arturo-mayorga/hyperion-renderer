@@ -130,6 +130,8 @@ LoadState.prototype.enter = function ()
 	
 	this.ui.components = [bg, bg2, progressBg, progressFg];
 	this.ui.pFg = progressFg;
+	
+	this.scene.setVisibility( false );
 };
 
 /**
@@ -201,6 +203,8 @@ LoadState.prototype.exit = function ()
 	//this.scene.addLight(light6);
 	//this.scene.addLight(light7);
 	//this.scene.addLight(light8);
+	
+	this.scene.setVisibility( true );
 };
 
 /**

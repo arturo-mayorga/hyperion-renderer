@@ -28,7 +28,7 @@ uniform mat4 uNMatrix;
 
 #ifdef ARMATURE_SUPPORT
 attribute vec4 aSkinVertex;
-uniform mat4 uAMatrix[64]; 
+uniform mat4 uAMatrix[60]; 
 #endif
 
 varying vec2 vKdMapCoord;

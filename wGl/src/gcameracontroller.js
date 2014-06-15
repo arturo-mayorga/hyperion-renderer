@@ -34,8 +34,8 @@ function GCameraController()
 	this.eyeRight = vec3.create();
 	this.tempDEyePos = vec3.create();
     
-    this.moveSize = .3;
-    this.rotSize = .02;
+    this.moveSize = .015;
+    this.rotSize = .001;
     
     this.camera = undefined;
 	
@@ -125,13 +125,13 @@ GCameraController.prototype.update = function( elapsedTime )
     
     vec3.cross(this.eyeRight, this.eyeLookAtDir, this.eyeUp);
     
-    var r = this.dYaw*this.rotSize;
+    var r = this.dYaw*this.rotSize*elapsedTime;
     
     var mvMatrix = mat4.create();
     mat4.identity(mvMatrix);
-    mat4.rotate(mvMatrix, mvMatrix, this.dYaw*this.rotSize,   this.eyeUp);
-    mat4.rotate(mvMatrix, mvMatrix, this.dPitch*this.rotSize, this.eyeRight);
-    mat4.rotate(mvMatrix, mvMatrix, this.dRoll*this.rotSize,  this.eyeLookAtDir);
+    mat4.rotate(mvMatrix, mvMatrix, this.dYaw*this.rotSize*elapsedTime,   this.eyeUp);
+    mat4.rotate(mvMatrix, mvMatrix, this.dPitch*this.rotSize*elapsedTime, this.eyeRight);
+    mat4.rotate(mvMatrix, mvMatrix, this.dRoll*this.rotSize*elapsedTime,  this.eyeLookAtDir);
     
     var tVec = vec4.create();
     vec4.set(tVec, this.eyeUp[0], this.eyeUp[1], this.eyeUp[2], 0);
@@ -176,7 +176,7 @@ GCameraController.prototype.update = function( elapsedTime )
     }
     
     vec3.normalize(this.tempDEyePos,this.tempDEyePos);
-    vec3.scale(this.tempDEyePos, this.tempDEyePos, this.moveSize);
+    vec3.scale(this.tempDEyePos, this.tempDEyePos, this.moveSize*elapsedTime);
     vec3.add(this.eyePos, this.eyePos, this.tempDEyePos);
     
     vec3.add(this.eyeLookAt, this.eyePos, this.eyeLookAtDir);

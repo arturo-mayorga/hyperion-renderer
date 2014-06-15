@@ -25,7 +25,7 @@ function ArmatureAnimator()
 {
     this.animations = [];
     
-    this.lastFrame = -1;
+    this.playTime = 0;
 } 
 
 /**
@@ -52,10 +52,15 @@ ArmatureAnimator.prototype.setTarget = function ( target )
  */
 ArmatureAnimator.prototype.update = function ( time ) 
 {
-    this.lastFrame += 1;
-    this.lastFrame %= this.animations[0].keyframes.length;
+    var frameCount = this.animations[0].keyframes.length;
+    var aniLen = this.animations[0].length;
     
-    var currentFrame = this.animations[0].keyframes[ this.lastFrame ];
+    var progress = frameCount * this.playTime / aniLen;
+    
+    
+    progress %= frameCount;
+    
+    var currentFrame = this.animations[0].keyframes[ Math.floor(progress) ];
     
     for ( var i in this.target.bones )
     {
@@ -63,12 +68,27 @@ ArmatureAnimator.prototype.update = function ( time )
                                                currentFrame.rotations[i],
                                                currentFrame.scales[i] );
     }
+    
+    this.playTime += time;
 };
 
 /**
  * Set the animator to the play state
  */
 ArmatureAnimator.prototype.play = function ( )
+{
+    this.playTime = 0;
+};
+
+/**
+ * Set the animator to the stop state
+ */
+ArmatureAnimator.prototype.stop = function ( )
+{
+};
+
+
+ArmatureAnimator.prototype.pause = function ( )
 {
 };
 

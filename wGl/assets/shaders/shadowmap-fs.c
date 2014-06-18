@@ -42,7 +42,7 @@ void main(void)
 	if ( abs(shadowProj.x) < 1.0 && abs(shadowProj.y) < 1.0 && abs(shadowProj.z) < 1.0 )
 	{
 	    
-	   if ( t4Shadow.w - shadowProj.z > -0.00008 )
+	   if ( t4Shadow.x - shadowProj.z > -0.00008 )
         {
             gl_FragColor = vec4(1);// + pingColor;
         } 

@@ -18,17 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 // SOFTWARE.
 
+#extension GL_OES_standard_derivatives : enable
 precision mediump float;
-
-uniform vec4 uKs;
-
-uniform vec4 uKd;
-varying vec2 vKdMapCoord;
-uniform sampler2D uMapKd;
-uniform vec2 uMapKdScale;
-
-varying highp vec4 vNormal;
-varying highp vec4 vPosition;
 varying highp vec4 vpPosition;
 
 
@@ -36,7 +27,7 @@ varying highp vec4 vpPosition;
 void main(void)
 {
     float depth = vpPosition.z / vpPosition.w ;
-    depth = depth * 0.5 + 0.5;			//Don't forget to move away from unit cube ([-1,1]) to [0,1] coordinate system
+   // depth = depth * 0.5 + 0.5;			//Don't forget to move away from unit cube ([-1,1]) to [0,1] coordinate system
     
     float moment1 = depth;
     float moment2 = depth * depth;

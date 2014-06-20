@@ -20,6 +20,7 @@
 
 attribute vec3 aPositionVertex;
 attribute vec3 aNormalVertex;
+attribute vec2 aTextureVertex;
 
 uniform mat4 uPMatrix;
 uniform mat4 uMVMatrix;
@@ -30,10 +31,11 @@ attribute vec4 aSkinVertex;
 uniform mat4 uAMatrix[60]; 
 #endif
 
-varying highp vec4 vNormal;
-varying highp vec4 vpPosition;
+varying vec2 vKdMapCoord;
 
-vec4 vPosition;
+varying highp vec4 vNormal;
+varying highp vec4 vPosition;
+varying highp vec4 vpPosition;
 
 #ifdef ARMATURE_SUPPORT
 void applyArmature()
@@ -72,6 +74,7 @@ void main(void)
 	vPosition = uMVMatrix * vPosition;
 	
 	vpPosition = uPMatrix * vPosition;
-	gl_Position = vpPosition;
+	gl_Position = vpPosition;	
+	vKdMapCoord = aTextureVertex;
 }
 

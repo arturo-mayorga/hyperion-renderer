@@ -18,60 +18,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 // SOFTWARE.
 
-attribute vec3 aPositionVertex;
-attribute vec3 aNormalVertex;
-
-uniform mat4 uPMatrix;
-uniform mat4 uMVMatrix;
-uniform mat4 uNMatrix;
-
-#ifdef ARMATURE_SUPPORT
-attribute vec4 aSkinVertex;
-uniform mat4 uAMatrix[60]; 
-#endif
-
-varying highp vec4 vNormal;
+#extension GL_OES_standard_derivatives : enable
+precision mediump float;
 varying highp vec4 vpPosition;
 
-vec4 vPosition;
 
-#ifdef ARMATURE_SUPPORT
-void applyArmature()
-{
-    int i0   = int( aSkinVertex[0] );
-    mat4 m0  = uAMatrix[i0*2];
-    mat4 n0  = uAMatrix[i0*2 + 1];
-    float w0 = aSkinVertex[2];
-    
-    int i1   = int( aSkinVertex[1] );
-    mat4 m1  = uAMatrix[i1*2];
-    mat4 n1  = uAMatrix[i1*2 + 1];
-    float w1 = aSkinVertex[3];
-	
-	vec4 position0 = m0 * vPosition;
-	vec4 normal0   = n0 * vNormal;
-	
-	vec4 position1 = m1 * vPosition;
-	vec4 normal1   = n1 * vNormal;
-    
-	vPosition = (position0 * w0) + (position1 * w1);
-	vNormal   = (normal0 * w0)   + (normal1 * w1);
-}
-#endif
 
-void main(void) 
+void main(void)
 {
-	vNormal = vec4(aNormalVertex, 1.0);
-	vPosition = vec4(aPositionVertex, 1.0);
-	
-#ifdef ARMATURE_SUPPORT	
-	applyArmature();
-#endif
+    float depth = vpPosition.z / vpPosition.w ;
+   // depth = depth * 0.5 + 0.5;			//Don't forget to move away from unit cube ([-1,1]) to [0,1] coordinate system
     
-	vNormal = uNMatrix * vNormal;
-	vPosition = uMVMatrix * vPosition;
-	
-	vpPosition = uPMatrix * vPosition;
-	gl_Position = vpPosition;
+    float moment1 = depth;
+    float moment2 = depth * depth;
+    
+    // Adjusting moments (this is sort of bias per pixel) using partial derivative
+    float dx = dFdx(depth);
+    float dy = dFdy(depth);
+    moment2 += 0.25*(dx*dx+dy*dy);
+    
+    gl_FragColor = vec4( moment1,moment2, 0.0, 0.0 );
 }
+
+
+
+
 

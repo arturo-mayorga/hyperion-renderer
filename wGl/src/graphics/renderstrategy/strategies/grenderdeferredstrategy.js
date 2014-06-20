@@ -529,7 +529,7 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     
 
     var tf = gl.getExtension("OES_texture_float");
-    var tfl = null;//gl.getExtension("OES_texture_float_linear"); // turning this off for now... its running better and no image difference
+    var tfl = gl.getExtension("OES_texture_float_linear"); // this is for softer shadows
     var dt = gl.getExtension("WEBGL_depth_texture");
     
     var floatTexFilter = (tfl != null)?gl.LINEAR:gl.NEAREST;

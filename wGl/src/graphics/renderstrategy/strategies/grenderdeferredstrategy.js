@@ -578,17 +578,17 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     frameBuffer.complete();
     this.frameBuffers.position = frameBuffer;
     
-    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 512, height: 512 });
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfgFloat);
     frameBuffer.complete();
     this.frameBuffers.lightNormal = frameBuffer;
     
-    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 256, height: 256 });
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
     this.frameBuffers.shadowmapPing = frameBuffer;
     
-    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 256, height: 256 });
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
     this.frameBuffers.shadowmapPong = frameBuffer;

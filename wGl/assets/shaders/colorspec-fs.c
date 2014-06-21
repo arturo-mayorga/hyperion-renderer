@@ -22,7 +22,7 @@ void main(void)
 										  uKd.a).xyz;
     
 
-    gl_FragColor = vec4(materialDiffuseColor, 1); 
+    gl_FragColor = vec4(materialDiffuseColor, uKs.x); 
 }
 
 

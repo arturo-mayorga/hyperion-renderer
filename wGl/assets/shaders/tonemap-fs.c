@@ -29,7 +29,10 @@ void main(void)
 {
     float toneFactor = 1.0;///2.0;
     
-    gl_FragColor = texture2D(uMapKd, vTexCoordinate) * texture2D(uMapShadow, vTexCoordinate)*toneFactor;
+    vec4 mapC = texture2D(uMapKd, vTexCoordinate);
+    vec4 shad = texture2D(uMapShadow, vTexCoordinate)*toneFactor;
+    
+   gl_FragColor = mapC * shad + shad * (shad.w - 1.0)*mapC.w; 
 } 
 
 

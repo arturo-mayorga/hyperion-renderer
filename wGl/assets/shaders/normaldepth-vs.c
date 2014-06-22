@@ -20,10 +20,17 @@
 
 attribute vec3 aPositionVertex;
 attribute vec3 aNormalVertex;
+#ifdef HAS_OES_DERIVATIVES
+attribute vec2 aTextureVertex;
+#endif
 
 uniform mat4 uPMatrix;
 uniform mat4 uMVMatrix;
 uniform mat4 uNMatrix;
+
+#ifdef HAS_OES_DERIVATIVES
+varying vec2 vKdMapCoord;
+#endif
 
 #ifdef ARMATURE_SUPPORT
 attribute vec4 aSkinVertex;
@@ -33,7 +40,11 @@ uniform mat4 uAMatrix[60];
 varying highp vec4 vNormal;
 varying highp vec4 vpPosition;
 
+#ifdef HAS_OES_DERIVATIVES
+varying highp vec4 vPosition;
+#else
 vec4 vPosition;
+#endif
 
 #ifdef ARMATURE_SUPPORT
 void applyArmature()
@@ -73,5 +84,9 @@ void main(void)
 	
 	vpPosition = uPMatrix * vPosition;
 	gl_Position = vpPosition;
+	
+#ifdef HAS_OES_DERIVATIVES	
+	vKdMapCoord = aTextureVertex;
+#endif
 }
 

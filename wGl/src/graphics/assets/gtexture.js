@@ -61,20 +61,22 @@ GTexture.prototype.processArgs = function( args )
  */
 GTexture.prototype.draw = function(glTextureTarget, textureUniform, scaleUniform)
 {    
+    var gl = this.gl;
+    
     if (undefined != this.glTHandle &&
         undefined != glTextureTarget )
     {
-        this.gl.activeTexture(glTextureTarget);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.glTHandle);
+        gl.activeTexture(glTextureTarget);
+        gl.bindTexture(this.gl.TEXTURE_2D, this.glTHandle);
         
         if ( null != textureUniform )
         {    
-            this.gl.uniform1i(textureUniform, 0);
+            gl.uniform1i(textureUniform, 0);
         }
         
         if ( null != scaleUniform )
         {
-            this.gl.uniform2fv(scaleUniform, this.scale);
+            gl.uniform2fv(scaleUniform, this.scale);
         }
     }
 }

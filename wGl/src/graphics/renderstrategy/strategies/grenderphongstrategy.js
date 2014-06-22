@@ -27,6 +27,9 @@ function GRenderPhongStrategy( gl )
     this.gl = gl;
     this.configure();
     
+    this.extensions = {};
+    this.extensions.stdDeriv = gl.getExtension('OES_standard_derivatives');
+    
 }
 
 /**
@@ -75,7 +78,11 @@ GRenderPhongStrategy.prototype.loadShader = function(srcName)
     {
         if ( client.readyState == 4 )
         {
-            _this.shaderSrcMap[srcName] = client.responseText; 
+            var devS = (_this.extensions.stdDeriv != null)?
+                    "#define HAS_OES_DERIVATIVES\n":
+                    "";
+                    
+            _this.shaderSrcMap[srcName] = devS + client.responseText; 
             _this.checkShaderDependencies();
         }
     }
@@ -210,11 +217,13 @@ GRenderPhongStrategy.prototype.initTextureFramebuffer = function()
 GRenderPhongStrategy.prototype.initShaders = function (shaderSrcMap) 
 {
     var gl = this.gl;
+    
+    
       
-    var phongComposite = new ShaderComposite(shaderSrcMap["phong-vs.c"], shaderSrcMap["phong-fs.c"]);
+    var phongComposite = new ShaderComposite( shaderSrcMap["phong-vs.c"], shaderSrcMap["phong-fs.c"]);
     phongComposite.bindToContext(gl);
     
-    var fullScr = new GShader(shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
+    var fullScr = new GShader( shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
     fullScr.bindToContext(gl);
     
     this.fullScreenProgram = fullScr;

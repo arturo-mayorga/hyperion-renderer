@@ -94,7 +94,11 @@ GRenderDeferredStrategy.prototype.loadShader = function( srcName )
     {
         if ( client.readyState == 4 )
         {
-            _this.shaderSrcMap[srcName] = client.responseText; 
+            var devS = (_this.extensions.stdDeriv != null)?
+                    "#define HAS_OES_DERIVATIVES\n":
+                    "";
+                    
+            _this.shaderSrcMap[srcName] = devS + client.responseText; 
             _this.checkShaderDependencies();
         }
     }
@@ -480,9 +484,9 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.setHRec(0, 0, 1, 1);
     this.drawScreenBuffer(this.programs.fullScr); 
     
-    /*this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "depthRGBTexture");
+    /*this.frameBuffers.normal.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(-0.125+0.75, 0.125-0.75, 0.125, 0.125);
-    this.drawScreenBuffer(this.fullScreenProgram);*/
+    this.drawScreenBuffer(this.programs.fullScr);*/
     
     /*this.frameBuffers.phongLightPing.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0.125+0.75, 0.125-0.75, 0.125, 0.125);

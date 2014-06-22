@@ -15,6 +15,7 @@ ks 0.57 0.57 0.57
 d 1
 illum 1
 map_kd -s 0.0769231 0.0769231 woodFloor.jpg
+bump -s 0.0769231 0.0769231 woodFloor_NRM.png
 
 newmtl blinn2SG
 ka 0.12 0.12 0.12
@@ -22,6 +23,7 @@ ks 0.5 0.5 0.5
 d 1
 illum 1
 map_kd 18361-texture-1.png
+bump 18361-texture-1_NRM.png
 
 newmtl blinn3SG
 kd 0.96 0.96 0.96

@@ -27,6 +27,8 @@ function GRenderDeferredStrategy( gl )
     this.gl = gl;
     this.configure();
     
+    this.extensions = {};
+    this.extensions.stdDeriv = gl.getExtension('OES_standard_derivatives');
 }
 
 /**
@@ -47,6 +49,8 @@ GRenderDeferredStrategy.prototype.configure = function()
         "colorspec-fs.c":undefined,
         "normaldepth-fs.c":undefined,
         "normaldepth-vs.c":undefined,
+        "depth-fs.c":undefined,
+        "depth-vs.c":undefined,
         "position-fs.c":undefined,
         "position-vs.c":undefined,
         "light-fs.c":undefined,
@@ -90,7 +94,11 @@ GRenderDeferredStrategy.prototype.loadShader = function( srcName )
     {
         if ( client.readyState == 4 )
         {
-            _this.shaderSrcMap[srcName] = client.responseText; 
+            var devS = (_this.extensions.stdDeriv != null)?
+                    "#define HAS_OES_DERIVATIVES\n":
+                    "";
+                    
+            _this.shaderSrcMap[srcName] = devS + client.responseText; 
             _this.checkShaderDependencies();
         }
     }
@@ -210,7 +218,7 @@ GRenderDeferredStrategy.prototype.initShaders = function ()
     this.programs.colorspec   = new ShaderComposite( shaderSrcMap["colorspec-vs.c"],   shaderSrcMap["colorspec-fs.c"]   );
     this.programs.normaldepth = new ShaderComposite( shaderSrcMap["normaldepth-vs.c"], shaderSrcMap["normaldepth-fs.c"] );
     this.programs.position    = new ShaderComposite( shaderSrcMap["position-vs.c"],    shaderSrcMap["position-fs.c"]    );
-    
+    this.programs.depth       = new ShaderComposite( shaderSrcMap["depth-vs.c"],       shaderSrcMap["depth-fs.c"]       );
 
     for ( var key in this.programs )
     {
@@ -285,7 +293,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var leftCtrl = new GLightBasedCamCtrl(); leftCtrl.bindToContext( this.gl ); 
     leftCtrl.setUp( 0, 1, 0 ); leftCtrl.setLookAtDir( -1, 0, 0 );
     this.lightCamControlers.left = leftCtrl;
-    var normalLSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, leftCtrl );
+    var normalLSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.depth, this.frameBuffers.lightNormal, leftCtrl );
     var shadowmapPassL = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPing, this.screen, leftCtrl.getCamera() );
     shadowmapPassL.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE0 );
     shadowmapPassL.addInputTexture( this.frameBuffers.lightNormal.getGTexture(),   gl.TEXTURE1 );
@@ -295,7 +303,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var rightCtrl = new GLightBasedCamCtrl(); rightCtrl.bindToContext( this.gl );
     rightCtrl.setUp( 0, 1, 0 ); rightCtrl.setLookAtDir( 1, 0, 0 );
     this.lightCamControlers.right = rightCtrl;
-    var normalRSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, rightCtrl );
+    var normalRSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.depth, this.frameBuffers.lightNormal, rightCtrl );
   
     var shadowmapPassR = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPong, this.screen, rightCtrl.getCamera() );
     shadowmapPassR.addInputTexture( this.frameBuffers.position.getGTexture(),    gl.TEXTURE0 );
@@ -308,7 +316,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var frontCtrl = new GLightBasedCamCtrl(); frontCtrl.bindToContext( this.gl );
     frontCtrl.setUp( 0, 1, 0 ); frontCtrl.setLookAtDir( 0, 0, 1 );
     this.lightCamControlers.front = frontCtrl;
-    var normalFSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, frontCtrl );
+    var normalFSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.depth, this.frameBuffers.lightNormal, frontCtrl );
     var shadowmapPassF = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPing, this.screen, frontCtrl.getCamera() );
     shadowmapPassF.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE0 );
     shadowmapPassF.addInputTexture( this.frameBuffers.lightNormal.getGTexture(),   gl.TEXTURE1 );
@@ -318,7 +326,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var backCtrl = new GLightBasedCamCtrl(); backCtrl.bindToContext( this.gl );
     backCtrl.setUp( 0, 1, 0 ); backCtrl.setLookAtDir( 0, 0, -1 );
     this.lightCamControlers.back = backCtrl;
-    var normalBSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, backCtrl );
+    var normalBSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.depth, this.frameBuffers.lightNormal, backCtrl );
     var shadowmapPassB = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPong, this.screen, backCtrl.getCamera() );
     shadowmapPassB.addInputTexture( this.frameBuffers.position.getGTexture(),    gl.TEXTURE0 );
     shadowmapPassB.addInputTexture( this.frameBuffers.lightNormal.getGTexture(), gl.TEXTURE1 );
@@ -330,7 +338,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var upCtrl = new GLightBasedCamCtrl(); upCtrl.bindToContext( this.gl );
     upCtrl.setUp( 1, 0, 0 ); upCtrl.setLookAtDir( 0, 1, 0 );
     this.lightCamControlers.up = upCtrl;
-    var normalUSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, upCtrl );
+    var normalUSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.depth, this.frameBuffers.lightNormal, upCtrl );
     var shadowmapPassU = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPing, this.screen, upCtrl.getCamera() );
     shadowmapPassU.addInputTexture( this.frameBuffers.position.getGTexture(),       gl.TEXTURE0 );
     shadowmapPassU.addInputTexture( this.frameBuffers.lightNormal.getGTexture(),    gl.TEXTURE1 );
@@ -340,7 +348,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var downCtrl = new GLightBasedCamCtrl(); downCtrl.bindToContext( this.gl );
     downCtrl.setUp( 1, 0, 0 ); downCtrl.setLookAtDir( 0, -1, 0 );
     this.lightCamControlers.down = downCtrl;
-    var normalDSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.lightNormal, downCtrl ); 
+    var normalDSource = new GCustomCamGeometryRenderPassCmd( this.gl, this.programs.depth, this.frameBuffers.lightNormal, downCtrl ); 
     var shadowmapPassD = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPong, this.screen, downCtrl.getCamera() );
     shadowmapPassD.addInputTexture( this.frameBuffers.position.getGTexture(),    gl.TEXTURE0 );
     shadowmapPassD.addInputTexture( this.frameBuffers.lightNormal.getGTexture(), gl.TEXTURE1 );
@@ -409,8 +417,8 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     shadowCmds.push( shadowmapPassD );
     
     shadowCmds.push( clearShadowmap );
-    shadowCmds.push( shadowBlurPing );
-    shadowCmds.push( shadowBlurPong );
+    //shadowCmds.push( shadowBlurPing );
+    //shadowCmds.push( shadowBlurPong );
     
     lightCmds.push( phongLightPassPing );
     lightCmds.push( phongLightPassPong );
@@ -476,9 +484,9 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.setHRec(0, 0, 1, 1);
     this.drawScreenBuffer(this.programs.fullScr); 
     
-    /*this.frameBuffers.prePass.bindTexture(gl.TEXTURE0, "depthRGBTexture");
+    /*this.frameBuffers.normal.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(-0.125+0.75, 0.125-0.75, 0.125, 0.125);
-    this.drawScreenBuffer(this.fullScreenProgram);*/
+    this.drawScreenBuffer(this.programs.fullScr);*/
     
     /*this.frameBuffers.phongLightPing.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0.125+0.75, 0.125-0.75, 0.125, 0.125);
@@ -525,7 +533,7 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     
 
     var tf = gl.getExtension("OES_texture_float");
-    var tfl = null;//gl.getExtension("OES_texture_float_linear"); // turning this off for now... its running better and no image difference
+    var tfl = gl.getExtension("OES_texture_float_linear"); // this is for softer shadows
     var dt = gl.getExtension("WEBGL_depth_texture");
     
     var floatTexFilter = (tfl != null)?gl.LINEAR:gl.NEAREST;
@@ -574,17 +582,17 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     frameBuffer.complete();
     this.frameBuffers.position = frameBuffer;
     
-    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 512, height: 512 });
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfgFloat);
     frameBuffer.complete();
     this.frameBuffers.lightNormal = frameBuffer;
     
-    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 256, height: 256 });
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
     this.frameBuffers.shadowmapPing = frameBuffer;
     
-    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 256, height: 256 });
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
     this.frameBuffers.shadowmapPong = frameBuffer;

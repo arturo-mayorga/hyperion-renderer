@@ -25,7 +25,11 @@ function ArmatureAnimator()
 {
     this.animations = [];
     
-    this.lastFrame = -1;
+    this.playTime = 0;
+    
+    this.tempPosV = vec3.create();
+    this.tempRotV = quat.create();
+    this.tempSclV = vec3.create();
 } 
 
 /**
@@ -52,23 +56,47 @@ ArmatureAnimator.prototype.setTarget = function ( target )
  */
 ArmatureAnimator.prototype.update = function ( time ) 
 {
-    this.lastFrame += 1;
-    this.lastFrame %= this.animations[0].keyframes.length;
+    var frameCount = this.animations[0].keyframes.length;
+    var aniLen = this.animations[0].length;
     
-    var currentFrame = this.animations[0].keyframes[ this.lastFrame ];
+    var progress = frameCount * this.playTime / aniLen;
+    
+    var prevFrameI = Math.floor(progress);
+    var nextFrameI = Math.ceil(progress);
+    var weight = progress - prevFrameI;
+    
+    var prevFrame = this.animations[0].keyframes[ prevFrameI % frameCount ];
+    var nextFrame = this.animations[0].keyframes[ nextFrameI % frameCount ];
     
     for ( var i in this.target.bones )
     {
-        this.target.bones[i].setCurrentValues( currentFrame.positions[i],
-                                               currentFrame.rotations[i],
-                                               currentFrame.scales[i] );
+        vec3.lerp( this.tempPosV, prevFrame.positions[i], nextFrame.positions[i], weight );
+        quat.slerp( this.tempRotV, prevFrame.rotations[i], nextFrame.rotations[i], weight );
+        vec3.lerp( this.tempSclV, prevFrame.scales[i], nextFrame.scales[i], weight );
+        
+        this.target.bones[i].setCurrentValues( this.tempPosV, this.tempRotV, this.tempSclV ); 
     }
+    
+    this.playTime += time;
 };
 
 /**
  * Set the animator to the play state
  */
 ArmatureAnimator.prototype.play = function ( )
+{
+    this.playTime = 0;
+};
+
+/**
+ * Set the animator to the stop state
+ */
+ArmatureAnimator.prototype.stop = function ( )
+{
+};
+
+
+ArmatureAnimator.prototype.pause = function ( )
 {
 };
 

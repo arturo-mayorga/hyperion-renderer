@@ -51,7 +51,7 @@ function Animation( name, fps, length )
 {
     this.name = name;
     this.fps = fps;
-    this.length = length;
+    this.length = length * 1000; // save this in milliseconds 
     this.keyframes = [];
 } 
 

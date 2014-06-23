@@ -18,22 +18,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 // SOFTWARE.
 
+#extension GL_OES_standard_derivatives : enable
 precision mediump float;
+varying highp vec4 vpPosition;
 
 
-uniform sampler2D uMapKd;
-uniform sampler2D uMapShadow;
-varying vec2 vTexCoordinate;
 
 void main(void)
 {
-    float toneFactor = 1.0;///2.0;
+    float depth = vpPosition.z / vpPosition.w ;
+   // depth = depth * 0.5 + 0.5;			//Don't forget to move away from unit cube ([-1,1]) to [0,1] coordinate system
     
-    vec4 mapC = texture2D(uMapKd, vTexCoordinate);
-    vec4 shad = texture2D(uMapShadow, vTexCoordinate)*toneFactor;
+    float moment1 = depth;
+    float moment2 = depth * depth;
     
-   gl_FragColor = mapC * shad + shad * (shad.w - 1.0)*mapC.w; 
-} 
+    // Adjusting moments (this is sort of bias per pixel) using partial derivative
+    float dx = dFdx(depth);
+    float dy = dFdy(depth);
+    moment2 += 0.25*(dx*dx+dy*dy);
+    
+    gl_FragColor = vec4( moment1,moment2, 0.0, 0.0 );
+}
+
+
 
 
 

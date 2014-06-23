@@ -30,6 +30,9 @@ function GMaterial ( name )
 	this.Kd = vec4.create();
 	this.Ks = vec4.create();
 	this.mapKd = undefined;
+	this.mapBump = undefined;
+	
+	this.tempArray = [];
 }
 
 /**
@@ -48,6 +51,15 @@ GMaterial.prototype.bindToContext = function( gl_ )
     else
     {
         this.mapKd = gl.whiteTexture;
+    }
+    
+    if ( undefined != this.mapBump )
+    {
+        this.mapBump.bindToContext( gl );
+    }
+    else
+    {
+        this.mapBump = gl.whiteTexture;
     }
 };
 
@@ -79,14 +91,49 @@ GMaterial.prototype.draw = function( shader )
         gl.uniform4fv(shader.uniforms.Kd, this.Kd);
     }
     
-    this.mapKd.draw(gl.TEXTURE0, 
-                shader.uniforms.mapKd,
-                shader.uniforms.mapKdScale);
-    
     if ( null != shader.uniforms.Ks )
     {
         gl.uniform4fv(shader.uniforms.Ks, this.Ks);
     }
+    
+    if ( null != shader.uniforms.normalEmphasis )
+    {
+        gl.uniform1f( shader.uniforms.normalEmphasis, (this.mapBump == gl.whiteTexture)?0:1 );
+    }
+    
+    
+    var mapIdx = 0;
+    
+    if ( null != shader.uniforms.mapKd )
+    {
+        this.mapKd.draw(gl.TEXTURE0, 
+                        null,
+                        shader.uniforms.mapKdScale); 
+        this.tempArray.push( mapIdx++ );
+    }
+    
+    if ( null != shader.uniforms.mapNormal )
+    {
+        this.mapBump.draw(gl.TEXTURE0 + mapIdx,
+                          null,
+                          shader.uniforms.mapNormalScale); 
+        
+        this.tempArray.push( mapIdx++ );
+    }
+    
+    
+    
+    if ( null != shader.uniforms.mapKd )
+    {
+        gl.uniform1i( shader.uniforms.mapKd, this.tempArray.shift() );
+    }
+    
+    if ( null != shader.uniforms.mapNormal )
+    {
+        gl.uniform1i( shader.uniforms.mapNormal, this.tempArray.shift() );
+    }
+    
+   
 };
 
 /**
@@ -132,4 +179,13 @@ GMaterial.prototype.setKa = function( Ka_ )
 GMaterial.prototype.setMapKd = function( texture )
 {
     this.mapKd = texture;
+};
+
+/**
+ * Set the diffuse texture for this material
+ * @param {GTexture} Diffuse texture for this material
+ */
+GMaterial.prototype.setMapBump = function( texture )
+{
+    this.mapBump = texture;
 };

@@ -31,15 +31,17 @@ function GMtlReader( mtlStrA, path )
 	
 	var lineHandlerMap = 
 	{
-		"#":      this.process_comment,
-		"newmtl": this.process_newmtl,
-		"ka":     this.process_ka,
-		"Ka":     this.process_ka,
-		"kd":     this.process_kd,
-		"Kd":     this.process_kd,
-		"ks":     this.process_ks,
-		"Ks":     this.process_ks,
-		"map_kd": this.process_mapKd
+		"#":        this.process_comment,
+		"newmtl":   this.process_newmtl,
+		"ka":       this.process_ka,
+		"Ka":       this.process_ka,
+		"kd":       this.process_kd,
+		"Kd":       this.process_kd,
+		"ks":       this.process_ks,
+		"Ks":       this.process_ks,
+		"map_kd":   this.process_mapKd,
+		"map_bump": this.process_mapBump,
+		"bump":     this.process_mapBump
 	}
 
 	var size = mtlStrA.length;
@@ -135,4 +137,22 @@ GMtlReader.prototype.process_mapKd = function( lineA )
 	var texture = new GTexture(texArgs, this.path);
 	
 	this.currentMtl.setMapKd(texture);
+};
+
+/**
+ * Called when processing a bump map texture (line starting with '[map_]bump')
+ * @param {Array.<string>} Current line (tokenized).
+ */
+GMtlReader.prototype.process_mapBump = function( lineA )
+{
+	var texArgs = [];
+	
+	for (var i = 1; i < lineA.length; ++i)
+	{
+		texArgs.push(lineA[i]);
+	}
+	
+	var texture = new GTexture(texArgs, this.path);
+	
+	this.currentMtl.setMapBump(texture);
 };

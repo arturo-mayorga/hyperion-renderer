@@ -121,6 +121,8 @@ function GScene()
 	
 	this.drawSection = this.drawSectionEnum.STATIC;
 	this.deferredDrawCommands = [];
+	
+	this.isVisible = true;
 }
 
 /**
@@ -234,12 +236,25 @@ GScene.prototype.drawActiveLight = function ( shader )
 };
 
 /**
+ * @para {boolean} New visibility value
+ */
+GScene.prototype.setVisibility = function ( visibility )
+{
+    this.isVisible = visibility;
+};
+
+/**
  * Draw the geometry using the provided view matrix and shader
  * @param {Array.<number>} Array of numbers that represent the 4 by 4 view matrix
  * @param {GShader} Shader program to use for rendering
  */
 GScene.prototype.drawGeometry = function ( parentMvMatrix, shader )
 {
+    if ( false == this.isVisible )
+    {
+        return;
+    }
+    
     var childCount = this.children.length;
     for (var i = 0; i < childCount; ++i)
     {

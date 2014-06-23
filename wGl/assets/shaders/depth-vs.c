@@ -33,8 +33,9 @@ uniform mat4 uAMatrix[60];
 
 varying vec2 vKdMapCoord;
 
-varying mediump vec4 vNormal;
+varying highp vec4 vNormal;
 varying highp vec4 vPosition;
+varying highp vec4 vpPosition;
 
 #ifdef ARMATURE_SUPPORT
 void applyArmature()
@@ -62,7 +63,7 @@ void applyArmature()
 
 void main(void) 
 {
-    vNormal = vec4(aNormalVertex, 1.0);
+	vNormal = vec4(aNormalVertex, 1.0);
 	vPosition = vec4(aPositionVertex, 1.0);
 	
 #ifdef ARMATURE_SUPPORT	
@@ -72,7 +73,8 @@ void main(void)
 	vNormal = uNMatrix * vNormal;
 	vPosition = uMVMatrix * vPosition;
 	
-	gl_Position = uPMatrix * vPosition;
+	vpPosition = uPMatrix * vPosition;
+	gl_Position = vpPosition;	
 	vKdMapCoord = aTextureVertex;
 }
 

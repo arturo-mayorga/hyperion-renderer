@@ -102,6 +102,8 @@ function FsmMachine()
 	this.signalQueue = [];
 }
 
+FsmMachine.prototype = Object.create( FsmState.prototype );
+
 /**
  * Add a named state
  * @param {string] name

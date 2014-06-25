@@ -42,7 +42,7 @@ var __pgGroup = undefined;
 
 /**
  * @constructor
- * @implements {FsmState}
+ * @extends {FsmMachine}
  * @implements {GObjLoaderObserver}
  * @implements {ThreejsLoaderObserver}
  * @param {GScene} scene Scene that is driven by this state
@@ -87,17 +87,7 @@ function LoadState( scene, hud )
 	this.tjsLoader.setObserver(this);
 }
 
-/**
- * Set the signal observer
- * @param {FsmSignalObserver} observer The new observer to be used
- */
-LoadState.prototype.setSignalObserver = FsmState.prototype.setSignalObserver;
-
-/**
- * Fire the transition signal
- * @param {string} signal Name of the signal to fire
- */
-LoadState.prototype.fireSignal = FsmState.prototype.fireSignal;
+LoadState.prototype = Object.create( FsmMachine.prototype );
 
 /**
  * This function is called each time this state is entered
@@ -389,7 +379,7 @@ Vec3Animator.prototype.getIsComplete = function()
 
 /**
  * @constructor
- * @implements {FsmState}
+ * @extends {FsmMachine}
  * @param {GScene} scene Scene that is driven by this state
  * @param {GHudController} hud  Hud to be driven by this state
  */
@@ -397,21 +387,10 @@ function AsmState( scene, hud )
 {
     this.scene = scene;
 	this.hud = hud;
-	this.camera = scene.getCamera();
-	this.tempEye = vec3.create();
-	this.tempUp = vec3.create();
-	this.tempLookAt = vec3.create();
+	
 }
-/**
- * Set the signal observer
- * @param {FsmSignalObserver} observer The new observer to be used
- */
-AsmState.prototype.setSignalObserver = FsmState.prototype.setSignalObserver;
-/**
- * Fire the transition signal
- * @param {string} signal Name of the signal to fire
- */
-AsmState.prototype.fireSignal = FsmState.prototype.fireSignal;
+
+AsmState.prototype = Object.create( FsmMachine.prototype );
 
 /**
  * This function is called whenever we enter the assembly state
@@ -430,6 +409,11 @@ AsmState.prototype.enter = function ()
 		}
 	}
 	
+	this.camera = this.scene.getCamera();
+	this.tempEye = vec3.create();
+	this.tempUp = vec3.create();
+	this.tempLookAt = vec3.create();
+	
 	this.clip     = this.penGroup.children[0];
 	this.gum      = this.penGroup.children[1];
 	this.spring   = this.penGroup.children[2];
@@ -440,6 +424,19 @@ AsmState.prototype.enter = function ()
 	this.grip     = this.penGroup.children[7];
 	
 	this.handler = this.moveCam;
+	
+	this.asmContext = 
+	{
+	    penGroup: this.penGroup,
+	    clip: this.clip,
+	    gum: this.gum,
+	    spring: this.spring,
+	    ink: this.ink,
+	    cylinder: this.cylinder,
+	    axle: this.axle,
+	    housing: this.housing,
+	    grip: this.grip   
+	};
 };
 
 /**

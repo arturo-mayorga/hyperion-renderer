@@ -387,7 +387,7 @@ function AsmState( scene, hud )
 {
     this.scene = scene;
 	this.hud = hud;
-	
+	FsmMachine.call( this );
 }
 
 AsmState.prototype = Object.create( FsmMachine.prototype );
@@ -437,6 +437,8 @@ AsmState.prototype.enter = function ()
 	    housing: this.housing,
 	    grip: this.grip   
 	};
+    
+    this.createSubState( "moveCam", function(){}, this.moveCam, function(){} );
 };
 
 /**
@@ -453,7 +455,16 @@ AsmState.prototype.exit = function ()
  */
 AsmState.prototype.update = function (time) 
 {
-	this.handler(time);
+    FsmMachine.prototype.update.call( this, time );
+    
+    if ( this.handler != this.moveCam )
+    {
+        this.handler(time);
+    }
+    else
+    {
+        this.nameStateMap["moveCam"].state.update( time );
+    }
 };
 
 /**

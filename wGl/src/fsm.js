@@ -80,6 +80,8 @@ function FsmStateTransitions(state)
 	this.transitions = {};
 }
 
+
+
 /**
  * Add the target for the given transition
  * @param {string} signalName
@@ -90,6 +92,51 @@ FsmStateTransitions.prototype.addSignalTarget = function(signalName, targetState
 	this.transitions[signalName] = targetStateName;
 }
 
+/**
+ * @constructor
+ * @implements {FsmState}
+ * @param {FsmState}
+ * @param {function()}
+ * @param {function( number )}
+ * @param {function()}
+ */
+ function FsmSubStateWrapper( context, enterFn, updateFn, exitFn )
+ {
+    this.context = context;
+    this.enterFn = enterFn;
+    this.updateFn = updateFn;
+    this.exitFn = exitFn;
+ }
+ 
+ FsmSubStateWrapper.prototype = Object.create( FsmState.prototype );
+
+ /**
+ * Update the state machine
+ * @param {number} Number of milliseconds sine the last update
+ */
+FsmSubStateWrapper.prototype.update = function ( time ) 
+{
+	this.updateFn.call( this.context, time );
+};
+
+/**
+ * This function is called each time this state 
+ * is entered
+ */
+FsmSubStateWrapper.prototype.enter = function () 
+{
+    this.enterFn.call( this.context );
+};
+
+/**
+ * This function is called each time this state
+ * is exited
+ */
+FsmSubStateWrapper.prototype.exit = function () 
+{
+    this.exitFn.call( this.context );
+};
+ 
 /**
  * @constructor
  * @implements {FsmSignalObserver}
@@ -117,6 +164,17 @@ FsmMachine.prototype.addState = function ( name, state )
 };
 
 /**
+ * @param {function()}
+ * @param {function( number )}
+ * @param {function()}
+ */
+FsmMachine.prototype.createSubState = function ( name, enterFn, updateFn, exitFn )
+{
+    var newState = new FsmSubStateWrapper( this, enterFn, updateFn, exitFn );
+    this.addState( name, newState );
+};
+
+/**
  * Add a transition from start-state to end-state
  * @param {string} startStateName
  * @param {string} signalName
@@ -128,7 +186,7 @@ FsmMachine.prototype.addTransition = function ( startStateName, signalName, endS
 };
 
 /**
- * Handle an FSM signal
+ * Handle an FSM signal. Implementing FsmSignalObserver
  * @param {string} signal Name of the signal that was fired
  */
 FsmMachine.prototype.onFsmSignal = function( signal ) 

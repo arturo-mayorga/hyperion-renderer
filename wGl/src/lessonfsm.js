@@ -439,6 +439,53 @@ AsmState.prototype.enter = function ()
 	};
     
     this.createSubState( "moveCam", function(){}, this.moveCam, function(){} );
+    this.createSubState( "grabInk", function(){}, this.grabInk, function(){} );
+    this.createSubState( "grabSpring", function(){}, this.grabSpring, function(){} );
+    this.createSubState( "installSpring", function(){}, this.installSpring, function(){} );
+    this.createSubState( "grabAxle", function(){}, this.grabAxle, function(){} );
+    this.createSubState( "installAxle", function(){}, this.installAxle, function(){} );
+    this.createSubState( "grabHousing", function(){}, this.grabHousing, function(){} );
+    this.createSubState( "installHousing", function(){}, this.installHousing, function(){} );
+    this.createSubState( "grabGrip", function(){}, this.grabGrip, function(){} );
+    this.createSubState( "installGrip", function(){}, this.installGrip, function(){} );
+    this.createSubState( "grabCylinder", function(){}, this.grabCylinder, function(){} );
+    this.createSubState( "installCylinder", function(){}, this.installCylinder, function(){} );
+    this.createSubState( "grabClip", function(){}, this.grabClip, function(){} );
+    this.createSubState( "installClip", function(){}, this.installClip, function(){} );
+    this.createSubState( "grabGum", function(){}, this.grabGum, function(){} );
+    this.createSubState( "installGum", function(){}, this.installGum, function(){} );
+    this.createSubState( "testOut", function(){}, this.testOut, function(){} );
+    this.createSubState( "holdBeforeTestIn", function(){}, this.holdBeforeTestIn, function(){} );
+    this.createSubState( "testIn", function(){}, this.testIn, function(){} );
+    this.createSubState( "idle", function(){}, this.idle, function(){} );
+    this.createSubState( "placeOnTable", function(){}, this.placeOnTable, function(){} );
+    this.createSubState( "done", function(){}, this.done, function(){} );
+    
+     
+    this.addTransition( "moveCam",         "done", "grabInk" );
+    this.addTransition( "grabInk",         "done", "grabSpring" );
+    this.addTransition( "grabSpring",      "done", "installSpring" );
+    this.addTransition( "installSpring",   "done", "grabAxle" );
+    this.addTransition( "grabAxle",        "done", "installAxle" );
+    this.addTransition( "installAxle",     "done", "grabHousing" );
+    this.addTransition( "grabHousing",     "done", "installHousing" );
+    this.addTransition( "installHousing",  "done",  "grabGrip" );
+    this.addTransition( "grabGrip",        "done", "installGrip" );
+    this.addTransition( "installGrip",     "done", "grabCylinder" );
+    this.addTransition( "grabCylinder",    "done", "installCylinder" );
+    this.addTransition( "installCylinder", "done", "grabClip" );
+    this.addTransition( "grabClip",        "done", "installClip" );
+    this.addTransition( "installClip",     "done", "grabGum" );
+    this.addTransition( "grabGum",         "done", "installGum" );
+    this.addTransition( "installGum",      "done", "testOut" );
+    this.addTransition( "testOut",         "done", "holdBeforeTestIn" );
+    this.addTransition( "holdBeforeTestIn","done", "testIn" );
+    this.addTransition( "testIn",          "done", "idle" );
+    this.addTransition( "idle",            "done", "placeOnTable" );
+    this.addTransition( "placeOnTable",    "done", "done" ); 
+    
+    this.setState( "moveCam" );
+    
 };
 
 /**
@@ -447,24 +494,6 @@ AsmState.prototype.enter = function ()
 AsmState.prototype.exit = function () 
 {
 	console.debug("exiting AsmState");
-};
-
-/**
- * This updates the assembly state by calling into the currently
- * active sub state
- */
-AsmState.prototype.update = function (time) 
-{
-    FsmMachine.prototype.update.call( this, time );
-    
-    if ( this.handler != this.moveCam )
-    {
-        this.handler(time);
-    }
-    else
-    {
-        this.nameStateMap["moveCam"].state.update( time );
-    }
 };
 
 /**
@@ -499,7 +528,8 @@ AsmState.prototype.moveCam = function (time)
 		this.lookAtAnimator = undefined;
 		this.upAnimator = undefined;
 		this.eyeAnimator = undefined;
-		this.handler = this.grabInk;
+		
+		this.fireSignal("done");
 	}
 	
 	this.camera.setEye(this.tempEye[0], this.tempEye[1], this.tempEye[2]);
@@ -531,7 +561,7 @@ AsmState.prototype.grabInk = function (time)
 	{
 		this.trans = undefined;
 		this.inkAnimator = undefined;
-		this.handler = this.grabSpring;
+		this.fireSignal("done");
 	}
 }
 
@@ -559,7 +589,7 @@ AsmState.prototype.grabSpring = function (time)
 	{
 		this.trans = undefined;
 		this.springAnimator = undefined;
-		this.handler = this.installSpring;
+		this.fireSignal("done");
 	}
 }
 
@@ -587,7 +617,7 @@ AsmState.prototype.installSpring = function (time)
 	{
 		this.trans = undefined;
 		this.inkAnimator = undefined;
-		this.handler = this.grabAxle;
+		this.fireSignal("done");
 	}
 }
 
@@ -615,7 +645,7 @@ AsmState.prototype.grabAxle = function (time)
 	{
 		this.trans = undefined;
 		this.axleAnimator = undefined;
-		this.handler = this.installAxle;
+		this.fireSignal("done");
 	}
 }
 
@@ -643,7 +673,7 @@ AsmState.prototype.installAxle = function (time)
 	{
 		this.trans = undefined;
 		this.axleAnimator = undefined;
-		this.handler = this.grabHousing;
+		this.fireSignal("done");
 	}
 }
 
@@ -671,7 +701,7 @@ AsmState.prototype.grabHousing = function (time)
 	{
 		this.trans = undefined;
 		this.housingAnimator = undefined;
-		this.handler = this.installHousing;
+		this.fireSignal("done");
 	}
 }
 
@@ -710,7 +740,7 @@ AsmState.prototype.installHousing = function (time)
 		this.trans = undefined;
 		this.asmAnimator = undefined;
 		this.inkAnimator = undefined;
-		this.handler = this.grabGrip;
+		this.fireSignal("done");
 	}
 }
 
@@ -738,7 +768,7 @@ AsmState.prototype.grabGrip = function (time)
 	{
 		this.trans = undefined;
 		this.housingAnimator = undefined;
-		this.handler = this.installGrip;
+		this.fireSignal("done");
 	}
 }
 
@@ -766,7 +796,7 @@ AsmState.prototype.installGrip = function (time)
 	{
 		this.trans = undefined;
 		this.housingAnimator = undefined;
-		this.handler = this.grabCylinder;
+		this.fireSignal("done");
 	}
 }
 
@@ -794,7 +824,7 @@ AsmState.prototype.grabCylinder = function (time)
 	{
 		this.trans = undefined;
 		this.cylinderAnimator = undefined;
-		this.handler = this.installCylinder;
+		this.fireSignal("done");
 	}
 }
 
@@ -822,7 +852,7 @@ AsmState.prototype.installCylinder = function (time)
 	{
 		this.trans = undefined;
 		this.cylinderAnimator = undefined;
-		this.handler = this.grabClip;
+		this.fireSignal("done");
 	}
 }
 
@@ -850,7 +880,7 @@ AsmState.prototype.grabClip = function (time)
 	{
 		this.trans = undefined;
 		this.clipAnimator = undefined;
-		this.handler = this.installClip;
+		this.fireSignal("done");
 	}
 }
 
@@ -878,7 +908,7 @@ AsmState.prototype.installClip = function (time)
 	{
 		this.trans = undefined;
 		this.clipAnimator = undefined;
-		this.handler = this.grabGum;
+		this.fireSignal("done");
 	}
 }
 
@@ -906,7 +936,7 @@ AsmState.prototype.grabGum = function (time)
 	{
 		this.trans = undefined;
 		this.gumAnimator = undefined;
-		this.handler = this.installGum;
+		this.fireSignal("done");
 	}
 }
 /**
@@ -933,7 +963,7 @@ AsmState.prototype.installGum = function (time)
 	{
 		this.trans = undefined;
 		this.gumAnimator = undefined;
-		this.handler = this.testOut;
+		this.fireSignal("done");
 	}
 }
 
@@ -965,7 +995,7 @@ AsmState.prototype.testOut = function (time)
 	{
 		this.trans = undefined;
 		this.inkAnimator = undefined;
-		this.handler = this.holdBeforeTestIn;
+		this.fireSignal("done");
 	}
 }
 
@@ -985,7 +1015,7 @@ AsmState.prototype.holdBeforeTestIn = function (time)
 	if ( this.currentLapse >= 3000 )
 	{
 		this.currentLapse = undefined;
-		this.handler = this.testIn;
+		this.fireSignal("done");
 	}
 }
 
@@ -1017,7 +1047,7 @@ AsmState.prototype.testIn = function (time)
 	{
 		this.trans = undefined;
 		this.inkAnimator = undefined;
-		this.handler = this.idle;
+		this.fireSignal("done");
 	}
 }
 
@@ -1037,7 +1067,7 @@ AsmState.prototype.idle = function (time)
 	if ( this.currentLapse >= 300 )
 	{
 		this.currentLapse = undefined;
-		this.handler = this.placeOnTable;
+		this.fireSignal("done");
 	}
 }
 
@@ -1099,7 +1129,7 @@ AsmState.prototype.placeOnTable = function (time)
 		this.eyeAnimator = undefined;
 		this.trans = undefined;
 		this.inkAnimator = undefined;
-		this.handler = this.done;
+		this.fireSignal("done");
 	}
 	
 	this.camera.setEye(this.tempEye[0], this.tempEye[1], this.tempEye[2]);

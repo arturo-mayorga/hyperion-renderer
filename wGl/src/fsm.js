@@ -59,6 +59,15 @@ FsmState.prototype.setSignalObserver = function (observer)
 };
 
 /**
+ * Return the current observer for the state
+ * @return {FsmSignalObserver}
+ */
+FsmState.prototype.getSignalObserver = function ()
+{
+    return this.observer;
+};
+
+/**
  * Fire the transition signal
  * @param {string} signal Name of the signal to fire
  */
@@ -94,6 +103,7 @@ FsmStateTransitions.prototype.addSignalTarget = function(signalName, targetState
 
 /**
  * @constructor
+ * @implements {FsmSignalObserver}
  * @implements {FsmState}
  * @param {FsmState}
  * @param {function()}
@@ -106,9 +116,20 @@ FsmStateTransitions.prototype.addSignalTarget = function(signalName, targetState
     this.enterFn = enterFn;
     this.updateFn = updateFn;
     this.exitFn = exitFn;
+    this.signalQueue = [];
+    
  }
  
  FsmSubStateWrapper.prototype = Object.create( FsmState.prototype );
+ 
+ /**
+ * Handle an FSM signal. Implementing FsmSignalObserver
+ * @param {string} signal Name of the signal that was fired
+ */
+FsmSubStateWrapper.prototype.onFsmSignal = function( signal ) 
+{
+	this.signalQueue.push( signal );
+};
 
  /**
  * Update the state machine
@@ -116,7 +137,17 @@ FsmStateTransitions.prototype.addSignalTarget = function(signalName, targetState
  */
 FsmSubStateWrapper.prototype.update = function ( time ) 
 {
+    // make sure that fired signals come from the wrapper context and
+    // they propagate back to the observer of this wrapper.
+    var oldObserver = this.context.getSignalObserver();
+    this.context.setSignalObserver( this );
 	this.updateFn.call( this.context, time );
+	this.context.setSignalObserver( oldObserver );
+	
+	while ( this.signalQueue.length > 0 )
+	{
+	    this.fireSignal( this.signalQueue.shift() );
+	}
 };
 
 /**
@@ -223,17 +254,20 @@ FsmMachine.prototype.update = function ( time )
 	
 	// find the first transitioning signal if any
 	var nextStateName = undefined;
-	for (var i = 0; i < this.signalQueue.length; ++i)
+	while (this.signalQueue.length > 0)
 	{
+	    var sig = this.signalQueue.shift();
 		var possibleTransitionTarget = 
-			currentStateTransitions.transitions[this.signalQueue[i]];
-		if (possibleTransitionTarget != undefined)
+			currentStateTransitions.transitions[sig];
+		if ( undefined != possibleTransitionTarget )
 		{
 			nextStateName = possibleTransitionTarget;
 		}
+		else
+		{
+		    this.fireSignal( sig );
+		}
 	}
-	
-	this.signalQueue = [];
 	
 	// in the case of a transition
 	//     Exit the current state

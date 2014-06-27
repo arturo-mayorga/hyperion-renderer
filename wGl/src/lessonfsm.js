@@ -438,7 +438,7 @@ AsmState.prototype.enter = function ()
 	    grip: this.grip   
 	};
     
-    this.createSubState( "moveCam", function(){}, this.moveCam, function(){} );
+    this.createSubState( "moveCam", this.moveCamEnter, this.moveCam, this.moveCamExit );
     this.createSubState( "grabInk", function(){}, this.grabInk, function(){} );
     this.createSubState( "grabSpring", function(){}, this.grabSpring, function(){} );
     this.createSubState( "installSpring", function(){}, this.installSpring, function(){} );
@@ -469,7 +469,7 @@ AsmState.prototype.enter = function ()
     this.addTransition( "grabAxle",        "done", "installAxle" );
     this.addTransition( "installAxle",     "done", "grabHousing" );
     this.addTransition( "grabHousing",     "done", "installHousing" );
-    this.addTransition( "installHousing",  "done",  "grabGrip" );
+    this.addTransition( "installHousing",  "done", "grabGrip" );
     this.addTransition( "grabGrip",        "done", "installGrip" );
     this.addTransition( "installGrip",     "done", "grabCylinder" );
     this.addTransition( "grabCylinder",    "done", "installCylinder" );
@@ -497,26 +497,39 @@ AsmState.prototype.exit = function ()
 };
 
 /**
+ * enter the move cam state
+ */
+AsmState.prototype.moveCamEnter = function()
+{
+    this.camera.getEye(this.tempEye);
+    this.camera.getUp(this.tempUp);
+    this.camera.getLookAt(this.tempLookAt);
+    
+    var targetEye    = [1.3583784103393555, 9.672802925109863, 17.14227294921875];
+    var targetLookAt = [1.1498558521270752, -6.496527671813965, -5.181362152099609];
+    var targetUp     = [-0.0014136419631540775, 0.8503075838088989, -0.5262849926948547];
+    
+    this.eyeAnimator    = new Vec3Animator( this.tempEye, targetEye, 3000 );
+    this.upAnimator     = new Vec3Animator( this.tempUp, targetUp, 3000 );
+    this.lookAtAnimator = new Vec3Animator( this.tempLookAt, targetLookAt, 3000 );
+};
+
+/**
+ * exit the move cam state
+ */
+AsmState.prototype.moveCamExit = function()
+{
+    this.lookAtAnimator = undefined;
+    this.upAnimator = undefined;
+    this.eyeAnimator = undefined;
+};
+
+/**
  * Assembly sub state: move the camera in front of the desk
  * @param {number} Number of milliseconds since the last update
  */
 AsmState.prototype.moveCam = function (time)
 {	
-	if (this.lookAtAnimator == undefined)
-	{	
-		this.camera.getEye(this.tempEye);
-		this.camera.getUp(this.tempUp);
-		this.camera.getLookAt(this.tempLookAt);
-		
-		var targetEye    = [1.3583784103393555, 9.672802925109863, 17.14227294921875];
-		var targetLookAt = [1.1498558521270752, -6.496527671813965, -5.181362152099609];
-		var targetUp     = [-0.0014136419631540775, 0.8503075838088989, -0.5262849926948547];
-		
-		this.eyeAnimator    = new Vec3Animator( this.tempEye, targetEye, 3000 );
-		this.upAnimator     = new Vec3Animator( this.tempUp, targetUp, 3000 );
-		this.lookAtAnimator = new Vec3Animator( this.tempLookAt, targetLookAt, 3000 );
-	}
-	
 	this.lookAtAnimator.update( time );
 	this.upAnimator.update( time );
 	this.eyeAnimator.update( time );
@@ -525,10 +538,6 @@ AsmState.prototype.moveCam = function (time)
 		this.upAnimator.getIsComplete() && 
 	    this.eyeAnimator.getIsComplete())
 	{
-		this.lookAtAnimator = undefined;
-		this.upAnimator = undefined;
-		this.eyeAnimator = undefined;
-		
 		this.fireSignal("done");
 	}
 	

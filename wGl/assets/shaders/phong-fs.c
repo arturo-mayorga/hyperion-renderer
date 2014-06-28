@@ -40,7 +40,7 @@ uniform sampler2D uMapNormal;
 #endif
 
 varying mediump vec4 vNormal;
-varying highp vec4 vPosition;
+varying mediump vec4 vPosition;
 
 uniform vec3 uLightPosition0;
 
@@ -68,6 +68,7 @@ mat3 cotangent_frame( vec3 N, vec3 p, vec2 uv )
 vec3 perturb_normal( vec3 N, vec3 V, vec3 Bump, vec2 texcoord )
 {
     mat3 TBN = cotangent_frame( N, -V, texcoord );
+    
     return normalize( TBN * Bump );
 }
 #endif
@@ -77,16 +78,16 @@ void main(void)
 // todo: should this be turned into a uniform variable?
 float uKsExponent = 100.0;
 
-    highp vec3 materialDiffuseColor = mix(texture2D(uMapKd, 
+    mediump vec3 materialDiffuseColor = mix(texture2D(uMapKd, 
                                                     vec2(vKdMapCoord.s / uMapKdScale.s, 
                                                          vKdMapCoord.t / uMapKdScale.t)), 
 										  uKd, 
 										  uKd.a).xyz;
 	
-	highp vec3 lightDirection = normalize(uLightPosition0 - vPosition.xyz);
+	mediump vec3 lightDirection = normalize(uLightPosition0 - vPosition.xyz);
 	
 #ifdef HAS_OES_DERIVATIVES	
-	highp vec3 materialBump = mix( vec3(0.5, 0.5, 1.0),
+	mediump vec3 materialBump = mix( vec3(0.5, 0.5, 1.0),
 	                               texture2D( uMapNormal, 
 									          vec2(vKdMapCoord.s / uMapNormalScale.s, 
 											       vKdMapCoord.t / uMapNormalScale.t)).xyz, 
@@ -95,16 +96,16 @@ float uKsExponent = 100.0;
 	materialBump = normalize (materialBump*2.0 - 1.0);
 
      
-    highp vec3 normal = perturb_normal( normalize(vNormal.xyz), 
+    mediump vec3 normal = perturb_normal( normalize(vNormal.xyz), 
                                         vPosition.xyz, 
                                         materialBump, 
                                         vec2(vKdMapCoord.s / uMapKdScale.s,
                                              vKdMapCoord.t / uMapKdScale.t) );
 #else
-    highp vec3 normal = normalize(vNormal.xyz);
+    mediump vec3 normal = normalize(vNormal.xyz);
 #endif
 
-    highp float diffuseFactor = max(0.0, dot(normal, lightDirection)); 
+    mediump float diffuseFactor = max(0.0, dot(normal, lightDirection)); 
     
     vec3 E = normalize(-vPosition.xyz);
     vec3 R = reflect(-lightDirection, normal);
@@ -112,7 +113,7 @@ float uKsExponent = 100.0;
 
     float specularFactor = pow(specular, uKsExponent);
 
-    highp vec3 color = diffuseFactor * materialDiffuseColor + specularFactor * uKs.xyz;
+    mediump vec3 color = diffuseFactor * materialDiffuseColor + specularFactor * uKs.xyz;
 
     gl_FragColor = vec4(color, 1); 
 	//gl_FragColor = vec4(normal.x*0.5 + 0.5, normal.y*0.5 + 0.5, normal.z*0.5 + 0.5, 1);

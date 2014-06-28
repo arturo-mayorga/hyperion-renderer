@@ -55,7 +55,6 @@ function GRenderStrategyFactory( gl )
         "simplePhong": function(gl) { return new GRenderPhongStrategy( gl ); },
         "deferredPhong": function(gl) { return new GRenderDeferredStrategy( gl ); }
     };
-    
 }
 
 /**
@@ -79,8 +78,12 @@ GRenderStrategyFactory.prototype.createByName = function ( name )
  */
 GRenderStrategyFactory.prototype.creteBestFit = function ()
 { 
-    return this.createByName( "deferredPhong" );
-    //return this.createByName( "simplePhong" );
+    if ( -1 == navigator.userAgent.toLowerCase().indexOf("android") )
+    {
+        return this.createByName( "deferredPhong" );
+    }
+    
+    return this.createByName( "simplePhong" );
 };
 
 

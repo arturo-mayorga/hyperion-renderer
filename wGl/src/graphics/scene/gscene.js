@@ -250,11 +250,6 @@ GScene.prototype.setVisibility = function ( visibility )
  */
 GScene.prototype.drawGeometry = function ( parentMvMatrix, shader )
 {
-    if ( false == this.isVisible )
-    {
-        return;
-    }
-    
     var childCount = this.children.length;
     for (var i = 0; i < childCount; ++i)
     {
@@ -269,6 +264,11 @@ GScene.prototype.drawGeometry = function ( parentMvMatrix, shader )
  */
 GScene.prototype.drawThroughCamera = function ( camera, shaderComposite )
 {
+    if ( false == this.isVisible )
+    {
+        return;
+    }
+    
     this.drawSection = this.drawSectionEnum.STATIC;
     
     var shader = shaderComposite.getStaticShader();
@@ -304,6 +304,11 @@ GScene.prototype.drawThroughCamera = function ( camera, shaderComposite )
  */
 GScene.prototype.draw = function( shaderComposite )
 {
+    if ( false == this.isVisible )
+    {
+        return;
+    }
+    
     this.drawSection = this.drawSectionEnum.STATIC;
     
     var shader = shaderComposite.getStaticShader();

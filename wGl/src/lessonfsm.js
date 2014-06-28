@@ -519,9 +519,9 @@ AsmState.prototype.moveCamEnter = function()
  */
 AsmState.prototype.moveCamExit = function()
 {
-    this.lookAtAnimator = undefined;
-    this.upAnimator = undefined;
-    this.eyeAnimator = undefined;
+    delete this.lookAtAnimator;
+    delete this.upAnimator;
+    delete this.eyeAnimator;
 };
 
 /**
@@ -562,8 +562,8 @@ AsmState.prototype.grabInkEnter = function()
  */
 AsmState.prototype.grabInkExit = function()
 {
-    this.trans = undefined;
-    this.inkAnimator = undefined;
+    delete this.trans;
+    delete this.inkAnimator;
 };
 /**
  * Assembly sub state: pick up the ink container from the table
@@ -599,8 +599,8 @@ AsmState.prototype.grabSpringEnter = function()
  */
 AsmState.prototype.grabSpringExit = function()
 {
-    this.trans = undefined;
-    this.springAnimator = undefined;
+    delete this.trans;
+    delete this.springAnimator;
 };
 
 
@@ -639,8 +639,8 @@ AsmState.prototype.installSpringEnter = function ()
  */
 AsmState.prototype.installSpringExit = function ()
 {
-    this.trans = undefined;
-    this.inkAnimator = undefined;
+    delete this.trans;
+    delete this.inkAnimator;
 };
 
 /**
@@ -678,8 +678,8 @@ AsmState.prototype.grabAxleEnter = function()
  */
 AsmState.prototype.grabAxleExit = function()
 {
-    this.trans = undefined;
-    this.axleAnimator = undefined;
+    delete this.trans;
+    delete this.axleAnimator;
 };
 
 /**
@@ -716,8 +716,8 @@ AsmState.prototype.installAxleEnter = function()
  */
 AsmState.prototype.installAxleExit = function()
 {
-    this.trans = undefined;
-    this.axleAnimator = undefined;
+    delete this.trans;
+    delete this.axleAnimator;
 };
 
 /**
@@ -754,8 +754,8 @@ AsmState.prototype.grabHousingEnter = function()
  */
 AsmState.prototype.grabHousingExit = function()
 {
-    this.trans = undefined;
-    this.housingAnimator = undefined;
+    delete this.trans;
+    delete this.housingAnimator;
 };
 
 /**
@@ -794,9 +794,9 @@ AsmState.prototype.installHousingEnter = function()
  */
 AsmState.prototype.installHousingExit = function()
 {
-    this.trans = undefined;
-    this.asmAnimator = undefined;
-    this.inkAnimator = undefined;
+    delete this.trans;
+    delete this.asmAnimator;
+    delete this.inkAnimator;
 };
 
 /**
@@ -841,8 +841,8 @@ AsmState.prototype.grabGripEnter = function()
  */
 AsmState.prototype.grabGripExit = function ()
 {
-    this.trans = undefined;
-    this.housingAnimator = undefined;
+    delete this.trans;
+    delete this.housingAnimator;
 };
 
 /**
@@ -879,8 +879,8 @@ AsmState.prototype.installGripEnter = function()
  */
 AsmState.prototype.installGripExit = function()
 {
-    this.trans = undefined;
-    this.housingAnimator = undefined;
+    delete this.trans;
+    delete this.housingAnimator;
 };
 
 /**
@@ -917,8 +917,8 @@ AsmState.prototype.grabCylinderEnter = function()
  */
 AsmState.prototype.grabCylinderExit = function()
 {
-    this.trans = undefined;
-    this.cylinderAnimator = undefined;
+    delete this.trans;
+    delete this.cylinderAnimator;
 };
 
 
@@ -956,8 +956,8 @@ AsmState.prototype.installCylinderEnter = function()
  */
 AsmState.prototype.installCylinderExit = function()
 {
-    this.trans = undefined;
-    this.cylinderAnimator = undefined;
+    delete this.trans;
+    delete this.cylinderAnimator;
 };
 
 /**
@@ -994,8 +994,8 @@ AsmState.prototype.grabClipEnter = function ()
  */
 AsmState.prototype.grabClipExit = function()
 {
-    this.trans = undefined;
-    this.clipAnimator = undefined;
+    delete this.trans;
+    delete this.clipAnimator;
 };
 
 /** 
@@ -1032,8 +1032,8 @@ AsmState.prototype.installClipEnter = function()
  */
 AsmState.prototype.installClipExit = function()
 {
-    this.trans = undefined;
-    this.clipAnimator = undefined;
+    delete this.trans;
+    delete this.clipAnimator;
 };
 
 /**
@@ -1078,8 +1078,8 @@ AsmState.prototype.grabGumEnter = function ()
  */
 AsmState.prototype.grabGumExit = function()
 {
-    this.trans = undefined;
-    this.gumAnimator = undefined;
+    delete this.trans;
+    delete this.gumAnimator;
 };
 
 /**
@@ -1116,8 +1116,8 @@ AsmState.prototype.installGumEnter = function()
  */
 AsmState.prototype.installGumExit = function()
 {
-    this.trans = undefined;
-    this.gumAnimator = undefined;
+    delete this.trans;
+    delete this.gumAnimator;
 };
 
 /**
@@ -1154,8 +1154,8 @@ AsmState.prototype.testOutEnter = function()
  */
 AsmState.prototype.testOutExit = function()
 {
-    this.trans = undefined;
-    this.inkAnimator = undefined;
+    delete this.trans;
+    delete this.inkAnimator;
 };
 
 /**
@@ -1193,7 +1193,7 @@ AsmState.prototype.holdBeforeTestInEnter = function()
  */
 AsmState.prototype.holdBeforeTestInExit = function()
 {
-    this.currentLapse = undefined;
+    delete this.currentLapse;
 };
 
 /**
@@ -1226,8 +1226,8 @@ AsmState.prototype.testInEnter = function()
  */
 AsmState.prototype.testInExit = function()
 {
-    this.trans = undefined;
-    this.inkAnimator = undefined;
+    delete this.trans;
+    delete this.inkAnimator;
 };
 
 /**
@@ -1265,7 +1265,7 @@ AsmState.prototype.idleEnter = function()
  */
 AsmState.prototype.idleExit = function()
 {
-    this.currentLapse = undefined;
+    delete this.currentLapse;
 };
 
 /**
@@ -1298,11 +1298,11 @@ AsmState.prototype.placeOnTableEnter = function()
  */
 AsmState.prototype.placeOnTableExit = function()
 {
-    this.lookAtAnimator = undefined;
-    this.upAnimator = undefined;
-    this.eyeAnimator = undefined;
-    this.trans = undefined;
-    this.inkAnimator = undefined;
+    delete this.lookAtAnimator;
+    delete this.upAnimator;
+    delete this.eyeAnimator;
+    delete this.trans;
+    delete this.inkAnimator;
 };
 
 /**

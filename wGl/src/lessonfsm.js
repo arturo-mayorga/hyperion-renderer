@@ -544,7 +544,7 @@ AsmState.prototype.moveCam = function (time)
 	this.camera.setEye(this.tempEye[0], this.tempEye[1], this.tempEye[2]);
 	this.camera.setUp(this.tempUp[0], this.tempUp[1], this.tempUp[2]);
 	this.camera.setLookAt(this.tempLookAt[0], this.tempLookAt[1], this.tempLookAt[2]);
-}
+};
 
 /**
  * Enter the grab ink state
@@ -581,7 +581,7 @@ AsmState.prototype.grabInk = function (time)
 	{
 		this.fireSignal("done");
 	}
-}
+};
 
 /**
  * Enter the grab spring state
@@ -620,7 +620,7 @@ AsmState.prototype.grabSpring = function (time)
 	{
 		this.fireSignal("done");
 	}
-}
+};
 
 
 /**
@@ -660,7 +660,7 @@ AsmState.prototype.installSpring = function (time)
 		
 		this.fireSignal("done");
 	}
-}
+};
 
 /**
  * Enter the grab axle state
@@ -698,7 +698,7 @@ AsmState.prototype.grabAxle = function (time)
 	{
 		this.fireSignal("done");
 	}
-}
+};
 
 /**
  * enter the install axle state
@@ -736,7 +736,7 @@ AsmState.prototype.installAxle = function (time)
 	{
 		this.fireSignal("done");
 	}
-}
+};
 
 /**
  * Enter the grab housing state
@@ -774,7 +774,7 @@ AsmState.prototype.grabHousing = function (time)
 	{
 		this.fireSignal("done");
 	}
-}
+};
 
 /**
  * Enter the install housing state
@@ -823,7 +823,7 @@ AsmState.prototype.installHousing = function (time)
 	{
 		this.fireSignal("done");
 	}
-}
+};
 
 /**
  * Enter the grab grip state
@@ -861,7 +861,7 @@ AsmState.prototype.grabGrip = function (time)
 	{
 		this.fireSignal("done");
 	}
-}
+};
 
 /**
  * Enter the install grip state
@@ -899,7 +899,7 @@ AsmState.prototype.installGrip = function (time)
 	{
 		this.fireSignal("done");
 	}
-}
+};
 
 /**
  * Enter the grab cylinder state
@@ -938,7 +938,7 @@ AsmState.prototype.grabCylinder = function (time)
 	{
 		this.fireSignal("done");
 	}
-}
+};
 
 /** 
  * Enter the install cylinder state
@@ -976,7 +976,7 @@ AsmState.prototype.installCylinder = function (time)
 	{
 		this.fireSignal("done");
 	}
-}
+};
 
 /**
  * Enter the grab clip state
@@ -1375,4 +1375,4 @@ AsmState.prototype.doneExit = function() {};
 AsmState.prototype.done = function (time)
 {
 	this.fireSignal("exitAsm");
-}
+};

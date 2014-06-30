@@ -42,7 +42,7 @@ var __pgGroup = undefined;
 
 /**
  * @constructor
- * @implements {FsmState}
+ * @extends {FsmMachine}
  * @implements {GObjLoaderObserver}
  * @implements {ThreejsLoaderObserver}
  * @param {GScene} scene Scene that is driven by this state
@@ -87,17 +87,7 @@ function LoadState( scene, hud )
 	this.tjsLoader.setObserver(this);
 }
 
-/**
- * Set the signal observer
- * @param {FsmSignalObserver} observer The new observer to be used
- */
-LoadState.prototype.setSignalObserver = FsmState.prototype.setSignalObserver;
-
-/**
- * Fire the transition signal
- * @param {string} signal Name of the signal to fire
- */
-LoadState.prototype.fireSignal = FsmState.prototype.fireSignal;
+LoadState.prototype = Object.create( FsmMachine.prototype );
 
 /**
  * This function is called each time this state is entered
@@ -389,7 +379,7 @@ Vec3Animator.prototype.getIsComplete = function()
 
 /**
  * @constructor
- * @implements {FsmState}
+ * @extends {FsmMachine}
  * @param {GScene} scene Scene that is driven by this state
  * @param {GHudController} hud  Hud to be driven by this state
  */
@@ -397,21 +387,10 @@ function AsmState( scene, hud )
 {
     this.scene = scene;
 	this.hud = hud;
-	this.camera = scene.getCamera();
-	this.tempEye = vec3.create();
-	this.tempUp = vec3.create();
-	this.tempLookAt = vec3.create();
+	FsmMachine.call( this );
 }
-/**
- * Set the signal observer
- * @param {FsmSignalObserver} observer The new observer to be used
- */
-AsmState.prototype.setSignalObserver = FsmState.prototype.setSignalObserver;
-/**
- * Fire the transition signal
- * @param {string} signal Name of the signal to fire
- */
-AsmState.prototype.fireSignal = FsmState.prototype.fireSignal;
+
+AsmState.prototype = Object.create( FsmMachine.prototype );
 
 /**
  * This function is called whenever we enter the assembly state
@@ -430,6 +409,11 @@ AsmState.prototype.enter = function ()
 		}
 	}
 	
+	this.camera = this.scene.getCamera();
+	this.tempEye = vec3.create();
+	this.tempUp = vec3.create();
+	this.tempLookAt = vec3.create();
+	
 	this.clip     = this.penGroup.children[0];
 	this.gum      = this.penGroup.children[1];
 	this.spring   = this.penGroup.children[2];
@@ -440,6 +424,68 @@ AsmState.prototype.enter = function ()
 	this.grip     = this.penGroup.children[7];
 	
 	this.handler = this.moveCam;
+	
+	this.asmContext = 
+	{
+	    penGroup: this.penGroup,
+	    clip: this.clip,
+	    gum: this.gum,
+	    spring: this.spring,
+	    ink: this.ink,
+	    cylinder: this.cylinder,
+	    axle: this.axle,
+	    housing: this.housing,
+	    grip: this.grip   
+	};
+    
+    this.createSubState( "moveCam", this.moveCamEnter, this.moveCam, this.moveCamExit );
+    this.createSubState( "grabInk", this.grabInkEnter, this.grabInk, this.grabInkExit );
+    this.createSubState( "grabSpring", this.grabSpringEnter, this.grabSpring, this.grabSpringExit );
+    this.createSubState( "installSpring", this.installSpringEnter, this.installSpring, this.installSpringExit );
+    this.createSubState( "grabAxle", this.grabAxleEnter, this.grabAxle, this.grabAxleExit );
+    this.createSubState( "installAxle", this.installAxleEnter, this.installAxle, this.installAxleExit );
+    this.createSubState( "grabHousing", this.grabHousingEnter, this.grabHousing, this.grabHousingExit );
+    this.createSubState( "installHousing", this.installHousingEnter, this.installHousing, this.installHousingExit );
+    this.createSubState( "grabGrip", this.grabGripEnter, this.grabGrip, this.grabGripExit );
+    this.createSubState( "installGrip", this.installGripEnter, this.installGrip, this.installGripExit );
+    this.createSubState( "grabCylinder", this.grabCylinderEnter, this.grabCylinder, this.grabCylinderExit );
+    this.createSubState( "installCylinder", this.installCylinderEnter, this.installCylinder, this.installCylinderExit );
+    this.createSubState( "grabClip", this.grabClipEnter, this.grabClip, this.grabClipExit );
+    this.createSubState( "installClip", this.installClipEnter, this.installClip, this.installClipExit );
+    this.createSubState( "grabGum", this.grabGumEnter, this.grabGum, this.grabGumExit );
+    this.createSubState( "installGum", this.installGumEnter, this.installGum, this.installGumExit );
+    this.createSubState( "testOut", this.testOutEnter, this.testOut, this.testOutExit );
+    this.createSubState( "holdBeforeTestIn", this.holdBeforeTestInEnter, this.holdBeforeTestIn, this.holdBeforeTestInExit );
+    this.createSubState( "testIn", this.testInEnter, this.testIn, this.testInExit );
+    this.createSubState( "idle", this.idleEnter, this.idle, this.idleExit );
+    this.createSubState( "placeOnTable", this.placeOnTableEnter, this.placeOnTable, this.placeOnTableExit );
+    this.createSubState( "done", this.doneEnter, this.done, this.doneExit );
+    
+     
+    this.addTransition( "moveCam",         "done", "grabInk" );
+    this.addTransition( "grabInk",         "done", "grabSpring" );
+    this.addTransition( "grabSpring",      "done", "installSpring" );
+    this.addTransition( "installSpring",   "done", "grabAxle" );
+    this.addTransition( "grabAxle",        "done", "installAxle" );
+    this.addTransition( "installAxle",     "done", "grabHousing" );
+    this.addTransition( "grabHousing",     "done", "installHousing" );
+    this.addTransition( "installHousing",  "done", "grabGrip" );
+    this.addTransition( "grabGrip",        "done", "installGrip" );
+    this.addTransition( "installGrip",     "done", "grabCylinder" );
+    this.addTransition( "grabCylinder",    "done", "installCylinder" );
+    this.addTransition( "installCylinder", "done", "grabClip" );
+    this.addTransition( "grabClip",        "done", "installClip" );
+    this.addTransition( "installClip",     "done", "grabGum" );
+    this.addTransition( "grabGum",         "done", "installGum" );
+    this.addTransition( "installGum",      "done", "testOut" );
+    this.addTransition( "testOut",         "done", "holdBeforeTestIn" );
+    this.addTransition( "holdBeforeTestIn","done", "testIn" );
+    this.addTransition( "testIn",          "done", "idle" );
+    this.addTransition( "idle",            "done", "placeOnTable" );
+    this.addTransition( "placeOnTable",    "done", "done" ); 
+    
+    this.setState( "moveCam" );
+    
 };
 
 /**
@@ -451,12 +497,31 @@ AsmState.prototype.exit = function ()
 };
 
 /**
- * This updates the assembly state by calling into the currently
- * active sub state
+ * enter the move cam state
  */
-AsmState.prototype.update = function (time) 
+AsmState.prototype.moveCamEnter = function()
 {
-	this.handler(time);
+    this.camera.getEye(this.tempEye);
+    this.camera.getUp(this.tempUp);
+    this.camera.getLookAt(this.tempLookAt);
+    
+    var targetEye    = [1.3583784103393555, 9.672802925109863, 17.14227294921875];
+    var targetLookAt = [1.1498558521270752, -6.496527671813965, -5.181362152099609];
+    var targetUp     = [-0.0014136419631540775, 0.8503075838088989, -0.5262849926948547];
+    
+    this.eyeAnimator    = new Vec3Animator( this.tempEye, targetEye, 3000 );
+    this.upAnimator     = new Vec3Animator( this.tempUp, targetUp, 3000 );
+    this.lookAtAnimator = new Vec3Animator( this.tempLookAt, targetLookAt, 3000 );
+};
+
+/**
+ * exit the move cam state
+ */
+AsmState.prototype.moveCamExit = function()
+{
+    delete this.lookAtAnimator;
+    delete this.upAnimator;
+    delete this.eyeAnimator;
 };
 
 /**
@@ -465,21 +530,6 @@ AsmState.prototype.update = function (time)
  */
 AsmState.prototype.moveCam = function (time)
 {	
-	if (this.lookAtAnimator == undefined)
-	{	
-		this.camera.getEye(this.tempEye);
-		this.camera.getUp(this.tempUp);
-		this.camera.getLookAt(this.tempLookAt);
-		
-		var targetEye    = [1.3583784103393555, 9.672802925109863, 17.14227294921875];
-		var targetLookAt = [1.1498558521270752, -6.496527671813965, -5.181362152099609];
-		var targetUp     = [-0.0014136419631540775, 0.8503075838088989, -0.5262849926948547];
-		
-		this.eyeAnimator    = new Vec3Animator( this.tempEye, targetEye, 3000 );
-		this.upAnimator     = new Vec3Animator( this.tempUp, targetUp, 3000 );
-		this.lookAtAnimator = new Vec3Animator( this.tempLookAt, targetLookAt, 3000 );
-	}
-	
 	this.lookAtAnimator.update( time );
 	this.upAnimator.update( time );
 	this.eyeAnimator.update( time );
@@ -488,31 +538,39 @@ AsmState.prototype.moveCam = function (time)
 		this.upAnimator.getIsComplete() && 
 	    this.eyeAnimator.getIsComplete())
 	{
-		this.lookAtAnimator = undefined;
-		this.upAnimator = undefined;
-		this.eyeAnimator = undefined;
-		this.handler = this.grabInk;
+		this.fireSignal("done");
 	}
 	
 	this.camera.setEye(this.tempEye[0], this.tempEye[1], this.tempEye[2]);
 	this.camera.setUp(this.tempUp[0], this.tempUp[1], this.tempUp[2]);
 	this.camera.setLookAt(this.tempLookAt[0], this.tempLookAt[1], this.tempLookAt[2]);
-}
+};
 
+/**
+ * Enter the grab ink state
+ */
+AsmState.prototype.grabInkEnter = function()
+{
+    this.trans = vec3.fromValues( 0, 0, 0.3 );
+    var target = vec3.fromValues( 0.7, 2.8, 3.8 );
+    
+    this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
+};
+
+/**
+ * Exit the grab ink state
+ */
+AsmState.prototype.grabInkExit = function()
+{
+    delete this.trans;
+    delete this.inkAnimator;
+};
 /**
  * Assembly sub state: pick up the ink container from the table
  * @param {number} Number of milliseconds since the last update
  */
 AsmState.prototype.grabInk = function (time)
 {
-    if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues( 0, 0, 0.3 );
-		var target = vec3.fromValues( 0.7, 2.8, 3.8 );
-		
-		this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
-	}
-	
 	this.inkAnimator.update(time);
 	
 	var transform = mat4.create();
@@ -521,26 +579,37 @@ AsmState.prototype.grabInk = function (time)
 	
 	if ( this.inkAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.inkAnimator = undefined;
-		this.handler = this.grabSpring;
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * Enter the grab spring state
+ */
+AsmState.prototype.grabSpringEnter = function()
+{
+    this.trans = vec3.fromValues( 0, 0, 0.2 );
+    var target = vec3.fromValues( -0.7, 2.8, 3.8 );
+    
+    this.springAnimator = new Vec3Animator( this.trans, target, 1000 );
+};
+
+/**
+ * Exit the grab spring state
+ */
+AsmState.prototype.grabSpringExit = function()
+{
+    delete this.trans;
+    delete this.springAnimator;
+};
+
 
 /**
  * Assembly sub state: pick up the spring from the table
  * @param {number} Number of milliseconds since the last update
  */
 AsmState.prototype.grabSpring = function (time)
-{
-    if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues( 0, 0, 0.2 );
-		var target = vec3.fromValues( -0.7, 2.8, 3.8 );
-		
-		this.springAnimator = new Vec3Animator( this.trans, target, 1000 );
-	}
-	
+{	
 	this.springAnimator.update(time);
 	
 	var transform = mat4.create();
@@ -549,11 +618,30 @@ AsmState.prototype.grabSpring = function (time)
 	
 	if ( this.springAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.springAnimator = undefined;
-		this.handler = this.installSpring;
+		this.fireSignal("done");
 	}
-}
+};
+
+
+/**
+ * Enter the install spring state
+ */
+AsmState.prototype.installSpringEnter = function ()
+{
+    this.trans = vec3.fromValues( 0.7, 2.8, 3.8 );
+    var target = vec3.fromValues( -0.7, 2.8, 3.8 );
+    
+    this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
+};
+
+/**
+ * Exit the install spring state
+ */
+AsmState.prototype.installSpringExit = function ()
+{
+    delete this.trans;
+    delete this.inkAnimator;
+};
 
 /**
  * Assembly sub state: install the spring on the ink container
@@ -561,14 +649,6 @@ AsmState.prototype.grabSpring = function (time)
  */
 AsmState.prototype.installSpring = function (time)
 {
-    if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues( 0.7, 2.8, 3.8 );
-		var target = vec3.fromValues( -0.7, 2.8, 3.8 );
-		
-		this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
-	}
-	
 	this.inkAnimator.update(time);
 	
 	var transform = mat4.create();
@@ -577,11 +657,30 @@ AsmState.prototype.installSpring = function (time)
 	
 	if ( this.inkAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.inkAnimator = undefined;
-		this.handler = this.grabAxle;
+		
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * Enter the grab axle state
+ */
+AsmState.prototype.grabAxleEnter = function()
+{
+    this.trans = vec3.fromValues( 0, 0, 0.5 );
+    var target = vec3.fromValues( 0.7, 2.8, 3.8 );
+    
+    this.axleAnimator = new Vec3Animator( this.trans, target, 1000 );
+};
+
+/**
+ * Exit the grab axle state
+ */
+AsmState.prototype.grabAxleExit = function()
+{
+    delete this.trans;
+    delete this.axleAnimator;
+};
 
 /**
  * Assembly sub state: pick up the axle form the table and line up for installation
@@ -589,14 +688,6 @@ AsmState.prototype.installSpring = function (time)
  */
 AsmState.prototype.grabAxle = function (time)
 {
-	if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues( 0, 0, 0.5 );
-		var target = vec3.fromValues( 0.7, 2.8, 3.8 );
-		
-		this.axleAnimator = new Vec3Animator( this.trans, target, 1000 );
-	}
-	
 	this.axleAnimator.update(time);
 	
 	var transform = mat4.create();
@@ -605,11 +696,29 @@ AsmState.prototype.grabAxle = function (time)
 	
 	if ( this.axleAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.axleAnimator = undefined;
-		this.handler = this.installAxle;
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * enter the install axle state
+ */
+AsmState.prototype.installAxleEnter = function()
+{
+    this.trans = vec3.fromValues( 0.7, 2.8, 3.8 );
+    var target = vec3.fromValues( -0.7, 2.8, 3.8 );
+    
+    this.axleAnimator = new Vec3Animator( this.trans, target, 1000 ); 
+};
+
+/**
+ * Exit the instal axle state
+ */
+AsmState.prototype.installAxleExit = function()
+{
+    delete this.trans;
+    delete this.axleAnimator;
+};
 
 /**
  * Assembly sub state: Install the axle to the current assembly
@@ -617,14 +726,6 @@ AsmState.prototype.grabAxle = function (time)
  */
 AsmState.prototype.installAxle = function (time)
 {
-	if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues( 0.7, 2.8, 3.8 );
-		var target = vec3.fromValues( -0.7, 2.8, 3.8 );
-		
-		this.axleAnimator = new Vec3Animator( this.trans, target, 1000 );
-	}
-	
 	this.axleAnimator.update(time);
 	
 	var transform = mat4.create();
@@ -633,11 +734,29 @@ AsmState.prototype.installAxle = function (time)
 	
 	if ( this.axleAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.axleAnimator = undefined;
-		this.handler = this.grabHousing;
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * Enter the grab housing state
+ */
+AsmState.prototype.grabHousingEnter = function()
+{
+    this.trans = vec3.fromValues( 0, 0, 0.6 );
+    var target = vec3.fromValues( 0.7, 2.8, 3.8 );
+    
+    this.housingAnimator = new Vec3Animator( this.trans, target, 1000 );
+};
+
+/**
+ * Exit the grab housing state
+ */
+AsmState.prototype.grabHousingExit = function()
+{
+    delete this.trans;
+    delete this.housingAnimator;
+};
 
 /**
  * Assembly sub state: pick up the housin from the table and align it for installation
@@ -645,14 +764,6 @@ AsmState.prototype.installAxle = function (time)
  */
 AsmState.prototype.grabHousing = function (time)
 {
-	if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues( 0, 0, 0.6 );
-		var target = vec3.fromValues( 0.7, 2.8, 3.8 );
-		
-		this.housingAnimator = new Vec3Animator( this.trans, target, 1000 );
-	}
-	
 	this.housingAnimator.update(time);
 	
 	var transform = mat4.create();
@@ -661,28 +772,39 @@ AsmState.prototype.grabHousing = function (time)
 	
 	if ( this.housingAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.housingAnimator = undefined;
-		this.handler = this.installHousing;
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * Enter the install housing state
+ */
+AsmState.prototype.installHousingEnter = function()
+{
+    this.trans = vec3.fromValues( -0.7, 2.8, 3.8 );
+    this.trans2 = vec3.fromValues( 0.7, 2.8, 3.8 );
+    var target = vec3.fromValues( 0.0, 2.8, 3.8 );
+    
+    this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
+    this.asmAnimator = new Vec3Animator( this.trans2,target, 1000 );
+};
+
+/**
+ * Exit the install housing state
+ */
+AsmState.prototype.installHousingExit = function()
+{
+    delete this.trans;
+    delete this.asmAnimator;
+    delete this.inkAnimator;
+};
 
 /**
  * Assembly sub state: Install the housing to the current assembly
  * @param {number} Number of milliseconds since the last update
  */
 AsmState.prototype.installHousing = function (time)
-{
-	if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues( -0.7, 2.8, 3.8 );
-		this.trans2 = vec3.fromValues( 0.7, 2.8, 3.8 );
-		var target = vec3.fromValues( 0.0, 2.8, 3.8 );
-		
-		this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
-		this.asmAnimator = new Vec3Animator( this.trans2,target, 1000 );
-	}
-	
+{	
 	this.inkAnimator.update(time);
 	this.asmAnimator.update(time);
 	
@@ -699,12 +821,29 @@ AsmState.prototype.installHousing = function (time)
 	if ( this.asmAnimator.getIsComplete() &&
          this.inkAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.asmAnimator = undefined;
-		this.inkAnimator = undefined;
-		this.handler = this.grabGrip;
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * Enter the grab grip state
+ */
+AsmState.prototype.grabGripEnter = function()
+{
+    this.trans = vec3.fromValues( 0, 0, 0.7 );
+    var target = vec3.fromValues( -0.7, 2.8, 3.8 );
+    
+    this.housingAnimator = new Vec3Animator( this.trans, target, 1000 );
+};
+
+/**
+ * Exit the grab grip state
+ */
+AsmState.prototype.grabGripExit = function ()
+{
+    delete this.trans;
+    delete this.housingAnimator;
+};
 
 /**
  * Assembly sub state: pick up the grip from the table and line it up for installation
@@ -712,14 +851,6 @@ AsmState.prototype.installHousing = function (time)
  */
 AsmState.prototype.grabGrip = function (time)
 {
-	if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues( 0, 0, 0.7 );
-		var target = vec3.fromValues( -0.7, 2.8, 3.8 );
-		
-		this.housingAnimator = new Vec3Animator( this.trans, target, 1000 );
-	}
-	
 	this.housingAnimator.update(time);
 	
 	var transform = mat4.create();
@@ -728,26 +859,36 @@ AsmState.prototype.grabGrip = function (time)
 	
 	if ( this.housingAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.housingAnimator = undefined;
-		this.handler = this.installGrip;
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * Enter the install grip state
+ */
+AsmState.prototype.installGripEnter = function()
+{
+    this.trans = vec3.fromValues( -0.7, 2.8, 3.8 );
+    var target = vec3.fromValues(  0.0, 2.8, 3.8 );
+    
+    this.housingAnimator = new Vec3Animator( this.trans, target, 1000 );
+};
+
+/**
+ * Exit the install grip state
+ */
+AsmState.prototype.installGripExit = function()
+{
+    delete this.trans;
+    delete this.housingAnimator;
+};
 
 /**
  * Assembly sub state: Install the grip to the rest of the assembly
  * @param {number} Number of milliseconds since the last update
  */
 AsmState.prototype.installGrip = function (time)
-{
-	if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues( -0.7, 2.8, 3.8 );
-		var target = vec3.fromValues(  0.0, 2.8, 3.8 );
-		
-		this.housingAnimator = new Vec3Animator( this.trans, target, 1000 );
-	}
-	
+{	
 	this.housingAnimator.update(time);
 	
 	var transform = mat4.create();
@@ -756,11 +897,30 @@ AsmState.prototype.installGrip = function (time)
 	
 	if ( this.housingAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.housingAnimator = undefined;
-		this.handler = this.grabCylinder;
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * Enter the grab cylinder state
+ */
+AsmState.prototype.grabCylinderEnter = function()
+{
+    this.trans = vec3.fromValues( 0.0, 0.0, 0.4 );
+    var target = vec3.fromValues( 0.4, 2.8, 3.8 );
+    
+    this.cylinderAnimator = new Vec3Animator( this.trans, target, 1000 );
+};
+
+/**
+ * Exti the grab cylinder state
+ */
+AsmState.prototype.grabCylinderExit = function()
+{
+    delete this.trans;
+    delete this.cylinderAnimator;
+};
+
 
 /**
  * Assembly sub state: Pick up the cylinder from the table and align for installation
@@ -768,14 +928,6 @@ AsmState.prototype.installGrip = function (time)
  */
 AsmState.prototype.grabCylinder = function (time)
 {
-	if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues( 0.0, 0.0, 0.4 );
-		var target = vec3.fromValues( 0.4, 2.8, 3.8 );
-		
-		this.cylinderAnimator = new Vec3Animator( this.trans, target, 1000 );
-	}
-	
 	this.cylinderAnimator.update(time);
 	
 	var transform = mat4.create();
@@ -784,11 +936,29 @@ AsmState.prototype.grabCylinder = function (time)
 	
 	if ( this.cylinderAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.cylinderAnimator = undefined;
-		this.handler = this.installCylinder;
+		this.fireSignal("done");
 	}
-}
+};
+
+/** 
+ * Enter the install cylinder state
+ */
+AsmState.prototype.installCylinderEnter = function()
+{
+    this.trans = vec3.fromValues( 0.4, 2.8, 3.8 );
+    var target = vec3.fromValues( 0.0, 2.8, 3.8 );
+    
+    this.cylinderAnimator = new Vec3Animator( this.trans, target, 1000 );
+};
+
+/**
+ * Exit the install cylinder state
+ */
+AsmState.prototype.installCylinderExit = function()
+{
+    delete this.trans;
+    delete this.cylinderAnimator;
+};
 
 /**
  * Assembly sub state: Install the cylinder to the assembly
@@ -796,14 +966,6 @@ AsmState.prototype.grabCylinder = function (time)
  */
 AsmState.prototype.installCylinder = function (time)
 {
-	if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues( 0.4, 2.8, 3.8 );
-		var target = vec3.fromValues( 0.0, 2.8, 3.8 );
-		
-		this.cylinderAnimator = new Vec3Animator( this.trans, target, 1000 );
-	}
-	
 	this.cylinderAnimator.update(time);
 	
 	var transform = mat4.create();
@@ -812,11 +974,29 @@ AsmState.prototype.installCylinder = function (time)
 	
 	if ( this.cylinderAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.cylinderAnimator = undefined;
-		this.handler = this.grabClip;
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * Enter the grab clip state
+ */
+AsmState.prototype.grabClipEnter = function ()
+{
+    this.trans = vec3.fromValues( 0.0, 0.0, 0.0 );
+    var target = vec3.fromValues( 0.4, 2.8, 3.8 );
+    
+    this.clipAnimator = new Vec3Animator( this.trans, target, 1000 );
+};
+
+/**
+ * Exit the grab clip state
+ */
+AsmState.prototype.grabClipExit = function()
+{
+    delete this.trans;
+    delete this.clipAnimator;
+};
 
 /** 
  * Assembly sub state: Pick up the clip from the table
@@ -824,14 +1004,6 @@ AsmState.prototype.installCylinder = function (time)
  */
 AsmState.prototype.grabClip = function (time)
 {
-	if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues( 0.0, 0.0, 0.0 );
-		var target = vec3.fromValues( 0.4, 2.8, 3.8 );
-		
-		this.clipAnimator = new Vec3Animator( this.trans, target, 1000 );
-	}
-	
 	this.clipAnimator.update(time);
 	
 	var transform = mat4.create();
@@ -840,11 +1012,29 @@ AsmState.prototype.grabClip = function (time)
 	
 	if ( this.clipAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.clipAnimator = undefined;
-		this.handler = this.installClip;
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * Enter the install clip state
+ */
+AsmState.prototype.installClipEnter = function()
+{
+    this.trans = vec3.fromValues( 0.4, 2.8, 3.8 );
+    var target = vec3.fromValues( 0.0, 2.8, 3.8 );
+    
+    this.clipAnimator = new Vec3Animator( this.trans, target, 1000 );
+};
+
+/**
+ * Exit the install clip state
+ */
+AsmState.prototype.installClipExit = function()
+{
+    delete this.trans;
+    delete this.clipAnimator;
+};
 
 /**
  * Assembly sub state: Install the clip to the assembly
@@ -868,11 +1058,29 @@ AsmState.prototype.installClip = function (time)
 	
 	if ( this.clipAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.clipAnimator = undefined;
-		this.handler = this.grabGum;
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * Enter the grab gum state 
+ */
+AsmState.prototype.grabGumEnter = function ()
+{
+    this.trans = vec3.fromValues( 0.0, 0.0, 0.0 );
+    var target = vec3.fromValues(-0.7, 2.8, 3.8 );
+    
+    this.gumAnimator = new Vec3Animator( this.trans, target, 1000 );
+};
+
+/**
+ * Exit the grab gum state
+ */
+AsmState.prototype.grabGumExit = function()
+{
+    delete this.trans;
+    delete this.gumAnimator;
+};
 
 /**
  * Assembly sub state: Pick up the gum from the table and align it for isntallation.
@@ -880,14 +1088,6 @@ AsmState.prototype.installClip = function (time)
  */
 AsmState.prototype.grabGum = function (time)
 {
-	if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues( 0.0, 0.0, 0.0 );
-		var target = vec3.fromValues(-0.7, 2.8, 3.8 );
-		
-		this.gumAnimator = new Vec3Animator( this.trans, target, 1000 );
-	}
-	
 	this.gumAnimator.update(time);
 	
 	var transform = mat4.create();
@@ -896,25 +1096,36 @@ AsmState.prototype.grabGum = function (time)
 	
 	if ( this.gumAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.gumAnimator = undefined;
-		this.handler = this.installGum;
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * Enter the grab gum state
+ */
+AsmState.prototype.installGumEnter = function()
+{
+    this.trans = vec3.fromValues(-0.7, 2.8, 3.8 );
+    var target = vec3.fromValues( 0.0, 2.8, 3.8 );
+    
+    this.gumAnimator = new Vec3Animator( this.trans, target, 1000 );
+};
+
+/**
+ * Exit the grab gum state
+ */
+AsmState.prototype.installGumExit = function()
+{
+    delete this.trans;
+    delete this.gumAnimator;
+};
+
 /**
  * Assembly sub state: Install the gum to the assembly
  * @param {number} Number of milliseconds since the last update.
  */
 AsmState.prototype.installGum = function (time)
 {
-    if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues(-0.7, 2.8, 3.8 );
-		var target = vec3.fromValues( 0.0, 2.8, 3.8 );
-		
-		this.gumAnimator = new Vec3Animator( this.trans, target, 1000 );
-	}
-	
 	this.gumAnimator.update(time);
 	
 	var transform = mat4.create();
@@ -923,11 +1134,29 @@ AsmState.prototype.installGum = function (time)
 	
 	if ( this.gumAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.gumAnimator = undefined;
-		this.handler = this.testOut;
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * Enter the test out state
+ */
+AsmState.prototype.testOutEnter = function()
+{
+    this.trans = vec3.fromValues(-0.09, 2.8, 3.8 );
+    var target = vec3.fromValues(-0.075, 2.8, 3.8 );
+    
+    this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
+};
+
+/**
+ * Exit the test out state
+ */
+AsmState.prototype.testOutExit = function()
+{
+    delete this.trans;
+    delete this.inkAnimator;
+};
 
 /**
  * Assembly sub state: Animate testing of the pen (going out)
@@ -935,14 +1164,6 @@ AsmState.prototype.installGum = function (time)
  */
 AsmState.prototype.testOut = function (time)
 {
-    if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues(-0.09, 2.8, 3.8 );
-		var target = vec3.fromValues(-0.075, 2.8, 3.8 );
-		
-		this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
-	}
-	
 	this.inkAnimator.update(time);
 	
 	var transform = mat4.create();
@@ -955,11 +1176,25 @@ AsmState.prototype.testOut = function (time)
 	
 	if ( this.inkAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.inkAnimator = undefined;
-		this.handler = this.holdBeforeTestIn;
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * Enter the hold before test in event
+ */
+AsmState.prototype.holdBeforeTestInEnter = function()
+{
+    this.currentLapse = 0;
+};
+
+/**
+ * Exit the hold before test in event
+ */
+AsmState.prototype.holdBeforeTestInExit = function()
+{
+    delete this.currentLapse;
+};
 
 /**
  * Assembly sub state: hold the assembly in position.
@@ -967,19 +1202,33 @@ AsmState.prototype.testOut = function (time)
  */
 AsmState.prototype.holdBeforeTestIn = function (time)
 {
-	if ( this.currentLapse == undefined )
-	{
-		this.currentLapse = 0;
-	}
-	
 	this.currentLapse += time;
 	
 	if ( this.currentLapse >= 3000 )
 	{
-		this.currentLapse = undefined;
-		this.handler = this.testIn;
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * Enter the test in state
+ */
+AsmState.prototype.testInEnter = function()
+{
+    this.trans = vec3.fromValues(-0.09, 2.8, 3.8 );
+    var target = vec3.fromValues(-0.0, 2.8, 3.8 );
+    
+    this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
+};
+
+/**
+ * Exit the test in state
+ */
+AsmState.prototype.testInExit = function()
+{
+    delete this.trans;
+    delete this.inkAnimator;
+};
 
 /**
  * Assembly sub state: Animate testing of the pen (going in)
@@ -987,14 +1236,6 @@ AsmState.prototype.holdBeforeTestIn = function (time)
  */
 AsmState.prototype.testIn = function (time)
 {
-	if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues(-0.09, 2.8, 3.8 );
-		var target = vec3.fromValues(-0.0, 2.8, 3.8 );
-		
-		this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
-	}
-	
 	this.inkAnimator.update(time);
 	
 	var transform = mat4.create();
@@ -1007,11 +1248,25 @@ AsmState.prototype.testIn = function (time)
 	
 	if ( this.inkAnimator.getIsComplete() )
 	{
-		this.trans = undefined;
-		this.inkAnimator = undefined;
-		this.handler = this.idle;
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * Enter the idle state
+ */
+AsmState.prototype.idleEnter = function()
+{
+    this.currentLapse = 0;
+};
+
+/**
+ * Exit the idle state
+ */
+AsmState.prototype.idleExit = function()
+{
+    delete this.currentLapse;
+};
 
 /**
  * Assembly sub state: hold the assembly in position.
@@ -1019,19 +1274,36 @@ AsmState.prototype.testIn = function (time)
  */
 AsmState.prototype.idle = function (time)
 {
-	if ( this.currentLapse == undefined )
-	{
-		this.currentLapse = 0;
-	}
-	
 	this.currentLapse += time;
 	
 	if ( this.currentLapse >= 300 )
 	{
-		this.currentLapse = undefined;
-		this.handler = this.placeOnTable;
+		this.fireSignal("done");
 	}
-}
+};
+
+/**
+ * Enter the place on table state
+ */
+AsmState.prototype.placeOnTableEnter = function()
+{
+    this.trans = vec3.fromValues( 0.0, 2.8, 3.8 );
+    var target = vec3.fromValues( 0.0, 0.0, 0.0 );
+    
+    this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
+};
+
+/**
+ * Exit the place on table state
+ */
+AsmState.prototype.placeOnTableExit = function()
+{
+    delete this.lookAtAnimator;
+    delete this.upAnimator;
+    delete this.eyeAnimator;
+    delete this.trans;
+    delete this.inkAnimator;
+};
 
 /**
  * Assembly sub state: Place the assembly on the table and move the camera away from the desk
@@ -1040,14 +1312,6 @@ AsmState.prototype.idle = function (time)
  */
 AsmState.prototype.placeOnTable = function (time)
 {
-	if ( undefined == this.trans )
-	{
-		this.trans = vec3.fromValues( 0.0, 2.8, 3.8 );
-		var target = vec3.fromValues( 0.0, 0.0, 0.0 );
-		
-		this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
-	}
-	
 	this.inkAnimator.update(time);
 	
 	var transform = mat4.create();
@@ -1086,18 +1350,23 @@ AsmState.prototype.placeOnTable = function (time)
 	    this.eyeAnimator.getIsComplete() && 
 		this.inkAnimator.getIsComplete())
 	{
-		this.lookAtAnimator = undefined;
-		this.upAnimator = undefined;
-		this.eyeAnimator = undefined;
-		this.trans = undefined;
-		this.inkAnimator = undefined;
-		this.handler = this.done;
+		this.fireSignal("done");
 	}
 	
 	this.camera.setEye(this.tempEye[0], this.tempEye[1], this.tempEye[2]);
 	this.camera.setUp(this.tempUp[0], this.tempUp[1], this.tempUp[2]);
 	this.camera.setLookAt(this.tempLookAt[0], this.tempLookAt[1], this.tempLookAt[2]);
-}
+};
+
+/**
+ * Enter the done state
+ */
+AsmState.prototype.doneEnter = function() {};
+
+/** 
+ * Exit the done state
+ */
+AsmState.prototype.doneExit = function() {};
 
 /**
  * Assembly sub state: Fire the signal to leave the assembly state
@@ -1106,4 +1375,4 @@ AsmState.prototype.placeOnTable = function (time)
 AsmState.prototype.done = function (time)
 {
 	this.fireSignal("exitAsm");
-}
+};

@@ -34,7 +34,7 @@ uniform mat4 uAMatrix[60];
 varying vec2 vKdMapCoord;
 
 varying mediump vec4 vNormal;
-varying highp vec4 vPosition;
+varying mediump vec4 vPosition;
 
 #ifdef ARMATURE_SUPPORT
 void applyArmature()

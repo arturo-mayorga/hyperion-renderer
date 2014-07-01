@@ -28,9 +28,28 @@ function GRenderPhongStrategy( gl )
     this.configure();
     
     this.extensions = {};
-    this.extensions.stdDeriv = gl.getExtension('OES_standard_derivatives');
+    this.extensions.stdDeriv = this.checkNavigatorProfile("OES_standard_derivatives")?
+                                    gl.getExtension('OES_standard_derivatives'):null;
     
 }
+
+/**
+ * Some devices don't play nice with some extensions eve if the claim support
+ * this function returns true if the known hardware support for a particular extension
+ * is good enough for the extension in question
+ * @param {string}
+ * @return {boolean}
+ */
+GRenderPhongStrategy.prototype.checkNavigatorProfile = function( extensionName )
+{
+   if ( "OES_standard_derivatives" == extensionName )
+   {
+       // for now just make sure we are not on some android device.
+       return -1 == navigator.userAgent.toLowerCase().indexOf("android");
+   }
+   
+   return true;
+};
 
 /**
  * Configures the strategy and starts the download process for the shader source
@@ -301,9 +320,5 @@ GRenderPhongStrategy.prototype.draw = function ( scene, hud )
         hud.draw(this.fullScreenProgram);
     }
     this.fullScreenProgram.deactivate();
-};
-
-
-
-
+}; 
 

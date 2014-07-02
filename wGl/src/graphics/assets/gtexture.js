@@ -36,12 +36,12 @@ function GTexture( mtlargs, path )
  */
 GTexture.prototype.processArgs = function( args )
 {
-    if ( undefined == args ) return;
+    if ( undefined === args ) return;
     
     var aLen = args.length;
     for (var i = 0; i < aLen; ++i)
     {
-        if ( args[i] == "-s" )
+        if ( args[i] === "-s" )
         {
             this.scale[0] = parseFloat(args[++i]);
             this.scale[1] = parseFloat(args[++i]);

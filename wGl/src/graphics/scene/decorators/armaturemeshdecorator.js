@@ -69,7 +69,7 @@ ArmatureMeshDecorator.prototype = Object.create( MeshDecorator.prototype );
  */
 ArmatureMeshDecorator.prototype.draw = function( parentMvMat, materials, shader, drawMode )
 {
-    if ( null == shader.uniforms.aMatrixUniform )
+    if ( null === shader.uniforms.aMatrixUniform )
     {
         var dCommand = new DrawCommand( this, parentMvMat, materials, drawMode );
         if ( this.requestDeferredDraw( dCommand, SceneDrawableDeferConditionCode.ARMATURE_REQUEST) )

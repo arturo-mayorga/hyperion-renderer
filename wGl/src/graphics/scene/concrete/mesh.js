@@ -83,8 +83,8 @@ Mesh.prototype.setMvMatrix = function( mat )
  */
 Mesh.prototype.bindToContext = function(gl_)
 {
-    if (gl_ == undefined) return;
-    if (gl_ == this.gl) return;
+    if (gl_ === undefined) return;
+    if (gl_ === this.gl) return;
     
     this.gl = gl_;
     var gl = this.gl;
@@ -178,8 +178,8 @@ Mesh.prototype.draw = function( parentMvMat, materials, shader, drawMode )
         gl.uniformMatrix4fv(shader.uniforms.nMatrixUniform, false, this.normalMatrix);
     }
     
-    if ( this.material == undefined &&
-         this.mtlName != undefined )
+    if ( this.material === undefined &&
+         this.mtlName !== undefined )
     {
         this.material = materials[this.mtlName];
     }

@@ -42,10 +42,10 @@ function GRenderPhongStrategy( gl )
  */
 GRenderPhongStrategy.prototype.checkNavigatorProfile = function( extensionName )
 {
-   if ( "OES_standard_derivatives" == extensionName )
+   if ( "OES_standard_derivatives" === extensionName )
    {
        // for now just make sure we are not on some android device.
-       return -1 == navigator.userAgent.toLowerCase().indexOf("android");
+       return -1 === navigator.userAgent.toLowerCase().indexOf("android");
    }
    
    return true;
@@ -97,7 +97,7 @@ GRenderPhongStrategy.prototype.loadShader = function(srcName)
     client.open('GET', "assets/shaders/" + srcName);
     client.onreadystatechange = function() 
     {
-        if ( client.readyState == 4 )
+        if ( client.readyState === 4 )
         {
             var devS = (_this.extensions.stdDeriv != null)?
                     "#define HAS_OES_DERIVATIVES\n":
@@ -118,7 +118,7 @@ GRenderPhongStrategy.prototype.checkShaderDependencies = function()
 {
     for (var key in this.shaderSrcMap)
     {
-        if (this.shaderSrcMap[key] == undefined)
+        if (this.shaderSrcMap[key] === undefined)
         {
             return;
         }
@@ -146,7 +146,7 @@ GRenderPhongStrategy.prototype.initialize = function()
  */
 GRenderPhongStrategy.prototype.isReady = function()
 {
-    return true == this._isReady;
+    return true === this._isReady;
 };
 
 /**

@@ -94,7 +94,7 @@ GRenderDeferredStrategy.prototype.loadShader = function( srcName )
     client.open('GET', "assets/shaders/" + srcName);
     client.onreadystatechange = function() 
     {
-        if ( client.readyState == 4 )
+        if ( client.readyState === 4 )
         {
             var devS = (_this.extensions.stdDeriv != null)?
                     "#define HAS_OES_DERIVATIVES\n":
@@ -115,7 +115,7 @@ GRenderDeferredStrategy.prototype.checkShaderDependencies = function()
 {
     for (var key in this.shaderSrcMap)
     {
-        if (this.shaderSrcMap[key] == undefined)
+        if (this.shaderSrcMap[key] === undefined)
         {
             return;
         }
@@ -144,7 +144,7 @@ GRenderDeferredStrategy.prototype.initialize = function()
  */
 GRenderDeferredStrategy.prototype.isReady = function()
 {
-    return true == this._isReady;
+    return true === this._isReady;
 };
 
 /**

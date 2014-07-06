@@ -357,8 +357,8 @@ function GPostEffectLitRenderPassCmd( gl, program, frameBuffer, screenGeometry, 
     this.lPMatrix = mat4.create();
     this.uniformMatrix = mat4.create();
     
-    this.sendShadowMatrix = ( undefined == this.shaderProgram.uniforms.shadowMatrix ||
-                              undefined == lightCamera  )?function(){}:function()
+    this.sendShadowMatrix = ( undefined === this.shaderProgram.uniforms.shadowMatrix ||
+                              undefined === lightCamera  )?function(){}:function()
     {
         var camera = this.lightCamera;
     

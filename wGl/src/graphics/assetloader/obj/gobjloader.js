@@ -80,12 +80,12 @@ GObjLoader.prototype.loadObj = function ( path, source )
     this.currentPath = path;
     this.client.onreadystatechange = function(e) 
     {
-        if ( this.client.readyState == 4 )
+        if ( this.client.readyState === 4 )
         {
             this.isDownloadComplete = true;
 			this.downloadProgress = 1;
         }
-		else if ( this.client.readyState == 3 )
+		else if ( this.client.readyState === 3 )
 		{
 			if ( e.lengthComputable )
 			{
@@ -128,7 +128,7 @@ GObjLoader.prototype.update = function ( time )
 	}
 	
 	
-	var defferedProgress = (this.deferredObjectCount==0)? ((this.autoMergeByMaterial)?0.0:1.0) :((this.deferredObjectCount-this.defferedObjectsLeft)/this.deferredObjectCount);
+	var defferedProgress = (this.deferredObjectCount===0)? ((this.autoMergeByMaterial)?0.0:1.0) :((this.deferredObjectCount-this.defferedObjectsLeft)/this.deferredObjectCount);
 	
 	this.totalProgress = (this.downloadProgress + this.processProgress*9.0 + defferedProgress )/11.0;
 	
@@ -155,7 +155,7 @@ GObjLoader.prototype.update = function ( time )
         }
         else if ( this.isReaderReady )
         {
-            if (false == this.reader.isLoadComplete)
+            if (false === this.reader.isLoadComplete)
             {
                 this.reader.update( time );
 				++this.objLinesProcessed;
@@ -167,7 +167,7 @@ GObjLoader.prototype.update = function ( time )
 				// the scene
 				var keys = Object.keys(this.deferredMeshMap);
 				
-				if ( keys.length == 0 )
+				if ( keys.length === 0 )
 				{
 					this.isReadComplete = true;
 				}
@@ -221,7 +221,7 @@ GObjLoader.prototype.deferMeshForMerge = function ( mesh )
     var currentMeshArray = this.deferredMeshMap[mesh.getMtlName()];
     var MAX_INDEX_VALUE = 65535;
     
-    if ( undefined == currentMeshArray )
+    if ( undefined === currentMeshArray )
     {
         // this is the first mesh with it's material
         currentMeshArray = [mesh];

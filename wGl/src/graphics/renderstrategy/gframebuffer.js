@@ -77,7 +77,7 @@ GFrameBuffer.prototype.addBufferTexture = function ( cfg )
          cfg.attachment >= this.cfg.extensions.WEBGL_draw_buffers['COLOR_ATTACHMENT0_WEBGL'] &&
          cfg.attachment <= this.cfg.extensions.WEBGL_draw_buffers['COLOR_ATTACHMENT15_WEBGL'] )
     {
-        if ( undefined == this.WEBGL_draw_buffers_drawBuffersList )
+        if ( undefined === this.WEBGL_draw_buffers_drawBuffersList )
         {
             this.WEBGL_draw_buffers_drawBuffersList = [];
         }
@@ -148,10 +148,10 @@ GFrameBuffer.prototype.bindTexture = function ( texture, name )
  */
 GFrameBuffer.prototype.getGTexture = function ( name )
 {
-    var _name = (undefined == name)?"color":name;
+    var _name = (undefined === name)?"color":name;
     var ret = this.gTextures[_name];
     
-    if ( undefined == ret )
+    if ( undefined === ret )
     {
         var textureHandle = this.textures[_name];
         

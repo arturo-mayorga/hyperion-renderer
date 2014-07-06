@@ -139,8 +139,8 @@ function GScene()
  */
 GScene.prototype.onDeferredDrawRequested = function ( command, conditionCode ) 
 { 
-    if ( conditionCode == SceneDrawableDeferConditionCode.ARMATURE_REQUEST &&
-         this.drawSection == this.drawSectionEnum.STATIC )
+    if ( conditionCode === SceneDrawableDeferConditionCode.ARMATURE_REQUEST &&
+         this.drawSection === this.drawSectionEnum.STATIC )
     {
         this.deferredDrawCommands.push( command );
         return true;
@@ -264,7 +264,7 @@ GScene.prototype.drawGeometry = function ( parentMvMatrix, shader )
  */
 GScene.prototype.drawThroughCamera = function ( camera, shaderComposite )
 {
-    if ( false == this.isVisible )
+    if ( false === this.isVisible )
     {
         return;
     }
@@ -304,7 +304,7 @@ GScene.prototype.drawThroughCamera = function ( camera, shaderComposite )
  */
 GScene.prototype.draw = function( shaderComposite )
 {
-    if ( false == this.isVisible )
+    if ( false === this.isVisible )
     {
         return;
     }

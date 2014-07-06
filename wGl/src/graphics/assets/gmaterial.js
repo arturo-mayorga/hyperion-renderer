@@ -98,7 +98,7 @@ GMaterial.prototype.draw = function( shader )
     
     if ( null != shader.uniforms.normalEmphasis )
     {
-        gl.uniform1f( shader.uniforms.normalEmphasis, (this.mapBump == gl.whiteTexture)?0:1 );
+        gl.uniform1f( shader.uniforms.normalEmphasis, (this.mapBump === gl.whiteTexture)?0:1 );
     }
     
     

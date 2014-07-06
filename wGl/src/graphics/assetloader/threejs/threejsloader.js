@@ -75,7 +75,7 @@ ThreejsLoader.prototype.loadJson = function ( path, source )
     this.client.onload = function(e) 
     {
 		var status = this.client.status;
-		if (status == 200) {
+		if (status === 200) {
 			this.jsonToRead = this.client.response;
 			this.isDownloadComplete = true;
 		} else {

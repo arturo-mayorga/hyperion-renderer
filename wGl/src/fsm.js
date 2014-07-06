@@ -247,7 +247,7 @@ FsmMachine.prototype.setState = function ( stateName )
  */
 FsmMachine.prototype.update = function ( time ) 
 {
-	if (this.currentStateName == "") return;
+	if (this.currentStateName === "") return;
 	// update the current state
 	var currentStateTransitions = this.nameStateMap[this.currentStateName];
 	currentStateTransitions.state.update(time);

@@ -149,7 +149,7 @@ LoadState.prototype.exit = function ()
 	    newGroup.addChild(childrenTemp[i]);
 	    this.penGroup.addChild(newGroup);
 	    
-	    if (i == 3)
+	    if (i === 3)
 	    {
 	        newGroup.addChild(childrenTemp[++i]);
 	    }
@@ -215,7 +215,7 @@ LoadState.prototype.update = function ( time )
 LoadState.prototype.onObjLoaderCompleted = function ( loader ) 
 {
 	// wait for 3 loaders
-	if (this.loadCount == undefined)
+	if (this.loadCount === undefined)
 	{
 		this.loadCount = 1;
 	}
@@ -403,7 +403,7 @@ AsmState.prototype.enter = function ()
 	var len = children.length;
 	for (var i = 0; i < len; ++i)
 	{
-		if (children[i].getName() == "penGroup")
+		if (children[i].getName() === "penGroup")
 		{
 			this.penGroup = children[i];
 		}
@@ -1042,7 +1042,7 @@ AsmState.prototype.installClipExit = function()
  */
 AsmState.prototype.installClip = function (time)
 {
-	if ( undefined == this.trans )
+	if ( undefined === this.trans )
 	{
 		this.trans = vec3.fromValues( 0.4, 2.8, 3.8 );
 		var target = vec3.fromValues( 0.0, 2.8, 3.8 );
@@ -1326,7 +1326,7 @@ AsmState.prototype.placeOnTable = function (time)
 	this.housing.setMvMatrix(transform);  
 	this.grip.setMvMatrix(transform);     
 	
-	if (this.lookAtAnimator == undefined)
+	if (this.lookAtAnimator === undefined)
 	{	
 		this.camera.getEye(this.tempEye);
 		this.camera.getUp(this.tempUp);

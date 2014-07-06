@@ -231,7 +231,7 @@ GObjReader.prototype.process_face = function( lineA )
 		var norm = this.objNormals[idxs.normIdx];
 		var vtex = this.objTVerts[idxs.textIdx];
 		
-		if (vtex == undefined)
+		if (vtex === undefined)
 		{
 			vtex = [0,0];
 		}

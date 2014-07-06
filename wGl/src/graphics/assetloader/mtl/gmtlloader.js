@@ -38,7 +38,7 @@ GMtlLoader.prototype.loadMtl = function ( path, source )
     this.client.open('GET', path + source);
     this.client.onreadystatechange = function() 
     {
-        if ( this.client.readyState == 4 )
+        if ( this.client.readyState === 4 )
         {
             var i = 0;
             var mtlFile = this.client.responseText.split("\n");

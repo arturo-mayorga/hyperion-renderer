@@ -313,6 +313,11 @@ GPostEffectRenderPassCmd.prototype.drawScreenBuffer = function( shader )
         gl.uniform1i( shader.uniforms.mapPing, mapIdx++ );
     }
     
+    if ( null != shader.uniforms.mapRandom )
+    {
+        gl.uniform1i( shader.uniforms.mapRandom, mapIdx++ );
+    }
+    
     gl.bindBuffer( gl.ARRAY_BUFFER, this.screen.vertBuffer);
     gl.vertexAttribPointer( shader.attributes.positionVertexAttribute, 
                             this.screen.vertBuffer.itemSize, gl.FLOAT, false, 0, 0 );

@@ -24,30 +24,14 @@ varying vec2 vTexCoordinate;
 uniform sampler2D uMapKd;
 uniform sampler2D uMapNormal;
 uniform sampler2D uMapPosition;
+uniform sampler2D uMapRandom;
 
 const float numSamples = 4.0;
 
-float pw = 1.0/256.0*0.5; 
-float ph = 1.0/256.0*0.5;
+float pw = 1.0/1024.0*0.5; 
+float ph = 1.0/1024.0*0.5;
 
-float randoms(float co)
-{
-  //  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453)*2.0 - 1.0 ;
-  //  return sin(co.x * co.y)*2.0 - 1.0 ;
-    return sin(co * (3.1416/1.5));
-}
 
-float randomc(float co)
-{
-  //  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453)*2.0 - 1.0 ;
-  //  return sin(co.x * co.y)*2.0 - 1.0 ;
-    return cos(co * (3.1416/1.5));
-}
-
-float random(vec2 co)
-{
-    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453)*2.0 - 1.0 ;
-}
 
 
 float readDepth(in vec2 coord)  
@@ -133,15 +117,13 @@ vec3 calAO(float depth, vec2 sample)
 
 void main(void)
 {
-    //vec3 tv3Normal   = texture2D(uMapNormal,   vTexCoordinate).xyz;
-    //vec3 tv3Position = texture2D(uMapPosition, vTexCoordinate).xyz;
-    //vec3 tv3RGBDepth = texture2D(uMapRGBDepth, vTexCoordinate).xyz;
+    vec3 tv3Normal   = texture2D(uMapNormal,   vTexCoordinate).xyz;
+    vec3 tv3Position = texture2D(uMapPosition, vTexCoordinate).xyz;
 	vec3 tv3Color    = texture2D(uMapKd,       vTexCoordinate).xyz;
+	vec3 random = texture2D(uMapRandom, vTexCoordinate).xyz;
 
-	float tfdDepthValue = readDepth(vTexCoordinate);  //256.0 * (tv3RGBDepth.x + tv3RGBDepth.y);
-    
-    vec3 random = vec3(random(vTexCoordinate), random(vTexCoordinate*32.43), random(vTexCoordinate*45.6));
-    
+	float tfdDepthValue = readDepth(vTexCoordinate);  
+	
 	vec3 occlusionC = vec3(0);
     for (float i = 0.0; i < numSamples; ++i) 
     {
@@ -167,11 +149,12 @@ void main(void)
         ph *= 3.5;
     }
     
-    vec3 ovFactor = 1.0 - (occlusionC/(numSamples*8.0));
+    vec3 ovFactor = 1.0-(occlusionC/(numSamples*8.0));
     
     //gl_FragColor = vec4(tv3Color*ovFactor, 1);
     // gl_FragColor = vec4(vec3(oFactor), 1);
     gl_FragColor = vec4(ovFactor, 1);
+    //gl_FragColor = vec4(random_, 1);
 } 
 
 

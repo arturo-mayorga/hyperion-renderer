@@ -33,6 +33,7 @@ function GContext( canvas )
 	this.currentProgram   = undefined;
 	
 	var whiteTexture = new GTexture(["white.jpg"], "assets/2d/");
+	var randomTexture = new GTexture(["noise_1024.png"], "assets/2d/");
     
     this.gl = canvas.getContext("webgl", { antialias: true } );
 	
@@ -50,7 +51,9 @@ function GContext( canvas )
     
     
     whiteTexture.bindToContext(gl);
+    randomTexture.bindToContext(gl);
     gl.whiteTexture = whiteTexture;
+    gl.randomTexture = randomTexture;
 };
 	
 /**

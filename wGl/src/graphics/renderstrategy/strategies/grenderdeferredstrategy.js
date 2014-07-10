@@ -380,10 +380,8 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     phongLightPassPong.addInputTexture( this.frameBuffers.phongLightPing.getGTexture(),gl.TEXTURE3 );
     
     var saoPass = new GPostEffectRenderPassCmd( this.gl, this.programs.ssao, this.frameBuffers.ssao, this.screen );
-    saoPass.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );
-    saoPass.addInputFrameBuffer( this.frameBuffers.normal, gl.TEXTURE1 );
-    saoPass.addInputFrameBuffer( this.frameBuffers.position, gl.TEXTURE2 );
-    saoPass.addInputTexture( this.gl.randomTexture, gl.TEXTURE3 );
+    saoPass.addInputFrameBuffer( this.frameBuffers.position, gl.TEXTURE0 );
+    saoPass.addInputTexture( this.gl.randomTexture, gl.TEXTURE1 );
     
     var toneMapPassPing = new GPostEffectRenderPassCmd( this.gl, this.programs.toneMap, this.frameBuffers.phongLightPong, this.screen );
     toneMapPassPing.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );

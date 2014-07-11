@@ -26,8 +26,7 @@ varying vec2 vTexCoordinate;
 uniform sampler2D uMapPosition;
 uniform sampler2D uMapRandom;
 
-#define NUM_SAMPLES           4.0
-#define NUM_SAMPLES_i           4
+#define NUM_SAMPLES           4
 #define NUM_SPIRAL_TURNS      7
 #define VARIATION             1
 #define PI 3.1415926535897932384626433832795
@@ -119,12 +118,12 @@ void main(void)
     float radiusWS = uSampleRadiusWS;
     float radiusSS = projScale * radiusWS / tv3Position.z;
     
-    for (int i = 0; i < NUM_SAMPLES_i; ++i) 
+    for (int i = 0; i < NUM_SAMPLES; ++i) 
     {
         occlusion += sampleAO(vTexCoordinate, tv3Position, tv3Normal, radiusSS, i, randomPatternRotationAngle);
     }
     
-    vec3 ovFactor = (vec3(1.0/occlusion)/(NUM_SAMPLES));
+    vec3 ovFactor = (vec3(1.0/occlusion)/float(NUM_SAMPLES));
     gl_FragColor = vec4(ovFactor, 1);
 } 
 

@@ -217,7 +217,6 @@ GRenderDeferredStrategy.prototype.initShaders = function ()
     this.programs.light       = new GShader( shaderSrcMap["light-vs.c"],       shaderSrcMap["light-fs.c"]       );
     this.programs.toneMap     = new GShader( shaderSrcMap["tonemap-vs.c"],     shaderSrcMap["tonemap-fs.c"]     );
     
-    
     this.programs.colorspec   = new ShaderComposite( shaderSrcMap["colorspec-vs.c"],   shaderSrcMap["colorspec-fs.c"]   );
     this.programs.normaldepth = new ShaderComposite( shaderSrcMap["normaldepth-vs.c"], shaderSrcMap["normaldepth-fs.c"] );
     this.programs.position    = new ShaderComposite( shaderSrcMap["position-vs.c"],    shaderSrcMap["position-fs.c"]    );
@@ -383,6 +382,14 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     saoPass.addInputFrameBuffer( this.frameBuffers.position, gl.TEXTURE0 );
     saoPass.addInputTexture( this.gl.randomTexture, gl.TEXTURE1 );
     
+    var saoBlurPing = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.shadowmapPing, this.screen );
+    saoBlurPing.setHRec( 0, 0, 1, 1, 3.14159/2 );
+    saoBlurPing.addInputFrameBuffer( this.frameBuffers.ssao, gl.TEXTURE0 );
+   
+    var saoBlurPong = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.ssao, this.screen );
+    saoBlurPong.setHRec( 0, 0, 1, 1, -3.14159/2 );
+    saoBlurPong.addInputFrameBuffer( this.frameBuffers.blurPing, gl.TEXTURE0 )
+    
     var toneMapPassPing = new GPostEffectRenderPassCmd( this.gl, this.programs.toneMap, this.frameBuffers.phongLightPong, this.screen );
     toneMapPassPing.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );
     toneMapPassPing.addInputFrameBuffer( this.frameBuffers.phongLightPing, gl.TEXTURE1 );
@@ -440,7 +447,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     
     this.toneMapCmds = toneMapCmds;
     
-    this.post = [saoPass];
+    this.post = [saoPass, saoBlurPing, saoBlurPong];
 };
 
 /**
@@ -477,7 +484,10 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
         this.toneMapCmds[lIdx%2].run( scene );
     }
     
-    this.post[0].run( scene );
+    for ( var pIdx in this.post )
+    {
+        this.post[pIdx].run( scene );
+    }
     
     // HUD
     this.gl.disable( this.gl.DEPTH_TEST );
@@ -580,6 +590,11 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     {
         ssao: frameBuffer
     };
+    
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
+    frameBuffer.addBufferTexture(texCfg);
+    frameBuffer.complete();
+    this.frameBuffers.blurPing = frameBuffer;
     
     frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfg);

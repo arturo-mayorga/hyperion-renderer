@@ -31,7 +31,7 @@ uniform sampler2D uMapRandom;
 #define VARIATION             1
 #define PI 3.1415926535897932384626433832795
 
-const float uSampleRadiusWS = 10.0;
+const float uSampleRadiusWS = 4.0;
 
 vec3 getOffsetPositionVS(vec2 uv, vec2 unitOffset, float radiusSS) 
 {
@@ -55,7 +55,7 @@ vec2 tapLocation(int sampleNumber, float spinAngle, out float radiusSS)
 float sampleAO(vec2 uv, vec3 positionVS, vec3 normalVS, float sampleRadiusSS,
                int tapIndex, float rotationAngle)
 {
-    const float epsilon = 0.9;
+    const float epsilon = 0.08;
     
     const float uBias = 0.0;
     float radius2 = uSampleRadiusWS * uSampleRadiusWS;

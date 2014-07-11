@@ -382,7 +382,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     saoPass.addInputFrameBuffer( this.frameBuffers.position, gl.TEXTURE0 );
     saoPass.addInputTexture( this.gl.randomTexture, gl.TEXTURE1 );
     
-    var saoBlurPing = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.shadowmapPing, this.screen );
+    var saoBlurPing = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.blurPing, this.screen );
     saoBlurPing.setHRec( 0, 0, 1, 1, 3.14159/2 );
     saoBlurPing.addInputFrameBuffer( this.frameBuffers.ssao, gl.TEXTURE0 );
    

@@ -43,6 +43,8 @@ GRenderDeferredStrategy.prototype.configure = function()
         "blur-fs.c":undefined,
         "fullscr-vs.c":undefined,
         "fullscr-fs.c":undefined,
+        "fxaa-vs.c":undefined,
+        "fxaa-fs.c":undefined,
         "shadowmap-vs.c":undefined,
         "shadowmap-fs.c":undefined,
         "ssao-vs.c":undefined,
@@ -216,6 +218,7 @@ GRenderDeferredStrategy.prototype.initShaders = function ()
     this.programs.blur        = new GShader( shaderSrcMap["blur-vs.c"],        shaderSrcMap["blur-fs.c"]        );
     this.programs.light       = new GShader( shaderSrcMap["light-vs.c"],       shaderSrcMap["light-fs.c"]       );
     this.programs.toneMap     = new GShader( shaderSrcMap["tonemap-vs.c"],     shaderSrcMap["tonemap-fs.c"]     );
+    this.programs.fxaa        = new GShader( shaderSrcMap["fxaa-vs.c"],        shaderSrcMap["fxaa-fs.c"]        );
     
     this.programs.colorspec   = new ShaderComposite( shaderSrcMap["colorspec-vs.c"],   shaderSrcMap["colorspec-fs.c"]   );
     this.programs.normaldepth = new ShaderComposite( shaderSrcMap["normaldepth-vs.c"], shaderSrcMap["normaldepth-fs.c"] );
@@ -496,10 +499,7 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     
     // HUD
     this.gl.disable( this.gl.DEPTH_TEST );
-    
-   
-    
-    this.programs.fullScr.activate(); 
+    this.programs.fxaa.activate(); 
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     
 	if ( lCount % 2 )
@@ -514,11 +514,11 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     
     
     this.setHRec(0, 0, 1, 1);
-    this.drawScreenBuffer(this.programs.fullScr); 
+    this.drawScreenBuffer(this.programs.fxaa); 
     
-   // this.frameBuffers.ssao.bindTexture(gl.TEXTURE0, "color");
-    //this.setHRec(-0.125+0.75, 0.125-0.75, 0.125, 0.125);
-    //this.drawScreenBuffer(this.programs.fullScr);
+    /*this.frameBuffers.normal.bindTexture(gl.TEXTURE0, "color");
+    this.setHRec(-0.125+0.75, 0.125-0.75, 0.125, 0.125);
+    this.drawScreenBuffer(this.programs.fullScr);*/
     
     /*this.frameBuffers.phongLightPing.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0.125+0.75, 0.125-0.75, 0.125, 0.125);
@@ -530,6 +530,7 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.setHRec(0.125+0.75, -0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.programs.fullScr);*/
     
+    this.programs.fullScr.activate();
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.enable(gl.BLEND);
        	

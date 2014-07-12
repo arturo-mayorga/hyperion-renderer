@@ -449,7 +449,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     
     this.toneMapCmds = toneMapCmds;
     
-    this.post = [saoPass, saoBlurPing, saoBlurPong];
+    this.sao = [saoPass, saoBlurPing, saoBlurPong];
 };
 
 /**
@@ -466,6 +466,12 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     for ( var i in this.preCmds )
     {
         this.preCmds[i].run( scene );
+    }
+    
+    this.gl.disable( this.gl.DEPTH_TEST );
+    for ( var pIdx in this.sao )
+    {
+        this.sao[pIdx].run( scene );
     }
     
     for ( var lIdx = 0; lIdx < lCount; ++lIdx )
@@ -486,13 +492,13 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
         this.toneMapCmds[lIdx%2].run( scene );
     }
     
-    for ( var pIdx in this.post )
-    {
-        this.post[pIdx].run( scene );
-    }
+   
     
     // HUD
     this.gl.disable( this.gl.DEPTH_TEST );
+    
+   
+    
     this.programs.fullScr.activate(); 
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     
@@ -510,9 +516,9 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.setHRec(0, 0, 1, 1);
     this.drawScreenBuffer(this.programs.fullScr); 
     
-    this.frameBuffers.ssao.bindTexture(gl.TEXTURE0, "color");
-    this.setHRec(-0.125+0.75, 0.125-0.75, 0.125, 0.125);
-    this.drawScreenBuffer(this.programs.fullScr);
+   // this.frameBuffers.ssao.bindTexture(gl.TEXTURE0, "color");
+    //this.setHRec(-0.125+0.75, 0.125-0.75, 0.125, 0.125);
+    //this.drawScreenBuffer(this.programs.fullScr);
     
     /*this.frameBuffers.phongLightPing.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0.125+0.75, 0.125-0.75, 0.125, 0.125);

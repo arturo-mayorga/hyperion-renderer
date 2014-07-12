@@ -303,6 +303,11 @@ GPostEffectRenderPassCmd.prototype.drawScreenBuffer = function( shader )
         gl.uniform1i( shader.uniforms.mapPosition, mapIdx++ );
     }
     
+    if ( null != shader.uniforms.mapLight )
+    {
+        gl.uniform1i( shader.uniforms.mapLight, mapIdx++ );
+    }
+    
     if ( null != shader.uniforms.mapShadow )
     {
         gl.uniform1i( shader.uniforms.mapShadow, mapIdx++ );

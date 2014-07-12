@@ -393,10 +393,12 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var toneMapPassPing = new GPostEffectRenderPassCmd( this.gl, this.programs.toneMap, this.frameBuffers.phongLightPong, this.screen );
     toneMapPassPing.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );
     toneMapPassPing.addInputFrameBuffer( this.frameBuffers.phongLightPing, gl.TEXTURE1 );
+    toneMapPassPing.addInputFrameBuffer( this.frameBuffers.ssao, gl.TEXTURE2 );
     
     var toneMapPassPong = new GPostEffectRenderPassCmd( this.gl, this.programs.toneMap, this.frameBuffers.phongLightPing, this.screen );
     toneMapPassPong.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );
     toneMapPassPong.addInputFrameBuffer( this.frameBuffers.phongLightPong, gl.TEXTURE1 );
+    toneMapPassPing.addInputFrameBuffer( this.frameBuffers.ssao, gl.TEXTURE2 );
     
     
     var cmds = [];
@@ -509,7 +511,7 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.drawScreenBuffer(this.programs.fullScr); 
     
     this.frameBuffers.ssao.bindTexture(gl.TEXTURE0, "color");
-    //this.setHRec(-0.125+0.75, 0.125-0.75, 0.125, 0.125);
+    this.setHRec(-0.125+0.75, 0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.programs.fullScr);
     
     /*this.frameBuffers.phongLightPing.bindTexture(gl.TEXTURE0, "color");

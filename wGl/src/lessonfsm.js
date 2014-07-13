@@ -188,7 +188,7 @@ LoadState.prototype.exit = function ()
 	//this.scene.addLight(light1);
 	//this.scene.addLight(light2);
 	this.scene.addLight(light3);
-	//this.scene.addLight(light4);
+	this.scene.addLight(light4);
 	//this.scene.addLight(light5);
 	//this.scene.addLight(light6);
 	//this.scene.addLight(light7);

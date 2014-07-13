@@ -23,7 +23,7 @@ precision highp float;
 varying vec2 vTexCoordinate;
 uniform sampler2D uMapPosition;
 uniform sampler2D uMapShadow;
-uniform sampler2D uMapPing;
+//uniform sampler2D uMapPing;
 
 uniform mat4 uShadowMatrix;
 
@@ -79,7 +79,7 @@ void main(void)
     }
     else
     {
-        vec4 pingColor   = texture2D( uMapPing,    vTexCoordinate);
+        vec4 pingColor   = vec4(0.0);//texture2D( uMapPing,    vTexCoordinate);
         gl_FragColor = pingColor;
     }
 } 

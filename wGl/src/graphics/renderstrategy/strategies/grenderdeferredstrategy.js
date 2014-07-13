@@ -301,7 +301,6 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var shadowmapPass = new GPostEffectLitRenderPassCmd( this.gl, this.programs.shadowmap, this.frameBuffers.shadowmapPong, this.screen, downCtrl.getCamera() );
     shadowmapPass.addInputTexture( this.frameBuffers.position.getGTexture(),    gl.TEXTURE0 );
     shadowmapPass.addInputTexture( this.frameBuffers.lightNormal.getGTexture(), gl.TEXTURE1 );
-  //  shadowmapPass.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(),   gl.TEXTURE2 );
  
     var phongLightPassPing = new GPostEffectLitRenderPassCmd( this.gl, this.programs.light, this.frameBuffers.phongLightPing, this.screen );
     phongLightPassPing.addInputTexture( this.frameBuffers.normal.getGTexture(),        gl.TEXTURE0 );
@@ -335,7 +334,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var toneMapPassPong = new GPostEffectRenderPassCmd( this.gl, this.programs.toneMap, this.frameBuffers.phongLightPing, this.screen );
     toneMapPassPong.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );
     toneMapPassPong.addInputFrameBuffer( this.frameBuffers.phongLightPong, gl.TEXTURE1 );
-    toneMapPassPing.addInputFrameBuffer( this.frameBuffers.ssao, gl.TEXTURE2 );
+    toneMapPassPong.addInputFrameBuffer( this.frameBuffers.ssao, gl.TEXTURE2 );
     
     
     var cmds = [];

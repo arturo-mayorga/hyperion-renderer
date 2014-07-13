@@ -34,10 +34,11 @@ void main(void)
     vec4 light= texture2D(uMapLight, vTexCoordinate);
     vec4 shad = texture2D(uMapShadow, vTexCoordinate);
     
-   gl_FragColor = mapC * light + light * (light.w - 1.0)*mapC.w; 
-   
-  // gl_FragColor = shad;
-//   gl_FragColor.w = 1.0;
+    vec4 ambient = mapC * shad * 0.2;
+    
+    light *= toneFactor * shad;
+    
+   gl_FragColor = mapC * light + light * (light.w - 1.0)*mapC.w + ambient; 
 } 
 
 

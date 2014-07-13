@@ -387,9 +387,6 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
         this.preCmds[i].run( scene );
     }
     
-    //this.gl.disable( this.gl.DEPTH_TEST );
-   
-    
     for ( var lIdx = 0; lIdx < lCount; ++lIdx )
     {
         scene.setActiveLightIndex( lIdx );
@@ -434,13 +431,13 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.setHRec(0, 0, 1, 1);
     this.drawScreenBuffer(this.programs.fxaa); 
     
-    this.frameBuffers.ssao.bindTexture(gl.TEXTURE0, "color");
+    /*this.frameBuffers.ssao.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(-0.125+0.75, 0.125-0.75, 0.125, 0.125);
-    this.drawScreenBuffer(this.programs.fxaa);
+    this.drawScreenBuffer(this.programs.fxaa);*/
     
-    this.frameBuffers.phongLightPong.bindTexture(gl.TEXTURE0, "color");
+    /*this.frameBuffers.phongLightPong.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(0.125+0.75, 0.125-0.75, 0.125, 0.125);
-    this.drawScreenBuffer(this.programs.fxaa); 
+    this.drawScreenBuffer(this.programs.fxaa); */
     
     /*this.frameBuffers.phongLightPong.bindTexture(gl.TEXTURE0, "color");  
     this.setHRec(-0.125+0.75, -0.125-0.75, 0.125, 0.125);

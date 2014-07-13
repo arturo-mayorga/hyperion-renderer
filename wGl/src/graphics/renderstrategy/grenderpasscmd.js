@@ -48,7 +48,7 @@ IGRenderPassCmdCameraController.prototype.bindToContext = function( gl ) {};
 function GLightBasedCamCtrl()
 {
     this.camera = new GCamera();
-    this.camera.setFovy( 3.14159/2 );
+    this.camera.setFovy( Math.PI/2 );
     this.camera.setAspect( 1 );
     
     

@@ -28,7 +28,7 @@ varying vec2 vTexCoordinate;
 
 void main(void)
 {
-    float toneFactor = 1.0;///2.0;
+    float toneFactor = 1.0/2.0;///2.0;
     
     vec4 mapC = texture2D(uMapKd, vTexCoordinate);
     vec4 light= texture2D(uMapLight, vTexCoordinate);

@@ -187,12 +187,12 @@ LoadState.prototype.exit = function ()
 	light4.setPosition(30, 28.25, 16);
 	light5.setPosition(30, 28.25, -22);
 	
-	//this.scene.addLight(light0);
+	this.scene.addLight(light0);
 	this.scene.addLight(light1);
-	//this.scene.addLight(light2);
+	this.scene.addLight(light2);
 	this.scene.addLight(light3);
-	//this.scene.addLight(light4);
-	//this.scene.addLight(light5);
+	this.scene.addLight(light4);
+	this.scene.addLight(light5);
 	//this.scene.addLight(light6);
 	//this.scene.addLight(light7);
 	//this.scene.addLight(light8);

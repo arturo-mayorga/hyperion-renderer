@@ -63,7 +63,7 @@ void main(void)
                 else
                 {
                     float variance = t4Shadow.y - (t4Shadow.x*t4Shadow.x);
-                    variance = max(variance,0.0000002);
+                    variance = max(variance,0.00000002);
                     
                     float d = shadowProj.z - t4Shadow.x;
                     float p_max = variance / (variance + d*d);

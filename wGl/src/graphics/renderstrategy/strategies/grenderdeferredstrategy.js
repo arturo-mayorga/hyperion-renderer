@@ -350,8 +350,8 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     preCmds.push( normalPass );
     preCmds.push( positionPass );
     preCmds.push( colorPass );
+    preCmds.push( clearPhongLightPong );
     
-    shadowCmds.push( clearPhongLightPong );
     shadowCmds.push( clearShadowmap );
     shadowCmds.push( normalSource );
     shadowCmds.push( shadowmapPass );

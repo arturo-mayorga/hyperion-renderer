@@ -23,7 +23,7 @@ precision highp float;
 varying vec2 vTexCoordinate;
 uniform sampler2D uMapPosition;
 uniform sampler2D uMapShadow;
-//uniform sampler2D uMapPing;
+uniform sampler2D uMapPing;
 
 uniform mat4 uShadowMatrix;
 
@@ -45,6 +45,8 @@ void main(void)
         float shadowVal = 0.0;
         float count = 0.0;
         //float x, y;
+        
+        vec4 lightMask = texture2D( uMapPing, shadowSample );
         
         for (float y = -1.5; y <= 1.5; y += 1.0)
         {
@@ -75,12 +77,11 @@ void main(void)
         
         shadowVal = shadowVal/count;
         
-        gl_FragColor = vec4(shadowVal);
+        gl_FragColor = vec4(shadowVal) * lightMask;
     }
     else
-    {
-        vec4 pingColor   = vec4(0.0);//texture2D( uMapPing,    vTexCoordinate);
-        gl_FragColor = pingColor;
+    { 
+        gl_FragColor = vec4(0.0);
     }
 } 
 

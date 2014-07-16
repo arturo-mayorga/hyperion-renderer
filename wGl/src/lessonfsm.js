@@ -170,25 +170,28 @@ LoadState.prototype.exit = function ()
 	var light3 = new GLight();
 	var light4 = new GLight();
 	var light5 = new GLight();
-	var light6 = new GLight();
+	/*var light6 = new GLight();
 	var light7 = new GLight();
 	var light8 = new GLight();
 	
-	light0.setPosition(-18, 19.21, 8);
-	light1.setPosition(-12, 19.21, -2);
-	light2.setPosition(-6, 19.21, 8);
-	light3.setPosition(0, 19.21, -2);
-	light4.setPosition(6, 19.21, 8);
-	light5.setPosition(12, 19.21, -2);
-	light6.setPosition(18, 19.21, 8);
-	light7.setPosition(24, 19.21, -2);
-	light8.setPosition(30, 19.21, 8);
+	light0.setPosition(-18, 28.25, 16);
+	light1.setPosition(-12, 28.25, -22);
+	light2.setPosition(-6, 28.25, 16);
+	light3.setPosition(0, 28.25, -22);*/
+	
+	
+	light0.setPosition(-18, 28.25, 16);
+	light1.setPosition(-18, 28.25, -22);
+	light2.setPosition(6, 28.25, 16);
+	light3.setPosition(6, 28.25, -22);
+	light4.setPosition(30, 28.25, 16);
+	light5.setPosition(30, 28.25, -22);
 	
 	//this.scene.addLight(light0);
-	//this.scene.addLight(light1);
+	this.scene.addLight(light1);
 	//this.scene.addLight(light2);
 	this.scene.addLight(light3);
-	this.scene.addLight(light4);
+	//this.scene.addLight(light4);
 	//this.scene.addLight(light5);
 	//this.scene.addLight(light6);
 	//this.scene.addLight(light7);

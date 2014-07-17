@@ -28,7 +28,7 @@ varying vec2 vTexCoordinate;
 
 void main(void)
 {
-    float toneFactor = 1.0/2.0;///2.0;
+    float toneFactor = 1.0/6.0;///2.0;
     
     vec4 mapC = texture2D(uMapKd, vTexCoordinate);
     vec4 light= texture2D(uMapLight, vTexCoordinate);
@@ -36,9 +36,9 @@ void main(void)
     
     vec4 ambient = mapC * shad * 0.2;
     
-    light *= toneFactor * shad;
+    vec4 lightf = light * toneFactor * shad;
     
-   gl_FragColor = mapC * light + light * (light.w - 1.0)*mapC.w + ambient; 
+   gl_FragColor = mapC * lightf + light * (light.w - 1.0)*mapC.w*toneFactor + ambient; 
 } 
 
 

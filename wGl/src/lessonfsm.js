@@ -181,11 +181,24 @@ LoadState.prototype.exit = function ()
 	
 	
 	light0.setPosition(-18, 28.25, 16);
-	light1.setPosition(-18, 28.25, -22);
+	light1.setPosition(-18, 28.25, -20);
 	light2.setPosition(6, 28.25, 16);
-	light3.setPosition(6, 28.25, -22);
+	light3.setPosition(6, 28.25, -20);
 	light4.setPosition(30, 28.25, 16);
-	light5.setPosition(30, 28.25, -22);
+	light5.setPosition(30, 28.25, -20);
+	
+	
+	
+	//light0.setPosition(-18, 28.25, 8);
+	//light1.setPosition(-12, 28.25, -2);
+	//light2.setPosition(-6, 28.25, 8);
+	//light3.setPosition(0, 28.25, -2);
+	//light4.setPosition(6, 28.25, 8);
+	//light5.setPosition(12, 28.25, -2);
+	/*light6.setPosition(18, 28.25, 8);
+	light7.setPosition(24, 28.25, -2);
+	light8.setPosition(30, 28.25, 8);*/
+	
 	
 	this.scene.addLight(light0);
 	this.scene.addLight(light1);
@@ -193,9 +206,6 @@ LoadState.prototype.exit = function ()
 	this.scene.addLight(light3);
 	this.scene.addLight(light4);
 	this.scene.addLight(light5);
-	//this.scene.addLight(light6);
-	//this.scene.addLight(light7);
-	//this.scene.addLight(light8);
 	
 	this.scene.setVisibility( true );
 };

@@ -47,6 +47,8 @@ GRenderDeferredStrategy.prototype.configure = function()
         "fxaa-fs.c":undefined,
         "shadowmap-vs.c":undefined,
         "shadowmap-fs.c":undefined,
+        "ssao-vs.c":undefined,
+        "ssao-fs.c":undefined,
         "colorspec-vs.c":undefined,
         "colorspec-fs.c":undefined,
         "normaldepth-fs.c":undefined,
@@ -212,11 +214,11 @@ GRenderDeferredStrategy.prototype.initShaders = function ()
   
     this.programs.fullScr     = new GShader( shaderSrcMap["fullscr-vs.c"],     shaderSrcMap["fullscr-fs.c"]     );
     this.programs.shadowmap   = new GShader( shaderSrcMap["shadowmap-vs.c"],   shaderSrcMap["shadowmap-fs.c"]   );
+    this.programs.ssao        = new GShader( shaderSrcMap["ssao-vs.c"],        shaderSrcMap["ssao-fs.c"]        );  
     this.programs.blur        = new GShader( shaderSrcMap["blur-vs.c"],        shaderSrcMap["blur-fs.c"]        );
     this.programs.light       = new GShader( shaderSrcMap["light-vs.c"],       shaderSrcMap["light-fs.c"]       );
     this.programs.toneMap     = new GShader( shaderSrcMap["tonemap-vs.c"],     shaderSrcMap["tonemap-fs.c"]     );
     this.programs.fxaa        = new GShader( shaderSrcMap["fxaa-vs.c"],        shaderSrcMap["fxaa-fs.c"]        );
-    
     
     this.programs.colorspec   = new ShaderComposite( shaderSrcMap["colorspec-vs.c"],   shaderSrcMap["colorspec-fs.c"]   );
     this.programs.normaldepth = new ShaderComposite( shaderSrcMap["normaldepth-vs.c"], shaderSrcMap["normaldepth-fs.c"] );
@@ -379,13 +381,27 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     phongLightPassPong.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );
     phongLightPassPong.addInputTexture( this.frameBuffers.phongLightPing.getGTexture(),gl.TEXTURE3 );
     
+    var saoPass = new GPostEffectRenderPassCmd( this.gl, this.programs.ssao, this.frameBuffers.ssao, this.screen );
+    saoPass.addInputFrameBuffer( this.frameBuffers.position, gl.TEXTURE0 );
+    saoPass.addInputTexture( this.gl.randomTexture, gl.TEXTURE1 );
+    
+    var saoBlurPing = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.blurPing, this.screen );
+    saoBlurPing.setHRec( 0, 0, 1, 1, 3.14159/2 );
+    saoBlurPing.addInputFrameBuffer( this.frameBuffers.ssao, gl.TEXTURE0 );
+   
+    var saoBlurPong = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.ssao, this.screen );
+    saoBlurPong.setHRec( 0, 0, 1, 1, -3.14159/2 );
+    saoBlurPong.addInputFrameBuffer( this.frameBuffers.blurPing, gl.TEXTURE0 )
+    
     var toneMapPassPing = new GPostEffectRenderPassCmd( this.gl, this.programs.toneMap, this.frameBuffers.phongLightPong, this.screen );
     toneMapPassPing.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );
     toneMapPassPing.addInputFrameBuffer( this.frameBuffers.phongLightPing, gl.TEXTURE1 );
+    toneMapPassPing.addInputFrameBuffer( this.frameBuffers.ssao, gl.TEXTURE2 );
     
     var toneMapPassPong = new GPostEffectRenderPassCmd( this.gl, this.programs.toneMap, this.frameBuffers.phongLightPing, this.screen );
     toneMapPassPong.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );
     toneMapPassPong.addInputFrameBuffer( this.frameBuffers.phongLightPong, gl.TEXTURE1 );
+    toneMapPassPing.addInputFrameBuffer( this.frameBuffers.ssao, gl.TEXTURE2 );
     
     
     var cmds = [];
@@ -435,6 +451,8 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     this.lightCmds = lightCmds;
     
     this.toneMapCmds = toneMapCmds;
+    
+    this.sao = [saoPass, saoBlurPing, saoBlurPong];
 };
 
 /**
@@ -451,6 +469,12 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     for ( var i in this.preCmds )
     {
         this.preCmds[i].run( scene );
+    }
+    
+    this.gl.disable( this.gl.DEPTH_TEST );
+    for ( var pIdx in this.sao )
+    {
+        this.sao[pIdx].run( scene );
     }
     
     for ( var lIdx = 0; lIdx < lCount; ++lIdx )
@@ -471,6 +495,8 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
         this.toneMapCmds[lIdx%2].run( scene );
     }
     
+   
+    
     // HUD
     this.gl.disable( this.gl.DEPTH_TEST );
     this.programs.fxaa.activate(); 
@@ -484,6 +510,9 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
 	{
 	    this.frameBuffers.phongLightPing.bindTexture(gl.TEXTURE0, "color");
     }
+    
+    
+    
     this.setHRec(0, 0, 1, 1);
     this.drawScreenBuffer(this.programs.fxaa); 
     
@@ -562,7 +591,7 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     
    
     
-    var frameBuffer = new GFrameBuffer({ gl: this.gl, width: 256, height: 256 });
+    var frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
    
@@ -570,6 +599,11 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     {
         ssao: frameBuffer
     };
+    
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
+    frameBuffer.addBufferTexture(texCfg);
+    frameBuffer.complete();
+    this.frameBuffers.blurPing = frameBuffer;
     
     frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfg);

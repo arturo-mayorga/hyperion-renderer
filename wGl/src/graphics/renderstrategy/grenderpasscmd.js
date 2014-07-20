@@ -303,6 +303,11 @@ GPostEffectRenderPassCmd.prototype.drawScreenBuffer = function( shader )
         gl.uniform1i( shader.uniforms.mapPosition, mapIdx++ );
     }
     
+    if ( null != shader.uniforms.mapLight )
+    {
+        gl.uniform1i( shader.uniforms.mapLight, mapIdx++ );
+    }
+    
     if ( null != shader.uniforms.mapShadow )
     {
         gl.uniform1i( shader.uniforms.mapShadow, mapIdx++ );
@@ -311,6 +316,11 @@ GPostEffectRenderPassCmd.prototype.drawScreenBuffer = function( shader )
     if ( null != shader.uniforms.mapPing )
     {
         gl.uniform1i( shader.uniforms.mapPing, mapIdx++ );
+    }
+    
+    if ( null != shader.uniforms.mapRandom )
+    {
+        gl.uniform1i( shader.uniforms.mapRandom, mapIdx++ );
     }
     
     gl.bindBuffer( gl.ARRAY_BUFFER, this.screen.vertBuffer);

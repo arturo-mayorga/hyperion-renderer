@@ -46,6 +46,8 @@ void main(void)
         float count = 0.0;
         //float x, y;
         
+        vec4 lightMask = texture2D( uMapPing, shadowSample );
+        
         for (float y = -1.5; y <= 1.5; y += 1.0)
         {
             for (float x = -1.5; x <= 1.5; x += 1.0)
@@ -61,7 +63,7 @@ void main(void)
                 else
                 {
                     float variance = t4Shadow.y - (t4Shadow.x*t4Shadow.x);
-                    variance = max(variance,0.0000002);
+                    variance = max(variance,0.00000002);
                     
                     float d = shadowProj.z - t4Shadow.x;
                     float p_max = variance / (variance + d*d);
@@ -75,12 +77,11 @@ void main(void)
         
         shadowVal = shadowVal/count;
         
-        gl_FragColor = vec4(shadowVal);
+        gl_FragColor = vec4(shadowVal) * lightMask;
     }
     else
-    {
-        vec4 pingColor   = texture2D( uMapPing,    vTexCoordinate);
-        gl_FragColor = pingColor;
+    { 
+        gl_FragColor = vec4(0.0);
     }
 } 
 

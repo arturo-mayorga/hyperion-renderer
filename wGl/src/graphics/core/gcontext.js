@@ -34,6 +34,7 @@ function GContext( canvas )
 	
 	var whiteTexture = new GTexture(["white.jpg"], "assets/2d/");
 	var randomTexture = new GTexture(["noise_1024.png"], "assets/2d/");
+	var whiteCircleTexture = new GTexture(["whitecircle_1024.png"], "assets/2d/");
     
     this.gl = canvas.getContext("webgl", { antialias: true } );
 	
@@ -52,6 +53,8 @@ function GContext( canvas )
     
     whiteTexture.bindToContext(gl);
     randomTexture.bindToContext(gl);
+    whiteCircleTexture.bindToContext(gl);
+    gl.whiteCircleTexture = whiteCircleTexture;
     gl.whiteTexture = whiteTexture;
     gl.randomTexture = randomTexture;
 };

@@ -116,8 +116,10 @@ GShader.prototype.bindToContext = function ( gl )
     
     uniforms.mapNormal       = gl.getUniformLocation( shaderProgram, "uMapNormal" );
     uniforms.mapPosition     = gl.getUniformLocation( shaderProgram, "uMapPosition" );
+    uniforms.mapLight        = gl.getUniformLocation( shaderProgram, "uMapLight" );
     uniforms.mapShadow       = gl.getUniformLocation( shaderProgram, "uMapShadow" );
     uniforms.mapPing         = gl.getUniformLocation( shaderProgram, "uMapPing" );
+    uniforms.mapRandom       = gl.getUniformLocation( shaderProgram, "uMapRandom" );
     
     uniforms.lightPosition0  = gl.getUniformLocation( shaderProgram, "uLightPosition0" );
     uniforms.lightPosition1  = gl.getUniformLocation( shaderProgram, "uLightPosition1" );

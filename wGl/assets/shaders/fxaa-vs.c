@@ -18,24 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 // SOFTWARE.
 
-precision mediump float;
+attribute vec3 aPositionVertex;
+attribute vec2 aTextureVertex;
 
+uniform mat3 uHMatrix;
 
-uniform sampler2D uMapKd;
-uniform sampler2D uMapLight;
-uniform sampler2D uMapShadow;
 varying vec2 vTexCoordinate;
 
 void main(void)
 {
-    float toneFactor = 1.0;///2.0;
-    
-    vec4 mapC = texture2D(uMapKd, vTexCoordinate);
-    vec4 light= texture2D(uMapLight, vTexCoordinate);
-    vec4 shad = light*texture2D(uMapShadow, vTexCoordinate)*toneFactor;
-    
-   gl_FragColor = mapC * shad + shad * (shad.w - 1.0)*mapC.w; 
+	vTexCoordinate = aTextureVertex;
+	gl_Position = vec4( (uHMatrix * aPositionVertex.xyz), 1);
 } 
-
-
 

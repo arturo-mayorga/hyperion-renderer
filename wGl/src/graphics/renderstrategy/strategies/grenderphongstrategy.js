@@ -61,7 +61,9 @@ GRenderPhongStrategy.prototype.configure = function()
         "phong-vs.c":undefined,
         "phong-fs.c":undefined,
         "fullscr-vs.c":undefined,
-        "fullscr-fs.c":undefined
+        "fullscr-fs.c":undefined,
+        "fxaa-vs.c":undefined,
+        "fxaa-fs.c":undefined
     };
     
     for (var key in this.shaderSrcMap)
@@ -245,7 +247,11 @@ GRenderPhongStrategy.prototype.initShaders = function (shaderSrcMap)
     var fullScr = new GShader( shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
     fullScr.bindToContext(gl);
     
+    var fxaa = new GShader( shaderSrcMap["fxaa-vs.c"], shaderSrcMap["fxaa-fs.c"]);
+    fxaa.bindToContext(gl);
+    
     this.fullScreenProgram = fullScr;
+    this.fxaaProgram = fxaa;
    
     
     this.phongComposite = phongComposite;
@@ -310,11 +316,10 @@ GRenderPhongStrategy.prototype.draw = function ( scene, hud )
     
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     
+    this.fxaaProgram.activate();
+    this.drawScreenBuffer(this.fxaaProgram);	
     
     this.fullScreenProgram.activate();
-    
-    this.drawScreenBuffer(this.fullScreenProgram);	
-    
     if (hud != undefined)
     {
         hud.draw(this.fullScreenProgram);

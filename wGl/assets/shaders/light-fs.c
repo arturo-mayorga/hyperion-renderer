@@ -45,7 +45,7 @@ vec4 calcLight(vec3 normal, vec3 position, vec3 lightPosition, vec3 lightColor, 
 
     float specularFactor = pow(specular, uKsExponent);
 
-    return vec4(lightColor * max(0.2,diffuseFactor), specularFactor * shadowFactor);
+    return vec4(lightColor * max(0.0,diffuseFactor), specularFactor * shadowFactor);
 }
 
 

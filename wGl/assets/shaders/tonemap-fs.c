@@ -28,13 +28,17 @@ varying vec2 vTexCoordinate;
 
 void main(void)
 {
-    float toneFactor = 1.0;///2.0;
+    float toneFactor = 1.0/6.0;///2.0;
     
     vec4 mapC = texture2D(uMapKd, vTexCoordinate);
     vec4 light= texture2D(uMapLight, vTexCoordinate);
-    vec4 shad = light*texture2D(uMapShadow, vTexCoordinate)*toneFactor;
+    vec4 shad = texture2D(uMapShadow, vTexCoordinate);
     
-   gl_FragColor = mapC * shad + shad * (shad.w - 1.0)*mapC.w; 
+    vec4 ambient = mapC * shad * 0.2;
+    
+    vec4 lightf = light * toneFactor * shad;
+    
+   gl_FragColor = mapC * lightf + light * (light.w - 1.0)*mapC.w*toneFactor + ambient; 
 } 
 
 

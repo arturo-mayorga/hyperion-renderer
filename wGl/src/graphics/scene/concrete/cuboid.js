@@ -20,14 +20,55 @@
 
 /**
  * @constructor
- * @param {Array.<number>} Buffer containing the vertices for this object
- * @param {Array.<number>} Buffer containing the texture vertices for this object
- * @param {Array.<number>} Buffer containing the normals for this object
- * @param {Array.<number>} Buffer containing the indices for this object
+ * @param {number} Width
+ * @param {number} Height
+ * @param {number} Depth
  * @param {string} Name for this object
  */
-function Cuboid( verts, tverts, normals, indices, name )
+function Cuboid( w, h, d, name )
 {
+    //verts, tverts, normals, indices, name
+    var verts = 
+    [
+        -w,-h,d, -w,h,d, w,-h,d,  -w,h,d, w,h,d, w,-h,d,       // front
+        -w,h,d, -w,h,-d, w,h,d,  -w,h,-d,  w,h,-d, w,h,d,      // top
+        -w,-h,d, -w,h,-d, -w,h,d,  -w,-h,d, -w,-h,-d, -w,h,-d, // left
+        w,-h,d,  w,h,d, w,h,-d,  w,-h,d, w,h,-d, w,-h,-d,      // right
+        -w,-h,d, w,-h,d, w,-h,-d,  -w,-h,d, w,-h,-d, -w,-h,-d, // bottom
+        -w,-h,-d, w,-h,-d, -w,h,-d,  w,-h,-d, w,h,-d, -w,h,-d  // back
+    ];
+    
+    var qt = 1.0/4.0;
+    var tverts = 
+    [
+        1*qt,2*qt, 1*qt,1*qt, 2*qt,2*qt,  1*qt,1*qt, 2*qt,1*qt, 2*qt,2*qt, // front
+        1*qt,1*qt, 1*qt,0*qt, 2*qt,1*qt,  1*qt,0*qt, 2*qt,0*qt, 2*qt,1*qt, // top
+        1*qt,2*qt, 0*qt,1*qt, 1*qt,1*qt,  1*qt,2*qt, 0*qt,2*qt, 0*qt,1*qt, // left
+        2*qt,2*qt, 2*qt,1*qt, 3*qt,1*qt,  2*qt,2*qt, 3*qt,1*qt, 3*qt,2*qt, // right
+        1*qt,2*qt, 2*qt,2*qt, 2*qt,3*qt,  1*qt,2*qt, 2*qt,3*qt, 1*qt,3*qt, // bottom
+        4*qt,2*qt, 3*qt,2*qt, 4*qt,1*qt,  3*qt,2*qt, 4*qt,1*qt, 3*qt,1*qt, // back
+    ];
+    
+    var normals =
+    [
+        0,0,1, 0,0,1, 0,0,1,  0,0,1, 0,0,1, 0,0,1,       // front
+        0,1,0, 0,1,0, 0,1,0,  0,1,0, 0,1,0, 0,1,0,       // top
+        -1,0,0, -1,0,0, -1,0,0,  -1,0,0, -1,0,0, -1,0,0, // left 
+        1,0,0, 1,0,0, 1,0,0,  1,0,0, 1,0,0, 1,0,0,       // right
+        0,-1,0, 0,-1,0, 0,-1,0,  0,-1,0, 0,-1,0, 0,-1,0, // bottom
+        0,0,-1, 0,0,-1, 0,0,-1,  0,0,-1, 0,0,-1, 0,0,-1, // back
+    ];
+    
+    var indices =
+    [
+        0, 1, 2,  3, 4, 5,       // front
+        6, 7, 8,  9, 10, 11,     // top
+        12, 13, 14,  15, 16, 17, // left
+        18, 19, 20,  21, 22, 23, // right
+        24, 25, 26,  27, 28, 29, // bottom
+        30, 31, 32,  33, 34, 35  // back
+    ];
+    
     this.vertBuffer = undefined;
     this.tverBuffer = undefined;
     this.normlBuffer = undefined;

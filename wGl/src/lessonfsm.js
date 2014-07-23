@@ -319,6 +319,8 @@ ExploreState.prototype.enter = function ()
 	this.camController = new GCameraController();
 	this.camController.bindCamera(this.scene.getCamera());
     _humanoidAnimator.play();
+    
+    this.scene.addChild( new Cuboid(1, 1, 1, "cube") );
 };
 
 /**

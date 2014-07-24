@@ -25,7 +25,7 @@
  * @param {number} Depth
  * @param {string} Name for this object
  */
-function Cuboid( w, h, d, name )
+function Cylinder( w, h, d, name )
 {
     //verts, tverts, normals, indices, name
     var verts = 
@@ -88,13 +88,13 @@ function Cuboid( w, h, d, name )
     this.normalMatrix = mat4.create();
 }
 
-Cuboid.prototype = Object.create( SceneDrawable.prototype );
+Cylinder.prototype = Object.create( SceneDrawable.prototype );
 
 /**
  * Get the name of this object
  * @param {string} The name of this object
  */
-Cuboid.prototype.getName = function()
+Cylinder.prototype.getName = function()
 {
     return this.name;
 };
@@ -103,7 +103,7 @@ Cuboid.prototype.getName = function()
  * Set the material name for this object to use
  * @param {string} name of the material that should be used by this object
  */
-Cuboid.prototype.setMtlName = function( mName )
+Cylinder.prototype.setMtlName = function( mName )
 {
     this.mtlName = mName;
     this.material = undefined;
@@ -113,7 +113,7 @@ Cuboid.prototype.setMtlName = function( mName )
  * Set the model view matrix for this object
  * @param {Array.<number>} Array of numbers representing the 4 by 4 model view matrix
  */
-Cuboid.prototype.setMvMatrix = function( mat )
+Cylinder.prototype.setMvMatrix = function( mat )
 {
     mat4.copy(this.mvMatrix, mat);
 };
@@ -122,7 +122,7 @@ Cuboid.prototype.setMvMatrix = function( mat )
  * Called to bind this object to a gl context
  * @param {WebGLRenderingContext} Context to bind to this object
  */
-Cuboid.prototype.bindToContext = function(gl_)
+Cylinder.prototype.bindToContext = function(gl_)
 {
     if (gl_ === undefined) return;
     if (gl_ === this.gl) return;
@@ -170,7 +170,7 @@ Cuboid.prototype.bindToContext = function(gl_)
  * @param {GShader} Shader program to use for rendering
  * @param {number} Draw mode for drawing the VBOs
  */
-Cuboid.prototype.draw = function( parentMvMat, materials, shader, drawMode )
+Cylinder.prototype.draw = function( parentMvMat, materials, shader, drawMode )
 {
    if ( !this.valid ) return;
    

@@ -27,7 +27,10 @@
  */
 function Cuboid( w, h, d, name )
 {
-    //verts, tverts, normals, indices, name
+    w*=0.5;
+    h*=0.5;
+    d*=0.5;
+    
     var verts = 
     [
         -w,-h,d, -w,h,d, w,-h,d,  -w,h,d, w,h,d, w,-h,d,       // front

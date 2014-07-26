@@ -20,63 +20,28 @@
 
 /**
  * @constructor
- * @param {number} Width
- * @param {number} Height
- * @param {number} Depth
+ * @param {number} radiusInner
+ * @param {number} radiusOuter
+ * @param {number} height
+ * @param {number} sliceCount
  * @param {string} Name for this object
  */
-function Cylinder( w, h, d, name )
+function Cylinder( radiusInner, radiusOuter, height, sliceCount, name )
 {
     //verts, tverts, normals, indices, name
-    var verts = 
-    [
-        -w,-h,d, -w,h,d, w,-h,d,  -w,h,d, w,h,d, w,-h,d,       // front
-        -w,h,d, -w,h,-d, w,h,d,  -w,h,-d,  w,h,-d, w,h,d,      // top
-        -w,-h,d, -w,h,-d, -w,h,d,  -w,-h,d, -w,-h,-d, -w,h,-d, // left
-        w,-h,d,  w,h,d, w,h,-d,  w,-h,d, w,h,-d, w,-h,-d,      // right
-        -w,-h,d, w,-h,d, w,-h,-d,  -w,-h,d, w,-h,-d, -w,-h,-d, // bottom
-        -w,-h,-d, w,-h,-d, -w,h,-d,  w,-h,-d, w,h,-d, -w,h,-d  // back
-    ];
     
-    var qt = 1.0/4.0;
-    var tverts = 
-    [
-        1*qt,2*qt, 1*qt,1*qt, 2*qt,2*qt,  1*qt,1*qt, 2*qt,1*qt, 2*qt,2*qt, // front
-        1*qt,1*qt, 1*qt,0*qt, 2*qt,1*qt,  1*qt,0*qt, 2*qt,0*qt, 2*qt,1*qt, // top
-        1*qt,2*qt, 0*qt,1*qt, 1*qt,1*qt,  1*qt,2*qt, 0*qt,2*qt, 0*qt,1*qt, // left
-        2*qt,2*qt, 2*qt,1*qt, 3*qt,1*qt,  2*qt,2*qt, 3*qt,1*qt, 3*qt,2*qt, // right
-        1*qt,2*qt, 2*qt,2*qt, 2*qt,3*qt,  1*qt,2*qt, 2*qt,3*qt, 1*qt,3*qt, // bottom
-        4*qt,2*qt, 3*qt,2*qt, 4*qt,1*qt,  3*qt,2*qt, 4*qt,1*qt, 3*qt,1*qt, // back
-    ];
+    this.radiusInner = radiusInner;
+    this.radiusOuter = radiusOuter;
+    this.height = height;
+    this.sliceCount = sliceCount;
     
-    var normals =
-    [
-        0,0,1, 0,0,1, 0,0,1,  0,0,1, 0,0,1, 0,0,1,       // front
-        0,1,0, 0,1,0, 0,1,0,  0,1,0, 0,1,0, 0,1,0,       // top
-        -1,0,0, -1,0,0, -1,0,0,  -1,0,0, -1,0,0, -1,0,0, // left 
-        1,0,0, 1,0,0, 1,0,0,  1,0,0, 1,0,0, 1,0,0,       // right
-        0,-1,0, 0,-1,0, 0,-1,0,  0,-1,0, 0,-1,0, 0,-1,0, // bottom
-        0,0,-1, 0,0,-1, 0,0,-1,  0,0,-1, 0,0,-1, 0,0,-1, // back
-    ];
-    
-    var indices =
-    [
-        0, 1, 2,  3, 4, 5,       // front
-        6, 7, 8,  9, 10, 11,     // top
-        12, 13, 14,  15, 16, 17, // left
-        18, 19, 20,  21, 22, 23, // right
-        24, 25, 26,  27, 28, 29, // bottom
-        30, 31, 32,  33, 34, 35  // back
-    ];
+    this.updateBufferArrays();
     
     this.vertBuffer = undefined;
     this.tverBuffer = undefined;
     this.normlBuffer = undefined;
     this.indexBuffer = undefined;
-    this.vertA = verts;
-    this.tverA = tverts;
-    this.normA = normals;
-    this.indxA = indices; 
+     
     this.mvMatrix = mat4.create(); 
     mat4.identity(this.mvMatrix);
     this.gl = undefined;
@@ -89,6 +54,91 @@ function Cylinder( w, h, d, name )
 }
 
 Cylinder.prototype = Object.create( SceneDrawable.prototype );
+
+/**
+ * Update the buffer arrays with the new set of triangles
+ */
+Cylinder.prototype.updateBufferArrays = function()
+{
+    var sliceBuffers = [];
+    
+    for ( var i = 0; i < this.sliceCount; ++i )
+    {
+        sliceBuffers.push( this.genSliceBuffer( (i*2*Math.PI)/this.sliceCount ) );
+    }
+    
+    this.vertA = [];
+    this.tverA = [];
+    this.normA = [];
+    this.indxA = [];
+    
+    
+    this.addArraysBetweenSlices( sliceBuffers[0], sliceBuffers[1] );
+    
+    this.indxA = [0, 1, 2, 3, 4, 5];
+};
+
+/**
+ * Generate the triangles between slices
+ * @param {Array<number>} first slice
+ * @param {Array<number>} second slice
+ */
+Cylinder.prototype.addArraysBetweenSlices = function( bA, bB )
+{
+    var pW = 8;
+    var lO = 0;
+    var nO = 3;
+    var uO = 6;
+    var i = 0;
+    
+    this.vertA.push(bA[(i+0)*pW+lO+0]);  this.vertA.push(bA[(i+0)*pW+lO+1]);  this.vertA.push(bA[(i+0)*pW+lO+2]);
+    this.vertA.push(bB[(i+0)*pW+lO+0]);  this.vertA.push(bB[(i+0)*pW+lO+1]);  this.vertA.push(bB[(i+0)*pW+lO+2]);
+    this.vertA.push(bB[(i+1)*pW+lO+0]);  this.vertA.push(bB[(i+1)*pW+lO+1]);  this.vertA.push(bB[(i+1)*pW+lO+2]);
+    
+    this.normA.push(bA[(i+0)*pW+nO+0]);  this.normA.push(bA[(i+0)*pW+nO+1]);  this.normA.push(bA[(i+0)*pW+nO+2]);
+    this.normA.push(bB[(i+0)*pW+nO+0]);  this.normA.push(bB[(i+0)*pW+nO+1]);  this.normA.push(bB[(i+0)*pW+nO+2]);
+    this.normA.push(bB[(i+1)*pW+nO+0]);  this.normA.push(bB[(i+1)*pW+nO+1]);  this.normA.push(bB[(i+1)*pW+nO+2]);
+    
+    this.tverA.push(bA[(i+0)*pW+uO+0]);  this.tverA.push(bA[(i+0)*pW+uO+1]);
+    this.tverA.push(bB[(i+0)*pW+uO+0]);  this.tverA.push(bB[(i+0)*pW+uO+1]);
+    this.tverA.push(bB[(i+1)*pW+uO+0]);  this.tverA.push(bB[(i+1)*pW+uO+1]);
+    
+    this.vertA.push(bA[(i+0)*pW+lO+0]);  this.vertA.push(bA[(i+0)*pW+lO+1]);  this.vertA.push(bA[(i+0)*pW+lO+2]);
+    this.vertA.push(bB[(i+1)*pW+lO+0]);  this.vertA.push(bB[(i+1)*pW+lO+1]);  this.vertA.push(bB[(i+1)*pW+lO+2]);
+    this.vertA.push(bA[(i+1)*pW+lO+0]);  this.vertA.push(bA[(i+1)*pW+lO+1]);  this.vertA.push(bA[(i+1)*pW+lO+2]);
+    
+    this.normA.push(bA[(i+0)*pW+nO+0]);  this.normA.push(bA[(i+0)*pW+nO+1]);  this.normA.push(bA[(i+0)*pW+nO+2]);
+    this.normA.push(bB[(i+1)*pW+nO+0]);  this.normA.push(bB[(i+1)*pW+nO+1]);  this.normA.push(bB[(i+1)*pW+nO+2]);
+    this.normA.push(bA[(i+1)*pW+nO+0]);  this.normA.push(bA[(i+1)*pW+nO+1]);  this.normA.push(bA[(i+1)*pW+nO+2]);
+    
+    this.tverA.push(bA[(i+0)*pW+uO+0]);  this.tverA.push(bA[(i+0)*pW+uO+1]);
+    this.tverA.push(bB[(i+1)*pW+uO+0]);  this.tverA.push(bB[(i+1)*pW+uO+1]);
+    this.tverA.push(bA[(i+1)*pW+uO+0]);  this.tverA.push(bA[(i+1)*pW+uO+1]);
+};
+
+/**
+ * Generate a buffer containing slice information
+ * @paraam {number} slice location in radians
+ * @return {Array<number>} slice buffer 
+ *          [ topCenter, topEdge, topShell, bottomShell, bottomEdge, bottomCenter ] 
+ *                         +--| ...pos.xyz, norm.xyz, uv.xy... | (for each of the six elements above)
+ */
+Cylinder.prototype.genSliceBuffer = function( loc )
+{   
+    console.debug(loc);
+    var ret = 
+    [
+        Math.cos( loc )*this.radiusInner, this.height, Math.sin( loc )*this.radiusInner, 0,1,0, loc/(2*Math.PI),0,
+        Math.cos( loc )*this.radiusOuter, this.height, Math.sin( loc )*this.radiusOuter, 0,1,0, loc/(2*Math.PI),0,
+        Math.cos( loc )*this.radiusOuter, this.height, Math.sin( loc )*this.radiusOuter, Math.cos( loc ),0,Math.sin( loc ), loc/(2*Math.PI),0,
+        Math.cos( loc )*this.radiusOuter, 0, Math.sin( loc )*this.radiusOuter, Math.cos( loc ),0,Math.sin( loc ), loc/(2*Math.PI),1,
+        Math.cos( loc )*this.radiusOuter, 0, Math.sin( loc )*this.radiusOuter, 0,-1,0, loc/(2*Math.PI),1,
+        Math.cos( loc )*this.radiusInner, 0, Math.sin( loc )*this.radiusInner, 0,-1,0, loc/(2*Math.PI),1
+    ];
+    
+    return ret;
+        
+};
 
 /**
  * Get the name of this object
@@ -241,5 +291,7 @@ Cylinder.prototype.draw = function( parentMvMat, materials, shader, drawMode )
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
     gl.drawElements(drawMode, this.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 };
+
+
 
 

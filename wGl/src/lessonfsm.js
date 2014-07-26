@@ -32,7 +32,8 @@ function createLesson( scene, hud )
 	ret.addState("Asm", new AsmState( scene, hud ));
 	
 	ret.addTransition( "Load", "loadComplete", "Asm" );
-	ret.addTransition( "Asm", "exitAsm", "Explore" );
+	ret.addTransition( "Load", "loadComplete", "Explore" );
+	//ret.addTransition( "Asm", "exitAsm", "Explore" );
 	ret.addTransition( "Explore", "startAsm", "Asm" );
 	ret.setState("Load");
 	return ret;
@@ -320,7 +321,8 @@ ExploreState.prototype.enter = function ()
 	this.camController.bindCamera(this.scene.getCamera());
     _humanoidAnimator.play();
     
-    this.scene.addChild( new Cuboid(1, 1, 1, "cube") );
+    //this.scene.addChild( new Cuboid(1, 1, 1, "cube") );
+    this.scene.addChild( new Cylinder(0, 1, 2, 5, "cylinder") );
 };
 
 /**

@@ -321,8 +321,8 @@ ExploreState.prototype.enter = function ()
 	this.camController.bindCamera(this.scene.getCamera());
     _humanoidAnimator.play();
     
-    //this.scene.addChild( new Cuboid(1, 1, 1, "cube") );
-    this.scene.addChild( new Cylinder(0, 1, 2, 5, "cylinder") );
+    this.scene.addChild( new Cuboid(1, 1, 1, "cube") );
+    this.scene.addChild( new Cylinder(0, 1, 2, 50, "cylinder") );
 };
 
 /**

@@ -69,7 +69,7 @@ Cone.prototype.updateBufferArrays = function()
     this.normA = [];
     this.indxA = [];
     
-    for ( var i = 0; i < 12*(this.sliceCount); ++i )
+    for ( var i = 0; i < 6*(this.sliceCount); ++i )
     {
         this.indxA.push(i);
          
@@ -96,7 +96,7 @@ Cone.prototype.addArraysBetweenSlices = function( bA, bB )
     var nO = 3;
     var uO = 6;
     
-    for ( var i = 0; i < 6; i+=2 )
+    for ( var i = 0; i < 4; i+=2 )
     {
         if ( 0 !== i )
         {
@@ -113,7 +113,7 @@ Cone.prototype.addArraysBetweenSlices = function( bA, bB )
             this.tverA.push(bB[(i+1)*pW+uO+0]);  this.tverA.push(bB[(i+1)*pW+uO+1]);
         }
         
-        if ( 4 !== i )
+        if ( 2 !== i )
         {
             this.vertA.push(bA[(i+0)*pW+lO+0]);  this.vertA.push(bA[(i+0)*pW+lO+1]);  this.vertA.push(bA[(i+0)*pW+lO+2]);
             this.vertA.push(bB[(i+1)*pW+lO+0]);  this.vertA.push(bB[(i+1)*pW+lO+1]);  this.vertA.push(bB[(i+1)*pW+lO+2]);
@@ -139,12 +139,12 @@ Cone.prototype.addArraysBetweenSlices = function( bA, bB )
  */
 Cone.prototype.genSliceBuffer = function( loc )
 {  
+    var nAng = Math.atan(this.height/this.radiusOuter);
+    
     var ret = 
     [
-        0, this.height, 0, 0,1,0, loc/(2*Math.PI),0,
-        0, this.height, 0, 0,1,0, loc/(2*Math.PI),0,
-        0, this.height, 0, Math.cos( loc ),0,Math.sin( loc ), loc/(2*Math.PI),0,
-        Math.cos( loc )*this.radiusOuter, 0, Math.sin( loc )*this.radiusOuter, Math.cos( loc ),0,Math.sin( loc ), loc/(2*Math.PI),1,
+        0, this.height, 0, Math.cos( loc )*Math.cos(nAng),Math.sin(nAng),Math.sin( loc )*Math.cos(nAng), loc/(2*Math.PI),0,
+        Math.cos( loc )*this.radiusOuter, 0, Math.sin( loc )*this.radiusOuter, Math.cos( loc )*Math.cos(nAng),Math.sin(nAng),Math.sin( loc )*Math.cos(nAng), loc/(2*Math.PI),1,
         Math.cos( loc )*this.radiusOuter, 0, Math.sin( loc )*this.radiusOuter, 0,-1,0, loc/(2*Math.PI),1,
         Math.cos( loc )*this.radiusInner, 0, Math.sin( loc )*this.radiusInner, 0,-1,0, loc/(2*Math.PI),1
     ];

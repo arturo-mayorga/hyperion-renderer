@@ -22,17 +22,17 @@
  * @constructor 
  * @param {number} radius
  * @param {number} height
- * @param {number} sliceCount
+ * @param {number} sliceCountMajor
+ * @param {number} sliceCountMinor
  * @param {string} Name for this object
  */
-function Torus( radius, height, sliceCount, name )
-{
-    //verts, tverts, normals, indices, name
-    
+function Torus( radiusMajor, radiusMinor, sliceCountMajor, sliceCountMinor, name )
+{   
     this.radiusInner = 0;
-    this.radiusOuter = radius;
-    this.height = height;
-    this.sliceCount = sliceCount;
+    this.radiusMajor = radiusMajor;
+    this.radiusMinor = radiusMinor;
+    this.sliceCount = sliceCountMajor;
+    this.sliceCountMinor = sliceCountMinor;
     
     this.updateBufferArrays();
     
@@ -71,7 +71,7 @@ Torus.prototype.updateBufferArrays = function()
     this.normA = [];
     this.indxA = [];
     
-    for ( var i = 0; i < 12*(this.sliceCount); ++i )
+    for ( var i = 0; i < 6*this.sliceCountMinor*this.sliceCount; ++i )
     {
         this.indxA.push(i);
          
@@ -98,37 +98,34 @@ Torus.prototype.addArraysBetweenSlices = function( bA, bB )
     var nO = 3;
     var uO = 6;
     
-    for ( var i = 0; i < 6; i+=2 )
+    for ( var i = 0; i < this.sliceCountMinor; ++i )
     {
-        if ( 0 !== i )
-        {
-            this.vertA.push(bA[(i+0)*pW+lO+0]);  this.vertA.push(bA[(i+0)*pW+lO+1]);  this.vertA.push(bA[(i+0)*pW+lO+2]);
-            this.vertA.push(bB[(i+0)*pW+lO+0]);  this.vertA.push(bB[(i+0)*pW+lO+1]);  this.vertA.push(bB[(i+0)*pW+lO+2]);
-            this.vertA.push(bB[(i+1)*pW+lO+0]);  this.vertA.push(bB[(i+1)*pW+lO+1]);  this.vertA.push(bB[(i+1)*pW+lO+2]);
-            
-            this.normA.push(bA[(i+0)*pW+nO+0]);  this.normA.push(bA[(i+0)*pW+nO+1]);  this.normA.push(bA[(i+0)*pW+nO+2]);
-            this.normA.push(bB[(i+0)*pW+nO+0]);  this.normA.push(bB[(i+0)*pW+nO+1]);  this.normA.push(bB[(i+0)*pW+nO+2]);
-            this.normA.push(bB[(i+1)*pW+nO+0]);  this.normA.push(bB[(i+1)*pW+nO+1]);  this.normA.push(bB[(i+1)*pW+nO+2]);
-            
-            this.tverA.push(bA[(i+0)*pW+uO+0]);  this.tverA.push(bA[(i+0)*pW+uO+1]);
-            this.tverA.push(bB[(i+0)*pW+uO+0]);  this.tverA.push(bB[(i+0)*pW+uO+1]);
-            this.tverA.push(bB[(i+1)*pW+uO+0]);  this.tverA.push(bB[(i+1)*pW+uO+1]);
-        }
         
-        if ( 4 !== i )
-        {
-            this.vertA.push(bA[(i+0)*pW+lO+0]);  this.vertA.push(bA[(i+0)*pW+lO+1]);  this.vertA.push(bA[(i+0)*pW+lO+2]);
-            this.vertA.push(bB[(i+1)*pW+lO+0]);  this.vertA.push(bB[(i+1)*pW+lO+1]);  this.vertA.push(bB[(i+1)*pW+lO+2]);
-            this.vertA.push(bA[(i+1)*pW+lO+0]);  this.vertA.push(bA[(i+1)*pW+lO+1]);  this.vertA.push(bA[(i+1)*pW+lO+2]);
-            
-            this.normA.push(bA[(i+0)*pW+nO+0]);  this.normA.push(bA[(i+0)*pW+nO+1]);  this.normA.push(bA[(i+0)*pW+nO+2]);
-            this.normA.push(bB[(i+1)*pW+nO+0]);  this.normA.push(bB[(i+1)*pW+nO+1]);  this.normA.push(bB[(i+1)*pW+nO+2]);
-            this.normA.push(bA[(i+1)*pW+nO+0]);  this.normA.push(bA[(i+1)*pW+nO+1]);  this.normA.push(bA[(i+1)*pW+nO+2]);
-            
-            this.tverA.push(bA[(i+0)*pW+uO+0]);  this.tverA.push(bA[(i+0)*pW+uO+1]);
-            this.tverA.push(bB[(i+1)*pW+uO+0]);  this.tverA.push(bB[(i+1)*pW+uO+1]);
-            this.tverA.push(bA[(i+1)*pW+uO+0]);  this.tverA.push(bA[(i+1)*pW+uO+1]);
-        }
+        this.vertA.push(bA[(i+0)*pW+lO+0]);  this.vertA.push(bA[(i+0)*pW+lO+1]);  this.vertA.push(bA[(i+0)*pW+lO+2]);
+        this.vertA.push(bB[(i+0)*pW+lO+0]);  this.vertA.push(bB[(i+0)*pW+lO+1]);  this.vertA.push(bB[(i+0)*pW+lO+2]);
+        this.vertA.push(bB[(i+1)*pW+lO+0]);  this.vertA.push(bB[(i+1)*pW+lO+1]);  this.vertA.push(bB[(i+1)*pW+lO+2]);
+        
+        this.normA.push(bA[(i+0)*pW+nO+0]);  this.normA.push(bA[(i+0)*pW+nO+1]);  this.normA.push(bA[(i+0)*pW+nO+2]);
+        this.normA.push(bB[(i+0)*pW+nO+0]);  this.normA.push(bB[(i+0)*pW+nO+1]);  this.normA.push(bB[(i+0)*pW+nO+2]);
+        this.normA.push(bB[(i+1)*pW+nO+0]);  this.normA.push(bB[(i+1)*pW+nO+1]);  this.normA.push(bB[(i+1)*pW+nO+2]);
+        
+        this.tverA.push(bA[(i+0)*pW+uO+0]);  this.tverA.push(bA[(i+0)*pW+uO+1]);
+        this.tverA.push(bB[(i+0)*pW+uO+0]);  this.tverA.push(bB[(i+0)*pW+uO+1]);
+        this.tverA.push(bB[(i+1)*pW+uO+0]);  this.tverA.push(bB[(i+1)*pW+uO+1]);
+    
+    
+   
+        this.vertA.push(bA[(i+0)*pW+lO+0]);  this.vertA.push(bA[(i+0)*pW+lO+1]);  this.vertA.push(bA[(i+0)*pW+lO+2]);
+        this.vertA.push(bB[(i+1)*pW+lO+0]);  this.vertA.push(bB[(i+1)*pW+lO+1]);  this.vertA.push(bB[(i+1)*pW+lO+2]);
+        this.vertA.push(bA[(i+1)*pW+lO+0]);  this.vertA.push(bA[(i+1)*pW+lO+1]);  this.vertA.push(bA[(i+1)*pW+lO+2]);
+        
+        this.normA.push(bA[(i+0)*pW+nO+0]);  this.normA.push(bA[(i+0)*pW+nO+1]);  this.normA.push(bA[(i+0)*pW+nO+2]);
+        this.normA.push(bB[(i+1)*pW+nO+0]);  this.normA.push(bB[(i+1)*pW+nO+1]);  this.normA.push(bB[(i+1)*pW+nO+2]);
+        this.normA.push(bA[(i+1)*pW+nO+0]);  this.normA.push(bA[(i+1)*pW+nO+1]);  this.normA.push(bA[(i+1)*pW+nO+2]);
+        
+        this.tverA.push(bA[(i+0)*pW+uO+0]);  this.tverA.push(bA[(i+0)*pW+uO+1]);
+        this.tverA.push(bB[(i+1)*pW+uO+0]);  this.tverA.push(bB[(i+1)*pW+uO+1]);
+        this.tverA.push(bA[(i+1)*pW+uO+0]);  this.tverA.push(bA[(i+1)*pW+uO+1]);
     }
 };
 
@@ -141,18 +138,35 @@ Torus.prototype.addArraysBetweenSlices = function( bA, bB )
  */
 Torus.prototype.genSliceBuffer = function( loc )
 {  
-    var ret = 
-    [
-        Math.cos( loc )*this.radiusInner, 0.5*this.height, Math.sin( loc )*this.radiusInner, 0,1,0, loc/(2*Math.PI),0,
-        Math.cos( loc )*this.radiusOuter, 0.5*this.height, Math.sin( loc )*this.radiusOuter, 0,1,0, loc/(2*Math.PI),0,
-        Math.cos( loc )*this.radiusOuter, 0.5*this.height, Math.sin( loc )*this.radiusOuter, Math.cos( loc ),0,Math.sin( loc ), loc/(2*Math.PI),0,
-        Math.cos( loc )*this.radiusOuter,-0.5*this.height, Math.sin( loc )*this.radiusOuter, Math.cos( loc ),0,Math.sin( loc ), loc/(2*Math.PI),1,
-        Math.cos( loc )*this.radiusOuter,-0.5*this.height, Math.sin( loc )*this.radiusOuter, 0,-1,0, loc/(2*Math.PI),1,
-        Math.cos( loc )*this.radiusInner,-0.5*this.height, Math.sin( loc )*this.radiusInner, 0,-1,0, loc/(2*Math.PI),1
-    ];
+    var ret = [];
+    
+    for ( var i = 0; i < this.sliceCountMinor+1; ++i )
+    {
+      ret = ret.concat( this.genMinorRingPoint(loc, i*2*Math.PI/this.sliceCountMinor) );
+    }
     
     return ret;
-        
+};
+
+/**
+ * Generate a point on the minor circle
+ * @param {number} location along the major ring
+ * @param {number} location along the minor ring
+ * @return {Array<number>} point buffer
+ */
+Torus.prototype.genMinorRingPoint = function( lMa, lMi )
+{
+    var rPMa = [Math.cos(lMa), Math.sin(lMa)];
+    var rPMi = [Math.cos(lMi), Math.sin(lMi)];
+    var rM = this.radiusMajor;
+    var rm = this.radiusMinor;
+    
+    var ret = [];
+    ret = ret.concat( [rPMa[0]*(rM+rPMi[0]*rm), rPMi[1]*rm, rPMa[1]*(rM+rPMi[0]*rm)] );
+    ret = ret.concat( [rPMa[0]*rPMi[0], rPMi[1], rPMa[1]*rPMi[0]] );
+    ret = ret.concat( [lMa/(2*Math.PI),lMi/(2*Math.PI)] );
+    
+    return ret;
 };
 
 /**

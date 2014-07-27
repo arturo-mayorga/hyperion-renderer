@@ -297,9 +297,8 @@ function ExploreState( scene, hud )
 {
     this.scene = scene;
 	this.hud = hud;
-	
-	
 }
+
 /**
  * Set the signal observer
  * @param {FsmSignalObserver} observer The new observer to be used
@@ -323,6 +322,7 @@ ExploreState.prototype.enter = function ()
     
     this.scene.addChild( new Cuboid(1, 1, 1, "cube") );
     this.scene.addChild( new Cylinder(0.5, 2, 50, "cylinder") );
+    this.scene.addChild( new Torus(1, .25, 50, 50, "torus") );
 };
 
 /**

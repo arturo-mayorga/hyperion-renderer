@@ -20,15 +20,14 @@
 
 /**
  * @constructor 
- * @param {number} radius
- * @param {number} height
+ * @param {number} radius major
+ * @param {number} radius minor
  * @param {number} sliceCountMajor
  * @param {number} sliceCountMinor
  * @param {string} Name for this object
  */
 function Torus( radiusMajor, radiusMinor, sliceCountMajor, sliceCountMinor, name )
-{   
-    this.radiusInner = 0;
+{
     this.radiusMajor = radiusMajor;
     this.radiusMinor = radiusMinor;
     this.sliceCount = sliceCountMajor;

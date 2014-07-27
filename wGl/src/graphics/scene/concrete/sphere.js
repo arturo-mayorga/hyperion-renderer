@@ -21,18 +21,15 @@
 /**
  * @constructor 
  * @param {number} radius
- * @param {number} height
- * @param {number} sliceCountMajor
- * @param {number} sliceCountMinor
+ * @param {number} sliceCount
+ * @param {number} stackCount
  * @param {string} Name for this object
  */
-function Sphere( radiusMajor, radiusMinor, sliceCountMajor, sliceCountMinor, name )
-{   
-    this.radiusInner = 0;
-    this.radiusMajor = radiusMajor;
-    this.radiusMinor = radiusMinor;
-    this.sliceCount = sliceCountMajor;
-    this.sliceCountMinor = sliceCountMinor;
+function Sphere( radius, sliceCount, stackCount, name )
+{
+    this.radius = radius;
+    this.sliceCount = sliceCount;
+    this.sliceCountMinor = stackCount;
     
     this.updateBufferArrays();
     
@@ -71,7 +68,7 @@ Sphere.prototype.updateBufferArrays = function()
     this.normA = [];
     this.indxA = [];
     
-    for ( var i = 0; i < 6*this.sliceCountMinor*this.sliceCount; ++i )
+    for ( var i = 0; i < 6*(this.sliceCountMinor-1)*this.sliceCount; ++i )
     {
         this.indxA.push(i);
          
@@ -100,32 +97,35 @@ Sphere.prototype.addArraysBetweenSlices = function( bA, bB )
     
     for ( var i = 0; i < this.sliceCountMinor; ++i )
     {
-        
-        this.vertA.push(bA[(i+0)*pW+lO+0]);  this.vertA.push(bA[(i+0)*pW+lO+1]);  this.vertA.push(bA[(i+0)*pW+lO+2]);
-        this.vertA.push(bB[(i+0)*pW+lO+0]);  this.vertA.push(bB[(i+0)*pW+lO+1]);  this.vertA.push(bB[(i+0)*pW+lO+2]);
-        this.vertA.push(bB[(i+1)*pW+lO+0]);  this.vertA.push(bB[(i+1)*pW+lO+1]);  this.vertA.push(bB[(i+1)*pW+lO+2]);
-        
-        this.normA.push(bA[(i+0)*pW+nO+0]);  this.normA.push(bA[(i+0)*pW+nO+1]);  this.normA.push(bA[(i+0)*pW+nO+2]);
-        this.normA.push(bB[(i+0)*pW+nO+0]);  this.normA.push(bB[(i+0)*pW+nO+1]);  this.normA.push(bB[(i+0)*pW+nO+2]);
-        this.normA.push(bB[(i+1)*pW+nO+0]);  this.normA.push(bB[(i+1)*pW+nO+1]);  this.normA.push(bB[(i+1)*pW+nO+2]);
-        
-        this.tverA.push(bA[(i+0)*pW+uO+0]);  this.tverA.push(bA[(i+0)*pW+uO+1]);
-        this.tverA.push(bB[(i+0)*pW+uO+0]);  this.tverA.push(bB[(i+0)*pW+uO+1]);
-        this.tverA.push(bB[(i+1)*pW+uO+0]);  this.tverA.push(bB[(i+1)*pW+uO+1]);
+        if ( 0 !== i )
+        {
+            this.vertA.push(bA[(i+0)*pW+lO+0]);  this.vertA.push(bA[(i+0)*pW+lO+1]);  this.vertA.push(bA[(i+0)*pW+lO+2]);
+            this.vertA.push(bB[(i+0)*pW+lO+0]);  this.vertA.push(bB[(i+0)*pW+lO+1]);  this.vertA.push(bB[(i+0)*pW+lO+2]);
+            this.vertA.push(bB[(i+1)*pW+lO+0]);  this.vertA.push(bB[(i+1)*pW+lO+1]);  this.vertA.push(bB[(i+1)*pW+lO+2]);
+            
+            this.normA.push(bA[(i+0)*pW+nO+0]);  this.normA.push(bA[(i+0)*pW+nO+1]);  this.normA.push(bA[(i+0)*pW+nO+2]);
+            this.normA.push(bB[(i+0)*pW+nO+0]);  this.normA.push(bB[(i+0)*pW+nO+1]);  this.normA.push(bB[(i+0)*pW+nO+2]);
+            this.normA.push(bB[(i+1)*pW+nO+0]);  this.normA.push(bB[(i+1)*pW+nO+1]);  this.normA.push(bB[(i+1)*pW+nO+2]);
+            
+            this.tverA.push(bA[(i+0)*pW+uO+0]);  this.tverA.push(bA[(i+0)*pW+uO+1]);
+            this.tverA.push(bB[(i+0)*pW+uO+0]);  this.tverA.push(bB[(i+0)*pW+uO+1]);
+            this.tverA.push(bB[(i+1)*pW+uO+0]);  this.tverA.push(bB[(i+1)*pW+uO+1]);
+        }
     
-    
-   
-        this.vertA.push(bA[(i+0)*pW+lO+0]);  this.vertA.push(bA[(i+0)*pW+lO+1]);  this.vertA.push(bA[(i+0)*pW+lO+2]);
-        this.vertA.push(bB[(i+1)*pW+lO+0]);  this.vertA.push(bB[(i+1)*pW+lO+1]);  this.vertA.push(bB[(i+1)*pW+lO+2]);
-        this.vertA.push(bA[(i+1)*pW+lO+0]);  this.vertA.push(bA[(i+1)*pW+lO+1]);  this.vertA.push(bA[(i+1)*pW+lO+2]);
-        
-        this.normA.push(bA[(i+0)*pW+nO+0]);  this.normA.push(bA[(i+0)*pW+nO+1]);  this.normA.push(bA[(i+0)*pW+nO+2]);
-        this.normA.push(bB[(i+1)*pW+nO+0]);  this.normA.push(bB[(i+1)*pW+nO+1]);  this.normA.push(bB[(i+1)*pW+nO+2]);
-        this.normA.push(bA[(i+1)*pW+nO+0]);  this.normA.push(bA[(i+1)*pW+nO+1]);  this.normA.push(bA[(i+1)*pW+nO+2]);
-        
-        this.tverA.push(bA[(i+0)*pW+uO+0]);  this.tverA.push(bA[(i+0)*pW+uO+1]);
-        this.tverA.push(bB[(i+1)*pW+uO+0]);  this.tverA.push(bB[(i+1)*pW+uO+1]);
-        this.tverA.push(bA[(i+1)*pW+uO+0]);  this.tverA.push(bA[(i+1)*pW+uO+1]);
+        if ( this.sliceCountMinor-1 !== i )
+        {
+            this.vertA.push(bA[(i+0)*pW+lO+0]);  this.vertA.push(bA[(i+0)*pW+lO+1]);  this.vertA.push(bA[(i+0)*pW+lO+2]);
+            this.vertA.push(bB[(i+1)*pW+lO+0]);  this.vertA.push(bB[(i+1)*pW+lO+1]);  this.vertA.push(bB[(i+1)*pW+lO+2]);
+            this.vertA.push(bA[(i+1)*pW+lO+0]);  this.vertA.push(bA[(i+1)*pW+lO+1]);  this.vertA.push(bA[(i+1)*pW+lO+2]);
+            
+            this.normA.push(bA[(i+0)*pW+nO+0]);  this.normA.push(bA[(i+0)*pW+nO+1]);  this.normA.push(bA[(i+0)*pW+nO+2]);
+            this.normA.push(bB[(i+1)*pW+nO+0]);  this.normA.push(bB[(i+1)*pW+nO+1]);  this.normA.push(bB[(i+1)*pW+nO+2]);
+            this.normA.push(bA[(i+1)*pW+nO+0]);  this.normA.push(bA[(i+1)*pW+nO+1]);  this.normA.push(bA[(i+1)*pW+nO+2]);
+            
+            this.tverA.push(bA[(i+0)*pW+uO+0]);  this.tverA.push(bA[(i+0)*pW+uO+1]);
+            this.tverA.push(bB[(i+1)*pW+uO+0]);  this.tverA.push(bB[(i+1)*pW+uO+1]);
+            this.tverA.push(bA[(i+1)*pW+uO+0]);  this.tverA.push(bA[(i+1)*pW+uO+1]);
+        }
     }
 };
 
@@ -142,7 +142,7 @@ Sphere.prototype.genSliceBuffer = function( loc )
     
     for ( var i = 0; i < this.sliceCountMinor+1; ++i )
     {
-      ret = ret.concat( this.genMinorRingPoint(loc, i*2*Math.PI/this.sliceCountMinor) );
+      ret = ret.concat( this.genMinorRingPoint(loc, i*Math.PI/this.sliceCountMinor) );
     }
     
     return ret;
@@ -157,9 +157,9 @@ Sphere.prototype.genSliceBuffer = function( loc )
 Sphere.prototype.genMinorRingPoint = function( lMa, lMi )
 {
     var rPMa = [Math.cos(lMa), Math.sin(lMa)];
-    var rPMi = [Math.cos(lMi), Math.sin(lMi)];
-    var rM = this.radiusMajor;
-    var rm = this.radiusMinor;
+    var rPMi = [Math.sin(lMi), Math.cos(lMi)];
+    var rM = 0;
+    var rm = this.radius;
     
     var ret = [];
     ret = ret.concat( [rPMa[0]*(rM+rPMi[0]*rm), rPMi[1]*rm, rPMa[1]*(rM+rPMi[0]*rm)] );

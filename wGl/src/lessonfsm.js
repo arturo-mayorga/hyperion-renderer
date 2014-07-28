@@ -31,10 +31,18 @@ function createLesson( scene, hud )
 	ret.addState("Load", new LoadState( scene, hud, oData ));
 	ret.addState("Explore", new ExploreState( scene, hud, oData ));
 	ret.addState("Asm", new AsmState( scene, hud, oData ));
+	ret.addState("Clean", new CleanState( scene, hud, oData ));
 	
 	ret.addTransition( "Load", "loadComplete", "Asm" );
+	//ret.addTransition( "Load", "loadComplete", "Explore" );
 	ret.addTransition( "Asm", "exitAsm", "Explore" );
 	ret.addTransition( "Explore", "startAsm", "Asm" );
+	
+	ret.addTransition( "Load", "exitReq", "Clean" );
+	ret.addTransition( "Asm", "exitReq", "Clean" );
+	ret.addTransition( "Explore", "exitReq", "Clean" );
+	ret.addTransition( "Clean", "load", "Load" );
+	
 	ret.setState("Load");
 	return ret;
 }
@@ -63,6 +71,53 @@ PenLessonOperatingData.prototype.getHAnimator = function ()
     return this.humanoidAnimator;
 };
 
+/**
+ * @constructor
+ * @extends {FsmMachine}
+ * @implements {GObjLoaderObserver}
+ * @implements {ThreejsLoaderObserver}
+ * @param {GScene} scene Scene that is driven by this state
+ * @param {GHudController}
+ * @param {PenLessonOperatingData}
+ */
+function CleanState( scene, hud, oData )
+{
+    this.scene = scene;
+}
+
+CleanState.prototype = Object.create( FsmMachine.prototype );
+
+/**
+ * This function is called each time this state is entered
+ */
+CleanState.prototype.enter = function () 
+{
+    var children = this.scene.getChildren();
+	var len = children.length;
+	for (var i = 0; i < len; ++i)
+	{
+		children[i].deleteResources(); 
+	}
+	
+	while ( this.scene.removeLight(0) );
+};
+
+/**
+ * This function is called each time the state is exited
+ */
+CleanState.prototype.exit = function () 
+{
+};
+
+/**
+ * Update this state
+ * @param {number} Number of milliseconds since the last update
+ */
+CleanState.prototype.update = function ( time ) 
+{
+    this.fireSignal("cleanComplete");
+    this.fireSignal("load");
+};
 
 /**
  * @constructor
@@ -79,7 +134,18 @@ function LoadState( scene, hud, oData )
 	this.hud = hud;
 	this.oData = oData;
 	
-	this.officeGroup = new GGroup( "officeGroup" );
+	
+}
+
+LoadState.prototype = Object.create( FsmMachine.prototype );
+
+/**
+ * This function is called each time this state is entered
+ */
+LoadState.prototype.enter = function () 
+{
+    this.loadCount = 0;
+    this.officeGroup = new GGroup( "officeGroup" );
 	this.penGroup = new GGroup( "penGroup" );
 	this.humanoidGroup = new GGroup( "humanoidGroup" );
 	
@@ -110,15 +176,8 @@ function LoadState( scene, hud, oData )
 	
 	this.tjsLoader = new ThreejsLoader(this.scene, this.humanoidGroup );
 	this.tjsLoader.setObserver(this);
-}
-
-LoadState.prototype = Object.create( FsmMachine.prototype );
-
-/**
- * This function is called each time this state is entered
- */
-LoadState.prototype.enter = function () 
-{
+    
+    
 	this.envLoader.loadObj("assets/3d/office3d/18361-obj-4/", "OfficeOBJ.obj");
 	this.penLoader.loadObj("assets/3d/stylus/", "stylus.obj");
 	this.tjsLoader.loadJson( "assets/3d/animtest/", "humanoid.js" );
@@ -323,6 +382,7 @@ function ExploreState( scene, hud, oData )
     this.scene = scene;
 	this.hud = hud;
 	this.oData = oData;
+	this.timeR = 0;
 	
 }
 /**
@@ -345,6 +405,7 @@ ExploreState.prototype.enter = function ()
 	this.camController = new GCameraController();
 	this.camController.bindCamera(this.scene.getCamera());
     this.oData.getHAnimator().play();
+    this.timeR = 0;
 };
 
 /**
@@ -365,6 +426,12 @@ ExploreState.prototype.update = function ( time )
 	//this.fireSignal("startAsm");
 	this.camController.update( time );
     this.oData.getHAnimator().update( time );
+    this.timeR += time;
+    
+    if ( this.timeR > 3000 )
+    {
+        this.fireSignal("exitReq");
+    }
 };
 
 
@@ -429,6 +496,52 @@ function AsmState( scene, hud, oData )
 	this.hud = hud;
 	this.oData = oData;
 	FsmMachine.call( this );
+	
+	this.createSubState( "moveCam", this.moveCamEnter, this.moveCam, this.moveCamExit );
+    this.createSubState( "grabInk", this.grabInkEnter, this.grabInk, this.grabInkExit );
+    this.createSubState( "grabSpring", this.grabSpringEnter, this.grabSpring, this.grabSpringExit );
+    this.createSubState( "installSpring", this.installSpringEnter, this.installSpring, this.installSpringExit );
+    this.createSubState( "grabAxle", this.grabAxleEnter, this.grabAxle, this.grabAxleExit );
+    this.createSubState( "installAxle", this.installAxleEnter, this.installAxle, this.installAxleExit );
+    this.createSubState( "grabHousing", this.grabHousingEnter, this.grabHousing, this.grabHousingExit );
+    this.createSubState( "installHousing", this.installHousingEnter, this.installHousing, this.installHousingExit );
+    this.createSubState( "grabGrip", this.grabGripEnter, this.grabGrip, this.grabGripExit );
+    this.createSubState( "installGrip", this.installGripEnter, this.installGrip, this.installGripExit );
+    this.createSubState( "grabCylinder", this.grabCylinderEnter, this.grabCylinder, this.grabCylinderExit );
+    this.createSubState( "installCylinder", this.installCylinderEnter, this.installCylinder, this.installCylinderExit );
+    this.createSubState( "grabClip", this.grabClipEnter, this.grabClip, this.grabClipExit );
+    this.createSubState( "installClip", this.installClipEnter, this.installClip, this.installClipExit );
+    this.createSubState( "grabGum", this.grabGumEnter, this.grabGum, this.grabGumExit );
+    this.createSubState( "installGum", this.installGumEnter, this.installGum, this.installGumExit );
+    this.createSubState( "testOut", this.testOutEnter, this.testOut, this.testOutExit );
+    this.createSubState( "holdBeforeTestIn", this.holdBeforeTestInEnter, this.holdBeforeTestIn, this.holdBeforeTestInExit );
+    this.createSubState( "testIn", this.testInEnter, this.testIn, this.testInExit );
+    this.createSubState( "idle", this.idleEnter, this.idle, this.idleExit );
+    this.createSubState( "placeOnTable", this.placeOnTableEnter, this.placeOnTable, this.placeOnTableExit );
+    this.createSubState( "done", this.doneEnter, this.done, this.doneExit );
+    
+     
+    this.addTransition( "moveCam",         "done", "grabInk" );
+    this.addTransition( "grabInk",         "done", "grabSpring" );
+    this.addTransition( "grabSpring",      "done", "installSpring" );
+    this.addTransition( "installSpring",   "done", "grabAxle" );
+    this.addTransition( "grabAxle",        "done", "installAxle" );
+    this.addTransition( "installAxle",     "done", "grabHousing" );
+    this.addTransition( "grabHousing",     "done", "installHousing" );
+    this.addTransition( "installHousing",  "done", "grabGrip" );
+    this.addTransition( "grabGrip",        "done", "installGrip" );
+    this.addTransition( "installGrip",     "done", "grabCylinder" );
+    this.addTransition( "grabCylinder",    "done", "installCylinder" );
+    this.addTransition( "installCylinder", "done", "grabClip" );
+    this.addTransition( "grabClip",        "done", "installClip" );
+    this.addTransition( "installClip",     "done", "grabGum" );
+    this.addTransition( "grabGum",         "done", "installGum" );
+    this.addTransition( "installGum",      "done", "testOut" );
+    this.addTransition( "testOut",         "done", "holdBeforeTestIn" );
+    this.addTransition( "holdBeforeTestIn","done", "testIn" );
+    this.addTransition( "testIn",          "done", "idle" );
+    this.addTransition( "idle",            "done", "placeOnTable" );
+    this.addTransition( "placeOnTable",    "done", "done" ); 
 }
 
 AsmState.prototype = Object.create( FsmMachine.prototype );
@@ -479,51 +592,7 @@ AsmState.prototype.enter = function ()
 	    grip: this.grip   
 	};
     
-    this.createSubState( "moveCam", this.moveCamEnter, this.moveCam, this.moveCamExit );
-    this.createSubState( "grabInk", this.grabInkEnter, this.grabInk, this.grabInkExit );
-    this.createSubState( "grabSpring", this.grabSpringEnter, this.grabSpring, this.grabSpringExit );
-    this.createSubState( "installSpring", this.installSpringEnter, this.installSpring, this.installSpringExit );
-    this.createSubState( "grabAxle", this.grabAxleEnter, this.grabAxle, this.grabAxleExit );
-    this.createSubState( "installAxle", this.installAxleEnter, this.installAxle, this.installAxleExit );
-    this.createSubState( "grabHousing", this.grabHousingEnter, this.grabHousing, this.grabHousingExit );
-    this.createSubState( "installHousing", this.installHousingEnter, this.installHousing, this.installHousingExit );
-    this.createSubState( "grabGrip", this.grabGripEnter, this.grabGrip, this.grabGripExit );
-    this.createSubState( "installGrip", this.installGripEnter, this.installGrip, this.installGripExit );
-    this.createSubState( "grabCylinder", this.grabCylinderEnter, this.grabCylinder, this.grabCylinderExit );
-    this.createSubState( "installCylinder", this.installCylinderEnter, this.installCylinder, this.installCylinderExit );
-    this.createSubState( "grabClip", this.grabClipEnter, this.grabClip, this.grabClipExit );
-    this.createSubState( "installClip", this.installClipEnter, this.installClip, this.installClipExit );
-    this.createSubState( "grabGum", this.grabGumEnter, this.grabGum, this.grabGumExit );
-    this.createSubState( "installGum", this.installGumEnter, this.installGum, this.installGumExit );
-    this.createSubState( "testOut", this.testOutEnter, this.testOut, this.testOutExit );
-    this.createSubState( "holdBeforeTestIn", this.holdBeforeTestInEnter, this.holdBeforeTestIn, this.holdBeforeTestInExit );
-    this.createSubState( "testIn", this.testInEnter, this.testIn, this.testInExit );
-    this.createSubState( "idle", this.idleEnter, this.idle, this.idleExit );
-    this.createSubState( "placeOnTable", this.placeOnTableEnter, this.placeOnTable, this.placeOnTableExit );
-    this.createSubState( "done", this.doneEnter, this.done, this.doneExit );
-    
-     
-    this.addTransition( "moveCam",         "done", "grabInk" );
-    this.addTransition( "grabInk",         "done", "grabSpring" );
-    this.addTransition( "grabSpring",      "done", "installSpring" );
-    this.addTransition( "installSpring",   "done", "grabAxle" );
-    this.addTransition( "grabAxle",        "done", "installAxle" );
-    this.addTransition( "installAxle",     "done", "grabHousing" );
-    this.addTransition( "grabHousing",     "done", "installHousing" );
-    this.addTransition( "installHousing",  "done", "grabGrip" );
-    this.addTransition( "grabGrip",        "done", "installGrip" );
-    this.addTransition( "installGrip",     "done", "grabCylinder" );
-    this.addTransition( "grabCylinder",    "done", "installCylinder" );
-    this.addTransition( "installCylinder", "done", "grabClip" );
-    this.addTransition( "grabClip",        "done", "installClip" );
-    this.addTransition( "installClip",     "done", "grabGum" );
-    this.addTransition( "grabGum",         "done", "installGum" );
-    this.addTransition( "installGum",      "done", "testOut" );
-    this.addTransition( "testOut",         "done", "holdBeforeTestIn" );
-    this.addTransition( "holdBeforeTestIn","done", "testIn" );
-    this.addTransition( "testIn",          "done", "idle" );
-    this.addTransition( "idle",            "done", "placeOnTable" );
-    this.addTransition( "placeOnTable",    "done", "done" ); 
+   
     
     this.setState( "moveCam" );
     

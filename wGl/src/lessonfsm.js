@@ -206,6 +206,11 @@ LoadState.prototype.enter = function ()
 	this.ui.pFg = progressFg;
 	
 	this.scene.setVisibility( false );
+	
+	var camera = this.scene.getCamera();
+	camera.setLookAt(4.232629776000977*4, 2.6432266235351562*4, 0.2486426830291748*4);
+	camera.setUp(-0.09341227263212204, 0.9805285334587097, 0.17273758351802826);
+	camera.setEye(9.44430160522461*4, 4.382470607757568*4, -3.9111077785491943*4);
 };
 
 /**

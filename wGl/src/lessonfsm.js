@@ -26,10 +26,11 @@
 function createLesson( scene, hud )
 {
 	var ret = new FsmMachine();
+	var oData = new PenLessonOperatingData();
 	
-	ret.addState("Load", new LoadState( scene, hud ));
-	ret.addState("Explore", new ExploreState( scene, hud ));
-	ret.addState("Asm", new AsmState( scene, hud ));
+	ret.addState("Load", new LoadState( scene, hud, oData ));
+	ret.addState("Explore", new ExploreState( scene, hud, oData ));
+	ret.addState("Asm", new AsmState( scene, hud, oData ));
 	
 	ret.addTransition( "Load", "loadComplete", "Asm" );
 	ret.addTransition( "Asm", "exitAsm", "Explore" );
@@ -38,7 +39,30 @@ function createLesson( scene, hud )
 	return ret;
 }
 
-var __pgGroup = undefined;
+/**
+ * @constructor
+ */
+function PenLessonOperatingData()
+{
+    this.humanoidAnimator = undefined;
+}
+ 
+/**
+ * @param {ArmatureAnimator}
+ */
+PenLessonOperatingData.prototype.setHAnimator = function ( animator )
+{
+    this.humanoidAnimator = animator;
+};
+
+/**
+ * @return {ArmatureAnimator}
+ */
+PenLessonOperatingData.prototype.getHAnimator = function ()
+{
+    return this.humanoidAnimator;
+};
+
 
 /**
  * @constructor
@@ -47,11 +71,13 @@ var __pgGroup = undefined;
  * @implements {ThreejsLoaderObserver}
  * @param {GScene} scene Scene that is driven by this state
  * @param {GHudController}
+ * @param {PenLessonOperatingData}
  */
-function LoadState( scene, hud ) 
+function LoadState( scene, hud, oData ) 
 {
     this.scene = scene;
 	this.hud = hud;
+	this.oData = oData;
 	
 	this.officeGroup = new GGroup( "officeGroup" );
 	this.penGroup = new GGroup( "penGroup" );
@@ -64,7 +90,6 @@ function LoadState( scene, hud )
 	this.penTransform = mat4.create();
 	mat4.translate(this.penTransform, this.penTransform, [1.5, 5.609, 11.5]);
 	this.penGroup.setMvMatrix(this.penTransform);
-	__pgGroup = this.penGroup;
 	
 	var humanoidTransform = mat4.create();
 	mat4.scale(humanoidTransform, humanoidTransform, [4, 4, 4]);
@@ -273,13 +298,13 @@ LoadState.prototype.onThreejsLoaderProgress = function ( loader, progress )
     this.onObjLoaderProgress( loader, progress );
 };
 
-var _humanoidAnimator = undefined;
+
 /**
  * @param {ArmatureAnimator} New armature animator connected to the loaded mesh
  */
 LoadState.prototype.onThreejsLoaderArmatureAnimatorLoaded = function ( animator ) 
 {
-    _humanoidAnimator = animator;
+    this.oData.setHAnimator( animator );
 };
 
 
@@ -291,12 +316,13 @@ LoadState.prototype.onThreejsLoaderArmatureAnimatorLoaded = function ( animator 
  * @implements {FsmState}
  * @param {GScene} scene Scene that is driven by this state
  * @param {GHudController} hud  Hud to be driven by this state
+ * @param {PenLessonOperatingData}
  */
-function ExploreState( scene, hud ) 
+function ExploreState( scene, hud, oData ) 
 {
     this.scene = scene;
 	this.hud = hud;
-	
+	this.oData = oData;
 	
 }
 /**
@@ -318,7 +344,7 @@ ExploreState.prototype.enter = function ()
 	console.debug("entering ExploreState");
 	this.camController = new GCameraController();
 	this.camController.bindCamera(this.scene.getCamera());
-    _humanoidAnimator.play();
+    this.oData.getHAnimator().play();
 };
 
 /**
@@ -338,7 +364,7 @@ ExploreState.prototype.update = function ( time )
 {
 	//this.fireSignal("startAsm");
 	this.camController.update( time );
-    _humanoidAnimator.update( time );
+    this.oData.getHAnimator().update( time );
 };
 
 
@@ -395,11 +421,13 @@ Vec3Animator.prototype.getIsComplete = function()
  * @extends {FsmMachine}
  * @param {GScene} scene Scene that is driven by this state
  * @param {GHudController} hud  Hud to be driven by this state
+ * @param {PenLessonOperatingData}
  */
-function AsmState( scene, hud ) 
+function AsmState( scene, hud, oData ) 
 {
     this.scene = scene;
 	this.hud = hud;
+	this.oData = oData;
 	FsmMachine.call( this );
 }
 

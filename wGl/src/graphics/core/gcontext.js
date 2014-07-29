@@ -37,6 +37,12 @@ function GContext( canvas )
 	var whiteCircleTexture = new GTexture(["whitecircle_1024.png"], "assets/2d/");
     
     this.gl = canvas.getContext("webgl", { antialias: true } );
+    
+    if ( undefined === this.gl ||
+         null === this.gl )
+    {
+        this.gl = canvas.getContext("experimental-webgl", { antialias: true } );
+    }
 	
     var gl = this.gl;
     

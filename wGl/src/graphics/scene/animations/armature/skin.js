@@ -44,6 +44,14 @@ Skin.prototype.draw = function( shader )
 };
 
 /**
+ * Called to delete all the resources under this drawable
+ */
+Skin.prototype.deleteResources = function () 
+{
+    this.gl.deleteBuffer( this.svertBuffer );
+};
+
+/**
  * Called to bind this object to a gl context
  * @param {WebGLRenderingContext} Context to bind to this object
  */

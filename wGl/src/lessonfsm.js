@@ -93,10 +93,10 @@ CleanState.prototype = Object.create( FsmMachine.prototype );
 CleanState.prototype.enter = function () 
 {
     var children = this.scene.getChildren();
-	var len = children.length;
-	for (var i = 0; i < len; ++i)
+	for (var len = children.length; len > 0; children = this.scene.getChildren(), len = children.length )
 	{
-		children[i].deleteResources(); 
+		children[0].deleteResources(); 
+		this.scene.removeChild( children[0] );
 	}
 	
 	while ( this.scene.removeLight(0) );

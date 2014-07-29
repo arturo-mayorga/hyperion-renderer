@@ -384,6 +384,37 @@ GScene.prototype.addMaterial = function( mat )
     this.materials[mat.getName()] = mat;
 };
 
+/** 
+ * Remove a material from the scene
+ * @param {GMaterial} material that is being removed from the scene
+ * @return {boolean} true if the material was removed false otherwise
+ */
+GScene.prototype.removeMaterial = function( mat )
+{
+    if ( undefined === this.materials[mat.getName()] )
+    {
+        return false;
+    }
+    
+    delete this.materials[mat.getName()];
+    return true;
+};
+
+/**
+ * Get the list of materials in the scene
+ * @return {Array<GMaterial>}
+ */
+GScene.prototype.getMaterials = function()
+{
+    ret = [];
+    for (var key in this.materials)
+    {
+        ret.push(this.materials[key]);
+    }
+    
+    return ret;
+};
+
 /**
  * Add a child to the scene
  * @param {SceneDrawable} Child to add to the scene

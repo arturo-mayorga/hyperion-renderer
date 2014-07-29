@@ -100,6 +100,14 @@ CleanState.prototype.enter = function ()
 	}
 	
 	while ( this.scene.removeLight(0) );
+	
+	var materials = this.scene.getMaterials();
+	
+	for ( var i in materials )
+	{
+	    this.scene.removeMaterial( materials[i] );
+	    materials[i].deleteResources();
+	}
 };
 
 /**

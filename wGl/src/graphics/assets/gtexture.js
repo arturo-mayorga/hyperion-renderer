@@ -79,7 +79,7 @@ GTexture.prototype.draw = function(glTextureTarget, textureUniform, scaleUniform
             gl.uniform2fv(scaleUniform, this.scale);
         }
     }
-}
+};
 
 /**
  * Stop the binding to this texture
@@ -87,7 +87,16 @@ GTexture.prototype.draw = function(glTextureTarget, textureUniform, scaleUniform
 GTexture.prototype.release = function()
 {
     this.gl.bindTexture(this.gl.TEXTURE_2D, null);
-}
+};
+
+/**
+ * Called to delete all the resources under this material
+ */
+GTexture.prototype.deleteResources = function()
+{
+    this.gl.deleteTexture( this.glTHandle );
+    console.debug("deleted: " + this.name);
+};
 
 /**
  * Called to bind this texture to a gl context
@@ -98,7 +107,7 @@ GTexture.prototype.bindToContext = function( gl )
     this.gl = gl;
     
     this.loadTexture();
-}
+};
 
 /**
  * Get the name for this texture
@@ -107,7 +116,7 @@ GTexture.prototype.bindToContext = function( gl )
 GTexture.prototype.getName = function()
 {
     return this.name;
-}
+};
 
 /**
  * Start the loading process for this texture (usually from a web serever)
@@ -121,7 +130,7 @@ GTexture.prototype.loadTexture = function()
         this.image.onload = this.handleTextureLoaded.bind(this);
         this.image.src = this.path+this.name;
     }
-}
+};
 
 /**
  * This is called as an async call whenever the image has been downloaded from the web server.
@@ -134,7 +143,7 @@ GTexture.prototype.handleTextureLoaded = function()
     }
     
     this.image.loaded = true;
-}
+};
 
 /**
  * This function is used to send the texture data over to the GPU
@@ -150,7 +159,7 @@ GTexture.prototype.sendTextureToGl = function()
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
     gl.generateMipmap(gl.TEXTURE_2D);
     gl.bindTexture(gl.TEXTURE_2D, null);
-}
+};
 
 /**
  * This is to provide an alternate construction mechanism and lets the caller set

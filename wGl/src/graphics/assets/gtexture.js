@@ -95,7 +95,6 @@ GTexture.prototype.release = function()
 GTexture.prototype.deleteResources = function()
 {
     this.gl.deleteTexture( this.glTHandle );
-    console.debug("deleted: " + this.name);
 };
 
 /**

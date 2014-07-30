@@ -29,7 +29,26 @@ FsmSignalObserver.prototype.onFsmSignal = function(signal) {};
  */
 function FsmState() 
 {
+    this.name = "?";
 }
+
+/**
+ * Set state name
+ * @param {string} name
+ */
+FsmState.prototype.setName = function( name )
+{
+    this.name = name;
+};
+
+/**
+ * Get state name
+ * @return {string}
+ */
+FsmState.prototype.getName = function()
+{
+    return this.name;
+};
 
 /**
  * Update the state machine
@@ -178,6 +197,7 @@ function FsmMachine()
 	this.nameStateMap = {};
 	this.currentStateName = "";
 	this.signalQueue = [];
+	this.name = "~";
 }
 
 FsmMachine.prototype = Object.create( FsmState.prototype );
@@ -192,6 +212,7 @@ FsmMachine.prototype.addState = function ( name, state )
 	state.setSignalObserver(this);
 	var transitions = new FsmStateTransitions(state);
 	this.nameStateMap[name] = transitions;
+	state.setName( this.name + "/" + name );
 };
 
 /**
@@ -203,6 +224,7 @@ FsmMachine.prototype.createSubState = function ( name, enterFn, updateFn, exitFn
 {
     var newState = new FsmSubStateWrapper( this, enterFn, updateFn, exitFn );
     this.addState( name, newState );
+    newState.setName( this.name + "/" + name );
 };
 
 /**
@@ -233,12 +255,18 @@ FsmMachine.prototype.setState = function ( stateName )
 {
 	if (this.currentStateName != "")
 	{
-		this.nameStateMap[this.currentStateName].state.exit();
+	    var oldState = this.nameStateMap[this.currentStateName].state;
+	    console.debug( "Ex: " + oldState.getName() );
+		oldState.exit();
 	}
 	
 	this.currentStateName = stateName;
 	
-	this.nameStateMap[this.currentStateName].state.enter();
+	var newState = this.nameStateMap[this.currentStateName].state;
+	
+	console.debug( "St: " + newState.getName() );
+	
+	newState.enter();
 }
 
 /**
@@ -275,9 +303,10 @@ FsmMachine.prototype.update = function ( time )
 	//     update the current state name
 	if ( nextStateName != undefined )
 	{
-		currentStateTransitions.state.exit();
+		/*currentStateTransitions.state.exit();
 		this.nameStateMap[nextStateName].state.enter();
-		this.currentStateName = nextStateName;
+		this.currentStateName = nextStateName;*/
+		this.setState( nextStateName );
 	}
 };
 

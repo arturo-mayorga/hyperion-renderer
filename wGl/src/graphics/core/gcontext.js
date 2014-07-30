@@ -43,6 +43,10 @@ function GContext( canvas )
     {
         this.gl = canvas.getContext("experimental-webgl", { antialias: true } );
     }
+    
+    canvas.onmousedown = GContext.handleMouseDown;
+    document.onmouseup = GContext.handleMouseUp;
+    document.onmousemove = GContext.handleMouseMove;
 	
     var gl = this.gl;
     
@@ -63,6 +67,21 @@ function GContext( canvas )
     gl.whiteCircleTexture = whiteCircleTexture;
     gl.whiteTexture = whiteTexture;
     gl.randomTexture = randomTexture;
+};
+
+GContext.handleMouseDown = function(ev)
+{
+    console.debug(ev);
+};
+
+GContext.handleMouseUp = function(ev)
+{
+    console.debug(ev);
+};
+
+GContext.handleMouseMove = function(ev)
+{
+    console.debug(ev);
 };
 	
 /**

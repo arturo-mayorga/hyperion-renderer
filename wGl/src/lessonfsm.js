@@ -43,6 +43,8 @@ function createLesson( scene, hud )
 	ret.addTransition( "Explore", "exitReq", "Clean" );
 	ret.addTransition( "Clean", "load", "Load" );
 	
+	ret.setName("pen");
+	
 	ret.setState("Load");
 	return ret;
 }

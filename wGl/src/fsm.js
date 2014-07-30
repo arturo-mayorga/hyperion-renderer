@@ -32,7 +32,7 @@ function FsmState()
     this.name = "?";
 }
 
-FsmState.debugEnable = false;
+FsmState.debugEnable = true;
 
 /**
  * @param {string}
@@ -238,6 +238,20 @@ FsmMachine.prototype.addState = function ( name, state )
 };
 
 /**
+ * Set state name
+ * @param {string} name
+ */
+FsmMachine.prototype.setName = function( name )
+{
+    this.name = name;
+    
+    for ( var i in this.nameStateMap )
+    {
+        this.nameStateMap[i].state.setName( this.name + "/" + i );
+    }
+};
+
+/**
  * @param {function()}
  * @param {function( number )}
  * @param {function()}
@@ -291,7 +305,7 @@ FsmMachine.prototype.setState = function ( stateName )
     FsmState.debug( newState.getName() + " [enter]" );
 	
 	newState.enter();
-}
+};
 
 /**
  * Update the state machine

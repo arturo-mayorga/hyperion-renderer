@@ -437,7 +437,6 @@ ExploreState.prototype.exit = function ()
  */
 ExploreState.prototype.update = function ( time ) 
 {
-	//this.fireSignal("startAsm");
 	this.camController.update( time );
     this.oData.getHAnimator().update( time );
     this.timeR += time;

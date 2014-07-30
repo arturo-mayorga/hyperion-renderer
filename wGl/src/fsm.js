@@ -32,6 +32,19 @@ function FsmState()
     this.name = "?";
 }
 
+FsmState.debugEnable = false;
+
+/**
+ * @param {string}
+ */
+FsmState.debug = function( str )
+{
+    if ( FsmState.debugEnable )
+    {
+        console.debug( "[FSM] " + str ); 
+    }
+};
+
 /**
  * Set state name
  * @param {string} name
@@ -91,10 +104,16 @@ FsmState.prototype.getSignalObserver = function ()
  * @param {string} signal Name of the signal to fire
  */
 FsmState.prototype.fireSignal = function (signal) 
-{
+{   
+    FsmState.debug( this.name + "::" + signal + " [fire]" );
+    
     if (this.observer != undefined)
 	{
 	    this.observer.onFsmSignal(signal);
+	}
+	else
+	{
+	    FsmState.debug( this.name + "::" + signal + " [lost]" );
 	}
 };
 
@@ -159,9 +178,12 @@ FsmSubStateWrapper.prototype.update = function ( time )
     // make sure that fired signals come from the wrapper context and
     // they propagate back to the observer of this wrapper.
     var oldObserver = this.context.getSignalObserver();
+    var oldDebugEnable = FsmState.debugEnable;
+    FsmState.debugEnable = false;
     this.context.setSignalObserver( this );
 	this.updateFn.call( this.context, time );
 	this.context.setSignalObserver( oldObserver );
+	FsmState.debugEnable = oldDebugEnable;
 	
 	while ( this.signalQueue.length > 0 )
 	{
@@ -256,7 +278,9 @@ FsmMachine.prototype.setState = function ( stateName )
 	if (this.currentStateName != "")
 	{
 	    var oldState = this.nameStateMap[this.currentStateName].state;
-	    console.debug( "Ex: " + oldState.getName() );
+	    
+        FsmState.debug( oldState.getName() + " [exit]" );
+	    
 		oldState.exit();
 	}
 	
@@ -264,7 +288,7 @@ FsmMachine.prototype.setState = function ( stateName )
 	
 	var newState = this.nameStateMap[this.currentStateName].state;
 	
-	console.debug( "St: " + newState.getName() );
+    FsmState.debug( newState.getName() + " [enter]" );
 	
 	newState.enter();
 }
@@ -289,10 +313,14 @@ FsmMachine.prototype.update = function ( time )
 			currentStateTransitions.transitions[sig];
 		if ( undefined != possibleTransitionTarget )
 		{
+            FsmState.debug( this.name + "::" + sig + " [consume]" );
+		    
 			nextStateName = possibleTransitionTarget;
 		}
 		else
 		{
+            FsmState.debug( this.name + "::" + sig + " [throw]" );
+		    
 		    this.fireSignal( sig );
 		}
 	}
@@ -303,9 +331,6 @@ FsmMachine.prototype.update = function ( time )
 	//     update the current state name
 	if ( nextStateName != undefined )
 	{
-		/*currentStateTransitions.state.exit();
-		this.nameStateMap[nextStateName].state.enter();
-		this.currentStateName = nextStateName;*/
 		this.setState( nextStateName );
 	}
 };

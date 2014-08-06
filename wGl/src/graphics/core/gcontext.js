@@ -19,6 +19,26 @@
 // SOFTWARE.
 
 /**
+ * @interface
+ */
+function IContextMouseObserver() {}
+
+/**
+ * @param {MouseEvent}
+ */
+IContextMouseObserver.prototype.onMouseDown = function( ev ) {};
+
+/**
+ * @param {MouseEvent}
+ */
+IContextMouseObserver.prototype.onMouseUp = function( ev ) {};
+
+/**
+ * @param {MouseEvent}
+ */
+IContextMouseObserver.prototype.onMouseMove = function( ev ) {};
+
+/**
  * @constructor
  */
 function GContext( canvas )
@@ -31,6 +51,7 @@ function GContext( canvas )
 	this.screenTextBuffer = undefined;
 	this.screenIndxBuffer = undefined;
 	this.currentProgram   = undefined;
+	this.mouseObservers = [];
 	
 	var whiteTexture = new GTexture(["white.jpg"], "assets/2d/");
 	var randomTexture = new GTexture(["noise_1024.png"], "assets/2d/");
@@ -70,6 +91,28 @@ function GContext( canvas )
     gl.randomTexture = randomTexture;
 };
 
+/**
+ * @param {IContextMouseObserver}
+ */
+GContext.prototype.addMouseObserver = function( observer )
+{
+    this.mouseObservers.push( observer );
+};
+
+/**
+ * @param {IContextMouseObserver}
+ */
+GContext.prototype.removeMouseObserver = function( observer )
+{
+    var i = this.mouseObservers.indexOf( observer );
+    
+    if ( i < 0 )
+    {
+        return;
+    }
+    
+    this.mouseObservers.splice( i, 1 );
+};
 
 /**
  * @param {MouseEvent}
@@ -77,6 +120,10 @@ function GContext( canvas )
 GContext.prototype.handleMouseDown = function(ev)
 {
    // console.debug(ev);
+   for ( var i in this.mouseObservers )
+   {
+       this.mouseObservers[i].onMouseDown(ev);
+   }
 };
 
 /**
@@ -85,6 +132,10 @@ GContext.prototype.handleMouseDown = function(ev)
 GContext.prototype.handleMouseUp = function(ev)
 {
    // console.debug(ev);
+   for ( var i in this.mouseObservers )
+   {
+       this.mouseObservers[i].onMouseUp(ev);
+   }
 };
 
 /**
@@ -93,6 +144,10 @@ GContext.prototype.handleMouseUp = function(ev)
 GContext.prototype.handleMouseMove = function(ev)
 {
    // console.debug(ev);
+   for ( var i in this.mouseObservers )
+   {
+       this.mouseObservers[i].onMouseMove(ev);
+   }
 };
 	
 /**

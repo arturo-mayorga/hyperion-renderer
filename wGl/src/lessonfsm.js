@@ -387,6 +387,7 @@ LoadState.prototype.onThreejsLoaderArmatureAnimatorLoaded = function ( animator 
 /**
  * @constructor
  * @implements {FsmState}
+ * @implements {IContextMouseObserver}
  * @param {PenLessonOperatingData}
  */
 function ExploreState( oData ) 
@@ -405,11 +406,30 @@ ExploreState.prototype = Object.create( FsmMachine.prototype );
  * @param {FsmSignalObserver} observer The new observer to be used
  */
 ExploreState.prototype.setSignalObserver = FsmState.prototype.setSignalObserver;
+
 /**
  * Fire the transition signal
  * @param {string} signal Name of the signal to fire
  */
 ExploreState.prototype.fireSignal = FsmState.prototype.fireSignal;
+
+/**
+ * @param {MouseEvent}
+ */
+ExploreState.prototype.onMouseDown = function( ev ) 
+{
+    this.fireSignal("exitReq");
+};
+
+/**
+ * @param {MouseEvent}
+ */
+ExploreState.prototype.onMouseUp = function( ev ) {};
+
+/**
+ * @param {MouseEvent}
+ */
+ExploreState.prototype.onMouseMove = function( ev ) {};
 
 /**
  * This function is called whenever we enter the explore state
@@ -420,6 +440,8 @@ ExploreState.prototype.enter = function ()
 	this.camController.bindCamera(this.scene.getCamera());
     this.oData.getHAnimator().play();
     this.timeR = 0;
+    
+    this.oData.context.addMouseObserver( this );
 };
 
 /**
@@ -428,6 +450,8 @@ ExploreState.prototype.enter = function ()
 ExploreState.prototype.exit = function () 
 {
 	this.camController = undefined;
+	
+	this.oData.context.removeMouseObserver( this );
 };
 
 /**

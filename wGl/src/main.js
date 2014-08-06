@@ -89,7 +89,7 @@ function mainLoop()
 	context.setHud(hud);
 	
 	
-	lesson = createLesson(scene, hud);
+	lesson = createLesson(context);
 	
 	stats = new Stats();
     stats.setMode(1); // 0: fps, 1: ms

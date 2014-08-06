@@ -106,6 +106,14 @@ GContext.prototype.setScene = function (scene_)
 };
 
 /**
+ * @return {GScene}
+ */
+GContext.prototype.getScene = function ()
+{
+    return this.scene;
+};
+
+/**
  * Set the HUD for this context
  * @param {GHudController} Controller that is being assigned to this context
  */
@@ -113,6 +121,14 @@ GContext.prototype.setHud = function ( hud_ )
 {
     this.hud = hud_;
     this.hud.bindToContext(this.gl);
+};
+
+/**
+ * @return {GHudController}
+ */
+GContext.prototype.getHud = function ()
+{
+    return this.hud;
 };
 
 /**

@@ -89,7 +89,12 @@ function mainLoop()
 	context.setHud(hud);
 	
 	
-	lesson = createLesson(context);
+	var penState = createLesson(context);
+	
+	lesson = new FsmMachine();
+	lesson.addState("Pen", penState);
+	lesson.addTransition("Pen", "cleanComplete", "Pen");
+	lesson.setState("Pen");
 	
 	stats = new Stats();
     stats.setMode(1); // 0: fps, 1: ms

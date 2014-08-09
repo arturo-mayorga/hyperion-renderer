@@ -220,6 +220,7 @@ function FsmMachine()
 	this.currentStateName = "";
 	this.signalQueue = [];
 	this.name = "~";
+	this.entryStateName = "";
 }
 
 FsmMachine.prototype = Object.create( FsmState.prototype );
@@ -307,6 +308,11 @@ FsmMachine.prototype.setState = function ( stateName )
 	newState.enter();
 };
 
+FsmMachine.prototype.setEnterState = function ( stateName )
+{
+    this.entryStateName = stateName;
+};
+
 /**
  * Update the state machine
  * @param {number} Number of milliseconds sine the last update
@@ -353,7 +359,13 @@ FsmMachine.prototype.update = function ( time )
  * This function is called each time this state 
  * is entered
  */
-FsmMachine.prototype.enter = function () {};
+FsmMachine.prototype.enter = function () 
+{
+    if ( "" !== this.entryStateName )
+    {
+        this.setState( this.entryStateName );
+    }
+};
 
 /**
  * This function is called each time this state

@@ -42,11 +42,9 @@ function createLesson( context )
 	ret.addTransition( "Load", "exitReq", "Clean" );
 	ret.addTransition( "Asm", "exitReq", "Clean" );
 	ret.addTransition( "Explore", "exitReq", "Clean" );
-	ret.addTransition( "Clean", "load", "Load" );
 	
-	ret.setName("pen");
-	
-	ret.setState("Load");
+	ret.setName("Pen");
+	ret.setEnterState("Load");
 	return ret;
 }
 
@@ -127,7 +125,6 @@ CleanState.prototype.exit = function ()
 CleanState.prototype.update = function ( time ) 
 {
     this.fireSignal("cleanComplete");
-    this.fireSignal("load");
 };
 
 /**
@@ -439,7 +436,6 @@ ExploreState.prototype.enter = function ()
 	this.camController = new GCameraController();
 	this.camController.bindCamera(this.scene.getCamera());
     this.oData.getHAnimator().play();
-    this.timeR = 0;
     
     this.oData.context.addMouseObserver( this );
 };
@@ -462,12 +458,6 @@ ExploreState.prototype.update = function ( time )
 {
 	this.camController.update( time );
     this.oData.getHAnimator().update( time );
-    this.timeR += time;
-    
-    if ( this.timeR > 300000 )
-    {
-        this.fireSignal("exitReq");
-    }
 };
 
 

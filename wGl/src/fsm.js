@@ -32,7 +32,7 @@ function FsmState()
     this.name = "?";
 }
 
-FsmState.debugEnable = true;
+FsmState.debugEnable = false;
 
 /**
  * @param {string}

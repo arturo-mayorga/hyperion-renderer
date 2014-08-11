@@ -123,6 +123,18 @@ Mesh.prototype.bindToContext = function(gl_)
 };
 
 /**
+ * Called to delete all the resources under this drawable
+ */
+Mesh.prototype.deleteResources = function () 
+{
+    this.gl.deleteBuffer( this.vertBuffer );
+    this.gl.deleteBuffer( this.tverBuffer );
+    this.gl.deleteBuffer( this.normlBuffer );
+    this.gl.deleteBuffer( this.indexBuffer );
+    this.valid = false;
+};
+
+/**
  * Draw this object
  * @param {Array.<number>} List of numbers representing the parent 4 by 4 view matrix
  * @param {Array.<GMaterial>} List of materials to use for rendering

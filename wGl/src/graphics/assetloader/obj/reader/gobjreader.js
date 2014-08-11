@@ -113,7 +113,7 @@ GObjReader.prototype.update = function (time)
 	}
 	else
 	{
-		console.debug("Loaded " + this.polyCount + " polygons in " + Object.keys(this.groupMap).length + " objects.");
+		//console.debug("Loaded " + this.polyCount + " polygons in " + Object.keys(this.groupMap).length + " objects.");
 		this.isLoadComplete = true;
 	}
 	

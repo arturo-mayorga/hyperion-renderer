@@ -60,7 +60,7 @@ function GMtlReader( mtlStrA, path )
 		}
 	}
 	
-	console.debug("Loaded " + Object.keys(this.materials).length + " materials.");
+	//console.debug("Loaded " + Object.keys(this.materials).length + " materials.");
 }
 
 /**

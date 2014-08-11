@@ -234,7 +234,7 @@ ThreejsReader.prototype.update = function (time)
         this.isLoadComplete = true;
         this.totalProgress = 1;
         this.observer.onNewMeshAvailable( this.currentMesh, this.currentSkin );
-        console.debug("Loaded " + this.polyCount + " polygons in 1 object.");
+        // console.debug("Loaded " + this.polyCount + " polygons in 1 object.");
     }
 };
 

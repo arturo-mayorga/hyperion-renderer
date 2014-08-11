@@ -101,6 +101,11 @@ SceneDrawable.prototype.setMvMatrix = function( mat ) {};
 SceneDrawable.prototype.bindToContext = function( gl ) {};
 
 /**
+ * Called to delete all the resources under this drawable
+ */
+SceneDrawable.prototype.deleteResources = function () {};
+
+/**
  * Draw this group
  * @param {Array.<number>} List of numbers representing the parent 4 by 4 view matrix
  * @param {Array.<GMaterial>} List of materials to use for rendering

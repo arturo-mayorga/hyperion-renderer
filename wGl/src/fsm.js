@@ -29,7 +29,39 @@ FsmSignalObserver.prototype.onFsmSignal = function(signal) {};
  */
 function FsmState() 
 {
+    this.name = "?";
 }
+
+FsmState.debugEnable = false;
+
+/**
+ * @param {string}
+ */
+FsmState.debug = function( str )
+{
+    if ( FsmState.debugEnable )
+    {
+        console.debug( "[FSM] " + str ); 
+    }
+};
+
+/**
+ * Set state name
+ * @param {string} name
+ */
+FsmState.prototype.setName = function( name )
+{
+    this.name = name;
+};
+
+/**
+ * Get state name
+ * @return {string}
+ */
+FsmState.prototype.getName = function()
+{
+    return this.name;
+};
 
 /**
  * Update the state machine
@@ -72,10 +104,16 @@ FsmState.prototype.getSignalObserver = function ()
  * @param {string} signal Name of the signal to fire
  */
 FsmState.prototype.fireSignal = function (signal) 
-{
+{   
+    FsmState.debug( this.name + "::" + signal + " [fire]" );
+    
     if (this.observer != undefined)
 	{
 	    this.observer.onFsmSignal(signal);
+	}
+	else
+	{
+	    FsmState.debug( this.name + "::" + signal + " [lost]" );
 	}
 };
 
@@ -140,9 +178,12 @@ FsmSubStateWrapper.prototype.update = function ( time )
     // make sure that fired signals come from the wrapper context and
     // they propagate back to the observer of this wrapper.
     var oldObserver = this.context.getSignalObserver();
+    var oldDebugEnable = FsmState.debugEnable;
+    FsmState.debugEnable = false;
     this.context.setSignalObserver( this );
 	this.updateFn.call( this.context, time );
 	this.context.setSignalObserver( oldObserver );
+	FsmState.debugEnable = oldDebugEnable;
 	
 	while ( this.signalQueue.length > 0 )
 	{
@@ -178,6 +219,8 @@ function FsmMachine()
 	this.nameStateMap = {};
 	this.currentStateName = "";
 	this.signalQueue = [];
+	this.name = "~";
+	this.entryStateName = "";
 }
 
 FsmMachine.prototype = Object.create( FsmState.prototype );
@@ -192,6 +235,21 @@ FsmMachine.prototype.addState = function ( name, state )
 	state.setSignalObserver(this);
 	var transitions = new FsmStateTransitions(state);
 	this.nameStateMap[name] = transitions;
+	state.setName( this.name + "/" + name );
+};
+
+/**
+ * Set state name
+ * @param {string} name
+ */
+FsmMachine.prototype.setName = function( name )
+{
+    this.name = name;
+    
+    for ( var i in this.nameStateMap )
+    {
+        this.nameStateMap[i].state.setName( this.name + "/" + i );
+    }
 };
 
 /**
@@ -203,6 +261,7 @@ FsmMachine.prototype.createSubState = function ( name, enterFn, updateFn, exitFn
 {
     var newState = new FsmSubStateWrapper( this, enterFn, updateFn, exitFn );
     this.addState( name, newState );
+    newState.setName( this.name + "/" + name );
 };
 
 /**
@@ -233,13 +292,26 @@ FsmMachine.prototype.setState = function ( stateName )
 {
 	if (this.currentStateName != "")
 	{
-		this.nameStateMap[this.currentStateName].state.exit();
+	    var oldState = this.nameStateMap[this.currentStateName].state;
+	    
+        FsmState.debug( oldState.getName() + " [exit]" );
+	    
+		oldState.exit();
 	}
 	
 	this.currentStateName = stateName;
 	
-	this.nameStateMap[this.currentStateName].state.enter();
-}
+	var newState = this.nameStateMap[this.currentStateName].state;
+	
+    FsmState.debug( newState.getName() + " [enter]" );
+	
+	newState.enter();
+};
+
+FsmMachine.prototype.setEnterState = function ( stateName )
+{
+    this.entryStateName = stateName;
+};
 
 /**
  * Update the state machine
@@ -261,10 +333,14 @@ FsmMachine.prototype.update = function ( time )
 			currentStateTransitions.transitions[sig];
 		if ( undefined != possibleTransitionTarget )
 		{
+            FsmState.debug( this.name + "::" + sig + " [consume]" );
+		    
 			nextStateName = possibleTransitionTarget;
 		}
 		else
 		{
+            FsmState.debug( this.name + "::" + sig + " [throw]" );
+		    
 		    this.fireSignal( sig );
 		}
 	}
@@ -275,9 +351,7 @@ FsmMachine.prototype.update = function ( time )
 	//     update the current state name
 	if ( nextStateName != undefined )
 	{
-		currentStateTransitions.state.exit();
-		this.nameStateMap[nextStateName].state.enter();
-		this.currentStateName = nextStateName;
+		this.setState( nextStateName );
 	}
 };
 
@@ -285,7 +359,13 @@ FsmMachine.prototype.update = function ( time )
  * This function is called each time this state 
  * is entered
  */
-FsmMachine.prototype.enter = function () {};
+FsmMachine.prototype.enter = function () 
+{
+    if ( "" !== this.entryStateName )
+    {
+        this.setState( this.entryStateName );
+    }
+};
 
 /**
  * This function is called each time this state

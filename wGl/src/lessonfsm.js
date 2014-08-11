@@ -438,6 +438,12 @@ ExploreState.prototype.enter = function ()
     this.oData.getHAnimator().play();
     
     this.oData.context.addMouseObserver( this );
+    
+    // this.scene.addChild( new Cuboid(1.5, 1.5, 1.5, "cube") );
+    // this.scene.addChild( new Cylinder(0.5, 2, 50, "cylinder") );
+    // this.scene.addChild( new Torus(1, .25, 50, 50, "torus") );
+    // this.scene.addChild( new Sphere(1, 50, 25, "sphere") );
+    // this.scene.addChild( new Cone(0.5, 2, 50, "cone") );
 };
 
 /**

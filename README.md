@@ -13,7 +13,7 @@ You can also build the optimized version and open [localhost/wGl/release.html]. 
 Contributing
 ============
 1. Get a GitHub account.
-2. Fork the repository on GitHub [https://github.com/ArmatureLabs/hyperion-renderer].
+2. Fork the repository on GitHub [https://github.com/QvantLabs/hyperion-renderer].
 3. Make sure an issue ticket exists for the contribution (enhancement, bug fix, etc...)
 4. Make changes to you clone of the repository.
 5. Submit a pull request.

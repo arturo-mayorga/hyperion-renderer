@@ -104,6 +104,15 @@ ArmatureMeshDecorator.prototype.draw = function( parentMvMat, materials, shader,
 };
 
 /**
+ * Called to delete all the resources under this drawable
+ */
+ArmatureMeshDecorator.prototype.deleteResources = function () 
+{
+    this.skin.deleteResources();
+    MeshDecorator.prototype.deleteResources.call( this );
+};
+
+/**
  * Called to bind this object to a gl context
  * @param {WebGLRenderingContext} Context to bind to this object
  */

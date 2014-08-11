@@ -80,6 +80,18 @@ GGroup.prototype.bindToContext = function( gl )
 };
 
 /**
+ * Called to delete all the resources under this drawable
+ */
+GGroup.prototype.deleteResources = function () 
+{
+	var childCount = this.children.length;
+	for (var i = 0; i < childCount; ++i)
+	{
+		this.children[i].deleteResources();
+	}
+};
+
+/**
  * Add a child to this group
  * @param {SceneDrawable} Child to add to this group
  */

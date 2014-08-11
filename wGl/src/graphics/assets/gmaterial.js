@@ -36,6 +36,24 @@ function GMaterial ( name )
 }
 
 /**
+ * Called to delete all the resources under this material
+ */
+GMaterial.prototype.deleteResources = function()
+{
+    if (this.mapKd !== undefined &&
+        this.mapKd !== this.gl.whiteTexture ) 
+    {
+        this.mapKd.deleteResources();
+    } 
+    
+    if ( undefined !== this.mapBump &&
+         this.mapBump !== this.gl.whiteTexture )
+    {
+        this.mapBump.deleteResources();
+    } 
+};
+
+/**
  * Called to bind this material to a gl context
  * @param {WebGLRenderingContext} Context to bind to this texture
  */

@@ -19,6 +19,26 @@
 // SOFTWARE.
 
 /**
+ * @interface
+ */
+function IContextMouseObserver() {}
+
+/**
+ * @param {MouseEvent}
+ */
+IContextMouseObserver.prototype.onMouseDown = function( ev ) {};
+
+/**
+ * @param {MouseEvent}
+ */
+IContextMouseObserver.prototype.onMouseUp = function( ev ) {};
+
+/**
+ * @param {MouseEvent}
+ */
+IContextMouseObserver.prototype.onMouseMove = function( ev ) {};
+
+/**
  * @constructor
  */
 function GContext( canvas )
@@ -31,12 +51,24 @@ function GContext( canvas )
 	this.screenTextBuffer = undefined;
 	this.screenIndxBuffer = undefined;
 	this.currentProgram   = undefined;
+	this.mouseObservers = [];
 	
 	var whiteTexture = new GTexture(["white.jpg"], "assets/2d/");
 	var randomTexture = new GTexture(["noise_1024.png"], "assets/2d/");
 	var whiteCircleTexture = new GTexture(["whitecircle_1024.png"], "assets/2d/");
     
     this.gl = canvas.getContext("webgl", { antialias: true } );
+    
+    if ( undefined === this.gl ||
+         null === this.gl )
+    {
+        this.gl = canvas.getContext("experimental-webgl", { antialias: true } );
+    }
+    
+    var _this = this;
+    canvas.onmousedown = function(ev) {_this.handleMouseDown(ev);}
+    document.onmouseup = function(ev) {_this.handleMouseUp(ev);}
+    document.onmousemove = function(ev) {_this.handleMouseMove(ev);}
 	
     var gl = this.gl;
     
@@ -58,6 +90,65 @@ function GContext( canvas )
     gl.whiteTexture = whiteTexture;
     gl.randomTexture = randomTexture;
 };
+
+/**
+ * @param {IContextMouseObserver}
+ */
+GContext.prototype.addMouseObserver = function( observer )
+{
+    this.mouseObservers.push( observer );
+};
+
+/**
+ * @param {IContextMouseObserver}
+ */
+GContext.prototype.removeMouseObserver = function( observer )
+{
+    var i = this.mouseObservers.indexOf( observer );
+    
+    if ( i < 0 )
+    {
+        return;
+    }
+    
+    this.mouseObservers.splice( i, 1 );
+};
+
+/**
+ * @param {MouseEvent}
+ */
+GContext.prototype.handleMouseDown = function(ev)
+{
+   // console.debug(ev);
+   for ( var i in this.mouseObservers )
+   {
+       this.mouseObservers[i].onMouseDown(ev);
+   }
+};
+
+/**
+ * @param {MouseEvent}
+ */
+GContext.prototype.handleMouseUp = function(ev)
+{
+   // console.debug(ev);
+   for ( var i in this.mouseObservers )
+   {
+       this.mouseObservers[i].onMouseUp(ev);
+   }
+};
+
+/**
+ * @param {MouseEvent}
+ */
+GContext.prototype.handleMouseMove = function(ev)
+{
+   // console.debug(ev);
+   for ( var i in this.mouseObservers )
+   {
+       this.mouseObservers[i].onMouseMove(ev);
+   }
+};
 	
 /**
  * Set the Scene for this context
@@ -70,6 +161,14 @@ GContext.prototype.setScene = function (scene_)
 };
 
 /**
+ * @return {GScene}
+ */
+GContext.prototype.getScene = function ()
+{
+    return this.scene;
+};
+
+/**
  * Set the HUD for this context
  * @param {GHudController} Controller that is being assigned to this context
  */
@@ -77,6 +176,14 @@ GContext.prototype.setHud = function ( hud_ )
 {
     this.hud = hud_;
     this.hud.bindToContext(this.gl);
+};
+
+/**
+ * @return {GHudController}
+ */
+GContext.prototype.getHud = function ()
+{
+    return this.hud;
 };
 
 /**

@@ -283,6 +283,22 @@ GScene.prototype.addLight = function( light )
 };
 
 /**
+ * Remove a light from the scene
+ * @param {number} light that we want to delete
+ * @return {boolean} true if the light was deleted, false otherwise
+ */
+GScene.prototype.removeLight = function( index )
+{
+    if ( index >= this.lights.length )
+    {
+        return false;
+    }
+    
+    this.lights.splice( index, 1 );
+    return true;
+};
+
+/**
  * Add a material to the scene
  * @param {GMaterial} New material to add to the scene
  */
@@ -291,6 +307,37 @@ GScene.prototype.addMaterial = function( mat )
     var gl = this.gl;
     mat.bindToContext( gl );
     this.materials[mat.getName()] = mat;
+};
+
+/** 
+ * Remove a material from the scene
+ * @param {GMaterial} material that is being removed from the scene
+ * @return {boolean} true if the material was removed false otherwise
+ */
+GScene.prototype.removeMaterial = function( mat )
+{
+    if ( undefined === this.materials[mat.getName()] )
+    {
+        return false;
+    }
+    
+    delete this.materials[mat.getName()];
+    return true;
+};
+
+/**
+ * Get the list of materials in the scene
+ * @return {Array<GMaterial>}
+ */
+GScene.prototype.getMaterials = function()
+{
+    ret = [];
+    for (var key in this.materials)
+    {
+        ret.push(this.materials[key]);
+    }
+    
+    return ret;
 };
 
 /**
@@ -302,6 +349,22 @@ GScene.prototype.addChild = function( child )
     child.bindToContext( this.gl );
     child.setObserver( this );
     this.children.push( child );
+};
+
+/**
+ * Remove a child from the scene
+ * @param {SceneDrawable} Child to remove from the scene
+ */
+GScene.prototype.removeChild = function( child )
+{
+    var i = this.children.indexOf( child );
+    
+    if ( i < 0 )
+    {
+        return;
+    }
+    
+    this.children.splice( i, 1 );
 };
 
 /**

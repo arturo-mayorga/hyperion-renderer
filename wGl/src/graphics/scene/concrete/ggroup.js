@@ -20,10 +20,13 @@
 
 /**
  * @constructor
+ * @implements {SceneDrawable}
  * @param {string} Name for this group
  */
 function GGroup( name )
 {
+    SceneDrawable.call( this );
+    
 	this.name = name;
 	this.children = [];
     this.drawMvMatrix = mat4.create(); 

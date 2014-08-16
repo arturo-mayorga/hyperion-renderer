@@ -20,6 +20,7 @@
 
 /**
  * @constructor
+ * @implements {SceneDrawable}
  * @param {Array.<number>} Buffer containing the vertices for this object
  * @param {Array.<number>} Buffer containing the texture vertices for this object
  * @param {Array.<number>} Buffer containing the normals for this object
@@ -28,6 +29,8 @@
  */
 function Mesh( verts, tverts, normals, indices, name )
 {
+    SceneDrawable.call( this );
+     
     this.vertBuffer = undefined;
     this.tverBuffer = undefined;
     this.normlBuffer = undefined;

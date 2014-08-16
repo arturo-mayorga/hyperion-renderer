@@ -41,24 +41,26 @@ GRenderDeferredStrategy.prototype.configure = function()
     {
         "blur-vs.c":undefined,
         "blur-fs.c":undefined,
+        "colorspec-vs.c":undefined,
+        "colorspec-fs.c":undefined,
+        "depth-fs.c":undefined,
+        "depth-vs.c":undefined,
         "fullscr-vs.c":undefined,
         "fullscr-fs.c":undefined,
+        "light-fs.c":undefined,
+        "light-vs.c":undefined,
+        "normaldepth-fs.c":undefined,
+        "normaldepth-vs.c":undefined,
         "fxaa-vs.c":undefined,
         "fxaa-fs.c":undefined,
+        "objid-fs.c":undefined,
+        "objid-vs.c":undefined,
+        "position-fs.c":undefined,
+        "position-vs.c":undefined,
         "shadowmap-vs.c":undefined,
         "shadowmap-fs.c":undefined,
         "ssao-vs.c":undefined,
         "ssao-fs.c":undefined,
-        "colorspec-vs.c":undefined,
-        "colorspec-fs.c":undefined,
-        "normaldepth-fs.c":undefined,
-        "normaldepth-vs.c":undefined,
-        "depth-fs.c":undefined,
-        "depth-vs.c":undefined,
-        "position-fs.c":undefined,
-        "position-vs.c":undefined,
-        "light-fs.c":undefined,
-        "light-vs.c":undefined,
         "tonemap-fs.c":undefined,
         "tonemap-vs.c":undefined
     };
@@ -224,6 +226,7 @@ GRenderDeferredStrategy.prototype.initShaders = function ()
     this.programs.normaldepth = new ShaderComposite( shaderSrcMap["normaldepth-vs.c"], shaderSrcMap["normaldepth-fs.c"] );
     this.programs.position    = new ShaderComposite( shaderSrcMap["position-vs.c"],    shaderSrcMap["position-fs.c"]    );
     this.programs.depth       = new ShaderComposite( shaderSrcMap["depth-vs.c"],       shaderSrcMap["depth-fs.c"]       );
+    this.programs.objid       = new ShaderComposite( shaderSrcMap["objid-vs.c"],       shaderSrcMap["objid-fs.c"]       );
 
     for ( var key in this.programs )
     {
@@ -290,6 +293,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var colorPass = new GGeometryRenderPassCmd( this.gl, this.programs.colorspec, this.frameBuffers.color );
     var normalPass = new GGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.normal );
     var positionPass = new GGeometryRenderPassCmd( this.gl, this.programs.position, this.frameBuffers.position );
+    var objidPass = new GGeometryRenderPassCmd( this.gl, this.programs.objid, this.frameBuffers.objid );
     var clearPhongLightPong = new GRenderPassClearCmd( this.gl, this.frameBuffers.phongLightPong );
     
     var clearShadowmap = new GRenderPassClearCmd( this.gl, this.frameBuffers.shadowmapPong );
@@ -350,6 +354,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     preCmds.push( normalPass );
     preCmds.push( positionPass );
     preCmds.push( colorPass );
+    preCmds.push( objidPass );
     preCmds.push( clearPhongLightPong );
     
     shadowCmds.push( clearShadowmap );
@@ -432,7 +437,7 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.setHRec(0, 0, 1, 1);
     this.drawScreenBuffer(this.programs.fxaa); 
     
-    /*this.frameBuffers.ssao.bindTexture(gl.TEXTURE0, "color");
+    /*this.frameBuffers.objid.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(-0.125+0.75, 0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.programs.fxaa);*/
     
@@ -536,6 +541,11 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     frameBuffer.addBufferTexture(texCfgFloat);
     frameBuffer.complete();
     this.frameBuffers.position = frameBuffer;
+    
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
+    frameBuffer.addBufferTexture(texCfgFloat);
+    frameBuffer.complete();
+    this.frameBuffers.objid = frameBuffer;
     
     frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfgFloat);

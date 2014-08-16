@@ -11,7 +11,7 @@ varying highp vec4 vpPosition;
 
 void main(void)
 {
-    gl_FragColor = vec4(uObjid.xyz, vpPosition.z); 
+    gl_FragColor = vec4(uObjid.xyz, 1.0);//vpPosition.z); 
 }
 
 

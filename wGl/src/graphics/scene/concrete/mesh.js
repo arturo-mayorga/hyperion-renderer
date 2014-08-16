@@ -204,6 +204,11 @@ Mesh.prototype.draw = function( parentMvMat, materials, shader, drawMode )
         this.material.draw( shader );
     }
     
+    if ( null != shader.uniforms.objid )
+    {
+        gl.uniform4fv(shader.uniforms.objid, this.objid);
+    }
+    
     if (this.indexBuffer.numItems !=  this.normlBuffer.numItems  ||
         this.indexBuffer.numItems !=  this.tverBuffer.numItems || 
         this.indexBuffer.numItems != this.vertBuffer.numItems)

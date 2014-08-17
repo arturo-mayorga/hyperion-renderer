@@ -530,6 +530,8 @@ function AsmState( oData )
 	FsmMachine.call( this );
 	this.needsSubStateInit = true;
 	this.lastObjIdClicked = -1;
+	
+	this.autoAdvanceAssembly = false;
 }
 
 AsmState.prototype = Object.create( FsmMachine.prototype );
@@ -554,11 +556,27 @@ AsmState.prototype.onMouseUp = function( ev ) {};
 AsmState.prototype.onMouseMove = function( ev ) {};
 
 /**
+ * @param {number}
+ * @return {boolean}
+ */
+AsmState.prototype.stepTransitionCheck = function( targetObj )
+{
+    if ( this.autoAdvanceAssembly )
+    {
+        return true;
+    }
+    
+    return ( targetObj === this.lastObjIdClicked );
+};
+
+/**
  * This function is called whenever we enter the assembly state
  */
 AsmState.prototype.enter = function () 
 {	
     this.oData.context.addMouseObserver( this );
+    
+    this.autoAdvanceAssembly = !(this.autoAdvanceAssembly);
     
 	if ( this.needsSubStateInit )
 	{
@@ -701,7 +719,7 @@ AsmState.prototype.moveCam = function (time)
 	if (this.lookAtAnimator.getIsComplete() && 
 		this.upAnimator.getIsComplete() && 
 	    this.eyeAnimator.getIsComplete() && 
-	    this.ink.children[1].getObjId() === this.lastObjIdClicked )
+	    this.stepTransitionCheck(this.ink.children[1].getObjId()) )
 	{
 		this.fireSignal("done");
 	}
@@ -743,7 +761,7 @@ AsmState.prototype.grabInk = function (time)
 	this.ink.setMvMatrix(transform);
 	
 	if ( this.inkAnimator.getIsComplete() && 
-	    this.spring.children[0].getObjId() === this.lastObjIdClicked )
+	    this.stepTransitionCheck(this.spring.children[0].getObjId()))
 	{
 		this.fireSignal("done");
 	}
@@ -822,7 +840,7 @@ AsmState.prototype.installSpring = function (time)
 	this.ink.setMvMatrix(transform);
 	
 	if ( this.inkAnimator.getIsComplete() && 
-	     this.axle.children[0].getObjId() === this.lastObjIdClicked )
+	     this.stepTransitionCheck(this.axle.children[0].getObjId()) )
 	{
 		
 		this.fireSignal("done");
@@ -900,7 +918,7 @@ AsmState.prototype.installAxle = function (time)
 	this.axle.setMvMatrix(transform);
 	
 	if ( this.axleAnimator.getIsComplete() && 
-	     this.housing.children[0].getObjId() === this.lastObjIdClicked )
+	     this.stepTransitionCheck(this.housing.children[0].getObjId()) )
 	{
 		this.fireSignal("done");
 	}
@@ -988,7 +1006,7 @@ AsmState.prototype.installHousing = function (time)
 	
 	if ( this.asmAnimator.getIsComplete() &&
          this.inkAnimator.getIsComplete() && 
-	     this.grip.children[0].getObjId() === this.lastObjIdClicked )
+	     this.stepTransitionCheck(this.grip.children[0].getObjId()) )
 	{
 		this.fireSignal("done");
 	}
@@ -1065,7 +1083,7 @@ AsmState.prototype.installGrip = function (time)
 	this.grip.setMvMatrix(transform);
 	
 	if ( this.housingAnimator.getIsComplete() && 
-	     this.cylinder.children[0].getObjId() === this.lastObjIdClicked )
+	     this.stepTransitionCheck(this.cylinder.children[0].getObjId()) )
 	{
 		this.fireSignal("done");
 	}
@@ -1143,7 +1161,7 @@ AsmState.prototype.installCylinder = function (time)
 	this.cylinder.setMvMatrix(transform);
 	
 	if ( this.cylinderAnimator.getIsComplete() && 
-	     this.clip.children[0].getObjId() === this.lastObjIdClicked )
+	     this.stepTransitionCheck(this.clip.children[0].getObjId()) )
 	{
 		this.fireSignal("done");
 	}
@@ -1228,7 +1246,7 @@ AsmState.prototype.installClip = function (time)
 	this.clip.setMvMatrix(transform);
 	
 	if ( this.clipAnimator.getIsComplete() && 
-	     this.gum.children[0].getObjId() === this.lastObjIdClicked )
+	     this.stepTransitionCheck(this.gum.children[0].getObjId()) )
 	{
 		this.fireSignal("done");
 	}

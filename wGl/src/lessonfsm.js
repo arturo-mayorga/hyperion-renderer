@@ -648,11 +648,8 @@ AsmState.prototype.enter = function ()
 	    housing: this.housing,
 	    grip: this.grip   
 	};
-    
-   
-    
+	
     this.setState( "moveCam" );
-    
 };
 
 /**
@@ -703,7 +700,8 @@ AsmState.prototype.moveCam = function (time)
 	
 	if (this.lookAtAnimator.getIsComplete() && 
 		this.upAnimator.getIsComplete() && 
-	    this.eyeAnimator.getIsComplete())
+	    this.eyeAnimator.getIsComplete() && 
+	    this.ink.children[1].getObjId() === this.lastObjIdClicked )
 	{
 		this.fireSignal("done");
 	}
@@ -744,7 +742,8 @@ AsmState.prototype.grabInk = function (time)
 	mat4.translate(transform, transform, this.trans);
 	this.ink.setMvMatrix(transform);
 	
-	if ( this.inkAnimator.getIsComplete() )
+	if ( this.inkAnimator.getIsComplete() && 
+	    this.spring.children[0].getObjId() === this.lastObjIdClicked )
 	{
 		this.fireSignal("done");
 	}
@@ -822,7 +821,8 @@ AsmState.prototype.installSpring = function (time)
 	mat4.translate(transform, transform, this.trans);
 	this.ink.setMvMatrix(transform);
 	
-	if ( this.inkAnimator.getIsComplete() )
+	if ( this.inkAnimator.getIsComplete() && 
+	     this.axle.children[0].getObjId() === this.lastObjIdClicked )
 	{
 		
 		this.fireSignal("done");
@@ -899,7 +899,8 @@ AsmState.prototype.installAxle = function (time)
 	mat4.translate(transform, transform, this.trans);
 	this.axle.setMvMatrix(transform);
 	
-	if ( this.axleAnimator.getIsComplete() )
+	if ( this.axleAnimator.getIsComplete() && 
+	     this.housing.children[0].getObjId() === this.lastObjIdClicked )
 	{
 		this.fireSignal("done");
 	}
@@ -986,7 +987,8 @@ AsmState.prototype.installHousing = function (time)
 	this.housing.setMvMatrix(transform);
 	
 	if ( this.asmAnimator.getIsComplete() &&
-         this.inkAnimator.getIsComplete() )
+         this.inkAnimator.getIsComplete() && 
+	     this.grip.children[0].getObjId() === this.lastObjIdClicked )
 	{
 		this.fireSignal("done");
 	}
@@ -1062,7 +1064,8 @@ AsmState.prototype.installGrip = function (time)
 	mat4.translate(transform, transform, this.trans);
 	this.grip.setMvMatrix(transform);
 	
-	if ( this.housingAnimator.getIsComplete() )
+	if ( this.housingAnimator.getIsComplete() && 
+	     this.cylinder.children[0].getObjId() === this.lastObjIdClicked )
 	{
 		this.fireSignal("done");
 	}
@@ -1139,7 +1142,8 @@ AsmState.prototype.installCylinder = function (time)
 	mat4.translate(transform, transform, this.trans);
 	this.cylinder.setMvMatrix(transform);
 	
-	if ( this.cylinderAnimator.getIsComplete() )
+	if ( this.cylinderAnimator.getIsComplete() && 
+	     this.clip.children[0].getObjId() === this.lastObjIdClicked )
 	{
 		this.fireSignal("done");
 	}
@@ -1223,7 +1227,8 @@ AsmState.prototype.installClip = function (time)
 	mat4.translate(transform, transform, this.trans);
 	this.clip.setMvMatrix(transform);
 	
-	if ( this.clipAnimator.getIsComplete() )
+	if ( this.clipAnimator.getIsComplete() && 
+	     this.gum.children[0].getObjId() === this.lastObjIdClicked )
 	{
 		this.fireSignal("done");
 	}

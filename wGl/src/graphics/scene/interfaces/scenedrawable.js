@@ -54,6 +54,7 @@ function SceneDrawable()
 {
     this.observer = undefined;
     var objid_ = SceneDrawable.instanceCounter;
+    this.objid_ = objid_;
     this.objid = [ (0x000000ff & (objid_>>16))/255, 
                    (0x000000ff & (objid_>>8))/255, 
                    (0x000000ff & objid_)/255, 1];
@@ -62,6 +63,13 @@ function SceneDrawable()
 
 SceneDrawable.instanceCounter = 0;
 
+/** 
+ * @param {number}
+ */
+SceneDrawable.prototype.getObjId = function()
+{
+    return this.objid_;
+};
 
 /**
  * Set the observer for this drawable

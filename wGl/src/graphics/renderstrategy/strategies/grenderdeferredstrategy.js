@@ -31,6 +31,8 @@ function GRenderDeferredStrategy( gl )
     this.extensions.stdDeriv = gl.getExtension('OES_standard_derivatives');
 }
 
+GRenderDeferredStrategy.prototype = Object.create( GRenderStrategy.prototype );
+
 /**
  * Configures the strategy and starts the download process for the shader source
  */
@@ -462,6 +464,12 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
 };
 
 GRenderDeferredStrategy.tempObjIdA = new Uint8Array(4);
+
+/**
+ * Get the object id of the object at the provided mouse location
+ * @param {number}
+ * @param {number}
+ */
 GRenderDeferredStrategy.prototype.getObjectIdAt = function ( x, y )
 {
     this.frameBuffers.objid.getColorValueAt(x, y, GRenderDeferredStrategy.tempObjIdA);

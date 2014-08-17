@@ -168,3 +168,16 @@ GFrameBuffer.prototype.getGTexture = function ( name )
     return ret;
 };
 
+/**
+ * Used to sample the color texture of the frame buffer
+ * @param {number} x coordinate for sampling
+ * @param {number} y coordinate for sampling
+ * @param {Array<number>} out argument with the returned value
+ */
+GFrameBuffer.prototype.getColorValueAt = function( x, y, outArg )
+{
+    this.bindBuffer();
+    var gl = this.cfg.gl;
+    gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, outArg);
+};
+

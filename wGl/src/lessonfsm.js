@@ -412,8 +412,9 @@ ExploreState.prototype.fireSignal = FsmState.prototype.fireSignal;
 
 /**
  * @param {MouseEvent}
+ * @param {number}
  */
-ExploreState.prototype.onMouseDown = function( ev ) 
+ExploreState.prototype.onMouseDown = function( ev, objid ) 
 {
     this.fireSignal("exitReq");
 };
@@ -518,6 +519,7 @@ Vec3Animator.prototype.getIsComplete = function()
 /**
  * @constructor
  * @extends {FsmMachine}
+ * @implements {IContextMouseObserver}
  * @param {PenLessonOperatingData}
  */
 function AsmState( oData ) 
@@ -527,16 +529,37 @@ function AsmState( oData )
 	this.oData = oData;
 	FsmMachine.call( this );
 	this.needsSubStateInit = true;
-	
+	this.lastObjIdClicked = -1;
 }
 
 AsmState.prototype = Object.create( FsmMachine.prototype );
+
+/**
+ * @param {MouseEvent}
+ * @param {number}
+ */
+AsmState.prototype.onMouseDown = function( ev, objid ) 
+{
+    this.lastObjIdClicked = objid;
+};
+
+/**
+ * @param {MouseEvent}
+ */
+AsmState.prototype.onMouseUp = function( ev ) {};
+
+/**
+ * @param {MouseEvent}
+ */
+AsmState.prototype.onMouseMove = function( ev ) {};
 
 /**
  * This function is called whenever we enter the assembly state
  */
 AsmState.prototype.enter = function () 
 {	
+    this.oData.context.addMouseObserver( this );
+    
 	if ( this.needsSubStateInit )
 	{
         this.createSubState( "moveCam", this.moveCamEnter, this.moveCam, this.moveCamExit );
@@ -637,6 +660,7 @@ AsmState.prototype.enter = function ()
  */
 AsmState.prototype.exit = function () 
 {
+    this.oData.context.removeMouseObserver( this );
 };
 
 /**

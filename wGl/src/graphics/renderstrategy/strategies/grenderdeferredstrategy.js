@@ -432,8 +432,6 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
 	    this.frameBuffers.phongLightPing.bindTexture(gl.TEXTURE0, "color");
     }
     
-    
-    
     this.setHRec(0, 0, 1, 1);
     this.drawScreenBuffer(this.programs.fxaa); 
     
@@ -461,6 +459,16 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
         hud.draw(this.programs.fullScr);
     }
     this.programs.fullScr.deactivate();
+};
+
+GRenderDeferredStrategy.tempObjIdA = new Uint8Array(4);
+GRenderDeferredStrategy.prototype.getObjectIdAt = function ( x, y )
+{
+    this.frameBuffers.objid.getColorValueAt(x, y, GRenderDeferredStrategy.tempObjIdA);
+    
+    return ( GRenderDeferredStrategy.tempObjIdA[0] << 16 |
+             GRenderDeferredStrategy.tempObjIdA[1] << 8  |
+             GRenderDeferredStrategy.tempObjIdA[2] );
 };
 
 /**

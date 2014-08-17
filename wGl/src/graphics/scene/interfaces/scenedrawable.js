@@ -57,8 +57,6 @@ function SceneDrawable()
     this.objid = [ (0x000000ff & (objid_>>16))/255, 
                    (0x000000ff & (objid_>>8))/255, 
                    (0x000000ff & objid_)/255, 1];
-                   
-    console.debug( this.objid.toString() );
     SceneDrawable.instanceCounter += 1;
 }
 

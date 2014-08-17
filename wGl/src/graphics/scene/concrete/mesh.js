@@ -20,6 +20,7 @@
 
 /**
  * @constructor
+ * @implements {SceneDrawable}
  * @param {Array.<number>} Buffer containing the vertices for this object
  * @param {Array.<number>} Buffer containing the texture vertices for this object
  * @param {Array.<number>} Buffer containing the normals for this object
@@ -28,6 +29,8 @@
  */
 function Mesh( verts, tverts, normals, indices, name )
 {
+    SceneDrawable.call( this );
+     
     this.vertBuffer = undefined;
     this.tverBuffer = undefined;
     this.normlBuffer = undefined;
@@ -199,6 +202,11 @@ Mesh.prototype.draw = function( parentMvMat, materials, shader, drawMode )
     if ( this.material != undefined )
     {
         this.material.draw( shader );
+    }
+    
+    if ( null != shader.uniforms.objid )
+    {
+        gl.uniform4fv(shader.uniforms.objid, this.objid);
     }
     
     if (this.indexBuffer.numItems !=  this.normlBuffer.numItems  ||

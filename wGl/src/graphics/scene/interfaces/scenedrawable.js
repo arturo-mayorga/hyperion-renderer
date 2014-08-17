@@ -53,7 +53,14 @@ SceneDrawableObserver.prototype.onDeferredDrawRequested = function ( command, co
 function SceneDrawable()
 {
     this.observer = undefined;
+    var objid_ = SceneDrawable.instanceCounter;
+    this.objid = [ (0x000000ff & (objid_>>16))/255, 
+                   (0x000000ff & (objid_>>8))/255, 
+                   (0x000000ff & objid_)/255, 1];
+    SceneDrawable.instanceCounter += 1;
 }
+
+SceneDrawable.instanceCounter = 0;
 
 
 /**

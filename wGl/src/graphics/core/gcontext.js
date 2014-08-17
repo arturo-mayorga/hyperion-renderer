@@ -25,18 +25,19 @@ function IContextMouseObserver() {}
 
 /**
  * @param {MouseEvent}
+ * @param {number}
  */
-IContextMouseObserver.prototype.onMouseDown = function( ev ) {};
+IContextMouseObserver.prototype.onMouseDown = function( ev, objid ) {};
 
 /**
  * @param {MouseEvent}
  */
-IContextMouseObserver.prototype.onMouseUp = function( ev ) {};
+IContextMouseObserver.prototype.onMouseUp = function( ev, objid ) {};
 
 /**
  * @param {MouseEvent}
  */
-IContextMouseObserver.prototype.onMouseMove = function( ev ) {};
+IContextMouseObserver.prototype.onMouseMove = function( ev, objid ) {};
 
 /**
  * @constructor
@@ -120,9 +121,14 @@ GContext.prototype.removeMouseObserver = function( observer )
 GContext.prototype.handleMouseDown = function(ev)
 {
    // console.debug(ev);
+   
+   var x = Math.round(1024*ev.x/ev.toElement.clientWidth);
+   var y = 1024-Math.round(1024*ev.y/ev.toElement.clientHeight);
+   var objid = this.renderStrategy.getObjectIdAt(x,y);
+   
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseDown(ev);
+       this.mouseObservers[i].onMouseDown(ev, objid);
    }
 };
 
@@ -132,6 +138,11 @@ GContext.prototype.handleMouseDown = function(ev)
 GContext.prototype.handleMouseUp = function(ev)
 {
    // console.debug(ev);
+   
+   // var x = Math.round(1024*ev.x/ev.toElement.clientWidth);
+   // var y = 1024-Math.round(1024*ev.y/ev.toElement.clientHeight);
+   // var objid = this.renderStrategy.getObjectIdAt(x,y);
+   
    for ( var i in this.mouseObservers )
    {
        this.mouseObservers[i].onMouseUp(ev);
@@ -143,7 +154,12 @@ GContext.prototype.handleMouseUp = function(ev)
  */
 GContext.prototype.handleMouseMove = function(ev)
 {
-   // console.debug(ev);
+   //console.debug(ev);
+   
+   // var x = Math.round(1024*ev.x/ev.toElement.clientWidth);
+   // var y = 1024-Math.round(1024*ev.y/ev.toElement.clientHeight);
+   // var objid = this.renderStrategy.getObjectIdAt(x,y);
+   
    for ( var i in this.mouseObservers )
    {
        this.mouseObservers[i].onMouseMove(ev);

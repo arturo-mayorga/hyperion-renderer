@@ -18,6 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 // SOFTWARE.
 
+#undef HAS_OES_DERIVATIVES
+
 #ifdef HAS_OES_DERIVATIVES
 #extension GL_OES_standard_derivatives : enable
 #endif

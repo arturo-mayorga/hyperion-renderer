@@ -20,6 +20,7 @@
 
 /**
  * @constructor 
+ * @extends {Mesh}
  * @param {number} radius
  * @param {number} height
  * @param {number} sliceCount
@@ -27,6 +28,8 @@
  */
 function Cone( radius, height, sliceCount, name )
 {   
+    Mesh.call( this );
+    
     this.radiusInner = 0;
     this.radiusOuter = radius;
     this.height = height;

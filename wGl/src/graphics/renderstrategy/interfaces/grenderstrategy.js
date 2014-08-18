@@ -35,6 +35,13 @@ GRenderStrategy.prototype.isReady = function() {return false;};
  */
 GRenderStrategy.prototype.reload = function() {};
 
+/**
+ * Get the object id of the object at the provided mouse location
+ * @param {number}
+ * @param {number}
+ */
+GRenderStrategy.prototype.getObjectIdAt = function(x,y) { return -1; };
+
 
 /**
  * Draw the current strategy
@@ -42,49 +49,4 @@ GRenderStrategy.prototype.reload = function() {};
  * @param (GHudController} hud Hud controller that needs to be drawn
  */
 GRenderStrategy.prototype.draw = function ( scene, hud ) {};
-
-/**
- * @constructor
- * @param {WebGLRenderingContext}
- */
-function GRenderStrategyFactory( gl )
-{
-    this.gl = gl;
-    this.strategyMap = 
-    {
-        "simplePhong": function(gl) { return new GRenderPhongStrategy( gl ); },
-        "deferredPhong": function(gl) { return new GRenderDeferredStrategy( gl ); }
-    };
-}
-
-/**
- * Create a new render strategy using the given name
- * @param {string}
- * @return {GRenderStrategy}
- */
-GRenderStrategyFactory.prototype.createByName = function ( name )
-{
-    var createFn = this.strategyMap[name];
-    if ( undefined != createFn )
-    {
-        return createFn(this.gl);
-    }
-    
-    return null;
-};
-
-/**
- * @return {GRenderStrategy}
- */
-GRenderStrategyFactory.prototype.creteBestFit = function ()
-{ 
-    if ( -1 === navigator.userAgent.toLowerCase().indexOf("android") )
-    {
-        return this.createByName( "deferredPhong" );
-    }
-    
-    return this.createByName( "simplePhong" );
-};
-
-
 

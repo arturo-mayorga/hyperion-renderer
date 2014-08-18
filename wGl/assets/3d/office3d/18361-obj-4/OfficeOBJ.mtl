@@ -52,7 +52,7 @@ ka 0 0 0
 ks 0 0 0
 d 1
 illum 1
-map_kd -o 1 1 Gen13.jpg
+map_kd -s -1 1 Gen13.jpg
 
 newmtl layeredShader1SG
 kd 0.2 0.2 0.05

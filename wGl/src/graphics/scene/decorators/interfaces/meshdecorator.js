@@ -26,6 +26,8 @@
  */
 function MeshDecorator( mesh )
 {
+    Mesh.call( this );
+    
     this.mesh = mesh;
 }
 

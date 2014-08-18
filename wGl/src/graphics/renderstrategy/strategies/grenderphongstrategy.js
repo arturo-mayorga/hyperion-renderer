@@ -33,6 +33,8 @@ function GRenderPhongStrategy( gl )
     
 }
 
+GRenderPhongStrategy.prototype = Object.create( GRenderStrategy.prototype );
+
 /**
  * Some devices don't play nice with some extensions eve if the claim support
  * this function returns true if the known hardware support for a particular extension

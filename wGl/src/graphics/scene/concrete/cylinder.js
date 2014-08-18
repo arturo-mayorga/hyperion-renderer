@@ -20,6 +20,7 @@
 
 /**
  * @constructor 
+ * @extends {Mesh}
  * @param {number} radius
  * @param {number} height
  * @param {number} sliceCount
@@ -27,7 +28,7 @@
  */
 function Cylinder( radius, height, sliceCount, name )
 {
-    //verts, tverts, normals, indices, name
+    Mesh.call( this );
     
     this.radiusInner = 0;
     this.radiusOuter = radius;

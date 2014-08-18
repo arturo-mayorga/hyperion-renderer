@@ -16,5 +16,5 @@ Contributing
 2. Fork the repository on GitHub [https://github.com/QvantLabs/hyperion-renderer].
 3. Make sure an issue ticket exists for the contribution (enhancement, bug fix, etc...)
 4. Make changes to you clone of the repository.
-5. Submit a pull request.
+5. Submit a pull request to the dev branch.
 

@@ -20,6 +20,7 @@
 
 /**
  * @constructor 
+ * @extends {Mesh}
  * @param {number} radius
  * @param {number} sliceCount
  * @param {number} stackCount
@@ -27,6 +28,8 @@
  */
 function Sphere( radius, sliceCount, stackCount, name )
 {
+    Mesh.call( this );
+    
     this.radius = radius;
     this.sliceCount = sliceCount;
     this.sliceCountMinor = stackCount;

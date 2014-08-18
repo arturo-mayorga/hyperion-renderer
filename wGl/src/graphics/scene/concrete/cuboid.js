@@ -20,6 +20,7 @@
 
 /**
  * @constructor
+ * @extends {Mesh}
  * @param {number} Width
  * @param {number} Height
  * @param {number} Depth
@@ -27,6 +28,8 @@
  */
 function Cuboid( w, h, d, name )
 {
+    Mesh.call( this );
+    
     w*=0.5;
     h*=0.5;
     d*=0.5;

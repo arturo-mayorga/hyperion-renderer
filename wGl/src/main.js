@@ -39,8 +39,8 @@ function animate() {
         context.draw(elapsed);
 	}
 	
-	stats.end();
-	stats.begin();
+	//stats.end();
+	//stats.begin();
 }
 
 
@@ -96,16 +96,16 @@ function mainLoop()
 	lesson.addTransition("Pen", "cleanComplete", "Pen");
 	lesson.setState("Pen");
 	
-	stats = new Stats();
-    stats.setMode(1); // 0: fps, 1: ms
-    stats.begin();
+	//stats = new Stats();
+    //stats.setMode(1); // 0: fps, 1: ms
+    //stats.begin();
     
     // Align top-left
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.left = '0px';
-    stats.domElement.style.top = '0px';
+    //stats.domElement.style.position = 'absolute';
+    //stats.domElement.style.left = '0px';
+    //stats.domElement.style.top = '0px';
     
-    document.body.appendChild( stats.domElement );
+    //document.body.appendChild( stats.domElement );
 	
 	tick();
 }

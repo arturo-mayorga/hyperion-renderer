@@ -412,8 +412,9 @@ ExploreState.prototype.fireSignal = FsmState.prototype.fireSignal;
 
 /**
  * @param {MouseEvent}
+ * @param {number}
  */
-ExploreState.prototype.onMouseDown = function( ev ) 
+ExploreState.prototype.onMouseDown = function( ev, objid ) 
 {
     this.fireSignal("exitReq");
 };
@@ -518,6 +519,7 @@ Vec3Animator.prototype.getIsComplete = function()
 /**
  * @constructor
  * @extends {FsmMachine}
+ * @implements {IContextMouseObserver}
  * @param {PenLessonOperatingData}
  */
 function AsmState( oData ) 
@@ -527,16 +529,58 @@ function AsmState( oData )
 	this.oData = oData;
 	FsmMachine.call( this );
 	this.needsSubStateInit = true;
+	this.lastObjIdClicked = -1;
 	
+	this.autoAdvanceAssembly = false;
+	
+	this.floatTarget = vec3.fromValues( -0.0, 2.4, 3.8 );
+	this.floatLrOffset = 0.7;
 }
 
 AsmState.prototype = Object.create( FsmMachine.prototype );
+
+/**
+ * @param {MouseEvent}
+ * @param {number}
+ */
+AsmState.prototype.onMouseDown = function( ev, objid ) 
+{
+    this.lastObjIdClicked = objid;
+};
+
+/**
+ * @param {MouseEvent}
+ */
+AsmState.prototype.onMouseUp = function( ev ) {};
+
+/**
+ * @param {MouseEvent}
+ */
+AsmState.prototype.onMouseMove = function( ev ) {};
+
+/**
+ * @param {number}
+ * @return {boolean}
+ */
+AsmState.prototype.stepTransitionCheck = function( targetObj )
+{
+    if ( this.autoAdvanceAssembly )
+    {
+        return true;
+    }
+    
+    return ( targetObj === this.lastObjIdClicked );
+};
 
 /**
  * This function is called whenever we enter the assembly state
  */
 AsmState.prototype.enter = function () 
 {	
+    this.oData.context.addMouseObserver( this );
+    
+    this.autoAdvanceAssembly = !(this.autoAdvanceAssembly);
+    
 	if ( this.needsSubStateInit )
 	{
         this.createSubState( "moveCam", this.moveCamEnter, this.moveCam, this.moveCamExit );
@@ -625,11 +669,8 @@ AsmState.prototype.enter = function ()
 	    housing: this.housing,
 	    grip: this.grip   
 	};
-    
-   
-    
+	
     this.setState( "moveCam" );
-    
 };
 
 /**
@@ -637,6 +678,7 @@ AsmState.prototype.enter = function ()
  */
 AsmState.prototype.exit = function () 
 {
+    this.oData.context.removeMouseObserver( this );
 };
 
 /**
@@ -679,7 +721,8 @@ AsmState.prototype.moveCam = function (time)
 	
 	if (this.lookAtAnimator.getIsComplete() && 
 		this.upAnimator.getIsComplete() && 
-	    this.eyeAnimator.getIsComplete())
+	    this.eyeAnimator.getIsComplete() && 
+	    this.stepTransitionCheck(this.ink.children[1].getObjId()) )
 	{
 		this.fireSignal("done");
 	}
@@ -695,7 +738,9 @@ AsmState.prototype.moveCam = function (time)
 AsmState.prototype.grabInkEnter = function()
 {
     this.trans = vec3.fromValues( 0, 0, 0.3 );
-    var target = vec3.fromValues( 0.7, 2.8, 3.8 );
+    var target = vec3.fromValues( this.floatTarget[0] + this.floatLrOffset, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
 };
@@ -720,7 +765,8 @@ AsmState.prototype.grabInk = function (time)
 	mat4.translate(transform, transform, this.trans);
 	this.ink.setMvMatrix(transform);
 	
-	if ( this.inkAnimator.getIsComplete() )
+	if ( this.inkAnimator.getIsComplete() && 
+	    this.stepTransitionCheck(this.spring.children[0].getObjId()))
 	{
 		this.fireSignal("done");
 	}
@@ -732,7 +778,9 @@ AsmState.prototype.grabInk = function (time)
 AsmState.prototype.grabSpringEnter = function()
 {
     this.trans = vec3.fromValues( 0, 0, 0.2 );
-    var target = vec3.fromValues( -0.7, 2.8, 3.8 );
+    var target = vec3.fromValues( this.floatTarget[0] - this.floatLrOffset, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.springAnimator = new Vec3Animator( this.trans, target, 1000 );
 };
@@ -771,8 +819,13 @@ AsmState.prototype.grabSpring = function (time)
  */
 AsmState.prototype.installSpringEnter = function ()
 {
-    this.trans = vec3.fromValues( 0.7, 2.8, 3.8 );
-    var target = vec3.fromValues( -0.7, 2.8, 3.8 );
+    this.trans = vec3.fromValues( this.floatTarget[0] + this.floatLrOffset, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
+    
+    var target = vec3.fromValues( this.floatTarget[0] - this.floatLrOffset, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
 };
@@ -798,7 +851,8 @@ AsmState.prototype.installSpring = function (time)
 	mat4.translate(transform, transform, this.trans);
 	this.ink.setMvMatrix(transform);
 	
-	if ( this.inkAnimator.getIsComplete() )
+	if ( this.inkAnimator.getIsComplete() && 
+	     this.stepTransitionCheck(this.axle.children[0].getObjId()) )
 	{
 		
 		this.fireSignal("done");
@@ -811,7 +865,9 @@ AsmState.prototype.installSpring = function (time)
 AsmState.prototype.grabAxleEnter = function()
 {
     this.trans = vec3.fromValues( 0, 0, 0.5 );
-    var target = vec3.fromValues( 0.7, 2.8, 3.8 );
+    var target = vec3.fromValues( this.floatTarget[0] + this.floatLrOffset, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.axleAnimator = new Vec3Animator( this.trans, target, 1000 );
 };
@@ -848,8 +904,13 @@ AsmState.prototype.grabAxle = function (time)
  */
 AsmState.prototype.installAxleEnter = function()
 {
-    this.trans = vec3.fromValues( 0.7, 2.8, 3.8 );
-    var target = vec3.fromValues( -0.7, 2.8, 3.8 );
+    this.trans = vec3.fromValues( this.floatTarget[0] + this.floatLrOffset, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
+    
+    var target = vec3.fromValues( this.floatTarget[0] - this.floatLrOffset, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.axleAnimator = new Vec3Animator( this.trans, target, 1000 ); 
 };
@@ -875,7 +936,8 @@ AsmState.prototype.installAxle = function (time)
 	mat4.translate(transform, transform, this.trans);
 	this.axle.setMvMatrix(transform);
 	
-	if ( this.axleAnimator.getIsComplete() )
+	if ( this.axleAnimator.getIsComplete() && 
+	     this.stepTransitionCheck(this.housing.children[0].getObjId()) )
 	{
 		this.fireSignal("done");
 	}
@@ -887,7 +949,9 @@ AsmState.prototype.installAxle = function (time)
 AsmState.prototype.grabHousingEnter = function()
 {
     this.trans = vec3.fromValues( 0, 0, 0.6 );
-    var target = vec3.fromValues( 0.7, 2.8, 3.8 );
+    var target = vec3.fromValues( this.floatTarget[0] + this.floatLrOffset, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.housingAnimator = new Vec3Animator( this.trans, target, 1000 );
 };
@@ -924,9 +988,17 @@ AsmState.prototype.grabHousing = function (time)
  */
 AsmState.prototype.installHousingEnter = function()
 {
-    this.trans = vec3.fromValues( -0.7, 2.8, 3.8 );
-    this.trans2 = vec3.fromValues( 0.7, 2.8, 3.8 );
-    var target = vec3.fromValues( 0.0, 2.8, 3.8 );
+    this.trans = vec3.fromValues( this.floatTarget[0] - this.floatLrOffset, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
+    
+    this.trans2 = vec3.fromValues( this.floatTarget[0] + this.floatLrOffset, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
+    
+    var target = vec3.fromValues( this.floatTarget[0], 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
     this.asmAnimator = new Vec3Animator( this.trans2,target, 1000 );
@@ -962,7 +1034,8 @@ AsmState.prototype.installHousing = function (time)
 	this.housing.setMvMatrix(transform);
 	
 	if ( this.asmAnimator.getIsComplete() &&
-         this.inkAnimator.getIsComplete() )
+         this.inkAnimator.getIsComplete() && 
+	     this.stepTransitionCheck(this.grip.children[0].getObjId()) )
 	{
 		this.fireSignal("done");
 	}
@@ -973,8 +1046,10 @@ AsmState.prototype.installHousing = function (time)
  */
 AsmState.prototype.grabGripEnter = function()
 {
-    this.trans = vec3.fromValues( 0, 0, 0.7 );
-    var target = vec3.fromValues( -0.7, 2.8, 3.8 );
+    this.trans = vec3.fromValues( 0, 0, 0 );
+    var target = vec3.fromValues( this.floatTarget[0] - this.floatLrOffset, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.housingAnimator = new Vec3Animator( this.trans, target, 1000 );
 };
@@ -1011,8 +1086,12 @@ AsmState.prototype.grabGrip = function (time)
  */
 AsmState.prototype.installGripEnter = function()
 {
-    this.trans = vec3.fromValues( -0.7, 2.8, 3.8 );
-    var target = vec3.fromValues(  0.0, 2.8, 3.8 );
+    this.trans = vec3.fromValues( this.floatTarget[0] - this.floatLrOffset, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
+    var target = vec3.fromValues( this.floatTarget[0], 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.housingAnimator = new Vec3Animator( this.trans, target, 1000 );
 };
@@ -1038,7 +1117,8 @@ AsmState.prototype.installGrip = function (time)
 	mat4.translate(transform, transform, this.trans);
 	this.grip.setMvMatrix(transform);
 	
-	if ( this.housingAnimator.getIsComplete() )
+	if ( this.housingAnimator.getIsComplete() && 
+	     this.stepTransitionCheck(this.cylinder.children[0].getObjId()) )
 	{
 		this.fireSignal("done");
 	}
@@ -1049,8 +1129,10 @@ AsmState.prototype.installGrip = function (time)
  */
 AsmState.prototype.grabCylinderEnter = function()
 {
-    this.trans = vec3.fromValues( 0.0, 0.0, 0.4 );
-    var target = vec3.fromValues( 0.4, 2.8, 3.8 );
+    this.trans = vec3.fromValues( 0.0, 0.0, 0.0 );
+    var target = vec3.fromValues( this.floatTarget[0] + 0.4, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.cylinderAnimator = new Vec3Animator( this.trans, target, 1000 );
 };
@@ -1088,8 +1170,13 @@ AsmState.prototype.grabCylinder = function (time)
  */
 AsmState.prototype.installCylinderEnter = function()
 {
-    this.trans = vec3.fromValues( 0.4, 2.8, 3.8 );
-    var target = vec3.fromValues( 0.0, 2.8, 3.8 );
+    this.trans = vec3.fromValues( this.floatTarget[0] + 0.4, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
+    
+    var target = vec3.fromValues( this.floatTarget[0], 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.cylinderAnimator = new Vec3Animator( this.trans, target, 1000 );
 };
@@ -1115,7 +1202,8 @@ AsmState.prototype.installCylinder = function (time)
 	mat4.translate(transform, transform, this.trans);
 	this.cylinder.setMvMatrix(transform);
 	
-	if ( this.cylinderAnimator.getIsComplete() )
+	if ( this.cylinderAnimator.getIsComplete() && 
+	     this.stepTransitionCheck(this.clip.children[0].getObjId()) )
 	{
 		this.fireSignal("done");
 	}
@@ -1127,7 +1215,9 @@ AsmState.prototype.installCylinder = function (time)
 AsmState.prototype.grabClipEnter = function ()
 {
     this.trans = vec3.fromValues( 0.0, 0.0, 0.0 );
-    var target = vec3.fromValues( 0.4, 2.8, 3.8 );
+    var target = vec3.fromValues( this.floatTarget[0] + 0.4, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.clipAnimator = new Vec3Animator( this.trans, target, 1000 );
 };
@@ -1164,8 +1254,13 @@ AsmState.prototype.grabClip = function (time)
  */
 AsmState.prototype.installClipEnter = function()
 {
-    this.trans = vec3.fromValues( 0.4, 2.8, 3.8 );
-    var target = vec3.fromValues( 0.0, 2.8, 3.8 );
+    this.trans = vec3.fromValues( this.floatTarget[0] + 0.4, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
+    
+    var target = vec3.fromValues( this.floatTarget[0], 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.clipAnimator = new Vec3Animator( this.trans, target, 1000 );
 };
@@ -1187,8 +1282,13 @@ AsmState.prototype.installClip = function (time)
 {
 	if ( undefined === this.trans )
 	{
-		this.trans = vec3.fromValues( 0.4, 2.8, 3.8 );
-		var target = vec3.fromValues( 0.0, 2.8, 3.8 );
+		this.trans = vec3.fromValues( this.floatTarget[0] + 0.4, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
+		
+		var target = vec3.fromValues( this.floatTarget[0] + this.floatLrOffset, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
 		
 		this.clipAnimator = new Vec3Animator( this.trans, target, 1000 );
 	}
@@ -1199,7 +1299,8 @@ AsmState.prototype.installClip = function (time)
 	mat4.translate(transform, transform, this.trans);
 	this.clip.setMvMatrix(transform);
 	
-	if ( this.clipAnimator.getIsComplete() )
+	if ( this.clipAnimator.getIsComplete() && 
+	     this.stepTransitionCheck(this.gum.children[0].getObjId()) )
 	{
 		this.fireSignal("done");
 	}
@@ -1211,7 +1312,9 @@ AsmState.prototype.installClip = function (time)
 AsmState.prototype.grabGumEnter = function ()
 {
     this.trans = vec3.fromValues( 0.0, 0.0, 0.0 );
-    var target = vec3.fromValues(-0.7, 2.8, 3.8 );
+    var target = vec3.fromValues( this.floatTarget[0] - this.floatLrOffset, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.gumAnimator = new Vec3Animator( this.trans, target, 1000 );
 };
@@ -1248,8 +1351,13 @@ AsmState.prototype.grabGum = function (time)
  */
 AsmState.prototype.installGumEnter = function()
 {
-    this.trans = vec3.fromValues(-0.7, 2.8, 3.8 );
-    var target = vec3.fromValues( 0.0, 2.8, 3.8 );
+    this.trans = vec3.fromValues( this.floatTarget[0] - this.floatLrOffset, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
+    
+    var target = vec3.fromValues( this.floatTarget[0], 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.gumAnimator = new Vec3Animator( this.trans, target, 1000 );
 };
@@ -1286,8 +1394,13 @@ AsmState.prototype.installGum = function (time)
  */
 AsmState.prototype.testOutEnter = function()
 {
-    this.trans = vec3.fromValues(-0.09, 2.8, 3.8 );
-    var target = vec3.fromValues(-0.075, 2.8, 3.8 );
+    this.trans = vec3.fromValues( this.floatTarget[0] - 0.09, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
+    
+    var target = vec3.fromValues( this.floatTarget[0] - 0.075, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
 };
@@ -1358,8 +1471,13 @@ AsmState.prototype.holdBeforeTestIn = function (time)
  */
 AsmState.prototype.testInEnter = function()
 {
-    this.trans = vec3.fromValues(-0.09, 2.8, 3.8 );
-    var target = vec3.fromValues(-0.0, 2.8, 3.8 );
+    this.trans = vec3.fromValues( this.floatTarget[0] - 0.09, 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
+    
+    var target = vec3.fromValues( this.floatTarget[0], 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
     
     this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );
 };
@@ -1430,7 +1548,10 @@ AsmState.prototype.idle = function (time)
  */
 AsmState.prototype.placeOnTableEnter = function()
 {
-    this.trans = vec3.fromValues( 0.0, 2.8, 3.8 );
+    this.trans = vec3.fromValues( this.floatTarget[0], 
+                                  this.floatTarget[1], 
+                                  this.floatTarget[2] );
+    
     var target = vec3.fromValues( 0.0, 0.0, 0.0 );
     
     this.inkAnimator = new Vec3Animator( this.trans, target, 1000 );

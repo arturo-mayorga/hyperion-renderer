@@ -20,6 +20,7 @@
 
 /**
  * @constructor 
+ * @extends {Mesh}
  * @param {number} radius major
  * @param {number} radius minor
  * @param {number} sliceCountMajor
@@ -28,6 +29,8 @@
  */
 function Torus( radiusMajor, radiusMinor, sliceCountMajor, sliceCountMinor, name )
 {
+    Mesh.call( this );
+    
     this.radiusMajor = radiusMajor;
     this.radiusMinor = radiusMinor;
     this.sliceCount = sliceCountMajor;

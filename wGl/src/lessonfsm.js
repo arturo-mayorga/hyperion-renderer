@@ -34,8 +34,8 @@ function createLesson( context )
 	ret.addState("Asm", new AsmState( oData ));
 	ret.addState("Clean", new CleanState( oData ));
 	
-	ret.addTransition( "Load", "loadComplete", "Asm" );
-	//ret.addTransition( "Load", "loadComplete", "Explore" );
+	//ret.addTransition( "Load", "loadComplete", "Asm" );
+	ret.addTransition( "Load", "loadComplete", "Explore" );
 	ret.addTransition( "Asm", "exitAsm", "Explore" );
 	ret.addTransition( "Explore", "startAsm", "Asm" );
 	
@@ -184,7 +184,7 @@ LoadState.prototype.enter = function ()
 	this.tjsLoader.setObserver(this);
     
     
-	this.envLoader.loadObj("assets/3d/office3d/18361-obj-4/", "OfficeOBJ.obj");
+	this.envLoader.loadObj("assets/3d/apartment/a1/", "sheldon.obj");
 	this.penLoader.loadObj("assets/3d/stylus/", "stylus.obj");
 	this.tjsLoader.loadJson( "assets/3d/animtest/", "humanoid.js" );
 

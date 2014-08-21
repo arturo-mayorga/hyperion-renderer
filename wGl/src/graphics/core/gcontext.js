@@ -79,9 +79,9 @@ function GContext( canvas )
     gl.viewportWidth = canvas.width;
     gl.viewportHeight = canvas.height;
     
-    var renderStrategyFactory = new GRenderStrategyFactory( gl );
+    this.renderStrategyFactory = new GRenderStrategyFactory( gl );
     
-    this.renderStrategy = renderStrategyFactory.creteBestFit();
+    this.renderStrategy = this.renderStrategyFactory.creteBestFit();
     
     
     whiteTexture.bindToContext(gl);

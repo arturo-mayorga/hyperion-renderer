@@ -312,13 +312,13 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var phongLightPassPing = new GPostEffectLitRenderPassCmd( this.gl, this.programs.light, this.frameBuffers.phongLightPing, this.screen );
     phongLightPassPing.addInputTexture( this.frameBuffers.normal.getGTexture(),        gl.TEXTURE0 );
     phongLightPassPing.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE1 );
-    phongLightPassPing.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );
+    phongLightPassPing.addInputTexture( this.gl.whiteTexture, gl.TEXTURE2 );
     phongLightPassPing.addInputTexture( this.frameBuffers.phongLightPong.getGTexture(),gl.TEXTURE3 );
     
     var phongLightPassPong = new GPostEffectLitRenderPassCmd( this.gl, this.programs.light, this.frameBuffers.phongLightPong, this.screen );
     phongLightPassPong.addInputTexture( this.frameBuffers.normal.getGTexture(),        gl.TEXTURE0 );
     phongLightPassPong.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE1 );
-    phongLightPassPong.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );
+    phongLightPassPong.addInputTexture( this.gl.whiteTexture, gl.TEXTURE2 );
     phongLightPassPong.addInputTexture( this.frameBuffers.phongLightPing.getGTexture(),gl.TEXTURE3 );
     
     var saoPass = new GPostEffectRenderPassCmd( this.gl, this.programs.ssao, this.frameBuffers.ssao, this.screen );
@@ -341,7 +341,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var toneMapPassPong = new GPostEffectRenderPassCmd( this.gl, this.programs.toneMap, this.frameBuffers.phongLightPing, this.screen );
     toneMapPassPong.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );
     toneMapPassPong.addInputFrameBuffer( this.frameBuffers.phongLightPong, gl.TEXTURE1 );
-    toneMapPassPong.addInputFrameBuffer( this.frameBuffers.ssao, gl.TEXTURE2 );
+    toneMapPassPong.addInputTexture( this.gl.whiteTexture, gl.TEXTURE2 );
     
     
     var cmds = [];
@@ -359,9 +359,9 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     preCmds.push( objidPass );
     preCmds.push( clearPhongLightPong );
     
-    shadowCmds.push( clearShadowmap );
-    shadowCmds.push( normalSource );
-    shadowCmds.push( shadowmapPass );
+  //  shadowCmds.push( clearShadowmap );
+  //  shadowCmds.push( normalSource );
+  //  shadowCmds.push( shadowmapPass );
     
     lightCmds.push( phongLightPassPing );
     lightCmds.push( phongLightPassPong );
@@ -376,7 +376,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     
     this.toneMapCmds = toneMapCmds;
     
-    this.sao = [ saoPass, saoBlurPing, saoBlurPong ];
+    this.sao = [];// saoPass, saoBlurPing, saoBlurPong ];
 };
 
 /**

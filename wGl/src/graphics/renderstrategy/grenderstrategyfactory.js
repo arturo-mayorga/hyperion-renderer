@@ -53,12 +53,12 @@ GRenderStrategyFactory.prototype.createByName = function ( name )
  */
 GRenderStrategyFactory.prototype.creteBestFit = function ()
 { 
-    if ( -1 === navigator.userAgent.toLowerCase().indexOf("android") )
-    {
+   // if ( -1 === navigator.userAgent.toLowerCase().indexOf("android") )
+   // {
         return this.createByName( "deferredPhong" );
-    } 
+   // } 
     
-    return this.createByName( "simplePhong" );
+   // return this.createByName( "simplePhong" );
 };
 
 

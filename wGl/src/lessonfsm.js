@@ -274,13 +274,14 @@ LoadState.prototype.exit = function ()
 	light2.setPosition(-6, 28.25, 16);
 	light3.setPosition(0, 28.25, -22);*/
 	
+	var h = 15.877;
 	
-	light0.setPosition(-18, 28.25, 16);
-	light1.setPosition(-18, 28.25, -20);
-	light2.setPosition(6, 28.25, 16);
-	light3.setPosition(6, 28.25, -20);
-	light4.setPosition(30, 28.25, 16);
-	light5.setPosition(30, 28.25, -20);
+	light0.setPosition(0, h, 0);
+	light1.setPosition(-10, h, -7.9);
+	light2.setPosition(-20.4, h, -6.4);
+	light3.setPosition(9.9, h, -21.6);
+	light4.setPosition(20.2, h, -6);
+	light5.setPosition(3, 12, -28);
 	
 	
 	

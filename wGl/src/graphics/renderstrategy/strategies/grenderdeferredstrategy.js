@@ -634,7 +634,7 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     this.frameBuffers.position = frameBuffer;
     
     frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
-    frameBuffer.addBufferTexture(texCfgFloat);
+    frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
     this.frameBuffers.objid = frameBuffer;
     

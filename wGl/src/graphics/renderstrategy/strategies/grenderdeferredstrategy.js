@@ -29,6 +29,8 @@ function GRenderDeferredStrategy( gl )
     
     this.extensions = {};
     this.extensions.stdDeriv = gl.getExtension('OES_standard_derivatives');
+    
+    this.renderLevel = 1;
 }
 
 GRenderDeferredStrategy.prototype = Object.create( GRenderStrategy.prototype );
@@ -312,13 +314,27 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var phongLightPassPing = new GPostEffectLitRenderPassCmd( this.gl, this.programs.light, this.frameBuffers.phongLightPing, this.screen );
     phongLightPassPing.addInputTexture( this.frameBuffers.normal.getGTexture(),        gl.TEXTURE0 );
     phongLightPassPing.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE1 );
-    phongLightPassPing.addInputTexture( this.gl.whiteTexture, gl.TEXTURE2 );
+    if ( 1 >= this.renderLevel )
+    {
+        phongLightPassPing.addInputTexture( this.gl.whiteTexture, gl.TEXTURE2 );
+    }
+    else
+    {
+        phongLightPassPing.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );
+    }
     phongLightPassPing.addInputTexture( this.frameBuffers.phongLightPong.getGTexture(),gl.TEXTURE3 );
     
     var phongLightPassPong = new GPostEffectLitRenderPassCmd( this.gl, this.programs.light, this.frameBuffers.phongLightPong, this.screen );
     phongLightPassPong.addInputTexture( this.frameBuffers.normal.getGTexture(),        gl.TEXTURE0 );
     phongLightPassPong.addInputTexture( this.frameBuffers.position.getGTexture(),      gl.TEXTURE1 );
-    phongLightPassPong.addInputTexture( this.gl.whiteTexture, gl.TEXTURE2 );
+    if ( 1 >= this.renderLevel )
+    {
+        phongLightPassPong.addInputTexture( this.gl.whiteTexture, gl.TEXTURE2 );
+    }
+    else
+    {
+        phongLightPassPong.addInputTexture( this.frameBuffers.shadowmapPong.getGTexture(), gl.TEXTURE2 );
+    }
     phongLightPassPong.addInputTexture( this.frameBuffers.phongLightPing.getGTexture(),gl.TEXTURE3 );
     
     var saoPass = new GPostEffectRenderPassCmd( this.gl, this.programs.ssao, this.frameBuffers.ssao, this.screen );
@@ -336,12 +352,26 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     var toneMapPassPing = new GPostEffectRenderPassCmd( this.gl, this.programs.toneMap, this.frameBuffers.phongLightPong, this.screen );
     toneMapPassPing.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );
     toneMapPassPing.addInputFrameBuffer( this.frameBuffers.phongLightPing, gl.TEXTURE1 );
-    toneMapPassPing.addInputFrameBuffer( this.frameBuffers.ssao, gl.TEXTURE2 );
+    if ( 0 >= this.renderLevel )
+    {
+        toneMapPassPing.addInputTexture( this.gl.whiteTexture, gl.TEXTURE2 );
+    }
+    else
+    {
+        toneMapPassPing.addInputFrameBuffer( this.frameBuffers.ssao, gl.TEXTURE2 );
+    }
     
     var toneMapPassPong = new GPostEffectRenderPassCmd( this.gl, this.programs.toneMap, this.frameBuffers.phongLightPing, this.screen );
     toneMapPassPong.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );
     toneMapPassPong.addInputFrameBuffer( this.frameBuffers.phongLightPong, gl.TEXTURE1 );
-    toneMapPassPong.addInputTexture( this.gl.whiteTexture, gl.TEXTURE2 );
+    if ( 0 >= this.renderLevel )
+    {
+        toneMapPassPong.addInputTexture( this.gl.whiteTexture, gl.TEXTURE2 );
+    }
+    else
+    {
+        toneMapPassPong.addInputFrameBuffer( this.frameBuffers.ssao, gl.TEXTURE2 );
+    }
     
     
     var cmds = [];
@@ -359,9 +389,12 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     preCmds.push( objidPass );
     preCmds.push( clearPhongLightPong );
     
-  //  shadowCmds.push( clearShadowmap );
-  //  shadowCmds.push( normalSource );
-  //  shadowCmds.push( shadowmapPass );
+    if ( this.renderLevel >= 2 )
+    {
+        shadowCmds.push( clearShadowmap );
+        shadowCmds.push( normalSource );
+        shadowCmds.push( shadowmapPass );
+    }
     
     lightCmds.push( phongLightPassPing );
     lightCmds.push( phongLightPassPong );
@@ -376,8 +409,37 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     
     this.toneMapCmds = toneMapCmds;
     
-    this.sao = [];// saoPass, saoBlurPing, saoBlurPong ];
+    if ( 0 >= this.renderLevel )
+    {
+        this.sao = [];
+    }
+    else
+    {
+        this.sao = [ saoPass, saoBlurPing, saoBlurPong ];
+    }
 };
+
+/**
+ * Get the current render level
+ * @return {number}
+ */
+GRenderDeferredStrategy.prototype.getRenderLevel = function ()
+{
+    return this.renderLevel;
+};
+
+/**
+ * Set the render level to use
+ * @param {number} the new render level
+ */
+GRenderDeferredStrategy.prototype.setRenderLevel = function ( newLevel )
+{
+    if ( newLevel !== this.renderLevel )
+    {
+        this.renderLevel = newLevel;
+        this.initPassCmds();
+    }
+}
 
 /**
  * Draw the scene and hud elements using this strategy

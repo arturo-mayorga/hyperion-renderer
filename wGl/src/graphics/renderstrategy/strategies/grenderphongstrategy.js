@@ -60,12 +60,15 @@ GRenderPhongStrategy.prototype.configure = function()
 {
     this.shaderSrcMap = 
     {
-        "phong-vs.c":undefined,
-        "phong-fs.c":undefined,
+        
         "fullscr-vs.c":undefined,
         "fullscr-fs.c":undefined,
         "fxaa-vs.c":undefined,
-        "fxaa-fs.c":undefined
+        "fxaa-fs.c":undefined,
+        "objid-fs.c":undefined,
+        "objid-vs.c":undefined,
+        "phong-vs.c":undefined,
+        "phong-fs.c":undefined
     };
     
     for (var key in this.shaderSrcMap)
@@ -138,6 +141,8 @@ GRenderPhongStrategy.prototype.initialize = function()
     this.initShaders(this.shaderSrcMap);
     
     this.initScreenVBOs();
+    
+    this.initPassCmds();
     this._isReady = true;
 };
 
@@ -231,6 +236,27 @@ GRenderPhongStrategy.prototype.initTextureFramebuffer = function()
     gl.bindTexture(gl.TEXTURE_2D, null);
     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    
+    var texCfg = 
+    {
+        filter: gl.LINEAR,
+        format: gl.RGBA,
+        type: gl.UNSIGNED_BYTE,
+        attachment: gl.COLOR_ATTACHMENT0,
+        name: "color"
+    };
+    
+    this.frameBuffers = {};
+    
+    var frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
+    frameBuffer.addBufferTexture(texCfg);
+    frameBuffer.complete();
+    this.frameBuffers.color = frameBuffer;
+    
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
+    frameBuffer.addBufferTexture(texCfg);
+    frameBuffer.complete();
+    this.frameBuffers.objid = frameBuffer;
 };
 
 /**
@@ -240,23 +266,23 @@ GRenderPhongStrategy.prototype.initTextureFramebuffer = function()
 GRenderPhongStrategy.prototype.initShaders = function (shaderSrcMap) 
 {
     var gl = this.gl;
+    this.programs = {};
     
+    this.programs.phongComposite = new ShaderComposite( shaderSrcMap["phong-vs.c"], shaderSrcMap["phong-fs.c"] ); 
+    this.programs.objidComposite = new ShaderComposite( shaderSrcMap["objid-vs.c"], shaderSrcMap["objid-fs.c"] );
     
-      
-    var phongComposite = new ShaderComposite( shaderSrcMap["phong-vs.c"], shaderSrcMap["phong-fs.c"]);
-    phongComposite.bindToContext(gl);
+    this.programs.fullScr = new GShader( shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"] );
+    this.programs.fxaa = new GShader( shaderSrcMap["fxaa-vs.c"], shaderSrcMap["fxaa-fs.c"] );
     
-    var fullScr = new GShader( shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"]);
-    fullScr.bindToContext(gl);
+    for ( var key in this.programs )
+    {
+        this.programs[key].bindToContext(gl);
+    }
     
-    var fxaa = new GShader( shaderSrcMap["fxaa-vs.c"], shaderSrcMap["fxaa-fs.c"]);
-    fxaa.bindToContext(gl);
+    this.fullScreenProgram = this.programs.fullScr;
+    this.fxaaProgram = this.programs.fxaa;
     
-    this.fullScreenProgram = fullScr;
-    this.fxaaProgram = fxaa;
-   
-    
-    this.phongComposite = phongComposite;
+    this.phongComposite = this.programs.phongComposite;
 };
 
 /**
@@ -271,8 +297,7 @@ GRenderPhongStrategy.prototype.drawScreenBuffer = function(shader)
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.rttTexture);
+   
     gl.uniform1i(shader.uniforms.mapKd, 0);
     
     if ( null != shader.uniforms.Kd )
@@ -299,6 +324,18 @@ GRenderPhongStrategy.prototype.drawScreenBuffer = function(shader)
 };
 
 /**
+ * Create the pass command pipeline
+ */
+GRenderPhongStrategy.prototype.initPassCmds = function()
+{   
+    var colorPass = new GGeometryRenderPassCmd( this.gl, this.programs.phongComposite, this.frameBuffers.color );
+    var objidPass = new GGeometryRenderPassCmd( this.gl, this.programs.objidComposite, this.frameBuffers.objid );
+    
+    this.passes = [ colorPass, objidPass ];
+};
+    
+
+/**
  * Draw the scene and hud elements using this strategy
  * @param {GScene} Scene to draw with this strategy
  * @param {GHudController} Hud to draw with this strategy
@@ -307,16 +344,31 @@ GRenderPhongStrategy.prototype.draw = function ( scene, hud )
 {
     var gl = this.gl;
    
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.rttFramebuffer);
-    gl.viewport(0, 0, 1024, 1024);
-    gl.enable(gl.DEPTH_TEST);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	
-    
-    
-    scene.draw(this.phongComposite);
-    
-    
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    if ( 1 === 0 )
+    {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.rttFramebuffer);
+        gl.viewport(0, 0, 1024, 1024);
+        gl.enable(gl.DEPTH_TEST);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	
+        
+        
+        scene.draw(this.phongComposite);
+        
+        
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        
+         gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.rttTexture);
+    }
+    else
+    {
+        for ( var key in this.passes )
+        {
+            this.passes[key].run( scene );
+        }
+        
+        this.frameBuffers.color.bindTexture(gl.TEXTURE0, "color");
+    }
     
     this.fxaaProgram.activate();
     this.drawScreenBuffer(this.fxaaProgram);	
@@ -328,4 +380,7 @@ GRenderPhongStrategy.prototype.draw = function ( scene, hud )
     }
     this.fullScreenProgram.deactivate();
 }; 
+
+
+
 

@@ -76,17 +76,30 @@ GRenderDeferredStrategy.prototype.configure = function()
 };
 
 /**
- * Free and reload all the resource for this strategy
+ * Called to delete all the resources under this buffer
  */
-GRenderDeferredStrategy.prototype.reload = function()
+GRenderDeferredStrategy.prototype.deleteResources = function()
 {
     this._isReady = false;
+    
+    for ( var fKey in this.frameBuffers )
+    {
+        this.frameBuffers[fKey].deleteResources();
+    }
     
     for ( var key in this.programs )
     {
         this.programs[key].destroy();
         this.programs[key] = undefined;
     }
+}
+
+/**
+ * Free and reload all the resource for this strategy
+ */
+GRenderDeferredStrategy.prototype.reload = function()
+{
+    this.deleteResources();
     
     this.configure();
 };

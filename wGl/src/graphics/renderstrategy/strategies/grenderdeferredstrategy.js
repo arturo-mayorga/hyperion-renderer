@@ -92,6 +92,8 @@ GRenderDeferredStrategy.prototype.deleteResources = function()
         this.programs[key].destroy();
         this.programs[key] = undefined;
     }
+    
+    this.deleteScreenVBOs();
 }
 
 /**
@@ -100,7 +102,6 @@ GRenderDeferredStrategy.prototype.deleteResources = function()
 GRenderDeferredStrategy.prototype.reload = function()
 {
     this.deleteResources();
-    
     this.configure();
 };
 
@@ -219,6 +220,17 @@ GRenderDeferredStrategy.prototype.initScreenVBOs = function()
     
 	
 	this.hMatrix = mat3.create();
+};
+
+/**
+ * Create the screen VBOs for drawing the screen
+ */
+GRenderDeferredStrategy.prototype.deleteScreenVBOs = function()
+{
+    for ( var key in this.screen )
+    {
+        this.gl.deleteBuffer( this.screen[key] );
+    }
 };
 
 /**
@@ -444,14 +456,20 @@ GRenderDeferredStrategy.prototype.getRenderLevel = function ()
 /**
  * Set the render level to use
  * @param {number} the new render level
+ * @return {boolean} true if the change was applied false otherwise
  */
 GRenderDeferredStrategy.prototype.setRenderLevel = function ( newLevel )
 {
-    if ( newLevel !== this.renderLevel )
+    if ( newLevel !== this.renderLevel &&
+         newLevel >= 0 &&
+         newLevel <= 2 )
     {
         this.renderLevel = newLevel;
         this.initPassCmds();
+        return true;
     }
+    
+    return false;
 }
 
 /**

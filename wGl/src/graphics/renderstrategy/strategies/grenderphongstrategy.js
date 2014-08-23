@@ -78,16 +78,32 @@ GRenderPhongStrategy.prototype.configure = function()
 };
 
 /**
+ * Called to delete all the resources under this buffer
+ */
+GRenderPhongStrategy.prototype.deleteResources = function()
+{
+    this._isReady = false;
+    
+    for ( var fKey in this.frameBuffers )
+    {
+        this.frameBuffers[fKey].deleteResources();
+    }
+    
+    for ( var key in this.programs )
+    {
+        this.programs[key].destroy();
+        this.programs[key] = undefined;
+    }
+    
+    this.deleteScreenVBOs();
+}
+
+/**
  * Free and reload all the resource for this strategy
  */
 GRenderPhongStrategy.prototype.reload = function()
 {
-    this._isReady = false;
-    this.phongComposite.destroy();
-    this.fullScreenProgram.destroy();
-    
-    this.phongComposite = undefined;
-    this.fullScreenProgram = undefined;
+    this.deleteResources();
     this.configure();
 };
 
@@ -198,8 +214,25 @@ GRenderPhongStrategy.prototype.initScreenVBOs = function()
                   gl.STATIC_DRAW);
     this.screenIndxBuffer.itemSize = 1;
     this.screenIndxBuffer.numItems = 6;
+    
+    this.screen = {};
+    
+    this.screen.vertBuffer = this.screenVertBuffer;
+    this.screen.textBuffer = this.screenTextBuffer;
+    this.screen.indxBuffer = this.screenIndxBuffer;
 	
 	this.hMatrix = mat3.create();
+};
+
+/**
+ * Create the screen VBOs for drawing the screen
+ */
+GRenderPhongStrategy.prototype.deleteScreenVBOs = function()
+{
+    for ( var key in this.screen )
+    {
+        this.gl.deleteBuffer( this.screen[key] );
+    }
 };
 
 /**
@@ -208,34 +241,6 @@ GRenderPhongStrategy.prototype.initScreenVBOs = function()
 GRenderPhongStrategy.prototype.initTextureFramebuffer = function()
 {
     var gl = this.gl;
-    this.rttFramebuffer = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.rttFramebuffer);
-    this.rttFramebuffer.width = 1024;
-    this.rttFramebuffer.height = 1024;
-    
-    this.rttTexture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, this.rttTexture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.rttFramebuffer.width, this.rttFramebuffer.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    
-    var renderbuffer = gl.createRenderbuffer();
-    gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.rttFramebuffer.width, this.rttFramebuffer.height);
-    
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.rttTexture, 0);
-    
-    if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE)
-    {
-        alert("incomplete famebuffer");
-    }
-    
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
-    
-    gl.bindTexture(gl.TEXTURE_2D, null);
-    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     
     var texCfg = 
     {
@@ -278,11 +283,6 @@ GRenderPhongStrategy.prototype.initShaders = function (shaderSrcMap)
     {
         this.programs[key].bindToContext(gl);
     }
-    
-    this.fullScreenProgram = this.programs.fullScr;
-    this.fxaaProgram = this.programs.fxaa;
-    
-    this.phongComposite = this.programs.phongComposite;
 };
 
 /**
@@ -343,42 +343,22 @@ GRenderPhongStrategy.prototype.initPassCmds = function()
 GRenderPhongStrategy.prototype.draw = function ( scene, hud )
 {
     var gl = this.gl;
-   
-    if ( 1 === 0 )
+    
+    for ( var key in this.passes )
     {
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this.rttFramebuffer);
-        gl.viewport(0, 0, 1024, 1024);
-        gl.enable(gl.DEPTH_TEST);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	
-        
-        
-        scene.draw(this.phongComposite);
-        
-        
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        
-         gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.rttTexture);
-    }
-    else
-    {
-        for ( var key in this.passes )
-        {
-            this.passes[key].run( scene );
-        }
-        
-        this.frameBuffers.color.bindTexture(gl.TEXTURE0, "color");
+        this.passes[key].run( scene );
     }
     
-    this.fxaaProgram.activate();
-    this.drawScreenBuffer(this.fxaaProgram);	
+    this.frameBuffers.color.bindTexture(gl.TEXTURE0, "color");
+    this.programs.fxaa.activate();
+    this.drawScreenBuffer(this.programs.fxaa);	
     
-    this.fullScreenProgram.activate();
+    this.programs.fullScr.activate();
     if (hud != undefined)
     {
-        hud.draw(this.fullScreenProgram);
+        hud.draw(this.programs.fullScr);
     }
-    this.fullScreenProgram.deactivate();
+    this.programs.fullScr.deactivate();
 }; 
 
 

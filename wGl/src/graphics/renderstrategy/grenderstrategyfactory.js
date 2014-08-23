@@ -27,8 +27,8 @@ function GRenderStrategyFactory( gl )
     this.gl = gl;
     this.strategyMap = 
     {
-        "simplePhong": function(gl) { return new GRenderPhongStrategy( gl ); },
-        "deferredPhong": function(gl) { return new GRenderDeferredStrategy( gl ); }
+        "simplePhong": function(gl) { return new GRenderPhongStrategy( gl ).setName( "simplePhong" ); },
+        "deferredPhong": function(gl) { return new GRenderDeferredStrategy( gl ).setName( "deferredPhong" ); }
     };
 }
 
@@ -53,12 +53,12 @@ GRenderStrategyFactory.prototype.createByName = function ( name )
  */
 GRenderStrategyFactory.prototype.creteBestFit = function ()
 { 
-   // if ( -1 === navigator.userAgent.toLowerCase().indexOf("android") )
-   // {
+    if ( -1 === navigator.userAgent.toLowerCase().indexOf("android") )
+    {
         return this.createByName( "deferredPhong" );
-   // } 
+    } 
     
-   // return this.createByName( "simplePhong" );
+    return this.createByName( "simplePhong" );
 };
 
 

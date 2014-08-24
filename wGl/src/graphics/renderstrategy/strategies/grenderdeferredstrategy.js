@@ -30,7 +30,7 @@ function GRenderDeferredStrategy( gl )
     this.extensions = {};
     this.extensions.stdDeriv = gl.getExtension('OES_standard_derivatives');
     
-    this.renderLevel = 1;
+    this.renderLevel = 0;
 }
 
 GRenderDeferredStrategy.prototype = Object.create( GRenderStrategy.prototype );

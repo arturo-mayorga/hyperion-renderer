@@ -93,6 +93,52 @@ function GContext( canvas )
 };
 
 /**
+ * @return {boolean} return true if the render level was changed
+ */
+GContext.prototype.increaseRenderLevel = function()
+{
+    var increased = this.renderStrategy.increaseRenderLevel();
+    
+    if ( false === increased )
+    {
+        // we were unable to increase the level, see if we can find a differen strategy
+        var newStrategy = this.renderStrategyFactory.createNextRenderLevel( this.renderStrategy.getName() );
+        
+        if ( null !== newStrategy )
+        {
+            this.renderStrategy.deleteResources();
+            this.renderStrategy = newStrategy;
+            increased = true;
+        }
+    }
+    
+    return increased;
+};
+
+/**
+ * @return {boolean} return true if the render level was changed
+ */
+GContext.prototype.decreaseRenderLevel = function()
+{
+    var decreased = this.renderStrategy.decreaseRenderLevel();
+    
+    if ( false === decreased )
+    {
+        // we were unable to increase the level, see if we can find a differen strategy
+        var newStrategy = this.renderStrategyFactory.createPreviousRenderLevel( this.renderStrategy.getName() );
+        
+        if ( null !== newStrategy )
+        {
+            this.renderStrategy.deleteResources();
+            this.renderStrategy = newStrategy;
+            decreased = true;
+        }
+    }
+    
+    return decreased;
+};
+
+/**
  * @param {IContextMouseObserver}
  */
 GContext.prototype.addMouseObserver = function( observer )

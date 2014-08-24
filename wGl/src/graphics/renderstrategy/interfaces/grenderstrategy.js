@@ -55,6 +55,24 @@ GRenderStrategy.prototype.setRenderLevel = function ( newLevel )
 }
 
 /**
+ * @return {boolean} true if the change was applied
+ */
+GRenderStrategy.prototype.increaseRenderLevel = function()
+{
+    var nLevel = this.getRenderLevel() + 1;
+    return this.setRenderLevel( nLevel );
+};
+
+/**
+ * @return {boolean} true if the change was applied
+ */
+GRenderStrategy.prototype.decreaseRenderLevel = function()
+{
+    var nLevel = this.getRenderLevel() - 1;
+    return this.setRenderLevel( nLevel );
+};
+
+/**
  * @return {string} name
  */
 GRenderStrategy.prototype.getName = function()

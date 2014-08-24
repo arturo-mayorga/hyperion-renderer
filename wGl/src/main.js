@@ -79,12 +79,16 @@ window.onload=mainLoop;
 
 function createPenApp()
 {
+    var profileState = createProfiler(context);
     var penState = createLesson(context);
+    
 	
     lesson = new FsmMachine();
     lesson.addState("Pen", penState);
+    lesson.addState("Profile", profileState);
+    lesson.addTransition("Profile", "cleanComplete", "Pen");
     lesson.addTransition("Pen", "cleanComplete", "Pen");
-    lesson.setState("Pen");
+    lesson.setState("Profile");
 }
 
 var _appCreator = 

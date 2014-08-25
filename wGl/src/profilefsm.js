@@ -120,7 +120,6 @@ function ProfilerLoadState( oData )
 	this.hud = oData.context.getHud();
 	this.oData = oData;
 	
-	
 }
 
 ProfilerLoadState.prototype = Object.create( FsmMachine.prototype );
@@ -133,9 +132,9 @@ ProfilerLoadState.prototype.enter = function ()
 	this.scene.setVisibility( false );
 	
 	var camera = this.scene.getCamera();
-	camera.setLookAt(4.232629776000977*4, 2.6432266235351562*4, 0.2486426830291748*4);
+	camera.setLookAt(0, 0, 0);
 	camera.setUp(-0.09341227263212204, 0.9805285334587097, 0.17273758351802826);
-	camera.setEye(0, 0, 0);
+	camera.setEye(20, 30, 10);
 	
 	var light0 = new GLight();
 	var light1 = new GLight();
@@ -152,11 +151,25 @@ ProfilerLoadState.prototype.enter = function ()
 	light4.setPosition(30, 28.25, 16);
 	light5.setPosition(30, 28.25, -20);
     
-    this.scene.addChild( new Cuboid(1.5, 1.5, 1.5, "cube") );
-    this.scene.addChild( new Cylinder(0.5, 2, 50, "cylinder") );
-    this.scene.addChild( new Torus(1, .25, 50, 50, "torus") );
-    this.scene.addChild( new Sphere(1, 50, 25, "sphere") );
-    this.scene.addChild( new Cone(0.5, 2, 50, "cone") );
+    var cube = new Cuboid(-70, -70, -70, "cube");
+    var cyl = new Cylinder(0.5, 2, 50, "cylinder");
+    var tor = new Torus(10, .25, 50, 50, "torus");
+    var sphe = new Sphere(1, 50, 25, "sphere");
+    var cone = new Cone(0.5, 2, 50, "cone");
+    
+    var transform = mat4.create();
+	mat4.translate(transform, transform, [2, 2, 0]);
+	cyl.setMvMatrix(transform);
+    
+    transform = mat4.create();
+	mat4.translate(transform, transform, [0, -2, 2]);
+	cone.setMvMatrix(transform);
+    
+    this.scene.addChild( cube );
+    this.scene.addChild( cyl );
+    this.scene.addChild( tor );
+    this.scene.addChild( sphe );
+    this.scene.addChild( cone );
     
     this.scene.addLight(light0);
 	this.scene.addLight(light1);
@@ -194,7 +207,8 @@ function ProfilerExploreState( oData )
     this.scene = oData.context.getScene();
 	this.hud = oData.context.getHud();
 	this.oData = oData;
-	this.timeR = 0;
+	this.runTime = 0;
+    this.frameCount = 0;
 	
 }
 
@@ -213,25 +227,6 @@ ProfilerExploreState.prototype.setSignalObserver = FsmState.prototype.setSignalO
 ProfilerExploreState.prototype.fireSignal = FsmState.prototype.fireSignal;
 
 /**
- * @param {MouseEvent}
- * @param {number}
- */
-ProfilerExploreState.prototype.onMouseDown = function( ev, objid ) 
-{
-    this.fireSignal("exitReq");
-};
-
-/**
- * @param {MouseEvent}
- */
-ProfilerExploreState.prototype.onMouseUp = function( ev ) {};
-
-/**
- * @param {MouseEvent}
- */
-ProfilerExploreState.prototype.onMouseMove = function( ev ) {};
-
-/**
  * This function is called whenever we enter the explore state
  */
 ProfilerExploreState.prototype.enter = function () 
@@ -239,7 +234,7 @@ ProfilerExploreState.prototype.enter = function ()
 	this.camController = new GCameraController();
 	this.camController.bindCamera(this.scene.getCamera());
     
-    this.oData.context.addMouseObserver( this );
+    
     
     
 	
@@ -252,8 +247,6 @@ ProfilerExploreState.prototype.enter = function ()
 ProfilerExploreState.prototype.exit = function () 
 {
 	this.camController = undefined;
-	
-	this.oData.context.removeMouseObserver( this );
 };
 
 /**
@@ -263,7 +256,37 @@ ProfilerExploreState.prototype.exit = function ()
 ProfilerExploreState.prototype.update = function ( time ) 
 {
 	this.camController.update( time );
-	this.fireSignal("exitReq");
+    
+    
+	this.runTime += time;
+    
+    this.frameCount++;
+    
+    if ( 3000 < this.runTime )
+    {
+        console.debug("meeep " + this.frameCount);
+        this.runTime = 0;
+        
+        if ( this.frameCount > 90 )
+        {
+            if ( false === this.oData.context.increaseRenderLevel() )
+            {
+                console.debug("highest supported");
+                // even the most expensive level can be supported
+                this.fireSignal("exitReq");
+            }
+        }
+        else
+        {
+            console.debug("rolling one back");
+            this.oData.context.decreaseRenderLevel();
+            this.fireSignal("exitReq");
+        }
+        
+        this.frameCount = 0;
+    }
+    
+	//this.fireSignal("exitReq");
 };
 
 

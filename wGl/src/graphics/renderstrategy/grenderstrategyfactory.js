@@ -103,10 +103,10 @@ GRenderStrategyFactory.prototype.createByName = function ( name )
  */
 GRenderStrategyFactory.prototype.creteBestFit = function ()
 { 
-    if ( -1 === navigator.userAgent.toLowerCase().indexOf("android") )
-    {
-        return this.createByName( "deferredPhong" );
-    } 
+   // if ( -1 === navigator.userAgent.toLowerCase().indexOf("android") )
+   // {
+   //     return this.createByName( "deferredPhong" );
+   // } 
     
     return this.createByName( "simplePhong" );
 };

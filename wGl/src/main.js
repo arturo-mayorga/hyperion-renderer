@@ -39,6 +39,9 @@ function animate() {
 	if (context.isReady())
 	{
         lesson.update(elapsed);
+    }
+    if (context.isReady())
+	{
         context.draw(elapsed);
 	}
 	

@@ -64,6 +64,7 @@ function ProfilerOperatingData( context )
 function ProfilerCleanState( oData )
 {
     this.scene = oData.context.getScene();
+    this.hud = oData.context.getHud();
 }
 
 ProfilerCleanState.prototype = Object.create( FsmMachine.prototype );
@@ -119,7 +120,6 @@ function ProfilerLoadState( oData )
     this.scene = oData.context.getScene();
 	this.hud = oData.context.getHud();
 	this.oData = oData;
-	
 }
 
 ProfilerLoadState.prototype = Object.create( FsmMachine.prototype );
@@ -129,6 +129,17 @@ ProfilerLoadState.prototype = Object.create( FsmMachine.prototype );
  */
 ProfilerLoadState.prototype.enter = function () 
 { 
+    this.ui = {};
+	var bg = new GHudRectangle();
+	bg.setColor(0, .2, 0, 1);
+	this.hud.addChild(bg);
+	
+	var bg2 = new GHudRectangle();
+	bg2.setColor(.1, .2, .1, .9);
+	this.hud.addChild(bg2);
+	bg2.setDrawRec(0, 0, 1, .7);
+    
+    
 	this.scene.setVisibility( false );
 	
 	var camera = this.scene.getCamera();
@@ -233,11 +244,6 @@ ProfilerExploreState.prototype.enter = function ()
 {
 	this.camController = new GCameraController();
 	this.camController.bindCamera(this.scene.getCamera());
-    
-    
-    
-    
-	
 	this.scene.setVisibility( true );
 };
 
@@ -262,31 +268,26 @@ ProfilerExploreState.prototype.update = function ( time )
     
     this.frameCount++;
     
-    if ( 3000 < this.runTime )
+    if ( 1000 < this.runTime )
     {
-        console.debug("meeep " + this.frameCount);
         this.runTime = 0;
         
-        if ( this.frameCount > 90 )
+        if ( this.frameCount > 40 )
         {
             if ( false === this.oData.context.increaseRenderLevel() )
             {
-                console.debug("highest supported");
                 // even the most expensive level can be supported
                 this.fireSignal("exitReq");
             }
         }
         else
         {
-            console.debug("rolling one back");
             this.oData.context.decreaseRenderLevel();
             this.fireSignal("exitReq");
         }
         
         this.frameCount = 0;
     }
-    
-	//this.fireSignal("exitReq");
 };
 
 

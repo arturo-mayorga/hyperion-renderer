@@ -361,6 +361,21 @@ GRenderPhongStrategy.prototype.draw = function ( scene, hud )
     this.programs.fullScr.deactivate();
 }; 
 
+GRenderPhongStrategy.tempObjIdA = new Uint8Array(4);
+
+/**
+ * Get the object id of the object at the provided mouse location
+ * @param {number}
+ * @param {number}
+ */
+GRenderPhongStrategy.prototype.getObjectIdAt = function ( x, y )
+{
+    this.frameBuffers.objid.getColorValueAt(x, y, GRenderPhongStrategy.tempObjIdA);
+    
+    return ( GRenderPhongStrategy.tempObjIdA[0] << 16 |
+             GRenderPhongStrategy.tempObjIdA[1] << 8  |
+             GRenderPhongStrategy.tempObjIdA[2] );
+};
 
 
 

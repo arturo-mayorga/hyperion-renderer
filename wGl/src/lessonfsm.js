@@ -100,7 +100,7 @@ CleanState.prototype.enter = function ()
 		this.scene.removeChild( children[0] );
 	}
 	
-	while ( this.scene.removeLight(0) );
+	while ( this.scene.removeLight(0) ){}
 	
 	var materials = this.scene.getMaterials();
 	
@@ -150,6 +150,14 @@ LoadState.prototype = Object.create( FsmMachine.prototype );
  */
 LoadState.prototype.enter = function () 
 {
+    var hChildren = this.hud.children;
+	var len = hChildren.length;
+	for (var i = 0; i < len; ++i)
+	{
+		this.hud.removeChild(hChildren[i]);
+	} 
+    
+    
     this.loadCount = 0;
     this.officeGroup = new GGroup( "officeGroup" );
 	this.penGroup = new GGroup( "penGroup" );
@@ -765,8 +773,7 @@ AsmState.prototype.grabInk = function (time)
 	mat4.translate(transform, transform, this.trans);
 	this.ink.setMvMatrix(transform);
 	
-	if ( this.inkAnimator.getIsComplete() && 
-	    this.stepTransitionCheck(this.spring.children[0].getObjId()))
+	if ( this.inkAnimator.getIsComplete() )
 	{
 		this.fireSignal("done");
 	}

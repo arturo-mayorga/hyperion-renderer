@@ -406,7 +406,7 @@ GScene.prototype.removeMaterial = function( mat )
  */
 GScene.prototype.getMaterials = function()
 {
-    ret = [];
+    var ret = [];
     for (var key in this.materials)
     {
         ret.push(this.materials[key]);

@@ -18,8 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 // SOFTWARE.
 
+var _releaseMode = true;
+var _appMode = "pen";
+
 var rPyramid = 0;
-var rCube = 0;
+var rCube = 0; 
 
 var lastTime = 0;
 
@@ -36,11 +39,17 @@ function animate() {
 	if (context.isReady())
 	{
         lesson.update(elapsed);
+    }
+    if (context.isReady())
+	{
         context.draw(elapsed);
 	}
 	
-	stats.end();
-	stats.begin();
+	if ( false === _releaseMode )
+	{
+	    stats.end();
+	    stats.begin();
+	}
 }
 
 
@@ -71,6 +80,30 @@ var stats;
 
 window.onload=mainLoop;
 
+function createPenApp()
+{
+    var profileState = createProfiler(context);
+    var penState = createLesson(context);
+    
+	
+    lesson = new FsmMachine();
+    lesson.addState("Pen", penState);
+    lesson.addState("Profile", profileState);
+    lesson.addTransition("Profile", "cleanComplete", "Pen");
+    lesson.addTransition("Pen", "cleanComplete", "Pen");
+    lesson.setState("Profile");
+}
+
+var _appCreator = 
+{
+    "pen":createPenApp
+};    
+
+function createAppFSM()
+{
+    _appCreator[_appMode]();
+}
+
 function mainLoop()
 {
 	context = new GContext(document.getElementById("glcanvas"));
@@ -88,24 +121,21 @@ function mainLoop()
 	context.setScene(scene);
 	context.setHud(hud);
 	
+	createAppFSM();
 	
-	var penState = createLesson(context);
-	
-	lesson = new FsmMachine();
-	lesson.addState("Pen", penState);
-	lesson.addTransition("Pen", "cleanComplete", "Pen");
-	lesson.setState("Pen");
-	
-	stats = new Stats();
-    stats.setMode(1); // 0: fps, 1: ms
-    stats.begin();
-    
-    // Align top-left
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.left = '0px';
-    stats.domElement.style.top = '0px';
-    
-    document.body.appendChild( stats.domElement );
+	if ( false === _releaseMode )
+	{
+        stats = new Stats();
+        stats.setMode(1); // 0: fps, 1: ms
+        stats.begin();
+        
+        // Align top-left
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.left = '0px';
+        stats.domElement.style.top = '0px';
+        
+        document.body.appendChild( stats.domElement );
+    }
 	
 	tick();
 }

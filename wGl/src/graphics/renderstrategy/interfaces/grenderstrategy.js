@@ -26,6 +26,61 @@ function GRenderStrategy()
 }
 
 /**
+ * @param {string} new name
+ * @return {GRenderStrategy} this.
+ */
+GRenderStrategy.prototype.setName = function ( name )
+{
+    this.name = name;
+    return this;
+};
+
+/**
+ * Get the current render level
+ * @return {number}
+ */
+GRenderStrategy.prototype.getRenderLevel = function ()
+{
+    return 0;
+};
+
+/**
+ * Set the render level to use
+ * @param {number} the new render level
+ * @return {boolean} true if the change was applied false otherwise
+ */
+GRenderStrategy.prototype.setRenderLevel = function ( newLevel )
+{
+    return false;
+}
+
+/**
+ * @return {boolean} true if the change was applied
+ */
+GRenderStrategy.prototype.increaseRenderLevel = function()
+{
+    var nLevel = this.getRenderLevel() + 1;
+    return this.setRenderLevel( nLevel );
+};
+
+/**
+ * @return {boolean} true if the change was applied
+ */
+GRenderStrategy.prototype.decreaseRenderLevel = function()
+{
+    var nLevel = this.getRenderLevel() - 1;
+    return this.setRenderLevel( nLevel );
+};
+
+/**
+ * @return {string} name
+ */
+GRenderStrategy.prototype.getName = function()
+{
+    return this.name;
+};
+
+/**
  * @return {boolean}
  */
 GRenderStrategy.prototype.isReady = function() {return false;};

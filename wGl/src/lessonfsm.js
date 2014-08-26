@@ -100,7 +100,7 @@ CleanState.prototype.enter = function ()
 		this.scene.removeChild( children[0] );
 	}
 	
-	while ( this.scene.removeLight(0) );
+	while ( this.scene.removeLight(0) ){}
 	
 	var materials = this.scene.getMaterials();
 	

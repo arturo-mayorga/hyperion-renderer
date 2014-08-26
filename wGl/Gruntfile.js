@@ -17,6 +17,7 @@ module.exports = function(grunt) {
                     'src/graphics/scene/interfaces/*.js',
                     'src/graphics/scene/drawordering/*.js',
 					'src/graphics/scene/concrete/*.js',
+					'src/graphics/scene/primitives/*.js',
 					'src/graphics/scene/animations/armature/*.js',
 					'src/graphics/scene/animations/*.js',
 					'src/graphics/scene/decorators/interfaces/*.js',

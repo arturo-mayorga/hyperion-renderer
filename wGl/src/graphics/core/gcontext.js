@@ -79,9 +79,9 @@ function GContext( canvas )
     gl.viewportWidth = canvas.width;
     gl.viewportHeight = canvas.height;
     
-    var renderStrategyFactory = new GRenderStrategyFactory( gl );
+    this.renderStrategyFactory = new GRenderStrategyFactory( gl );
     
-    this.renderStrategy = renderStrategyFactory.creteBestFit();
+    this.renderStrategy = this.renderStrategyFactory.creteBestFit();
     
     
     whiteTexture.bindToContext(gl);
@@ -90,6 +90,52 @@ function GContext( canvas )
     gl.whiteCircleTexture = whiteCircleTexture;
     gl.whiteTexture = whiteTexture;
     gl.randomTexture = randomTexture;
+};
+
+/**
+ * @return {boolean} return true if the render level was changed
+ */
+GContext.prototype.increaseRenderLevel = function()
+{
+    var increased = this.renderStrategy.increaseRenderLevel();
+    
+    if ( false === increased )
+    {
+        // we were unable to increase the level, see if we can find a differen strategy
+        var newStrategy = this.renderStrategyFactory.createNextRenderLevel( this.renderStrategy.getName() );
+        
+        if ( null !== newStrategy )
+        {
+            this.renderStrategy.deleteResources();
+            this.renderStrategy = newStrategy;
+            increased = true;
+        }
+    }
+    
+    return increased;
+};
+
+/**
+ * @return {boolean} return true if the render level was changed
+ */
+GContext.prototype.decreaseRenderLevel = function()
+{
+    var decreased = this.renderStrategy.decreaseRenderLevel();
+    
+    if ( false === decreased )
+    {
+        // we were unable to increase the level, see if we can find a differen strategy
+        var newStrategy = this.renderStrategyFactory.createPreviousRenderLevel( this.renderStrategy.getName() );
+        
+        if ( null !== newStrategy )
+        {
+            this.renderStrategy.deleteResources();
+            this.renderStrategy = newStrategy;
+            decreased = true;
+        }
+    }
+    
+    return decreased;
 };
 
 /**

@@ -27,10 +27,60 @@ function GRenderStrategyFactory( gl )
     this.gl = gl;
     this.strategyMap = 
     {
-        "simplePhong": function(gl) { return new GRenderPhongStrategy( gl ); },
-        "deferredPhong": function(gl) { return new GRenderDeferredStrategy( gl ); }
+        "simplePhong": function(gl) { return new GRenderPhongStrategy( gl ).setName( "simplePhong" ); },
+        "deferredPhong": function(gl) { return new GRenderDeferredStrategy( gl ).setName( "deferredPhong" ); }
     };
+    
+    this.renderLevelSequence =
+    [
+        "simplePhong",
+        "deferredPhong"
+    ];
 }
+
+/** 
+ * Create a render strategy at the next render level
+ * @return {GRenderStrategy|null}
+ */
+GRenderStrategyFactory.prototype.createNextRenderLevel = function ( currentName )
+{
+    var newIdx = -1;
+    var currentIdx = this.renderLevelSequence.indexOf( currentName );
+    if ( currentIdx > -1 &&
+         currentIdx+1 < this.renderLevelSequence.length )
+    {
+        newIdx = currentIdx+1;
+    }
+    
+    if ( -1 === newIdx )
+    {
+        return null;
+    }
+    
+    return this.createByName( this.renderLevelSequence[newIdx] );
+};
+
+/**
+ * Create a render strategy at the previous render level
+ * @return {GRenderStrategy|null}
+ */
+GRenderStrategyFactory.prototype.createPreviousRenderLevel = function ( currentName )
+{
+    var newIdx = -1;
+    var currentIdx = this.renderLevelSequence.indexOf( currentName );
+    if ( currentIdx > -1 &&
+         currentIdx-1 >= 0 )
+    {
+        newIdx = currentIdx-1;
+    }
+    
+    if ( -1 === newIdx )
+    {
+        return null;
+    }
+    
+    return this.createByName( this.renderLevelSequence[newIdx] );
+};
 
 /**
  * Create a new render strategy using the given name
@@ -53,10 +103,10 @@ GRenderStrategyFactory.prototype.createByName = function ( name )
  */
 GRenderStrategyFactory.prototype.creteBestFit = function ()
 { 
-    if ( -1 === navigator.userAgent.toLowerCase().indexOf("android") )
-    {
-        return this.createByName( "deferredPhong" );
-    } 
+   // if ( -1 === navigator.userAgent.toLowerCase().indexOf("android") )
+   // {
+   //     return this.createByName( "deferredPhong" );
+   // } 
     
     return this.createByName( "simplePhong" );
 };

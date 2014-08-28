@@ -135,8 +135,6 @@ function LoadState( oData )
     this.scene = oData.context.getScene();
 	this.hud = oData.context.getHud();
 	this.oData = oData;
-	
-	
 }
 
 LoadState.prototype = Object.create( FsmMachine.prototype );
@@ -336,31 +334,36 @@ ExploreState.prototype.fireSignal = FsmState.prototype.fireSignal;
 /**
  * @param {MouseEvent}
  * @param {number}
+ * @param {number}
  */
-ExploreState.prototype.onMouseDown = function( ev, objid ) 
-{
-  //  this.fireSignal("exitReq");
-};
+ExploreState.prototype.onMouseDown = function( ev, viewportX, viewportY ) {};
 
 /**
  * @param {MouseEvent}
+ * @param {number}
+ * @param {number}
  */
-ExploreState.prototype.onMouseUp = function( ev ) {};
+ExploreState.prototype.onMouseUp = function( ev, viewportX, viewportY ) {};
 
 /**
  * @param {MouseEvent}
+ * @param {number}
+ * @param {number}
  */
-ExploreState.prototype.onMouseMove = function( ev ) {};
+ExploreState.prototype.onMouseMove = function( ev, viewportX, viewportY ) {};
 
 /**
  * This function is called whenever we enter the explore state
  */
 ExploreState.prototype.enter = function () 
 {
-	this.camController = new GCameraController();
-	this.camController.bindCamera(this.scene.getCamera());
+	this.kCamController = new KeyboardDbgCameraController();
+	this.mCamController = new MouseOrbitingCameraController();
+	this.kCamController.bindCamera( this.scene.getCamera() );
+	this.mCamController.bindCamera( this.scene.getCamera() );
     
     this.oData.context.addMouseObserver( this );
+    this.oData.context.addMouseObserver( this.mCamController );
 };
 
 /**
@@ -368,9 +371,11 @@ ExploreState.prototype.enter = function ()
  */
 ExploreState.prototype.exit = function () 
 {
-	this.camController = undefined;
-	
 	this.oData.context.removeMouseObserver( this );
+	this.oData.context.removeMouseObserver( this.mCamController );
+	
+	this.kCamController = undefined;
+	this.mCamController = undefined;
 };
 
 /**
@@ -379,7 +384,8 @@ ExploreState.prototype.exit = function ()
  */
 ExploreState.prototype.update = function ( time ) 
 {
-	this.camController.update( time );
+	this.kCamController.update( time );
+	this.mCamController.update( time );
 };
 
 

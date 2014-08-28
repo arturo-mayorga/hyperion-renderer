@@ -242,7 +242,7 @@ ProfilerExploreState.prototype.fireSignal = FsmState.prototype.fireSignal;
  */
 ProfilerExploreState.prototype.enter = function () 
 {
-	this.camController = new GCameraController();
+	this.camController = new KeyboardDbgCameraController();
 	this.scene.setVisibility( true );
 };
 

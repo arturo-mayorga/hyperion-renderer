@@ -26,18 +26,23 @@ function IContextMouseObserver() {}
 /**
  * @param {MouseEvent}
  * @param {number}
+ * @param {number}
  */
-IContextMouseObserver.prototype.onMouseDown = function( ev, objid ) {};
+IContextMouseObserver.prototype.onMouseDown = function( ev, viewportX, viewportY ) {};
 
 /**
  * @param {MouseEvent}
+ * @param {number}
+ * @param {number}
  */
-IContextMouseObserver.prototype.onMouseUp = function( ev, objid ) {};
+IContextMouseObserver.prototype.onMouseUp = function( ev, viewportX, viewportY ) {};
 
 /**
  * @param {MouseEvent}
+ * @param {number}
+ * @param {number}
  */
-IContextMouseObserver.prototype.onMouseMove = function( ev, objid ) {};
+IContextMouseObserver.prototype.onMouseMove = function( ev, viewportX, viewportY ) {};
 
 /**
  * @constructor
@@ -166,15 +171,12 @@ GContext.prototype.removeMouseObserver = function( observer )
  */
 GContext.prototype.handleMouseDown = function(ev)
 {
-   // console.debug(ev);
-   
-   var x = Math.round(1024*ev.x/ev.toElement.clientWidth);
-   var y = 1024-Math.round(1024*ev.y/ev.toElement.clientHeight);
-   var objid = this.renderStrategy.getObjectIdAt(x,y);
+   var x = ev.x/ev.toElement.clientWidth;
+   var y = ev.y/ev.toElement.clientHeight;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseDown(ev, objid);
+       this.mouseObservers[i].onMouseDown(ev, x, y);
    }
 };
 
@@ -183,15 +185,12 @@ GContext.prototype.handleMouseDown = function(ev)
  */
 GContext.prototype.handleMouseUp = function(ev)
 {
-   // console.debug(ev);
-   
-   // var x = Math.round(1024*ev.x/ev.toElement.clientWidth);
-   // var y = 1024-Math.round(1024*ev.y/ev.toElement.clientHeight);
-   // var objid = this.renderStrategy.getObjectIdAt(x,y);
+   var x = ev.x/ev.toElement.clientWidth;
+   var y = ev.y/ev.toElement.clientHeight;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseUp(ev);
+       this.mouseObservers[i].onMouseUp(ev, x, y);
    }
 };
 
@@ -200,15 +199,12 @@ GContext.prototype.handleMouseUp = function(ev)
  */
 GContext.prototype.handleMouseMove = function(ev)
 {
-   //console.debug(ev);
-   
-   // var x = Math.round(1024*ev.x/ev.toElement.clientWidth);
-   // var y = 1024-Math.round(1024*ev.y/ev.toElement.clientHeight);
-   // var objid = this.renderStrategy.getObjectIdAt(x,y);
+   var x = ev.x/ev.toElement.clientWidth;
+   var y = ev.y/ev.toElement.clientHeight;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseMove(ev);
+       this.mouseObservers[i].onMouseMove(ev, x, y);
    }
 };
 	

@@ -108,25 +108,29 @@ GCameraController.prototype.bindCamera = function( camera )
 {
     var lookAt = vec3.create();
     this.camera = camera;
-    this.camera.getEye(this.eyePos);
-    this.camera.getLookAt(lookAt);
-    this.camera.getUp(this.eyeUp);
-    vec3.subtract( this.eyeLookAtDir,
-                   lookAt, this.eyePos );
+    this.getValuesFromCam();
 }
 
-/**
- * Update the camera state
- * @param {number} Number of milliseconds since the last call.
- */
-GCameraController.prototype.update = function( elapsedTime )
+GCameraController.prototype.getValuesFromCam = function()
 {
-    if ( this.camera === undefined ) return;
+    this.camera.getEye(this.eyePos);
+    this.camera.getLookAt(this.eyeLookAtDir);
+    this.camera.getUp(this.eyeUp);
+    vec3.subtract( this.eyeLookAtDir,
+                   this.eyeLookAtDir, this.eyePos );
     
     vec3.cross(this.eyeRight, this.eyeLookAtDir, this.eyeUp);
-    
-    var r = this.dYaw*this.rotSize*elapsedTime;
-    
+};
+
+GCameraController.prototype.setValuesToCam = function()
+{
+    camera.setEye(this.eyePos[0], this.eyePos[1], this.eyePos[2]);
+    camera.setLookAt(this.eyeLookAt[0], this.eyeLookAt[1], this.eyeLookAt[2]);
+    camera.setUp(this.eyeUp[0], this.eyeUp[1], this.eyeUp[2]);
+};
+
+GCameraController.prototype.calcRotations = function ( elapsedTime )
+{
     var mvMatrix = mat4.create();
     mat4.identity(mvMatrix);
     mat4.rotate(mvMatrix, mvMatrix, this.dYaw*this.rotSize*elapsedTime,   this.eyeUp);
@@ -145,7 +149,10 @@ GCameraController.prototype.update = function( elapsedTime )
     vec4.set(tVec, this.eyeLookAtDir[0], this.eyeLookAtDir[1], this.eyeLookAtDir[2], 0);
     vec4.transformMat4(tVec, tVec, mvMatrix);
     vec3.set(this.eyeLookAtDir, tVec[0], tVec[1], tVec[2]);
+};
 
+GCameraController.prototype.calcTrans = function( elapsedTime )
+{
     vec3.set(this.tempDEyePos, 0,0,0);
     
     if (this.dZ === 1)
@@ -180,8 +187,18 @@ GCameraController.prototype.update = function( elapsedTime )
     vec3.add(this.eyePos, this.eyePos, this.tempDEyePos);
     
     vec3.add(this.eyeLookAt, this.eyePos, this.eyeLookAtDir);
+};
+
+/**
+ * Update the camera state
+ * @param {number} Number of milliseconds since the last call.
+ */
+GCameraController.prototype.update = function( elapsedTime )
+{
+    if ( this.camera === undefined ) return;
     
-    camera.setEye(this.eyePos[0], this.eyePos[1], this.eyePos[2]);
-    camera.setLookAt(this.eyeLookAt[0], this.eyeLookAt[1], this.eyeLookAt[2]);
-    camera.setUp(this.eyeUp[0], this.eyeUp[1], this.eyeUp[2]);
+    this.getValuesFromCam(); 
+    this.calcRotations( elapsedTime ); 
+    this.calcTrans( elapsedTime ); 
+    this.setValuesToCam();
 }

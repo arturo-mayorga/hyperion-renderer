@@ -243,7 +243,6 @@ ProfilerExploreState.prototype.fireSignal = FsmState.prototype.fireSignal;
 ProfilerExploreState.prototype.enter = function () 
 {
 	this.camController = new GCameraController();
-	this.camController.bindCamera(this.scene.getCamera());
 	this.scene.setVisibility( true );
 };
 
@@ -252,7 +251,6 @@ ProfilerExploreState.prototype.enter = function ()
  */
 ProfilerExploreState.prototype.exit = function () 
 {
-	this.camController = undefined;
 };
 
 /**
@@ -260,19 +258,39 @@ ProfilerExploreState.prototype.exit = function ()
  * @param {number} number of milliseconds since the last update
  */
 ProfilerExploreState.prototype.update = function ( time ) 
-{
-	this.camController.update( time );
+{	
+	this.debugLevel = 2;
+	
+	if ( undefined !== this.debugLevel )
+	{
+	    while ( this.oData.context.decreaseRenderLevel() ) {}
+	    for ( var i = 0; i < this.debugLevel; ++i )
+	    {
+	        this.oData.context.increaseRenderLevel();
+	        this.fireSignal("exitReq");
+	    }
+	}
+	
+	
     
     
 	this.runTime += time;
-    
     this.frameCount++;
     
-    if ( 1000 < this.runTime )
+    if ( this.oData.context.renderStrategy.isReady() == false )
+	{
+	    this.runtime = 0;
+	    this.frameCount = 0;
+	    console.debug("not ready");
+	}
+    
+    
+    if ( 3000 < this.runTime )
     {
         this.runTime = 0;
         
-        if ( this.frameCount > 40 )
+        console.debug(this.frameCount);
+        if ( this.frameCount > 120 )
         {
             if ( false === this.oData.context.increaseRenderLevel() )
             {

@@ -168,7 +168,9 @@ LoadState.prototype.enter = function ()
 	this.envLoader.enableAutoMergeByMaterial(); 
     
     
-	this.envLoader.loadObj("assets/3d/apartment/a1/", "sheldon.obj"); 
+	//this.envLoader.loadObj("assets/3d/apartment/a1/", "sheldon.obj"); 
+	//this.envLoader.loadObj("assets/3d/0f69d966978a46df96cd1c8a9b05da76/", "0f69d966978a46df96cd1c8a9b05da76.obj"); 
+	this.envLoader.loadObj("assets/3d/bluefalcon/", "bluefalcon.obj"); 
 
 	this.ui = {};
 	var bg = new GHudRectangle();
@@ -196,9 +198,9 @@ LoadState.prototype.enter = function ()
 	this.scene.setVisibility( false );
 	
 	var camera = this.scene.getCamera();
-	camera.setLookAt(4.232629776000977*4, 2.6432266235351562*4, 0.2486426830291748*4);
-	camera.setUp(-0.09341227263212204, 0.9805285334587097, 0.17273758351802826);
-	camera.setEye(0, 7, 0);
+	camera.setLookAt(0, 0, 0);
+	camera.setUp(0, 1, 0);
+	camera.setEye(-59, 0, -3);
 };
 
 /**
@@ -337,7 +339,7 @@ ExploreState.prototype.fireSignal = FsmState.prototype.fireSignal;
  */
 ExploreState.prototype.onMouseDown = function( ev, objid ) 
 {
-    this.fireSignal("exitReq");
+  //  this.fireSignal("exitReq");
 };
 
 /**

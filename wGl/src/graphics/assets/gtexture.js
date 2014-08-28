@@ -51,6 +51,8 @@ GTexture.prototype.processArgs = function( args )
             this.name = args[i];
         }
     }
+    
+    this.scale[1] *= -1;
 };
 	
 /**

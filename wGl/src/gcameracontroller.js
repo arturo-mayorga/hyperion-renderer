@@ -220,9 +220,15 @@ function MouseOrbitingCameraController()
 	this.eyeRight = vec3.create();
 	this.tempDEyePos = vec3.create();
 	
+	this.lookAtR = 0;
+	
 	this.isDragging = false;
 	
+	this.eyePosStart = vec3.create();
 	this.viewPortOrigin = vec2.create();
+	this.viewPortDrag = vec2.create();
+	
+	this.horizontalAxis = vec3.create();
 }
 
 /**
@@ -233,8 +239,17 @@ function MouseOrbitingCameraController()
 MouseOrbitingCameraController.prototype.onMouseDown = function( ev, viewportX, viewportY ) 
 {
     this.isDragging = true;
-    this.viewPortOrigin[0] = veiwportX;
+    this.viewPortOrigin[0] = viewportX;
     this.viewPortOrigin[1] = viewportY;
+    
+    this.viewPortDrag[0] = 0;
+    this.viewPortDrag[1] = 0;
+    
+    this.getValuesFromCam();
+    
+    vec3.add( this.horizontalAxis, this.eyeRight, this.eyeLookAt );
+    
+    vec3.copy( this.eyePosStart, this.eyePos ); 
 };
 
 /**
@@ -256,7 +271,9 @@ MouseOrbitingCameraController.prototype.onMouseMove = function( ev, viewportX, v
 {
     if ( false === this.isDragging ) return;
     
-    console.debug(viewportX + ", " + viewportY);
+    vec2.subtract( this.viewPortDrag, this.viewPortOrigin, [viewportX, viewportY] ); 
+    
+    console.debug(this.viewPortDrag+ ", " + this.lookAtR);
 };
 
 /**
@@ -271,15 +288,37 @@ MouseOrbitingCameraController.prototype.bindCamera = function( camera )
 
 MouseOrbitingCameraController.prototype.getValuesFromCam = function()
 {
-    this.camera.getEye(this.eyePos);
-    this.camera.getLookAt(this.eyeLookAtDir);
-    this.camera.getUp(this.eyeUp);
+    this.camera.getEye( this.eyePos );
+    this.camera.getLookAt( this.eyeLookAt );
+    this.camera.getUp( this.eyeUp );
     vec3.subtract( this.eyeLookAtDir,
-                   this.eyeLookAtDir, this.eyePos );
+                   this.eyeLookAt, this.eyePos );
     
-    vec3.cross(this.eyeRight, this.eyeLookAtDir, this.eyeUp);
+    vec3.cross( this.eyeRight, this.eyeLookAtDir, this.eyeUp );
+    
+    this.lookAtR = vec3.distance( this.eyePos, this.eyeLookAt );
+};
+
+MouseOrbitingCameraController.prototype.setValuesToCam = function()
+{
+    camera.setEye( this.eyePos[0], this.eyePos[1], this.eyePos[2] );
+    camera.setLookAt( this.eyeLookAt[0], this.eyeLookAt[1], this.eyeLookAt[2] );
+    camera.setUp( this.eyeUp[0], this.eyeUp[1], this.eyeUp[2] );
 };
 
 MouseOrbitingCameraController.prototype.update = function( time )
 {
+    if ( false === this.isDragging ) return;
+    
+    var mvMatrix = mat4.create();
+    mat4.identity( mvMatrix );
+    // allways rotate around the y axis
+    mat4.rotate( mvMatrix, mvMatrix, this.viewPortDrag[0]*Math.PI, [0,1,0] );
+    
+    // find the horizontal axis
+    mat4.rotate( mvMatrix, mvMatrix, this.viewPortDrag[1]*Math.PI, this.horizontalAxis );
+    
+    vec3.transformMat4(this.eyePos, this.eyePosStart, mvMatrix);
+    
+    this.setValuesToCam();
 };

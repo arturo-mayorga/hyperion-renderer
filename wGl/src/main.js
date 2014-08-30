@@ -83,7 +83,7 @@ window.onload=mainLoop;
 function createPenApp()
 {
     var profileState = createProfiler(context);
-    var penState = createLesson(context);
+    var penState = OrbitingViewer.createState(context);
     
 	
     lesson = new FsmMachine();

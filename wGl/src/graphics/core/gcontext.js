@@ -75,6 +75,11 @@ function GContext( canvas )
     canvas.onmousedown = function(ev) {_this.handleMouseDown(ev);}
     document.onmouseup = function(ev) {_this.handleMouseUp(ev);}
     document.onmousemove = function(ev) {_this.handleMouseMove(ev);}
+    
+    document.addEventListener('touchstart', function(e){_this.handleTouchStart(e);}, false);
+    document.addEventListener('touchmove', function(e){_this.handleTouchMove(e);}, false);
+    document.addEventListener('touchend', function(e){_this.handleTouchEnd(e);}, false);
+
 	
     var gl = this.gl;
     
@@ -167,6 +172,20 @@ GContext.prototype.removeMouseObserver = function( observer )
 };
 
 /**
+ * @param {TouchEvent}
+ */
+GContext.prototype.handleTouchStart = function(ev)
+{
+   var x = ev.targetTouches[0].clientX/ev.target.clientWidth;
+   var y = ev.targetTouches[0].clientY/ev.target.clientHeight;
+   
+   for ( var i in this.mouseObservers )
+   {
+       this.mouseObservers[i].onMouseDown(ev, x, y);
+   }
+};
+
+/**
  * @param {MouseEvent}
  */
 GContext.prototype.handleMouseDown = function(ev)
@@ -181,6 +200,20 @@ GContext.prototype.handleMouseDown = function(ev)
 };
 
 /**
+ * @param {TouchEvent}
+ */
+GContext.prototype.handleTouchEnd = function(ev)
+{
+   var x = 0;//ev.targetTouches[0].clientX/ev.target.clientWidth;
+   var y = 0;//ev.targetTouches[0].clientY/ev.target.clientHeight;
+   
+   for ( var i in this.mouseObservers )
+   {
+       this.mouseObservers[i].onMouseUp(ev, x, y);
+   }
+};
+
+/**
  * @param {MouseEvent}
  */
 GContext.prototype.handleMouseUp = function(ev)
@@ -191,6 +224,20 @@ GContext.prototype.handleMouseUp = function(ev)
    for ( var i in this.mouseObservers )
    {
        this.mouseObservers[i].onMouseUp(ev, x, y);
+   }
+};
+
+/**
+ * @param {TouchEvent}
+ */
+GContext.prototype.handleTouchMove = function(ev)
+{
+   var x = ev.targetTouches[0].clientX/ev.target.clientWidth;
+   var y = ev.targetTouches[0].clientY/ev.target.clientHeight;
+   
+   for ( var i in this.mouseObservers )
+   {
+       this.mouseObservers[i].onMouseMove(ev, x, y);
    }
 };
 

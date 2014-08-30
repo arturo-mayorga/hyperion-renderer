@@ -18,64 +18,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 // SOFTWARE.
 
+
+// JS namespace...
+var OrbitingViewer = new function()
+{
+    
 /**
  * @return {FsmState}
  * @param {GContext}
  */
-function createLesson( context )
+this.createState = function( context )
 {
     var scene = context.getScene();
     var hud = context.getHud();
 	var ret = new FsmMachine();
-	var oData = new PenLessonOperatingData( context );
+	var oData = new StateOperatingData( context );
 	
 	ret.addState("Load", new LoadState( oData ));
 	ret.addState("Explore", new ExploreState( oData ));
 	ret.addState("Clean", new CleanState( oData ));
 	
 	ret.addTransition( "Load", "loadComplete", "Explore" );
-	ret.addTransition( "Explore", "startAsm", "Asm" );
 	
 	ret.addTransition( "Load", "exitReq", "Clean" );
 	ret.addTransition( "Explore", "exitReq", "Clean" );
 	
-	ret.setName("Pen");
+	ret.setName("OrbitingViewer");
 	ret.setEnterState("Load");
 	return ret;
-}
+};
 
 /**
  * @constructor
  * @param {GContext}
  */
-function PenLessonOperatingData( context )
+function StateOperatingData( context )
 {
     this.context = context;
-    this.humanoidAnimator = undefined;
 }
- 
-/**
- * @param {ArmatureAnimator}
- */
-PenLessonOperatingData.prototype.setHAnimator = function ( animator )
-{
-    this.humanoidAnimator = animator;
-};
-
-/**
- * @return {ArmatureAnimator}
- */
-PenLessonOperatingData.prototype.getHAnimator = function ()
-{
-    return this.humanoidAnimator;
-};
 
 /**
  * @constructor
  * @extends {FsmMachine}
  * @implements {GObjLoaderObserver}
  * @implements {ThreejsLoaderObserver}
- * @param {PenLessonOperatingData}
+ * @param {StateOperatingData}
  */
 function CleanState( oData )
 {
@@ -90,7 +77,9 @@ CleanState.prototype = Object.create( FsmMachine.prototype );
 CleanState.prototype.enter = function () 
 {
     var children = this.scene.getChildren();
-	for (var len = children.length; len > 0; children = this.scene.getChildren(), len = children.length )
+	for ( var len = children.length; len > 0; 
+	      children = this.scene.getChildren(), 
+	      len = children.length )
 	{
 		children[0].deleteResources(); 
 		this.scene.removeChild( children[0] );
@@ -128,7 +117,7 @@ CleanState.prototype.update = function ( time )
  * @extends {FsmMachine}
  * @implements {GObjLoaderObserver}
  * @implements {ThreejsLoaderObserver}
- * @param {PenLessonOperatingData}
+ * @param {StateOperatingData}
  */
 function LoadState( oData ) 
 {
@@ -172,11 +161,11 @@ LoadState.prototype.enter = function ()
 
 	this.ui = {};
 	var bg = new GHudRectangle();
-	bg.setColor(0, .2, 0, 1);
+	bg.setColor(0, 0, .2, 1);
 	this.hud.addChild(bg);
 	
 	var bg2 = new GHudRectangle();
-	bg2.setColor(.1, .2, .1, .9);
+	bg2.setColor(.1, .1, .2, .9);
 	this.hud.addChild(bg2);
 	bg2.setDrawRec(0, 0, 1, .7);
 	
@@ -210,9 +199,7 @@ LoadState.prototype.exit = function ()
 	for (var i = 0; i < len; ++i)
 	{
 		this.hud.removeChild(this.ui.components[i]);
-	} 
-	
-	 
+	}
 	
 	var light0 = new GLight();
 	var light1 = new GLight();
@@ -220,14 +207,6 @@ LoadState.prototype.exit = function ()
 	var light3 = new GLight();
 	var light4 = new GLight();
 	var light5 = new GLight();
-	/*var light6 = new GLight();
-	var light7 = new GLight();
-	var light8 = new GLight();
-	
-	light0.setPosition(-18, 28.25, 16);
-	light1.setPosition(-12, 28.25, -22);
-	light2.setPosition(-6, 28.25, 16);
-	light3.setPosition(0, 28.25, -22);*/
 	
 	var h = 15.877;
 	
@@ -237,19 +216,6 @@ LoadState.prototype.exit = function ()
 	light3.setPosition(9.9, h, -21.6);
 	light4.setPosition(20.2, h, -6);
 	light5.setPosition(3, 12, -28);
-	
-	
-	
-	//light0.setPosition(-18, 28.25, 8);
-	//light1.setPosition(-12, 28.25, -2);
-	//light2.setPosition(-6, 28.25, 8);
-	//light3.setPosition(0, 28.25, -2);
-	//light4.setPosition(6, 28.25, 8);
-	//light5.setPosition(12, 28.25, -2);
-	/*light6.setPosition(18, 28.25, 8);
-	light7.setPosition(24, 28.25, -2);
-	light8.setPosition(30, 28.25, 8);*/
-	
 	
 	this.scene.addLight(light0);
 	this.scene.addLight(light1);
@@ -271,7 +237,8 @@ LoadState.prototype.update = function ( time )
 };
  
  /**
-  * This function gets called whenever the observed loader completes the loading process
+  * This function gets called whenever the observed loader completes the loading 
+  * process
   * @param {GObjLoader} Loader object that just finished loading its assets
   */
 LoadState.prototype.onObjLoaderCompleted = function ( loader ) 
@@ -305,16 +272,13 @@ LoadState.prototype.onObjLoaderProgress = function ( loader, progress )
 /**
  * @constructor
  * @implements {FsmState}
- * @implements {IContextMouseObserver}
- * @param {PenLessonOperatingData}
+ * @param {StateOperatingData}
  */
 function ExploreState( oData ) 
 {
     this.scene = oData.context.getScene();
 	this.hud = oData.context.getHud();
 	this.oData = oData;
-	this.timeR = 0;
-	
 }
 
 ExploreState.prototype = Object.create( FsmMachine.prototype );
@@ -332,27 +296,6 @@ ExploreState.prototype.setSignalObserver = FsmState.prototype.setSignalObserver;
 ExploreState.prototype.fireSignal = FsmState.prototype.fireSignal;
 
 /**
- * @param {MouseEvent}
- * @param {number}
- * @param {number}
- */
-ExploreState.prototype.onMouseDown = function( ev, viewportX, viewportY ) {};
-
-/**
- * @param {MouseEvent}
- * @param {number}
- * @param {number}
- */
-ExploreState.prototype.onMouseUp = function( ev, viewportX, viewportY ) {};
-
-/**
- * @param {MouseEvent}
- * @param {number}
- * @param {number}
- */
-ExploreState.prototype.onMouseMove = function( ev, viewportX, viewportY ) {};
-
-/**
  * This function is called whenever we enter the explore state
  */
 ExploreState.prototype.enter = function () 
@@ -361,8 +304,7 @@ ExploreState.prototype.enter = function ()
 	this.mCamController = new MouseOrbitingCameraController();
 	this.kCamController.bindCamera( this.scene.getCamera() );
 	this.mCamController.bindCamera( this.scene.getCamera() );
-    
-    this.oData.context.addMouseObserver( this );
+	
     this.oData.context.addMouseObserver( this.mCamController );
 };
 
@@ -388,5 +330,5 @@ ExploreState.prototype.update = function ( time )
 	this.mCamController.update( time );
 };
 
-
+};
 

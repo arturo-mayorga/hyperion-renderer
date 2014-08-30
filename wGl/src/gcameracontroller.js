@@ -229,6 +229,7 @@ function MouseOrbitingCameraController()
 	this.viewPortDrag = vec2.create();
 	
 	this.horizontalAxis = vec3.create();
+	this.verticalAxis = vec3.fromValues(0,1,0);
 }
 
 /**
@@ -271,9 +272,7 @@ MouseOrbitingCameraController.prototype.onMouseMove = function( ev, viewportX, v
 {
     if ( false === this.isDragging ) return;
     
-    vec2.subtract( this.viewPortDrag, this.viewPortOrigin, [viewportX, viewportY] ); 
-    
-    console.debug(this.viewPortDrag+ ", " + this.lookAtR);
+    vec2.subtract( this.viewPortDrag, this.viewPortOrigin, [viewportX, viewportY] );
 };
 
 /**
@@ -312,11 +311,16 @@ MouseOrbitingCameraController.prototype.update = function( time )
     
     var mvMatrix = mat4.create();
     mat4.identity( mvMatrix );
+    
+    mat4.translate(mvMatrix, mvMatrix, [this.eyeLookAt[0]*-1, this.eyeLookAt[1]*-1, this.eyeLookAt[2]*-1] );
+    
     // allways rotate around the y axis
-    mat4.rotate( mvMatrix, mvMatrix, this.viewPortDrag[0]*Math.PI, [0,1,0] );
+    mat4.rotate( mvMatrix, mvMatrix, this.viewPortDrag[0]*Math.PI, this.verticalAxis );
     
     // find the horizontal axis
     mat4.rotate( mvMatrix, mvMatrix, this.viewPortDrag[1]*Math.PI, this.horizontalAxis );
+    
+    mat4.translate(mvMatrix, mvMatrix, this.eyeLookAt);
     
     vec3.transformMat4(this.eyePos, this.eyePosStart, mvMatrix);
     

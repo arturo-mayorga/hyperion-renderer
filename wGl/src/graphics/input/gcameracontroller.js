@@ -233,12 +233,13 @@ function MouseOrbitingCameraController()
 }
 
 /**
- * @param {MouseEvent}
- * @param {number}
- * @param {number}
+ * @param {PointingEvent}
  */
-MouseOrbitingCameraController.prototype.onMouseDown = function( ev, viewportX, viewportY ) 
+MouseOrbitingCameraController.prototype.onMouseDown = function( ev ) 
 {
+     var viewportX = ev.getX();
+     var viewportY = ev.getY();
+    
     this.isDragging = true;
     this.viewPortOrigin[0] = viewportX;
     this.viewPortOrigin[1] = viewportY;
@@ -254,23 +255,25 @@ MouseOrbitingCameraController.prototype.onMouseDown = function( ev, viewportX, v
 };
 
 /**
- * @param {MouseEvent}
- * @param {number}
- * @param {number}
+ * @param {PointingEvent}
  */
-MouseOrbitingCameraController.prototype.onMouseUp = function( ev, viewportX, viewportY ) 
+MouseOrbitingCameraController.prototype.onMouseUp = function( ev ) 
 {
+    var viewportX = ev.getX();
+    var viewportY = ev.getY();
+     
     this.isDragging = false;
 };
 
 /**
- * @param {MouseEvent}
- * @param {number}
- * @param {number}
+ * @param {PointingEvent}
  */
-MouseOrbitingCameraController.prototype.onMouseMove = function( ev, viewportX, viewportY ) 
+MouseOrbitingCameraController.prototype.onMouseMove = function( ev ) 
 {
     if ( false === this.isDragging ) return;
+    
+    var viewportX = ev.getX();
+    var viewportY = ev.getY();
     
     vec2.subtract( this.viewPortDrag, this.viewPortOrigin, [viewportX, viewportY] );
 };

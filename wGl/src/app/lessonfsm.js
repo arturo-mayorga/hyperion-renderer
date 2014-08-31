@@ -552,21 +552,20 @@ function AsmState( oData )
 AsmState.prototype = Object.create( FsmMachine.prototype );
 
 /**
- * @param {MouseEvent}
- * @param {number}
+ * @param {PointingEvent}
  */
-AsmState.prototype.onMouseDown = function( ev, objid ) 
+AsmState.prototype.onMouseDown = function( ev ) 
 {
-    this.lastObjIdClicked = objid;
+    this.lastObjIdClicked = this.oData.context.getSceneObjectIdAt(ev);
 };
 
 /**
- * @param {MouseEvent}
+ * @param {PointingEvent}
  */
 AsmState.prototype.onMouseUp = function( ev ) {};
 
 /**
- * @param {MouseEvent}
+ * @param {PointingEvent}
  */
 AsmState.prototype.onMouseMove = function( ev ) {};
 

@@ -24,6 +24,8 @@
  */
 function GHudRectangle() 
 {
+    GHudWidget.call( this );
+    
     this.transform = mat3.create();
 	this.drawTransform = mat3.create();
 	this.bgColor = [1, 1, 0, 0.5];
@@ -62,6 +64,11 @@ GHudRectangle.prototype.draw = function( mat, shader )
 	if ( null != shader.uniforms.hMatrixUniform )
     {
         gl.uniformMatrix3fv(shader.uniforms.hMatrixUniform, false, this.drawTransform);
+    }
+    
+    if ( null != shader.uniforms.objid )
+    {
+        gl.uniform4fv(shader.uniforms.objid, this.objid);
     }
     
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.recIndxBuffer);

@@ -25,7 +25,16 @@ function GHudWidget()
 {
     this.gl = undefined;
     this.transform = mat3.create();
+    
+    var objid_ = GHudWidget.instanceCounter;
+    this.objid_ = objid_;
+    this.objid = [ (0x000000ff & (objid_>>16))/255, 
+                   (0x000000ff & (objid_>>8))/255, 
+                   (0x000000ff & objid_)/255, 1];
+    GHudWidget.instanceCounter += 1;
 }
+
+GHudWidget.instanceCounter = 0;
 
 /**
  * Draw this widget using the provided transform matrix and shader
@@ -67,6 +76,8 @@ GHudWidget.prototype.setDrawRec = function ( x, y, width, height )
  */
 function GHudGroup() 
 {
+    GHudWidget.call( this );
+    
     this.gl = undefined;
 	this.children = [];
 	this.transform = mat3.create();

@@ -465,7 +465,12 @@ GRenderDeferredStrategy.prototype.setRenderLevel = function ( newLevel )
          newLevel <= 2 )
     {
         this.renderLevel = newLevel;
-        this.initPassCmds();
+        
+        if ( this._isReady )
+        {
+            this.initPassCmds();
+        }
+        
         return true;
     }
     

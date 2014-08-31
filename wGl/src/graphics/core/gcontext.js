@@ -26,18 +26,23 @@ function IContextMouseObserver() {}
 /**
  * @param {MouseEvent}
  * @param {number}
+ * @param {number}
  */
-IContextMouseObserver.prototype.onMouseDown = function( ev, objid ) {};
+IContextMouseObserver.prototype.onMouseDown = function( ev, viewportX, viewportY ) {};
 
 /**
  * @param {MouseEvent}
+ * @param {number}
+ * @param {number}
  */
-IContextMouseObserver.prototype.onMouseUp = function( ev, objid ) {};
+IContextMouseObserver.prototype.onMouseUp = function( ev, viewportX, viewportY ) {};
 
 /**
  * @param {MouseEvent}
+ * @param {number}
+ * @param {number}
  */
-IContextMouseObserver.prototype.onMouseMove = function( ev, objid ) {};
+IContextMouseObserver.prototype.onMouseMove = function( ev, viewportX, viewportY ) {};
 
 /**
  * @constructor
@@ -70,6 +75,11 @@ function GContext( canvas )
     canvas.onmousedown = function(ev) {_this.handleMouseDown(ev);}
     document.onmouseup = function(ev) {_this.handleMouseUp(ev);}
     document.onmousemove = function(ev) {_this.handleMouseMove(ev);}
+    
+    document.addEventListener('touchstart', function(e){_this.handleTouchStart(e);}, false);
+    document.addEventListener('touchmove', function(e){_this.handleTouchMove(e);}, false);
+    document.addEventListener('touchend', function(e){_this.handleTouchEnd(e);}, false);
+
 	
     var gl = this.gl;
     
@@ -162,19 +172,44 @@ GContext.prototype.removeMouseObserver = function( observer )
 };
 
 /**
+ * @param {TouchEvent}
+ */
+GContext.prototype.handleTouchStart = function(ev)
+{
+   var x = ev.targetTouches[0].clientX/ev.target.clientWidth;
+   var y = ev.targetTouches[0].clientY/ev.target.clientHeight;
+   
+   for ( var i in this.mouseObservers )
+   {
+       this.mouseObservers[i].onMouseDown(ev, x, y);
+   }
+};
+
+/**
  * @param {MouseEvent}
  */
 GContext.prototype.handleMouseDown = function(ev)
 {
-   // console.debug(ev);
-   
-   var x = Math.round(1024*ev.x/ev.toElement.clientWidth);
-   var y = 1024-Math.round(1024*ev.y/ev.toElement.clientHeight);
-   var objid = this.renderStrategy.getObjectIdAt(x,y);
+   var x = ev.x/ev.toElement.clientWidth;
+   var y = ev.y/ev.toElement.clientHeight;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseDown(ev, objid);
+       this.mouseObservers[i].onMouseDown(ev, x, y);
+   }
+};
+
+/**
+ * @param {TouchEvent}
+ */
+GContext.prototype.handleTouchEnd = function(ev)
+{
+   var x = 0;//ev.targetTouches[0].clientX/ev.target.clientWidth;
+   var y = 0;//ev.targetTouches[0].clientY/ev.target.clientHeight;
+   
+   for ( var i in this.mouseObservers )
+   {
+       this.mouseObservers[i].onMouseUp(ev, x, y);
    }
 };
 
@@ -183,15 +218,26 @@ GContext.prototype.handleMouseDown = function(ev)
  */
 GContext.prototype.handleMouseUp = function(ev)
 {
-   // console.debug(ev);
-   
-   // var x = Math.round(1024*ev.x/ev.toElement.clientWidth);
-   // var y = 1024-Math.round(1024*ev.y/ev.toElement.clientHeight);
-   // var objid = this.renderStrategy.getObjectIdAt(x,y);
+   var x = ev.x/ev.toElement.clientWidth;
+   var y = ev.y/ev.toElement.clientHeight;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseUp(ev);
+       this.mouseObservers[i].onMouseUp(ev, x, y);
+   }
+};
+
+/**
+ * @param {TouchEvent}
+ */
+GContext.prototype.handleTouchMove = function(ev)
+{
+   var x = ev.targetTouches[0].clientX/ev.target.clientWidth;
+   var y = ev.targetTouches[0].clientY/ev.target.clientHeight;
+   
+   for ( var i in this.mouseObservers )
+   {
+       this.mouseObservers[i].onMouseMove(ev, x, y);
    }
 };
 
@@ -200,15 +246,12 @@ GContext.prototype.handleMouseUp = function(ev)
  */
 GContext.prototype.handleMouseMove = function(ev)
 {
-   //console.debug(ev);
-   
-   // var x = Math.round(1024*ev.x/ev.toElement.clientWidth);
-   // var y = 1024-Math.round(1024*ev.y/ev.toElement.clientHeight);
-   // var objid = this.renderStrategy.getObjectIdAt(x,y);
+   var x = ev.x/ev.toElement.clientWidth;
+   var y = ev.y/ev.toElement.clientHeight;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseMove(ev);
+       this.mouseObservers[i].onMouseMove(ev, x, y);
    }
 };
 	

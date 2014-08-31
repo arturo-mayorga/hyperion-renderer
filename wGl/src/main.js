@@ -19,7 +19,7 @@
 // SOFTWARE.
 
 var _releaseMode = false;
-var _appMode = "pen";
+var _appMode = "orbiting";//"pen";
 
 var rPyramid = 0;
 var rCube = 0; 

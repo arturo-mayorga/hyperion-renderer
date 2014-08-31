@@ -18,11 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 // SOFTWARE.
 
+// JS namespace...
+var PenAssembly = new function()
+{
+
 /**
  * @return {FsmState}
  * @param {GContext}
  */
-function createLesson( context )
+this.createState = function( context )
 {
     var scene = context.getScene();
     var hud = context.getHud();
@@ -46,7 +50,7 @@ function createLesson( context )
 	ret.setName("Pen");
 	ret.setEnterState("Load");
 	return ret;
-}
+};
 
 /**
  * @constructor
@@ -442,7 +446,7 @@ ExploreState.prototype.onMouseMove = function( ev ) {};
  */
 ExploreState.prototype.enter = function () 
 {
-	this.camController = new GCameraController();
+	this.camController = new KeyboardDbgCameraController();
 	this.camController.bindCamera(this.scene.getCamera());
     this.oData.getHAnimator().play();
     
@@ -1646,4 +1650,6 @@ AsmState.prototype.doneExit = function() {};
 AsmState.prototype.done = function (time)
 {
 	this.fireSignal("exitAsm");
+};
+
 };

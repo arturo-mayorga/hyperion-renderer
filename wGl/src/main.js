@@ -83,7 +83,7 @@ window.onload=mainLoop;
 function createPenApp()
 {
     var profileState = createProfiler(context);
-    var penState = OrbitingViewer.createState(context);
+    var penState = PenAssembly.createState(context);
     
 	
     lesson = new FsmMachine();
@@ -94,9 +94,24 @@ function createPenApp()
     lesson.setState("Profile");
 }
 
+function createOrbitingViewerApp()
+{
+    var profileState = createProfiler(context);
+    var orbitingViewerState = OrbitingViewer.createState(context);
+    
+	
+    lesson = new FsmMachine();
+    lesson.addState("OrbitingViewer", orbitingViewerState);
+    lesson.addState("Profile", profileState);
+    lesson.addTransition("Profile", "cleanComplete", "OrbitingViewer");
+    lesson.addTransition("OrbitingViewer", "cleanComplete", "OrbitingViewer");
+    lesson.setState("Profile");
+};
+
 var _appCreator = 
 {
-    "pen":createPenApp
+    "pen":createPenApp,
+    "orbiting":createOrbitingViewerApp
 };    
 
 function createAppFSM()

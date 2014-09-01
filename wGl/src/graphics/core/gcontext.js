@@ -45,17 +45,17 @@ function IContextMouseObserver() {}
 /**
  * @param {PointingEvent}
  */
-IContextMouseObserver.prototype.onMouseDown = function( ev ) {};
+IContextMouseObserver.prototype.onMouseDown = function( ev ) { return false; };
 
 /**
  * @param {PointingEvent}
  */
-IContextMouseObserver.prototype.onMouseUp = function( ev ) {};
+IContextMouseObserver.prototype.onMouseUp = function( ev ) { return false; };
 
 /**
  * @param {PointingEvent}
  */
-IContextMouseObserver.prototype.onMouseMove = function( ev ) {};
+IContextMouseObserver.prototype.onMouseMove = function( ev ) { return false; };
 
 /**
  * @constructor
@@ -192,10 +192,12 @@ GContext.prototype.handleTouchStart = function(ev)
    var x = ev.targetTouches[0].clientX/ev.target.clientWidth;
    var y = ev.targetTouches[0].clientY/ev.target.clientHeight;
    var pev = new PointingEvent( x, y );
+   var ret = false;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseDown( pev );
+       ret = this.mouseObservers[i].onMouseDown( pev );
+       if ( ret ) return;
    }
 };
 
@@ -207,10 +209,12 @@ GContext.prototype.handleMouseDown = function(ev)
    var x = ev.x/ev.toElement.clientWidth;
    var y = ev.y/ev.toElement.clientHeight;
    var pev = new PointingEvent( x, y );
+   var ret = false;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseDown( pev );
+       ret = this.mouseObservers[i].onMouseDown( pev );
+       if ( ret ) return;
    }
 };
 
@@ -222,10 +226,12 @@ GContext.prototype.handleTouchEnd = function(ev)
    var x = 0;//ev.targetTouches[0].clientX/ev.target.clientWidth;
    var y = 0;//ev.targetTouches[0].clientY/ev.target.clientHeight;
    var pev = new PointingEvent( x, y );
+   var ret = true;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseUp( pev );
+       ret = this.mouseObservers[i].onMouseUp( pev );
+       if ( ret ) return;
    }
 };
 
@@ -237,10 +243,12 @@ GContext.prototype.handleMouseUp = function(ev)
    var x = ev.x/ev.toElement.clientWidth;
    var y = ev.y/ev.toElement.clientHeight;
    var pev = new PointingEvent( x, y );
+   var ret = false;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseUp( pev );
+       ret = this.mouseObservers[i].onMouseUp( pev );
+       if ( ret ) return;
    }
 };
 
@@ -252,10 +260,12 @@ GContext.prototype.handleTouchMove = function(ev)
    var x = ev.targetTouches[0].clientX/ev.target.clientWidth;
    var y = ev.targetTouches[0].clientY/ev.target.clientHeight;
    var pev = new PointingEvent( x, y );
+   var ret = false;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseMove( pev );
+       ret = this.mouseObservers[i].onMouseMove( pev );
+       if ( ret ) return;
    }
 };
 
@@ -267,15 +277,18 @@ GContext.prototype.handleMouseMove = function(ev)
    var x = ev.x/ev.toElement.clientWidth;
    var y = ev.y/ev.toElement.clientHeight;
    var pev = new PointingEvent( x, y );
+   var ret = false;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseMove( pev );
+       ret = this.mouseObservers[i].onMouseMove( pev );
+       if ( ret ) return;
    }
 };
 
 /**
  * @param {PointingEvent}
+ * @return {number}
  */
 GContext.prototype.getSceneObjectIdAt = function ( pev )
 {
@@ -283,6 +296,18 @@ GContext.prototype.getSceneObjectIdAt = function ( pev )
     var y = 1024-Math.round(1024*pev.getY());
     
     return this.renderStrategy.getObjectIdAt( x, y );
+};
+
+/**
+ * @param {PointingEvent}
+ * @return {number}
+ */
+GContext.prototype.getHudObjectIdAt = function ( pev )
+{
+    var x = Math.round(1024*pev.getX());
+    var y = 1024-Math.round(1024*pev.getY());
+    
+    return this.renderStrategy.getHudObjectIdAt( x, y );
 };
 
 /**

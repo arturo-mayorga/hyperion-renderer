@@ -252,6 +252,8 @@ MouseOrbitingCameraController.prototype.onMouseDown = function( ev )
     vec3.add( this.horizontalAxis, this.eyeRight, this.eyeLookAt );
     
     vec3.copy( this.eyePosStart, this.eyePos ); 
+    
+    return true;
 };
 
 /**
@@ -259,10 +261,14 @@ MouseOrbitingCameraController.prototype.onMouseDown = function( ev )
  */
 MouseOrbitingCameraController.prototype.onMouseUp = function( ev ) 
 {
+    if ( false === this.isDragging ) return false;
+    
     var viewportX = ev.getX();
     var viewportY = ev.getY();
      
     this.isDragging = false;
+    
+    return true;
 };
 
 /**
@@ -270,12 +276,14 @@ MouseOrbitingCameraController.prototype.onMouseUp = function( ev )
  */
 MouseOrbitingCameraController.prototype.onMouseMove = function( ev ) 
 {
-    if ( false === this.isDragging ) return;
+    if ( false === this.isDragging ) return false;
     
     var viewportX = ev.getX();
     var viewportY = ev.getY();
     
     vec2.subtract( this.viewPortDrag, this.viewPortOrigin, [viewportX, viewportY] );
+    
+    return true;
 };
 
 /**

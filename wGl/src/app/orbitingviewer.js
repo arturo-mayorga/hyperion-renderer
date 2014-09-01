@@ -305,6 +305,9 @@ ExploreState.prototype.enter = function ()
 	this.kCamController.bindCamera( this.scene.getCamera() );
 	this.mCamController.bindCamera( this.scene.getCamera() );
 	
+	this.toolbar = new Toolbar( this.oData.context );
+	this.toolbar.enter();
+	
     this.oData.context.addMouseObserver( this.mCamController );
 };
 
@@ -313,7 +316,7 @@ ExploreState.prototype.enter = function ()
  */
 ExploreState.prototype.exit = function () 
 {
-	this.oData.context.removeMouseObserver( this );
+    this.toolbar.exit();
 	this.oData.context.removeMouseObserver( this.mCamController );
 	
 	this.kCamController = undefined;
@@ -326,8 +329,79 @@ ExploreState.prototype.exit = function ()
  */
 ExploreState.prototype.update = function ( time ) 
 {
+    this.toolbar.update( time );
 	this.kCamController.update( time );
 	this.mCamController.update( time );
+};
+
+/**
+ * @constructor
+ * @extends {FsmMachine}
+ * @implements {IContextMouseObserver}
+ */
+function Toolbar( context )
+{
+    this.context = context;
+    this.hud = context.getHud(); 
+}
+
+Toolbar.prototype = Object.create( FsmMachine.prototype );
+
+/**
+ * @param {PointingEvent}
+ */
+Toolbar.prototype.onMouseDown = function( ev ) 
+{
+    var id = this.context.getHudObjectIdAt( ev );
+    console.debug( id );
+    return false;
+};
+
+/**
+ * @param {PointingEvent}
+ */
+Toolbar.prototype.onMouseUp = function( ev ) 
+{
+    return false;
+};
+
+/**
+ * @param {PointingEvent}
+ */
+Toolbar.prototype.onMouseMove = function( ev ) 
+{
+    return false;
+};
+
+/**
+ * This function is called whenever we enter the explore state
+ */
+Toolbar.prototype.enter = function () 
+{
+    this.context.addMouseObserver( this );
+    
+    this.fullscrBtn = new GHudRectangle();
+	this.fullscrBtn.setColor(1, 1, 1, .9);
+	this.fullscrBtn.setDrawRec(0.87, -0.87, .1, .1);
+	
+	this.hud.addChild(this.fullscrBtn);
+};
+
+/**
+ * This function is called whenever we exit the explore state
+ */
+Toolbar.prototype.exit = function () 
+{
+    this.context.removeMouseObserver( this );
+    this.hud.removeChild( this.fullscrBtn );
+};
+
+/**
+ * This is the update function for the explore state
+ * @param {number} number of milliseconds since the last update
+ */
+Toolbar.prototype.update = function ( time ) 
+{
 };
 
 };

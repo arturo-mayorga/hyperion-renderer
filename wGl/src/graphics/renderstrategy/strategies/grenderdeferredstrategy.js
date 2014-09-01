@@ -554,25 +554,22 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.setHRec(0.125+0.75, -0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.programs.fullScr);*/
     
-    this.programs.fullScr.activate();
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    gl.enable(gl.BLEND);
-       	
     if (hud != undefined)
     {
+        this.programs.fullScr.activate();
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.enable(gl.BLEND);
+        
         hud.draw(this.programs.fullScr);
-    }
-    this.programs.fullScr.deactivate();
-    
-    
-    this.frameBuffers.objidHud.bindBuffer();
-    this.programs.objidscr.activate();
-    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
-    if ( hud != undefined )
-    {
+        this.programs.fullScr.deactivate();
+        
+        this.frameBuffers.objidHud.bindBuffer();
+        this.programs.objidscr.activate();
+        gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+        
         hud.draw( this.programs.objidscr );
+        this.programs.objidscr.deactivate();
     }
-    this.programs.objidscr.deactivate();
 };
 
 GRenderDeferredStrategy.tempObjIdA = new Uint8Array(4);

@@ -267,8 +267,8 @@ ProfilerExploreState.prototype.update = function ( time )
 	    for ( var i = 0; i < this.debugLevel; ++i )
 	    {
 	        this.oData.context.increaseRenderLevel();
-	        this.fireSignal("exitReq");
 	    }
+	    this.fireSignal("exitReq");
 	}
 	
 	

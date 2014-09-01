@@ -31,8 +31,7 @@ function GHudRectangle()
 	this.bgColor = [1, 1, 0, 0.5];
 }
 
-GHudRectangle.prototype.bindToContext = GHudWidget.prototype.bindToContext;
-GHudRectangle.prototype.setDrawRec    = GHudWidget.prototype.setDrawRec;
+GHudRectangle.prototype = Object.create( GHudWidget.prototype );
 
 /**
  * Set the color for this hud rectangle

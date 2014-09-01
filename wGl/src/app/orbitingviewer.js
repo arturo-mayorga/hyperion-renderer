@@ -353,7 +353,12 @@ Toolbar.prototype = Object.create( FsmMachine.prototype );
 Toolbar.prototype.onMouseDown = function( ev ) 
 {
     var id = this.context.getHudObjectIdAt( ev );
-    console.debug( id );
+    if ( id === this.fullscrBtn.getObjId() )
+    {
+        this.context.requestFullScreen();
+        return true;
+    }
+    //console.debug( id );
     return false;
 };
 
@@ -370,6 +375,8 @@ Toolbar.prototype.onMouseUp = function( ev )
  */
 Toolbar.prototype.onMouseMove = function( ev ) 
 {
+    //var id = this.context.getHudObjectIdAt( ev );
+    //console.debug( id );
     return false;
 };
 
@@ -378,13 +385,12 @@ Toolbar.prototype.onMouseMove = function( ev )
  */
 Toolbar.prototype.enter = function () 
 {
-    this.context.addMouseObserver( this );
-    
     this.fullscrBtn = new GHudRectangle();
 	this.fullscrBtn.setColor(1, 1, 1, .9);
 	this.fullscrBtn.setDrawRec(0.87, -0.87, .1, .1);
-	
 	this.hud.addChild(this.fullscrBtn);
+	
+	this.context.addMouseObserver( this );
 };
 
 /**

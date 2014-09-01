@@ -62,6 +62,7 @@ IContextMouseObserver.prototype.onMouseMove = function( ev ) { return false; };
  */
 function GContext( canvas )
 {
+    this.canvas           = canvas;
 	this.scene            = undefined;
 	this.gl               = undefined;
 	this.rttFramebuffer   = undefined;
@@ -371,5 +372,19 @@ GContext.prototype.reloadRenderStrategy = function()
 {
     this.renderStrategy.reload();
 };
+
+GContext.prototype.requestFullScreen = function()
+{
+    var c = this.canvas;
+    
+    if( c.webkitRequestFullscreen )
+    {
+        c.webkitRequestFullscreen();
+    }
+    else if( c.mozRequestFullScreen)
+    {
+        c.mozRequestFullScreen();
+    } 
+}
 
 

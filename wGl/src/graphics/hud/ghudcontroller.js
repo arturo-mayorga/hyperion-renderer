@@ -36,6 +36,14 @@ function GHudWidget()
 
 GHudWidget.instanceCounter = 0;
 
+/** 
+ * @return {number}
+ */
+GHudWidget.prototype.getObjId = function()
+{
+    return this.objid_;
+};
+
 /**
  * Draw this widget using the provided transform matrix and shader
  * @param {Array.<number>} List of numbers representing the 3 by 3 transform matrix

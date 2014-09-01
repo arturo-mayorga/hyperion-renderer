@@ -114,6 +114,12 @@ function GContext( canvas )
     gl.whiteCircleTexture = whiteCircleTexture;
     gl.whiteTexture = whiteTexture;
     gl.randomTexture = randomTexture;
+    
+    this.dom = {};
+    this.dom.window = window;
+    this.dom.document = document;
+    this.dom.element = this.dom.document.documentElement;
+    this.dom.body = this.dom.document.getElementsByTagName('body')[0];
 };
 
 /**
@@ -352,6 +358,11 @@ GContext.prototype.getHud = function ()
  */
 GContext.prototype.draw = function()
 {
+    var x = this.dom.window.innerWidth  || this.dom.element.clientWidth  || this.dom.body.clientWidth;
+    var y = this.dom.window.innerHeight || this.dom.element.clientHeight || this.dom.body.clientHeight;
+    
+    this.scene.getCamera().setAspect( x/y );
+    
     this.renderStrategy.draw(this.scene, this.hud);
 };
 

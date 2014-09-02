@@ -343,6 +343,16 @@ function Toolbar( context )
 {
     this.context = context;
     this.hud = context.getHud(); 
+    this.prevHudObjId = -1;
+    
+    this.lowAlpha = 0.07;
+    this.hiAlpha = 0.8;
+    
+    this.isMouseOver = false;
+    
+    this.alphaState = 0;
+    
+    
 }
 
 Toolbar.prototype = Object.create( FsmMachine.prototype );
@@ -375,18 +385,32 @@ Toolbar.prototype.onMouseUp = function( ev )
  */
 Toolbar.prototype.onMouseMove = function( ev ) 
 {
-    //var id = this.context.getHudObjectIdAt( ev );
-    //console.debug( id );
+    var id = this.context.getHudObjectIdAt( ev );
+    if ( id !== this.prevHudObjId )
+    {
+        if ( this.prevHudObjId === this.fullscrBtn.getObjId() )
+        {
+            // exited
+            this.isMouseOver = false;
+        }
+        else if ( id === this.fullscrBtn.getObjId() )
+        {
+            // entered
+            this.isMouseOver = true;
+        }
+    }
+    
+    this.prevHudObjId = id;
     return false;
 };
 
 /**
- * This function is called whenever we enter the explore state
+ * This function is called whenever we enter the toolbar state
  */
 Toolbar.prototype.enter = function () 
 {
     this.fullscrBtn = new GHudRectangle();
-	this.fullscrBtn.setColor(1, 1, 1, .9);
+	this.fullscrBtn.setColor(1, 1, 1, 0);
 	this.fullscrBtn.setDrawRec(0.87, -0.87, .1, .1);
 	this.hud.addChild(this.fullscrBtn);
 	
@@ -394,7 +418,7 @@ Toolbar.prototype.enter = function ()
 };
 
 /**
- * This function is called whenever we exit the explore state
+ * This function is called whenever we exit the toolbar state
  */
 Toolbar.prototype.exit = function () 
 {
@@ -403,7 +427,7 @@ Toolbar.prototype.exit = function ()
 };
 
 /**
- * This is the update function for the explore state
+ * This is the update function for the toolbar state
  * @param {number} number of milliseconds since the last update
  */
 Toolbar.prototype.update = function ( time ) 
@@ -414,7 +438,16 @@ Toolbar.prototype.update = function ( time )
     }
     else
     {
-        this.fullscrBtn.setColor(1, 1, 1, .9);
+        var factor = time / 100;
+        if ( 1 < factor )
+        {
+            factor = 1;
+        }
+        
+        this.alphaState = this.alphaState + 
+                            factor * ( ((this.isMouseOver)?this.hiAlpha:this.lowAlpha) - this.alphaState); 
+                            
+        this.fullscrBtn.setColor(1, 1, 1, this.alphaState);
     }
 };
 

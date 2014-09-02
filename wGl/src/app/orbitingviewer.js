@@ -408,6 +408,14 @@ Toolbar.prototype.exit = function ()
  */
 Toolbar.prototype.update = function ( time ) 
 {
+    if ( this.context.isFullScreen() )
+    {
+        this.fullscrBtn.setColor(1, 1, 1, 0);
+    }
+    else
+    {
+        this.fullscrBtn.setColor(1, 1, 1, .9);
+    }
 };
 
 };

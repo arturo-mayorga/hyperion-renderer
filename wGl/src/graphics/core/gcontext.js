@@ -384,6 +384,9 @@ GContext.prototype.reloadRenderStrategy = function()
     this.renderStrategy.reload();
 };
 
+/**
+ * used to enter full screen mode
+ */
 GContext.prototype.requestFullScreen = function()
 {
     var c = this.canvas;
@@ -398,4 +401,14 @@ GContext.prototype.requestFullScreen = function()
     } 
 }
 
+/**
+ * @return {boolean} true if the context is currently in full screen mode
+ */
+GContext.prototype.isFullScreen = function ()
+{
+    var fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
+    var fullscreenEnabled = document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled;
+
+    return fullscreenEnabled && null !== fullscreenElement;
+};
 

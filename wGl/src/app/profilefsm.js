@@ -259,7 +259,7 @@ ProfilerExploreState.prototype.exit = function ()
  */
 ProfilerExploreState.prototype.update = function ( time ) 
 {	
-	this.debugLevel = 2;
+	//this.debugLevel = 2;
 	
 	if ( undefined !== this.debugLevel )
 	{
@@ -271,9 +271,6 @@ ProfilerExploreState.prototype.update = function ( time )
 	    this.fireSignal("exitReq");
 	}
 	
-	
-    
-    
 	this.runTime += time;
     this.frameCount++;
     

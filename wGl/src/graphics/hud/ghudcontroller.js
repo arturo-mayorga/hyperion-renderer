@@ -160,11 +160,7 @@ function GHudController()
 	this.drawTransform = mat3.create();
 }
 
-GHudController.prototype.setDrawRec          = GHudGroup.prototype.setDrawRec;
-GHudController.prototype.group_draw          = GHudGroup.prototype.draw;
-GHudController.prototype.group_bindToContext = GHudGroup.prototype.bindToContext;
-GHudController.prototype.addChild            = GHudGroup.prototype.addChild;
-GHudController.prototype.removeChild         = GHudGroup.prototype.removeChild;
+GHudController.prototype = Object.create( GHudGroup.prototype );
 
 /**
  * Called to bind this HUD controller to a gl context
@@ -205,7 +201,7 @@ GHudController.prototype.bindToContext = function ( gl )
     this.recIndxBuffer.itemSize = 1;
     this.recIndxBuffer.numItems = 6;
     
-    this.group_bindToContext(gl, this.recIndxBuffer);
+    GHudGroup.prototype.bindToContext.call( this, gl, this.recIndxBuffer);
 };
 
 /**
@@ -229,7 +225,7 @@ GHudController.prototype.draw = function( shader )
     gl.vertexAttribPointer(shader.attributes.textureVertexAttribute, 
                            this.recTextBuffer.itemSize, gl.FLOAT, false, 0, 0);
     
-    this.group_draw(this.transform, shader);
+    GHudGroup.prototype.draw.call( this, this.transform, shader);
 };
 
 

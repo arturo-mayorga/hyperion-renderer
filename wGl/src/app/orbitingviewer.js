@@ -346,7 +346,7 @@ function Toolbar( context )
     this.prevHudObjId = -1;
     
     this.lowAlpha = 0.07;
-    this.hiAlpha = 0.8;
+    this.hiAlpha = 0.7;
     
     this.isMouseOver = false;
     
@@ -413,6 +413,8 @@ Toolbar.prototype.enter = function ()
 	this.fullscrBtn.setColor(1, 1, 1, 0);
 	this.fullscrBtn.setDrawRec(0.87, -0.87, .1, .1);
 	this.hud.addChild(this.fullscrBtn);
+	this.fullscrBtn.setTexture("fscrbtn.png", "assets/2d/");
+	//this.fullscrBtn.setTexture("noise_256.jpg", "assets/2d/");
 	
 	this.context.addMouseObserver( this );
 };

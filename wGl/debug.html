@@ -27,6 +27,7 @@
         <script src="src/graphics/scene/interfaces/scenedrawable.js"></script>
         <script src="src/graphics/scene/drawordering/drawcommand.js"></script>
         <script src="src/graphics/scene/drawordering/shadercomposite.js"></script>
+        <script src="src/graphics/scene/concrete/light.js"></script>
         <script src="src/graphics/scene/concrete/ggroup.js"></script>
         <script src="src/graphics/scene/concrete/mesh.js"></script>
         <script src="src/graphics/scene/primitives/cuboid.js"></script>
@@ -41,15 +42,17 @@
 		<script src="src/graphics/scene/decorators/interfaces/meshdecorator.js"></script>
 		<script src="src/graphics/scene/decorators/armaturemeshdecorator.js"></script>
         <script src="src/graphics/scene/gscene.js"></script>
+        <script src="src/graphics/input/gcameracontroller.js"></script>
+        
           
         <script src="src/graphics/hud/ghudcontroller.js"></script>
         <script src="src/graphics/hud/ghudrectangle.js"></script>
-         
-        <script src="src/gcameracontroller.js"></script>
         
-		<script src="src/fsm.js"></script>
-		<script src="src/lessonfsm.js"></script>
-		<script src="src/profilefsm.js"></script>
+		<script src="src/fsm/fsm.js"></script>
+		<script src="src/app/lessonfsm.js"></script>
+		<script src="src/app/orbitingviewer.js"></script>
+		<script src="src/app/profilefsm.js"></script>
+		
 		<script src="src/stats.js"></script>
         <script src="src/main.js"></script>  
         
@@ -57,9 +60,8 @@
     </head>
     
     <body style="margin:auto">
-        <canvas id="glcanvas" width="1280" height="720" style="width: 100%; height: 100%;">
-            Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
+        <canvas id="glcanvas" width="1280" height="720" style="width: 100%; height: 100%;  top: 0; right: 0; position:absolute;">
+            Your browser doesn't appear to support the HTML5  &lt;canvas&gt; element.
         </canvas>
-		<!-- <button onclick="var c = document.getElementById('glcanvas');if(c.webkitRequestFullscreen ){c.webkitRequestFullscreen();}else if(c.mozRequestFullScreen){c.mozRequestFullScreen();}">Full Screen</button> -->
     </body>
 </html>

@@ -23,8 +23,11 @@ module.exports = function(grunt) {
 					'src/graphics/scene/decorators/interfaces/*.js',
 					'src/graphics/scene/decorators/*.js',
                     'src/graphics/scene/*.js',
+                    'src/graphics/input/*.js',
                     'src/graphics/hud/*.js',
                     'src/graphics/*.js',
+                    'src/fsm/*.js',
+                    'src/app/*.js',
                     'src/*.js'
                 ];
 

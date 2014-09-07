@@ -18,8 +18,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 // SOFTWARE.
 
+
+var _appArgs = function () 
+{
+  // This function is anonymous, is executed immediately and 
+  // the return value is assigned to QueryString!
+  var query_string = {};
+  var query = window.location.search.substring(1);
+  var vars = query.split("&");
+  for (var i=0;i<vars.length;i++) {
+    var pair = vars[i].split("=");
+    	// If first entry with this name
+    if (typeof query_string[pair[0]] === "undefined") {
+      query_string[pair[0]] = pair[1];
+    	// If second entry with this name
+    } else if (typeof query_string[pair[0]] === "string") {
+      var arr = [ query_string[pair[0]], pair[1] ];
+      query_string[pair[0]] = arr;
+    	// If third or later entry with this name
+    } else {
+      query_string[pair[0]].push(pair[1]);
+    }
+  } 
+    return query_string;
+} ();
+
 var _releaseMode = true;
-var _appMode = "pen";
+var _appMode = "orbiting";//"pen";
 
 var rPyramid = 0;
 var rCube = 0; 
@@ -83,7 +108,7 @@ window.onload=mainLoop;
 function createPenApp()
 {
     var profileState = createProfiler(context);
-    var penState = createLesson(context);
+    var penState = PenAssembly.createState(context);
     
 	
     lesson = new FsmMachine();
@@ -94,13 +119,33 @@ function createPenApp()
     lesson.setState("Profile");
 }
 
+function createOrbitingViewerApp()
+{
+    var profileState = createProfiler(context);
+    var orbitingViewerState = OrbitingViewer.createState(context, _appArgs["h"]);
+    
+	
+    lesson = new FsmMachine();
+    lesson.addState("OrbitingViewer", orbitingViewerState);
+    lesson.addState("Profile", profileState);
+    lesson.addTransition("Profile", "cleanComplete", "OrbitingViewer");
+    lesson.addTransition("OrbitingViewer", "cleanComplete", "OrbitingViewer");
+    lesson.setState("Profile");
+};
+
 var _appCreator = 
 {
-    "pen":createPenApp
+    "pen":createPenApp,
+    "orbiting":createOrbitingViewerApp
 };    
 
 function createAppFSM()
 {
+    if ( undefined !== _appArgs["mode"] )
+    {
+        _appMode = _appArgs["mode"];
+    }
+    
     _appCreator[_appMode]();
 }
 

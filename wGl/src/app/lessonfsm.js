@@ -196,9 +196,9 @@ LoadState.prototype.enter = function ()
 	this.tjsLoader.setObserver(this);
     
     
-	this.envLoader.loadObj("assets/3d/office3d/18361-obj-4/", "OfficeOBJ.obj");
-	this.penLoader.loadObj("assets/3d/stylus/", "stylus.obj");
-	this.tjsLoader.loadJson( "assets/3d/animtest/", "humanoid.js" );
+	this.envLoader.loadObj("assets/3d/office3d/", "object.obj");
+	this.penLoader.loadObj("assets/3d/stylus/", "object.obj");
+	this.tjsLoader.loadJson( "assets/3d/animtest/", "object.js" );
 
 	this.ui = {};
 	var bg = new GHudRectangle();
@@ -552,21 +552,20 @@ function AsmState( oData )
 AsmState.prototype = Object.create( FsmMachine.prototype );
 
 /**
- * @param {MouseEvent}
- * @param {number}
+ * @param {PointingEvent}
  */
-AsmState.prototype.onMouseDown = function( ev, objid ) 
+AsmState.prototype.onMouseDown = function( ev ) 
 {
-    this.lastObjIdClicked = objid;
+    this.lastObjIdClicked = this.oData.context.getSceneObjectIdAt(ev);
 };
 
 /**
- * @param {MouseEvent}
+ * @param {PointingEvent}
  */
 AsmState.prototype.onMouseUp = function( ev ) {};
 
 /**
- * @param {MouseEvent}
+ * @param {PointingEvent}
  */
 AsmState.prototype.onMouseMove = function( ev ) {};
 

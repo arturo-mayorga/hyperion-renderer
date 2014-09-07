@@ -97,6 +97,13 @@ GRenderStrategy.prototype.reload = function() {};
  */
 GRenderStrategy.prototype.getObjectIdAt = function(x,y) { return -1; };
 
+/**
+ * Get the object id of the object at the provided mouse location
+ * @param {number}
+ * @param {number}
+ */
+GRenderStrategy.prototype.getHudObjectIdAt = function(x,y) { return -1; };
+
 
 /**
  * Draw the current strategy

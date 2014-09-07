@@ -25,7 +25,24 @@ function GHudWidget()
 {
     this.gl = undefined;
     this.transform = mat3.create();
+    
+    var objid_ = GHudWidget.instanceCounter;
+    this.objid_ = objid_;
+    this.objid = [ (0x000000ff & (objid_>>16))/255, 
+                   (0x000000ff & (objid_>>8))/255, 
+                   (0x000000ff & objid_)/255, 1];
+    GHudWidget.instanceCounter += 1;
 }
+
+GHudWidget.instanceCounter = 0;
+
+/** 
+ * @return {number}
+ */
+GHudWidget.prototype.getObjId = function()
+{
+    return this.objid_;
+};
 
 /**
  * Draw this widget using the provided transform matrix and shader
@@ -67,6 +84,8 @@ GHudWidget.prototype.setDrawRec = function ( x, y, width, height )
  */
 function GHudGroup() 
 {
+    GHudWidget.call( this );
+    
     this.gl = undefined;
 	this.children = [];
 	this.transform = mat3.create();
@@ -141,11 +160,7 @@ function GHudController()
 	this.drawTransform = mat3.create();
 }
 
-GHudController.prototype.setDrawRec          = GHudGroup.prototype.setDrawRec;
-GHudController.prototype.group_draw          = GHudGroup.prototype.draw;
-GHudController.prototype.group_bindToContext = GHudGroup.prototype.bindToContext;
-GHudController.prototype.addChild            = GHudGroup.prototype.addChild;
-GHudController.prototype.removeChild         = GHudGroup.prototype.removeChild;
+GHudController.prototype = Object.create( GHudGroup.prototype );
 
 /**
  * Called to bind this HUD controller to a gl context
@@ -186,7 +201,7 @@ GHudController.prototype.bindToContext = function ( gl )
     this.recIndxBuffer.itemSize = 1;
     this.recIndxBuffer.numItems = 6;
     
-    this.group_bindToContext(gl, this.recIndxBuffer);
+    GHudGroup.prototype.bindToContext.call( this, gl, this.recIndxBuffer);
 };
 
 /**
@@ -210,7 +225,7 @@ GHudController.prototype.draw = function( shader )
     gl.vertexAttribPointer(shader.attributes.textureVertexAttribute, 
                            this.recTextBuffer.itemSize, gl.FLOAT, false, 0, 0);
     
-    this.group_draw(this.transform, shader);
+    GHudGroup.prototype.draw.call( this, this.transform, shader);
 };
 
 

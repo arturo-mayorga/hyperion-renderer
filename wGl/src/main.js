@@ -43,7 +43,7 @@ var _appArgs = function ()
     return query_string;
 } ();
 
-var _releaseMode = false;
+var _releaseMode = true;
 var _appMode = "orbiting";//"pen";
 
 var rPyramid = 0;

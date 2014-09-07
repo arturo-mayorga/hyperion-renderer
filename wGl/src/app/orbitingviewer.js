@@ -27,12 +27,12 @@ var OrbitingViewer = new function()
  * @return {FsmState}
  * @param {GContext}
  */
-this.createState = function( context )
+this.createState = function( context, hash )
 {
     var scene = context.getScene();
     var hud = context.getHud();
 	var ret = new FsmMachine();
-	var oData = new StateOperatingData( context );
+	var oData = new StateOperatingData( context, hash );
 	
 	ret.addState("Load", new LoadState( oData ));
 	ret.addState("Explore", new ExploreState( oData ));
@@ -52,9 +52,10 @@ this.createState = function( context )
  * @constructor
  * @param {GContext}
  */
-function StateOperatingData( context )
+function StateOperatingData( context, hash )
 {
     this.context = context;
+    this.hash = hash;
 }
 
 /**
@@ -157,7 +158,14 @@ LoadState.prototype.enter = function ()
     
 	//this.envLoader.loadObj("assets/3d/apartment/a1/", "sheldon.obj"); 
 	//this.envLoader.loadObj("assets/3d/0f69d966978a46df96cd1c8a9b05da76/", "0f69d966978a46df96cd1c8a9b05da76.obj"); 
-	this.envLoader.loadObj("assets/3d/bluefalcon/", "bluefalcon.obj"); 
+	var hash = "bluefalcon";
+	
+	if ( undefined !== this.oData.hash )
+	{
+	    hash = this.oData.hash;
+	}
+	
+	this.envLoader.loadObj("assets/3d/" + hash + "/", "object.obj"); 
 
 	this.ui = {};
 	var bg = new GHudRectangle();

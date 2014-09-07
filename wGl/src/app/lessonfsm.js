@@ -196,9 +196,9 @@ LoadState.prototype.enter = function ()
 	this.tjsLoader.setObserver(this);
     
     
-	this.envLoader.loadObj("assets/3d/office3d/18361-obj-4/", "OfficeOBJ.obj");
-	this.penLoader.loadObj("assets/3d/stylus/", "stylus.obj");
-	this.tjsLoader.loadJson( "assets/3d/animtest/", "humanoid.js" );
+	this.envLoader.loadObj("assets/3d/office3d/", "object.obj");
+	this.penLoader.loadObj("assets/3d/stylus/", "object.obj");
+	this.tjsLoader.loadJson( "assets/3d/animtest/", "object.js" );
 
 	this.ui = {};
 	var bg = new GHudRectangle();

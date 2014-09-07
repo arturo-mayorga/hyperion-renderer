@@ -122,7 +122,7 @@ function createPenApp()
 function createOrbitingViewerApp()
 {
     var profileState = createProfiler(context);
-    var orbitingViewerState = OrbitingViewer.createState(context);
+    var orbitingViewerState = OrbitingViewer.createState(context, _appArgs["h"]);
     
 	
     lesson = new FsmMachine();

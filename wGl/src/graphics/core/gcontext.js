@@ -19,31 +19,50 @@
 // SOFTWARE.
 
 /**
+ * @constructor
+ */
+function PointingEvent( x, y )
+{
+    this.x = x;
+    this.y = y;
+}
+
+PointingEvent.prototype.getX = function()
+{
+    return this.x;
+};
+
+PointingEvent.prototype.getY = function()
+{
+    return this.y;
+};
+
+/**
  * @interface
  */
 function IContextMouseObserver() {}
 
 /**
- * @param {MouseEvent}
- * @param {number}
+ * @param {PointingEvent}
  */
-IContextMouseObserver.prototype.onMouseDown = function( ev, objid ) {};
+IContextMouseObserver.prototype.onMouseDown = function( ev ) { return false; };
 
 /**
- * @param {MouseEvent}
+ * @param {PointingEvent}
  */
-IContextMouseObserver.prototype.onMouseUp = function( ev, objid ) {};
+IContextMouseObserver.prototype.onMouseUp = function( ev ) { return false; };
 
 /**
- * @param {MouseEvent}
+ * @param {PointingEvent}
  */
-IContextMouseObserver.prototype.onMouseMove = function( ev, objid ) {};
+IContextMouseObserver.prototype.onMouseMove = function( ev ) { return false; };
 
 /**
  * @constructor
  */
 function GContext( canvas )
 {
+    this.canvas           = canvas;
 	this.scene            = undefined;
 	this.gl               = undefined;
 	this.rttFramebuffer   = undefined;
@@ -70,6 +89,11 @@ function GContext( canvas )
     canvas.onmousedown = function(ev) {_this.handleMouseDown(ev);}
     document.onmouseup = function(ev) {_this.handleMouseUp(ev);}
     document.onmousemove = function(ev) {_this.handleMouseMove(ev);}
+    
+    document.addEventListener('touchstart', function(e){_this.handleTouchStart(e);}, false);
+    document.addEventListener('touchmove', function(e){_this.handleTouchMove(e);}, false);
+    document.addEventListener('touchend', function(e){_this.handleTouchEnd(e);}, false);
+
 	
     var gl = this.gl;
     
@@ -90,6 +114,12 @@ function GContext( canvas )
     gl.whiteCircleTexture = whiteCircleTexture;
     gl.whiteTexture = whiteTexture;
     gl.randomTexture = randomTexture;
+    
+    this.dom = {};
+    this.dom.window = window;
+    this.dom.document = document;
+    this.dom.element = this.dom.document.documentElement;
+    this.dom.body = this.dom.document.getElementsByTagName('body')[0];
 };
 
 /**
@@ -162,19 +192,53 @@ GContext.prototype.removeMouseObserver = function( observer )
 };
 
 /**
+ * @param {TouchEvent}
+ */
+GContext.prototype.handleTouchStart = function(ev)
+{
+   var x = ev.targetTouches[0].clientX/ev.target.clientWidth;
+   var y = ev.targetTouches[0].clientY/ev.target.clientHeight;
+   var pev = new PointingEvent( x, y );
+   var ret = false;
+   
+   for ( var i in this.mouseObservers )
+   {
+       ret = this.mouseObservers[i].onMouseDown( pev );
+       if ( ret ) return;
+   }
+};
+
+/**
  * @param {MouseEvent}
  */
 GContext.prototype.handleMouseDown = function(ev)
 {
-   // console.debug(ev);
-   
-   var x = Math.round(1024*ev.x/ev.toElement.clientWidth);
-   var y = 1024-Math.round(1024*ev.y/ev.toElement.clientHeight);
-   var objid = this.renderStrategy.getObjectIdAt(x,y);
+   var x = ev.x/ev.toElement.clientWidth;
+   var y = ev.y/ev.toElement.clientHeight;
+   var pev = new PointingEvent( x, y );
+   var ret = false;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseDown(ev, objid);
+       ret = this.mouseObservers[i].onMouseDown( pev );
+       if ( ret ) return;
+   }
+};
+
+/**
+ * @param {TouchEvent}
+ */
+GContext.prototype.handleTouchEnd = function(ev)
+{
+   var x = 0;//ev.targetTouches[0].clientX/ev.target.clientWidth;
+   var y = 0;//ev.targetTouches[0].clientY/ev.target.clientHeight;
+   var pev = new PointingEvent( x, y );
+   var ret = true;
+   
+   for ( var i in this.mouseObservers )
+   {
+       ret = this.mouseObservers[i].onMouseUp( pev );
+       if ( ret ) return;
    }
 };
 
@@ -183,15 +247,32 @@ GContext.prototype.handleMouseDown = function(ev)
  */
 GContext.prototype.handleMouseUp = function(ev)
 {
-   // console.debug(ev);
-   
-   // var x = Math.round(1024*ev.x/ev.toElement.clientWidth);
-   // var y = 1024-Math.round(1024*ev.y/ev.toElement.clientHeight);
-   // var objid = this.renderStrategy.getObjectIdAt(x,y);
+   var x = ev.x/ev.toElement.clientWidth;
+   var y = ev.y/ev.toElement.clientHeight;
+   var pev = new PointingEvent( x, y );
+   var ret = false;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseUp(ev);
+       ret = this.mouseObservers[i].onMouseUp( pev );
+       if ( ret ) return;
+   }
+};
+
+/**
+ * @param {TouchEvent}
+ */
+GContext.prototype.handleTouchMove = function(ev)
+{
+   var x = ev.targetTouches[0].clientX/ev.target.clientWidth;
+   var y = ev.targetTouches[0].clientY/ev.target.clientHeight;
+   var pev = new PointingEvent( x, y );
+   var ret = false;
+   
+   for ( var i in this.mouseObservers )
+   {
+       ret = this.mouseObservers[i].onMouseMove( pev );
+       if ( ret ) return;
    }
 };
 
@@ -200,18 +281,42 @@ GContext.prototype.handleMouseUp = function(ev)
  */
 GContext.prototype.handleMouseMove = function(ev)
 {
-   //console.debug(ev);
-   
-   // var x = Math.round(1024*ev.x/ev.toElement.clientWidth);
-   // var y = 1024-Math.round(1024*ev.y/ev.toElement.clientHeight);
-   // var objid = this.renderStrategy.getObjectIdAt(x,y);
+   var x = ev.x/ev.toElement.clientWidth;
+   var y = ev.y/ev.toElement.clientHeight;
+   var pev = new PointingEvent( x, y );
+   var ret = false;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseMove(ev);
+       ret = this.mouseObservers[i].onMouseMove( pev );
+       if ( ret ) return;
    }
 };
-	
+
+/**
+ * @param {PointingEvent}
+ * @return {number}
+ */
+GContext.prototype.getSceneObjectIdAt = function ( pev )
+{
+    var x = Math.round(1024*pev.getX());
+    var y = 1024-Math.round(1024*pev.getY());
+    
+    return this.renderStrategy.getObjectIdAt( x, y );
+};
+
+/**
+ * @param {PointingEvent}
+ * @return {number}
+ */
+GContext.prototype.getHudObjectIdAt = function ( pev )
+{
+    var x = Math.round(1024*pev.getX());
+    var y = 1024-Math.round(1024*pev.getY());
+    
+    return this.renderStrategy.getHudObjectIdAt( x, y );
+};
+
 /**
  * Set the Scene for this context
  * @param {GScene} Scene that is being assigned to this context
@@ -253,6 +358,11 @@ GContext.prototype.getHud = function ()
  */
 GContext.prototype.draw = function()
 {
+    var x = this.dom.window.innerWidth  || this.dom.element.clientWidth  || this.dom.body.clientWidth;
+    var y = this.dom.window.innerHeight || this.dom.element.clientHeight || this.dom.body.clientHeight;
+    
+    this.scene.getCamera().setAspect( x/y );
+    
     this.renderStrategy.draw(this.scene, this.hud);
 };
 
@@ -274,4 +384,31 @@ GContext.prototype.reloadRenderStrategy = function()
     this.renderStrategy.reload();
 };
 
+/**
+ * used to enter full screen mode
+ */
+GContext.prototype.requestFullScreen = function()
+{
+    var c = this.canvas;
+    
+    if( c.webkitRequestFullscreen )
+    {
+        c.webkitRequestFullscreen();
+    }
+    else if( c.mozRequestFullScreen)
+    {
+        c.mozRequestFullScreen();
+    } 
+}
+
+/**
+ * @return {boolean} true if the context is currently in full screen mode
+ */
+GContext.prototype.isFullScreen = function ()
+{
+    var fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
+    var fullscreenEnabled = document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled;
+
+    return fullscreenEnabled && null !== fullscreenElement;
+};
 

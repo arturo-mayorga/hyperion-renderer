@@ -49,7 +49,9 @@ function GMtlReader( mtlStrA, path )
 	{
 		var stra = mtlStrA[i].split(" ");
 		
-		this.handler = lineHandlerMap[stra[0]];
+		var key = stra[0].toLowerCase();
+		
+		this.handler = lineHandlerMap[key];
 		if (this.handler != undefined)
 		{
 			this.handler(stra);

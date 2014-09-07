@@ -59,6 +59,8 @@ GRenderDeferredStrategy.prototype.configure = function()
         "fxaa-fs.c":undefined,
         "objid-fs.c":undefined,
         "objid-vs.c":undefined,
+        "objidscr-fs.c":undefined,
+        "objidscr-vs.c":undefined,
         "position-fs.c":undefined,
         "position-vs.c":undefined,
         "shadowmap-vs.c":undefined,
@@ -250,12 +252,14 @@ GRenderDeferredStrategy.prototype.initShaders = function ()
     this.programs.light       = new GShader( shaderSrcMap["light-vs.c"],       shaderSrcMap["light-fs.c"]       );
     this.programs.toneMap     = new GShader( shaderSrcMap["tonemap-vs.c"],     shaderSrcMap["tonemap-fs.c"]     );
     this.programs.fxaa        = new GShader( shaderSrcMap["fxaa-vs.c"],        shaderSrcMap["fxaa-fs.c"]        );
+    this.programs.objidscr    = new GShader( shaderSrcMap["objidscr-vs.c"],    shaderSrcMap["objidscr-fs.c"]       );
     
     this.programs.colorspec   = new ShaderComposite( shaderSrcMap["colorspec-vs.c"],   shaderSrcMap["colorspec-fs.c"]   );
     this.programs.normaldepth = new ShaderComposite( shaderSrcMap["normaldepth-vs.c"], shaderSrcMap["normaldepth-fs.c"] );
     this.programs.position    = new ShaderComposite( shaderSrcMap["position-vs.c"],    shaderSrcMap["position-fs.c"]    );
     this.programs.depth       = new ShaderComposite( shaderSrcMap["depth-vs.c"],       shaderSrcMap["depth-fs.c"]       );
     this.programs.objid       = new ShaderComposite( shaderSrcMap["objid-vs.c"],       shaderSrcMap["objid-fs.c"]       );
+    
 
     for ( var key in this.programs )
     {
@@ -550,15 +554,22 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     this.setHRec(0.125+0.75, -0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.programs.fullScr);*/
     
-    this.programs.fullScr.activate();
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    gl.enable(gl.BLEND);
-       	
     if (hud != undefined)
     {
+        this.programs.fullScr.activate();
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.enable(gl.BLEND);
+        
         hud.draw(this.programs.fullScr);
+        this.programs.fullScr.deactivate();
+        
+        this.frameBuffers.objidHud.bindBuffer();
+        this.programs.objidscr.activate();
+        gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+        
+        hud.draw( this.programs.objidscr );
+        this.programs.objidscr.deactivate();
     }
-    this.programs.fullScr.deactivate();
 };
 
 GRenderDeferredStrategy.tempObjIdA = new Uint8Array(4);
@@ -571,6 +582,20 @@ GRenderDeferredStrategy.tempObjIdA = new Uint8Array(4);
 GRenderDeferredStrategy.prototype.getObjectIdAt = function ( x, y )
 {
     this.frameBuffers.objid.getColorValueAt(x, y, GRenderDeferredStrategy.tempObjIdA);
+    
+    return ( GRenderDeferredStrategy.tempObjIdA[0] << 16 |
+             GRenderDeferredStrategy.tempObjIdA[1] << 8  |
+             GRenderDeferredStrategy.tempObjIdA[2] );
+};
+
+/**
+ * Get the object id of the object at the provided mouse location
+ * @param {number}
+ * @param {number}
+ */
+GRenderDeferredStrategy.prototype.getHudObjectIdAt = function ( x, y )
+{
+    this.frameBuffers.objidHud.getColorValueAt(x, y, GRenderDeferredStrategy.tempObjIdA);
     
     return ( GRenderDeferredStrategy.tempObjIdA[0] << 16 |
              GRenderDeferredStrategy.tempObjIdA[1] << 8  |
@@ -660,6 +685,11 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
     this.frameBuffers.objid = frameBuffer;
+    
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
+    frameBuffer.addBufferTexture(texCfg);
+    frameBuffer.complete();
+    this.frameBuffers.objidHud = frameBuffer;
     
     frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfgFloat);

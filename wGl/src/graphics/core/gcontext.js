@@ -19,36 +19,50 @@
 // SOFTWARE.
 
 /**
+ * @constructor
+ */
+function PointingEvent( x, y )
+{
+    this.x = x;
+    this.y = y;
+}
+
+PointingEvent.prototype.getX = function()
+{
+    return this.x;
+};
+
+PointingEvent.prototype.getY = function()
+{
+    return this.y;
+};
+
+/**
  * @interface
  */
 function IContextMouseObserver() {}
 
 /**
- * @param {MouseEvent}
- * @param {number}
- * @param {number}
+ * @param {PointingEvent}
  */
-IContextMouseObserver.prototype.onMouseDown = function( ev, viewportX, viewportY ) {};
+IContextMouseObserver.prototype.onMouseDown = function( ev ) { return false; };
 
 /**
- * @param {MouseEvent}
- * @param {number}
- * @param {number}
+ * @param {PointingEvent}
  */
-IContextMouseObserver.prototype.onMouseUp = function( ev, viewportX, viewportY ) {};
+IContextMouseObserver.prototype.onMouseUp = function( ev ) { return false; };
 
 /**
- * @param {MouseEvent}
- * @param {number}
- * @param {number}
+ * @param {PointingEvent}
  */
-IContextMouseObserver.prototype.onMouseMove = function( ev, viewportX, viewportY ) {};
+IContextMouseObserver.prototype.onMouseMove = function( ev ) { return false; };
 
 /**
  * @constructor
  */
 function GContext( canvas )
 {
+    this.canvas           = canvas;
 	this.scene            = undefined;
 	this.gl               = undefined;
 	this.rttFramebuffer   = undefined;
@@ -100,6 +114,12 @@ function GContext( canvas )
     gl.whiteCircleTexture = whiteCircleTexture;
     gl.whiteTexture = whiteTexture;
     gl.randomTexture = randomTexture;
+    
+    this.dom = {};
+    this.dom.window = window;
+    this.dom.document = document;
+    this.dom.element = this.dom.document.documentElement;
+    this.dom.body = this.dom.document.getElementsByTagName('body')[0];
 };
 
 /**
@@ -178,10 +198,13 @@ GContext.prototype.handleTouchStart = function(ev)
 {
    var x = ev.targetTouches[0].clientX/ev.target.clientWidth;
    var y = ev.targetTouches[0].clientY/ev.target.clientHeight;
+   var pev = new PointingEvent( x, y );
+   var ret = false;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseDown(ev, x, y);
+       ret = this.mouseObservers[i].onMouseDown( pev );
+       if ( ret ) return;
    }
 };
 
@@ -192,10 +215,13 @@ GContext.prototype.handleMouseDown = function(ev)
 {
    var x = ev.x/ev.toElement.clientWidth;
    var y = ev.y/ev.toElement.clientHeight;
+   var pev = new PointingEvent( x, y );
+   var ret = false;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseDown(ev, x, y);
+       ret = this.mouseObservers[i].onMouseDown( pev );
+       if ( ret ) return;
    }
 };
 
@@ -206,10 +232,13 @@ GContext.prototype.handleTouchEnd = function(ev)
 {
    var x = 0;//ev.targetTouches[0].clientX/ev.target.clientWidth;
    var y = 0;//ev.targetTouches[0].clientY/ev.target.clientHeight;
+   var pev = new PointingEvent( x, y );
+   var ret = true;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseUp(ev, x, y);
+       ret = this.mouseObservers[i].onMouseUp( pev );
+       if ( ret ) return;
    }
 };
 
@@ -220,10 +249,13 @@ GContext.prototype.handleMouseUp = function(ev)
 {
    var x = ev.x/ev.toElement.clientWidth;
    var y = ev.y/ev.toElement.clientHeight;
+   var pev = new PointingEvent( x, y );
+   var ret = false;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseUp(ev, x, y);
+       ret = this.mouseObservers[i].onMouseUp( pev );
+       if ( ret ) return;
    }
 };
 
@@ -234,10 +266,13 @@ GContext.prototype.handleTouchMove = function(ev)
 {
    var x = ev.targetTouches[0].clientX/ev.target.clientWidth;
    var y = ev.targetTouches[0].clientY/ev.target.clientHeight;
+   var pev = new PointingEvent( x, y );
+   var ret = false;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseMove(ev, x, y);
+       ret = this.mouseObservers[i].onMouseMove( pev );
+       if ( ret ) return;
    }
 };
 
@@ -248,13 +283,40 @@ GContext.prototype.handleMouseMove = function(ev)
 {
    var x = ev.x/ev.toElement.clientWidth;
    var y = ev.y/ev.toElement.clientHeight;
+   var pev = new PointingEvent( x, y );
+   var ret = false;
    
    for ( var i in this.mouseObservers )
    {
-       this.mouseObservers[i].onMouseMove(ev, x, y);
+       ret = this.mouseObservers[i].onMouseMove( pev );
+       if ( ret ) return;
    }
 };
-	
+
+/**
+ * @param {PointingEvent}
+ * @return {number}
+ */
+GContext.prototype.getSceneObjectIdAt = function ( pev )
+{
+    var x = Math.round(1024*pev.getX());
+    var y = 1024-Math.round(1024*pev.getY());
+    
+    return this.renderStrategy.getObjectIdAt( x, y );
+};
+
+/**
+ * @param {PointingEvent}
+ * @return {number}
+ */
+GContext.prototype.getHudObjectIdAt = function ( pev )
+{
+    var x = Math.round(1024*pev.getX());
+    var y = 1024-Math.round(1024*pev.getY());
+    
+    return this.renderStrategy.getHudObjectIdAt( x, y );
+};
+
 /**
  * Set the Scene for this context
  * @param {GScene} Scene that is being assigned to this context
@@ -296,6 +358,11 @@ GContext.prototype.getHud = function ()
  */
 GContext.prototype.draw = function()
 {
+    var x = this.dom.window.innerWidth  || this.dom.element.clientWidth  || this.dom.body.clientWidth;
+    var y = this.dom.window.innerHeight || this.dom.element.clientHeight || this.dom.body.clientHeight;
+    
+    this.scene.getCamera().setAspect( x/y );
+    
     this.renderStrategy.draw(this.scene, this.hud);
 };
 
@@ -317,4 +384,31 @@ GContext.prototype.reloadRenderStrategy = function()
     this.renderStrategy.reload();
 };
 
+/**
+ * used to enter full screen mode
+ */
+GContext.prototype.requestFullScreen = function()
+{
+    var c = this.canvas;
+    
+    if( c.webkitRequestFullscreen )
+    {
+        c.webkitRequestFullscreen();
+    }
+    else if( c.mozRequestFullScreen)
+    {
+        c.mozRequestFullScreen();
+    } 
+}
+
+/**
+ * @return {boolean} true if the context is currently in full screen mode
+ */
+GContext.prototype.isFullScreen = function ()
+{
+    var fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
+    var fullscreenEnabled = document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled;
+
+    return fullscreenEnabled && null !== fullscreenElement;
+};
 

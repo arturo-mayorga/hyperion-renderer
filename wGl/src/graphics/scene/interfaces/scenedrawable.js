@@ -64,7 +64,7 @@ function SceneDrawable()
 SceneDrawable.instanceCounter = 0;
 
 /** 
- * @param {number}
+ * @return {number}
  */
 SceneDrawable.prototype.getObjId = function()
 {

@@ -131,11 +131,11 @@ ProfilerLoadState.prototype.enter = function ()
 { 
     this.ui = {};
 	var bg = new GHudRectangle();
-	bg.setColor(0, .2, 0, 1);
+	bg.setColor(0, 0, .2, 1);
 	this.hud.addChild(bg);
 	
 	var bg2 = new GHudRectangle();
-	bg2.setColor(.1, .2, .1, .9);
+	bg2.setColor(.1, .1, .2, .9);
 	this.hud.addChild(bg2);
 	bg2.setDrawRec(0, 0, 1, .7);
     
@@ -219,8 +219,20 @@ function ProfilerExploreState( oData )
 	this.hud = oData.context.getHud();
 	this.oData = oData;
 	this.runTime = 0;
-    this.frameCount = 0;
 	
+    // moving average of the draw time
+    this.msMaPeriod = 10; 
+    this.msMa = 0;
+    this.msMaElem = [];
+    for (var i = 0; i < this.msMaPeriod; ++i)
+    {
+        var v = Math.random()*100
+        this.msMa += v
+        this.msMaElem.push(v);
+    }
+    this.msMa /= this.msMaPeriod;
+    
+    
 }
 
 ProfilerExploreState.prototype = Object.create( FsmMachine.prototype );
@@ -259,38 +271,51 @@ ProfilerExploreState.prototype.exit = function ()
  */
 ProfilerExploreState.prototype.update = function ( time ) 
 {	
-	//this.debugLevel = 2;
+	// update the MA
+	var oldestMa = this.msMaElem[0];
+	for (var i = 0; i < this.msMaPeriod-1; ++i)
+	{
+	    this.msMaElem[i] = this.msMaElem[i+1];
+	}
+	this.msMaElem[this.msMaPeriod-1] = time;
+	this.msMa = (this.msMa*this.msMaPeriod - oldestMa + time)/this.msMaPeriod;
 	
+	// calculate the standard deviation
+	var variance = 0;
+	for (var i = 0; i < this.msMaPeriod; ++i)
+	{
+        variance += (this.msMaElem[i]-this.msMa) * (this.msMaElem[i]-this.msMa);
+	}
+	variance /= this.msMaPeriod;
+	var stdev = Math.sqrt(variance);
+	
+	//console.debug(this.msMa + ": " + stdev);
+	
+	//this.debugLevel = 2;
 	if ( undefined !== this.debugLevel )
 	{
 	    while ( this.oData.context.decreaseRenderLevel() ) {}
 	    for ( var i = 0; i < this.debugLevel; ++i )
 	    {
 	        this.oData.context.increaseRenderLevel();
-	        this.fireSignal("exitReq");
 	    }
+	    this.fireSignal("exitReq");
 	}
 	
-	
-    
-    
 	this.runTime += time;
-    this.frameCount++;
     
     if ( this.oData.context.renderStrategy.isReady() == false )
 	{
 	    this.runtime = 0;
-	    this.frameCount = 0;
-	    console.debug("not ready");
 	}
     
-    
-    if ( 3000 < this.runTime )
+    if ( stdev < 10 ||
+         3000 < this.runTime  )
     {
         this.runTime = 0;
         
-        console.debug(this.frameCount);
-        if ( this.frameCount > 120 )
+        //console.debug(this.msMa);
+        if ( this.msMa < 22 )
         {
             if ( false === this.oData.context.increaseRenderLevel() )
             {
@@ -304,7 +329,17 @@ ProfilerExploreState.prototype.update = function ( time )
             this.fireSignal("exitReq");
         }
         
-        this.frameCount = 0;
+        this.runTime 
+        
+        this.msMa = 0;
+        this.msMaElem = [];
+        for (var i = 0; i < this.msMaPeriod; ++i)
+        {
+            var v = Math.random()*100;
+            this.msMa += v;
+            this.msMaElem.push(v);
+        }
+        this.msMa /= this.msMaPeriod;
     }
 };
 

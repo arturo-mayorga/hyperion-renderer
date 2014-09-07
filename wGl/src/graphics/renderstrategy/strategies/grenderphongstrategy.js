@@ -67,6 +67,8 @@ GRenderPhongStrategy.prototype.configure = function()
         "fxaa-fs.c":undefined,
         "objid-fs.c":undefined,
         "objid-vs.c":undefined,
+        "objidscr-fs.c":undefined,
+        "objidscr-vs.c":undefined,
         "phong-vs.c":undefined,
         "phong-fs.c":undefined
     };
@@ -179,7 +181,7 @@ GRenderPhongStrategy.prototype.initScreenVBOs = function()
 {
     var gl = this.gl;
     
-    gl.clearColor(0.1, 0.3, 0.1, 1.0);
+    gl.clearColor(0, 0, 0, 1.0);
     gl.enable(gl.DEPTH_TEST);
     
     
@@ -262,6 +264,11 @@ GRenderPhongStrategy.prototype.initTextureFramebuffer = function()
     frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
     this.frameBuffers.objid = frameBuffer;
+    
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
+    frameBuffer.addBufferTexture(texCfg);
+    frameBuffer.complete();
+    this.frameBuffers.objidHud = frameBuffer;
 };
 
 /**
@@ -276,8 +283,9 @@ GRenderPhongStrategy.prototype.initShaders = function (shaderSrcMap)
     this.programs.phongComposite = new ShaderComposite( shaderSrcMap["phong-vs.c"], shaderSrcMap["phong-fs.c"] ); 
     this.programs.objidComposite = new ShaderComposite( shaderSrcMap["objid-vs.c"], shaderSrcMap["objid-fs.c"] );
     
-    this.programs.fullScr = new GShader( shaderSrcMap["fullscr-vs.c"], shaderSrcMap["fullscr-fs.c"] );
-    this.programs.fxaa = new GShader( shaderSrcMap["fxaa-vs.c"], shaderSrcMap["fxaa-fs.c"] );
+    this.programs.fullScr  = new GShader( shaderSrcMap["fullscr-vs.c"],  shaderSrcMap["fullscr-fs.c"] );
+    this.programs.fxaa     = new GShader( shaderSrcMap["fxaa-vs.c"],     shaderSrcMap["fxaa-fs.c"] );
+    this.programs.objidscr = new GShader( shaderSrcMap["objidscr-vs.c"], shaderSrcMap["objidscr-fs.c"]       );
     
     for ( var key in this.programs )
     {
@@ -353,12 +361,19 @@ GRenderPhongStrategy.prototype.draw = function ( scene, hud )
     this.programs.fxaa.activate();
     this.drawScreenBuffer(this.programs.fxaa);	
     
-    this.programs.fullScr.activate();
+    
     if (hud != undefined)
     {
+        this.programs.fullScr.activate();
         hud.draw(this.programs.fullScr);
+        this.programs.fullScr.deactivate();
+        
+        this.frameBuffers.objidHud.bindBuffer();
+        this.programs.objidscr.activate();
+        gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+        hud.draw( this.programs.objidscr ); 
+        this.programs.objidscr.deactivate();
     }
-    this.programs.fullScr.deactivate();
 }; 
 
 GRenderPhongStrategy.tempObjIdA = new Uint8Array(4);
@@ -375,6 +390,20 @@ GRenderPhongStrategy.prototype.getObjectIdAt = function ( x, y )
     return ( GRenderPhongStrategy.tempObjIdA[0] << 16 |
              GRenderPhongStrategy.tempObjIdA[1] << 8  |
              GRenderPhongStrategy.tempObjIdA[2] );
+};
+
+/**
+ * Get the object id of the object at the provided mouse location
+ * @param {number}
+ * @param {number}
+ */
+GRenderPhongStrategy.prototype.getHudObjectIdAt = function ( x, y )
+{
+    this.frameBuffers.objidHud.getColorValueAt(x, y, GRenderDeferredStrategy.tempObjIdA);
+    
+    return ( GRenderDeferredStrategy.tempObjIdA[0] << 16 |
+             GRenderDeferredStrategy.tempObjIdA[1] << 8  |
+             GRenderDeferredStrategy.tempObjIdA[2] );
 };
 
 

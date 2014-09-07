@@ -27,12 +27,12 @@ var OrbitingViewer = new function()
  * @return {FsmState}
  * @param {GContext}
  */
-this.createState = function( context )
+this.createState = function( context, hash )
 {
     var scene = context.getScene();
     var hud = context.getHud();
 	var ret = new FsmMachine();
-	var oData = new StateOperatingData( context );
+	var oData = new StateOperatingData( context, hash );
 	
 	ret.addState("Load", new LoadState( oData ));
 	ret.addState("Explore", new ExploreState( oData ));
@@ -52,9 +52,10 @@ this.createState = function( context )
  * @constructor
  * @param {GContext}
  */
-function StateOperatingData( context )
+function StateOperatingData( context, hash )
 {
     this.context = context;
+    this.hash = hash;
 }
 
 /**
@@ -157,7 +158,14 @@ LoadState.prototype.enter = function ()
     
 	//this.envLoader.loadObj("assets/3d/apartment/a1/", "sheldon.obj"); 
 	//this.envLoader.loadObj("assets/3d/0f69d966978a46df96cd1c8a9b05da76/", "0f69d966978a46df96cd1c8a9b05da76.obj"); 
-	this.envLoader.loadObj("assets/3d/bluefalcon/", "bluefalcon.obj"); 
+	var hash = "bluefalcon";
+	
+	if ( undefined !== this.oData.hash )
+	{
+	    hash = this.oData.hash;
+	}
+	
+	this.envLoader.loadObj("assets/3d/" + hash + "/", "object.obj"); 
 
 	this.ui = {};
 	var bg = new GHudRectangle();
@@ -305,6 +313,9 @@ ExploreState.prototype.enter = function ()
 	this.kCamController.bindCamera( this.scene.getCamera() );
 	this.mCamController.bindCamera( this.scene.getCamera() );
 	
+	this.toolbar = new Toolbar( this.oData.context );
+	this.toolbar.enter();
+	
     this.oData.context.addMouseObserver( this.mCamController );
 };
 
@@ -313,7 +324,7 @@ ExploreState.prototype.enter = function ()
  */
 ExploreState.prototype.exit = function () 
 {
-	this.oData.context.removeMouseObserver( this );
+    this.toolbar.exit();
 	this.oData.context.removeMouseObserver( this.mCamController );
 	
 	this.kCamController = undefined;
@@ -326,8 +337,128 @@ ExploreState.prototype.exit = function ()
  */
 ExploreState.prototype.update = function ( time ) 
 {
+    this.toolbar.update( time );
 	this.kCamController.update( time );
 	this.mCamController.update( time );
+};
+
+/**
+ * @constructor
+ * @extends {FsmMachine}
+ * @implements {IContextMouseObserver}
+ */
+function Toolbar( context )
+{
+    this.context = context;
+    this.hud = context.getHud(); 
+    this.prevHudObjId = -1;
+    
+    this.lowAlpha = 0.07;
+    this.hiAlpha = 0.7;
+    
+    this.isMouseOver = false;
+    
+    this.alphaState = 0;
+    
+    
+}
+
+Toolbar.prototype = Object.create( FsmMachine.prototype );
+
+/**
+ * @param {PointingEvent}
+ */
+Toolbar.prototype.onMouseDown = function( ev ) 
+{
+    var id = this.context.getHudObjectIdAt( ev );
+    if ( id === this.fullscrBtn.getObjId() )
+    {
+        this.context.requestFullScreen();
+        return true;
+    }
+    //console.debug( id );
+    return false;
+};
+
+/**
+ * @param {PointingEvent}
+ */
+Toolbar.prototype.onMouseUp = function( ev ) 
+{
+    return false;
+};
+
+/**
+ * @param {PointingEvent}
+ */
+Toolbar.prototype.onMouseMove = function( ev ) 
+{
+    var id = this.context.getHudObjectIdAt( ev );
+    if ( id !== this.prevHudObjId )
+    {
+        if ( this.prevHudObjId === this.fullscrBtn.getObjId() )
+        {
+            // exited
+            this.isMouseOver = false;
+        }
+        else if ( id === this.fullscrBtn.getObjId() )
+        {
+            // entered
+            this.isMouseOver = true;
+        }
+    }
+    
+    this.prevHudObjId = id;
+    return false;
+};
+
+/**
+ * This function is called whenever we enter the toolbar state
+ */
+Toolbar.prototype.enter = function () 
+{
+    this.fullscrBtn = new GHudRectangle();
+	this.fullscrBtn.setColor(1, 1, 1, 0);
+	this.fullscrBtn.setDrawRec(0.87, -0.87, .1, .1);
+	this.hud.addChild(this.fullscrBtn);
+	this.fullscrBtn.setTexture("fscrbtn.png", "assets/2d/");
+	//this.fullscrBtn.setTexture("noise_256.jpg", "assets/2d/");
+	
+	this.context.addMouseObserver( this );
+};
+
+/**
+ * This function is called whenever we exit the toolbar state
+ */
+Toolbar.prototype.exit = function () 
+{
+    this.context.removeMouseObserver( this );
+    this.hud.removeChild( this.fullscrBtn );
+};
+
+/**
+ * This is the update function for the toolbar state
+ * @param {number} number of milliseconds since the last update
+ */
+Toolbar.prototype.update = function ( time ) 
+{
+    if ( this.context.isFullScreen() )
+    {
+        this.fullscrBtn.setColor(1, 1, 1, 0);
+    }
+    else
+    {
+        var factor = time / 100;
+        if ( 1 < factor )
+        {
+            factor = 1;
+        }
+        
+        this.alphaState = this.alphaState + 
+                            factor * ( ((this.isMouseOver)?this.hiAlpha:this.lowAlpha) - this.alphaState); 
+                            
+        this.fullscrBtn.setColor(1, 1, 1, this.alphaState);
+    }
 };
 
 };

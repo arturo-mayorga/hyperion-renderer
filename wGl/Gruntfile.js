@@ -58,15 +58,25 @@ module.exports = function(grunt) {
                     language_in: 'ECMASCRIPT5_STRICT'
                 }
             }
-        }
+        },
+        jsdoc : {
+        	dist : {
+            	src: srcList,
+            	options: { 
+            		destination: 'jsdoc',
+            		configure: 'jsdoc.json'
+            	}
+        	}
+    	}
     });
 
     // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-closure-compiler');
+    grunt.loadNpmTasks('grunt-jsdoc');
     
     // Default task(s).
-    grunt.registerTask('default', ['closure-compiler', 'concat', 'uglify']);
+    grunt.registerTask('default', ['closure-compiler', 'concat', 'uglify', 'jsdoc']);
 
 };

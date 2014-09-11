@@ -233,8 +233,8 @@ function GPostEffectRenderPassCmd( gl, program, frameBuffer, screenGeometry )
 GPostEffectRenderPassCmd.prototype.setHRec = function( x, y, w, h, r )
 {
     mat3.identity( this.hMatrix);
-	mat3.translate( this.hMatrix, this.hMatrix, [x, y] );
-	mat3.scale( this.hMatrix,this.hMatrix, [w, h] ); 
+	mat3.translate( this.hMatrix, this.hMatrix, new Float32Array([x, y]) );
+	mat3.scale( this.hMatrix,this.hMatrix, new Float32Array([w, h]) );
 	mat3.rotate( this.hMatrix,this.hMatrix, r );
 };
 

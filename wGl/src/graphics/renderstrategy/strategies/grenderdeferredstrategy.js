@@ -368,7 +368,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     
     var saoPass = new GPostEffectRenderPassCmd( this.gl, this.programs.ssao, this.frameBuffers.ssao, this.screen );
     saoPass.addInputFrameBuffer( this.frameBuffers.position, gl.TEXTURE0 );
-    saoPass.addInputTexture( this.gl.randomTexture, gl.TEXTURE1 );
+    saoPass.addInputTexture( this.gl.randomTexture );
     
     var saoBlurPing = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.blurPing, this.screen );
     saoBlurPing.setHRec( 0, 0, 1, 1, 3.14159/2 );
@@ -383,7 +383,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     toneMapPassPing.addInputFrameBuffer( this.frameBuffers.phongLightPing, gl.TEXTURE1 );
     if ( 0 >= this.renderLevel )
     {
-        toneMapPassPing.addInputTexture( this.gl.whiteTexture, gl.TEXTURE2 );
+        toneMapPassPing.addInputTexture( this.gl.whiteTexture );
     }
     else
     {
@@ -395,7 +395,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     toneMapPassPong.addInputFrameBuffer( this.frameBuffers.phongLightPong, gl.TEXTURE1 );
     if ( 0 >= this.renderLevel )
     {
-        toneMapPassPong.addInputTexture( this.gl.whiteTexture, gl.TEXTURE2 );
+        toneMapPassPong.addInputTexture( this.gl.whiteTexture );
     }
     else
     {
@@ -614,8 +614,8 @@ GRenderDeferredStrategy.prototype.setHRec = function( x, y, width, height )
 	// the values passed in are meant to be between 0 and 1
 	// currently there are no plans to add debug assertions
     mat3.identity(this.hMatrix);
-	mat3.translate(this.hMatrix, this.hMatrix, [x, y]);
-	mat3.scale(this.hMatrix,this.hMatrix, [width, height]);  
+	mat3.translate(this.hMatrix, this.hMatrix, new Float32Array([x, y]) );
+	mat3.scale(this.hMatrix,this.hMatrix, new Float32Array([width, height]) );
 };
 
 /**

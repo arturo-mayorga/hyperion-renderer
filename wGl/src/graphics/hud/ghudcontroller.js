@@ -74,8 +74,8 @@ GHudWidget.prototype.bindToContext = function( gl, recIdxBuffer )
 GHudWidget.prototype.setDrawRec = function ( x, y, width, height )
 {
     mat3.identity(this.transform);
-	mat3.translate(this.transform, this.transform, [x, y]);
-	mat3.scale(this.transform,this.transform, [width, height]);  
+	mat3.translate(this.transform, this.transform, new Float32Array([x, y]) );
+	mat3.scale(this.transform,this.transform, new Float32Array([width, height]) );
 }
 
 /**
@@ -113,7 +113,7 @@ GHudGroup.prototype.bindToContext = function( gl, recIdxBuffer )
 
 /**
  * Draw this group using the provided transform matrix and shader
- * @param {Array.<number>} transform List of numbers representing the 3 by 3 transform matrix
+ * @param {Float32Array} transform List of numbers representing the 3 by 3 transform matrix
  * @param {GShader} shader Shader program to use for drawing this group
  */
 GHudGroup.prototype.draw = function( transform, shader )

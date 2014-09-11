@@ -66,7 +66,7 @@ GHudRectangle.prototype.setColor = function(r, g, b, a)
 
 /**
  * Draw the rectangle
- * @param {Array.<number>} mat Array of numbers representing a 3 by 3 matrix
+ * @param {Float32Array} mat Array of numbers representing a 3 by 3 matrix
  * @param {GShader} shader Shader program to use for drawing this rectangle
  */
 GHudRectangle.prototype.draw = function( mat, shader ) 

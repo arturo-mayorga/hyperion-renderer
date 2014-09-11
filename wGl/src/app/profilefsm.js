@@ -57,7 +57,7 @@ function ProfilerOperatingData( context )
 /**
  * @constructor
  * @extends {FsmMachine}
- * @param {ProfilerExploreState} oData
+ * @param {ProfilerOperatingData} oData
  */
 function ProfilerCleanState( oData )
 {
@@ -165,11 +165,11 @@ ProfilerLoadState.prototype.enter = function ()
     var cone = new Cone(0.5, 2, 50, "cone");
     
     var transform = mat4.create();
-	mat4.translate(transform, transform, [2, 2, 0]);
+	mat4.translate(transform, transform, new Float32Array([2, 2, 0]));
 	cyl.setMvMatrix(transform);
     
     transform = mat4.create();
-	mat4.translate(transform, transform, [0, -2, 2]);
+	mat4.translate(transform, transform, new Float32Array([0, -2, 2]));
 	cone.setMvMatrix(transform);
     
     this.scene.addChild( cube );

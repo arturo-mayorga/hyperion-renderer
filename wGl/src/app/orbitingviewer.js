@@ -34,10 +34,14 @@ this.createState = function( context, hash )
     var hud = context.getHud();
 	var ret = new FsmMachine();
 	var oData = new StateOperatingData( context, hash );
+
+    /** @type {FsmMachine} */ var loadState = new LoadState( oData );
+    /** @type {FsmMachine} */ var exploreState = new ExploreState( oData );
+    /** @type {FsmMachine} */ var cleanState = new CleanState( oData );
 	
-	ret.addState("Load", new LoadState( oData ));
-	ret.addState("Explore", new ExploreState( oData ));
-	ret.addState("Clean", new CleanState( oData ));
+	ret.addState("Load", loadState);
+	ret.addState("Explore", exploreState);
+	ret.addState("Clean", cleanState);
 	
 	ret.addTransition( "Load", "loadComplete", "Explore" );
 	
@@ -62,7 +66,7 @@ function StateOperatingData( context, hash )
 /**
  * @constructor
  * @extends {FsmMachine}
- * @param {StateOperatingData} oData
+ * @param {OrbitingViewer.StateOperatingData} oData
  */
 function CleanState( oData )
 {
@@ -116,7 +120,7 @@ CleanState.prototype.update = function ( time )
  * @constructor
  * @extends {FsmMachine}
  * @implements {GObjLoaderObserver}
- * @param {StateOperatingData} oData
+ * @param {OrbitingViewer.StateOperatingData} oData
  */
 function LoadState( oData ) 
 {
@@ -144,7 +148,7 @@ LoadState.prototype.enter = function ()
     this.officeGroup = new GGroup( "officeGroup" ); 
 	
 	var officeTransform = mat4.create();
-	mat4.scale(officeTransform, officeTransform, [4, 4, 4]);
+	mat4.scale(officeTransform, officeTransform, new Float32Array([4, 4, 4]));
 	this.officeGroup.setMvMatrix(officeTransform);
 	
 	this.scene.addChild(this.officeGroup); 
@@ -278,7 +282,7 @@ LoadState.prototype.onObjLoaderProgress = function ( loader, progress )
 /**
  * @constructor
  * @extends {FsmMachine}
- * @param {StateOperatingData} oData
+ * @param {OrbitingViewer.StateOperatingData} oData
  */
 function ExploreState( oData ) 
 {

@@ -35,8 +35,6 @@ function MouseOrbitingCameraController()
 	this.eyeRight = vec3.create();
 	this.tempDEyePos = vec3.create();
 	
-	this.lookAtR = 0;
-	
 	this.isDragging = false;
 	
 	this.eyePosStart = vec3.create();
@@ -77,9 +75,6 @@ MouseOrbitingCameraController.prototype.onMouseDown = function( ev )
 MouseOrbitingCameraController.prototype.onMouseUp = function( ev ) 
 {
     if ( false === this.isDragging ) return false;
-    
-    var viewportX = ev.getX();
-    var viewportY = ev.getY();
      
     this.isDragging = false;
     
@@ -93,10 +88,10 @@ MouseOrbitingCameraController.prototype.onMouseMove = function( ev )
 {
     if ( false === this.isDragging ) return false;
     
-    var viewportX = ev.getX();
-    var viewportY = ev.getY();
+    var viewPortX = ev.getX();
+    var viewPortY = ev.getY();
     
-    vec2.subtract( this.viewPortDrag, this.viewPortOrigin, [viewportX, viewportY] );
+    vec2.subtract( this.viewPortDrag, this.viewPortOrigin, new Float32Array([viewPortX, viewPortY]) );
     
     return true;
 };
@@ -120,8 +115,6 @@ MouseOrbitingCameraController.prototype.getValuesFromCam = function()
                    this.eyeLookAt, this.eyePos );
     
     vec3.cross( this.eyeRight, this.eyeLookAtDir, this.eyeUp );
-    
-    this.lookAtR = vec3.distance( this.eyePos, this.eyeLookAt );
 };
 
 MouseOrbitingCameraController.prototype.setValuesToCam = function()
@@ -131,6 +124,10 @@ MouseOrbitingCameraController.prototype.setValuesToCam = function()
     camera.setUp( this.eyeUp[0], this.eyeUp[1], this.eyeUp[2] );
 };
 
+/**
+ * Update the state of the controller
+ * @param {number} time
+ */
 MouseOrbitingCameraController.prototype.update = function( time )
 {
     if ( false === this.isDragging ) return;
@@ -138,7 +135,7 @@ MouseOrbitingCameraController.prototype.update = function( time )
     var mvMatrix = mat4.create();
     mat4.identity( mvMatrix );
     
-    mat4.translate(mvMatrix, mvMatrix, [this.eyeLookAt[0]*-1, this.eyeLookAt[1]*-1, this.eyeLookAt[2]*-1] );
+    mat4.translate(mvMatrix, mvMatrix, new Float32Array([this.eyeLookAt[0]*-1, this.eyeLookAt[1]*-1, this.eyeLookAt[2]*-1]) );
     
     // allways rotate around the y axis
     mat4.rotate( mvMatrix, mvMatrix, this.viewPortDrag[0]*Math.PI, this.verticalAxis );

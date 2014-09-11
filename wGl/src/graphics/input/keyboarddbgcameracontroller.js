@@ -129,6 +129,10 @@ KeyboardDbgCameraController.prototype.setValuesToCam = function()
     camera.setUp(this.eyeUp[0], this.eyeUp[1], this.eyeUp[2]);
 };
 
+/**
+ *
+ * @param {number} elapsedTime
+ */
 KeyboardDbgCameraController.prototype.calcRotations = function ( elapsedTime )
 {
     var mvMatrix = mat4.create();

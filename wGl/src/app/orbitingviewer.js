@@ -25,7 +25,8 @@ var OrbitingViewer = new function()
     
 /**
  * @return {FsmState}
- * @param {GContext}
+ * @param {GContext} context
+ * @param {string} hash
  */
 this.createState = function( context, hash )
 {
@@ -61,9 +62,7 @@ function StateOperatingData( context, hash )
 /**
  * @constructor
  * @extends {FsmMachine}
- * @implements {GObjLoaderObserver}
- * @implements {ThreejsLoaderObserver}
- * @param {StateOperatingData}
+ * @param {StateOperatingData} oData
  */
 function CleanState( oData )
 {
@@ -106,7 +105,7 @@ CleanState.prototype.exit = function ()
 
 /**
  * Update this state
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 CleanState.prototype.update = function ( time ) 
 {
@@ -117,8 +116,7 @@ CleanState.prototype.update = function ( time )
  * @constructor
  * @extends {FsmMachine}
  * @implements {GObjLoaderObserver}
- * @implements {ThreejsLoaderObserver}
- * @param {StateOperatingData}
+ * @param {StateOperatingData} oData
  */
 function LoadState( oData ) 
 {
@@ -237,7 +235,7 @@ LoadState.prototype.exit = function ()
 
 /**
  * Update this state
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 LoadState.prototype.update = function ( time ) 
 {
@@ -247,7 +245,7 @@ LoadState.prototype.update = function ( time )
  /**
   * This function gets called whenever the observed loader completes the loading 
   * process
-  * @param {GObjLoader} Loader object that just finished loading its assets
+  * @param {GObjLoader} loader Loader object that just finished loading its assets
   */
 LoadState.prototype.onObjLoaderCompleted = function ( loader ) 
 { 
@@ -279,8 +277,8 @@ LoadState.prototype.onObjLoaderProgress = function ( loader, progress )
 
 /**
  * @constructor
- * @implements {FsmState}
- * @param {StateOperatingData}
+ * @extends {FsmMachine}
+ * @param {StateOperatingData} oData
  */
 function ExploreState( oData ) 
 {
@@ -333,7 +331,7 @@ ExploreState.prototype.exit = function ()
 
 /**
  * This is the update function for the explore state
- * @param {number} number of milliseconds since the last update
+ * @param {number} time number of milliseconds since the last update
  */
 ExploreState.prototype.update = function ( time ) 
 {
@@ -344,8 +342,8 @@ ExploreState.prototype.update = function ( time )
 
 /**
  * @constructor
- * @extends {FsmMachine}
  * @implements {IContextMouseObserver}
+ * @extends {FsmMachine}
  */
 function Toolbar( context )
 {

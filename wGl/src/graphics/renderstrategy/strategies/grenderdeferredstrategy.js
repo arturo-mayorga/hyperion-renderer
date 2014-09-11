@@ -20,7 +20,7 @@
 
 /** 
  * @constructor
- * @implements {GRenderStrategy}
+ * @extends {GRenderStrategy}
  */
 function GRenderDeferredStrategy( gl )
 {

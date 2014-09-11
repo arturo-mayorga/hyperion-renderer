@@ -20,7 +20,7 @@
 
 /** 
  * @constructor
- * @implements {GRenderStrategy}
+ * @extends {GRenderStrategy}
  */
 function GRenderPhongStrategy( gl )
 {
@@ -39,7 +39,7 @@ GRenderPhongStrategy.prototype = Object.create( GRenderStrategy.prototype );
  * Some devices don't play nice with some extensions eve if the claim support
  * this function returns true if the known hardware support for a particular extension
  * is good enough for the extension in question
- * @param {string}
+ * @param {string} extensionName
  * @return {boolean}
  */
 GRenderPhongStrategy.prototype.checkNavigatorProfile = function( extensionName )

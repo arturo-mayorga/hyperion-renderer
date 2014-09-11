@@ -20,7 +20,7 @@
 
 /**
  * @return {FsmState}
- * @param {GContext}
+ * @param {GContext} context
  */
 function createProfiler( context )
 {
@@ -45,7 +45,7 @@ function createProfiler( context )
 
 /**
  * @constructor
- * @param {GContext}
+ * @param {GContext} context
  */
 function ProfilerOperatingData( context )
 {
@@ -57,9 +57,7 @@ function ProfilerOperatingData( context )
 /**
  * @constructor
  * @extends {FsmMachine}
- * @implements {GObjLoaderObserver}
- * @implements {ThreejsLoaderObserver}
- * @param {ProfilerExploreState}
+ * @param {ProfilerExploreState} oData
  */
 function ProfilerCleanState( oData )
 {
@@ -111,9 +109,7 @@ ProfilerCleanState.prototype.update = function ( time )
 /**
  * @constructor
  * @extends {FsmMachine}
- * @implements {GObjLoaderObserver}
- * @implements {ThreejsLoaderObserver}
- * @param {ProfilerOperatingData}
+ * @param {ProfilerOperatingData} oData
  */
 function ProfilerLoadState( oData ) 
 {
@@ -200,7 +196,7 @@ ProfilerLoadState.prototype.exit = function ()
 
 /**
  * Update this state
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 ProfilerLoadState.prototype.update = function ( time ) 
 {
@@ -209,9 +205,8 @@ ProfilerLoadState.prototype.update = function ( time )
 
 /**
  * @constructor
- * @implements {FsmState}
- * @implements {IContextMouseObserver}
- * @param {ProfilerOperatingData}
+ * @extends {FsmMachine}
+ * @param {ProfilerOperatingData} oData
  */
 function ProfilerExploreState( oData ) 
 {
@@ -267,7 +262,7 @@ ProfilerExploreState.prototype.exit = function ()
 
 /**
  * This is the update function for the explore state
- * @param {number} number of milliseconds since the last update
+ * @param {number} time number of milliseconds since the last update
  */
 ProfilerExploreState.prototype.update = function ( time ) 
 {	
@@ -328,8 +323,6 @@ ProfilerExploreState.prototype.update = function ( time )
             this.oData.context.decreaseRenderLevel();
             this.fireSignal("exitReq");
         }
-        
-        this.runTime 
         
         this.msMa = 0;
         this.msMaElem = [];

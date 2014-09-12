@@ -32,11 +32,16 @@ this.createState = function( context )
     var hud = context.getHud();
 	var ret = new FsmMachine();
 	var oData = new PenLessonOperatingData( context );
+
+    /** @type {FsmMachine} */ var loadState = new LoadState( oData );
+    /** @type {FsmMachine} */ var exploreState = new ExploreState( oData );
+    /** @type {FsmMachine} */ var asmState = new AsmState( oData );
+    /** @type {FsmMachine} */ var cleanState = new CleanState( oData );
 	
-	ret.addState("Load", new LoadState( oData ));
-	ret.addState("Explore", new ExploreState( oData ));
-	ret.addState("Asm", new AsmState( oData ));
-	ret.addState("Clean", new CleanState( oData ));
+	ret.addState("Load", loadState );
+	ret.addState("Explore", exploreState);
+	ret.addState("Asm", asmState );
+	ret.addState("Clean", cleanState );
 	
 	ret.addTransition( "Load", "loadComplete", "Asm" );
 	//ret.addTransition( "Load", "loadComplete", "Explore" );
@@ -81,7 +86,7 @@ PenLessonOperatingData.prototype.getHAnimator = function ()
 /**
  * @constructor
  * @extends {FsmMachine}
- * @param {PenLessonOperatingData} oData
+ * @param {PenAssembly.PenLessonOperatingData} oData
  */
 function CleanState( oData )
 {
@@ -134,7 +139,7 @@ CleanState.prototype.update = function ( time )
  * @extends {FsmMachine}
  * @implements {GObjLoaderObserver}
  * @implements {ThreejsLoaderObserver}
- * @param {PenLessonOperatingData} oData
+ * @param {PenAssembly.PenLessonOperatingData} oData
  */
 function LoadState( oData ) 
 {
@@ -166,17 +171,17 @@ LoadState.prototype.enter = function ()
 	this.humanoidGroup = new GGroup( "humanoidGroup" );
 	
 	var officeTransform = mat4.create();
-	mat4.scale(officeTransform, officeTransform, [4, 4, 4]);
+	mat4.scale(officeTransform, officeTransform, new Float32Array([4, 4, 4]));
 	this.officeGroup.setMvMatrix(officeTransform);
 	
 	this.penTransform = mat4.create();
-	mat4.translate(this.penTransform, this.penTransform, [1.5, 5.609, 11.5]);
+	mat4.translate(this.penTransform, this.penTransform, new Float32Array([1.5, 5.609, 11.5]));
 	this.penGroup.setMvMatrix(this.penTransform);
 	
 	var humanoidTransform = mat4.create();
-	mat4.scale(humanoidTransform, humanoidTransform, [4, 4, 4]);
-	mat4.rotate(humanoidTransform, humanoidTransform, -2, [0, 1, 0]);
-	mat4.translate(humanoidTransform, humanoidTransform, [30, 0, 25]);
+	mat4.scale(humanoidTransform, humanoidTransform, new Float32Array([4, 4, 4]));
+	mat4.rotate(humanoidTransform, humanoidTransform, -2, new Float32Array([0, 1, 0]));
+	mat4.translate(humanoidTransform, humanoidTransform, new Float32Array([30, 0, 25]));
 	this.humanoidGroup.setMvMatrix(humanoidTransform);
 	
 	this.scene.addChild(this.officeGroup);
@@ -265,7 +270,7 @@ LoadState.prototype.exit = function ()
 	for (var i = 0; i < len; ++i)
 	{    
 	    var penTransform = mat4.create();
-	    mat4.translate(penTransform, penTransform, [0, 0, i*0.1]);
+	    mat4.translate(penTransform, penTransform, new Float32Array([0, 0, i*0.1]));
 	    this.penGroup.children[i].setMvMatrix(penTransform);
 	}
 	
@@ -395,7 +400,7 @@ LoadState.prototype.onThreejsLoaderArmatureAnimatorLoaded = function ( animator 
  * @constructor
  * @extends {FsmState}
  * @implements {IContextMouseObserver}
- * @param {PenLessonOperatingData} oData
+ * @param {PenAssembly.PenLessonOperatingData} oData
  */
 function ExploreState( oData ) 
 {
@@ -502,7 +507,7 @@ Vec3Animator.prototype.update = function( time )
 		this.lapseTime = this.targetLapseTime;
 	}
 	
-	var percent = this.lapseTime / this.targetLapseTime;;
+	var percent = this.lapseTime / this.targetLapseTime;
 	
 	if (percent >= 1)
 	{
@@ -514,7 +519,7 @@ Vec3Animator.prototype.update = function( time )
 	{
 		this.inVector[i] = this.startVec[i] + (this.target[i] - this.startVec[i])*percent;
 	}
-}
+};
 
 /**
  * Determines if the current animation has completed
@@ -523,13 +528,13 @@ Vec3Animator.prototype.update = function( time )
 Vec3Animator.prototype.getIsComplete = function()
 {
 	return this.isComplete;
-}
+};
 
 /**
  * @constructor
  * @extends {FsmMachine}
  * @implements {IContextMouseObserver}
- * @param {PenLessonOperatingData} oData
+ * @param {PenAssembly.PenLessonOperatingData} oData
  */
 function AsmState( oData ) 
 {

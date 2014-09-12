@@ -73,7 +73,7 @@ Mesh.prototype.setMtlName = function( mName )
 
 /**
  * Set the model view matrix for this object
- * @param {Array.<number>} mat Array of numbers representing the 4 by 4 model view matrix
+ * @param {Float32Array} mat Array of numbers representing the 4 by 4 model view matrix
  */
 Mesh.prototype.setMvMatrix = function( mat )
 {
@@ -121,7 +121,7 @@ Mesh.prototype.bindToContext = function(gl_)
         this.indexBuffer.numItems != this.vertBuffer.numItems)
     {
         console.debug("Mesh: index missmatch [" + this.name + "]");
-        _valid = false;
+        this._valid = false;
     }
 };
 
@@ -139,7 +139,7 @@ Mesh.prototype.deleteResources = function ()
 
 /**
  * Draw this object
- * @param {Array.<number>} parentMvMat List of numbers representing the parent 4 by 4 view matrix
+ * @param {Float32Array} parentMvMat List of numbers representing the parent 4 by 4 view matrix
  * @param {Array.<GMaterial>} materials List of materials to use for rendering
  * @param {GShader} shader Shader program to use for rendering
  * @param {number} drawMode Draw mode for drawing the VBOs

@@ -21,9 +21,9 @@
 /**
  * @constructor
  * @extends {MeshDecorator}
- * @param {Mesh} mesh that is being decorated
- * @param {Skin} Skin to apply to the mesh
- * @param {Array.<Bone>} Array of bones
+ * @param {Mesh} mesh Skin that is being decorated
+ * @param {Skin} skin Skin to apply to the mesh
+ * @param {Array.<Bone>} bones Array of bones
  */
 function ArmatureMeshDecorator( mesh, skin, bones )
 {
@@ -48,9 +48,9 @@ function ArmatureMeshDecorator( mesh, skin, bones )
         }
     }
     
-    for ( var i in this.rootBones )
+    for ( var j in this.rootBones )
     {
-        this.rootBones[i].calculateRestPoseMatrix( this.identMat );
+        this.rootBones[j].calculateRestPoseMatrix( this.identMat );
     }
     
     this.boneMatrixCollection = new Float32Array( this.bones.length * 32 ); // 16 for vert mat and 16 for normal mat

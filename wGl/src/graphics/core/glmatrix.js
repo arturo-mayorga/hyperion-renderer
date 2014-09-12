@@ -54,7 +54,7 @@ var glMatrix = {};
  */
 glMatrix.setMatrixArrayType = function(type) {
     GLMAT_ARRAY_TYPE = type;
-}
+};
 
 
 
@@ -81,7 +81,7 @@ var vec2 = {};
 /**
  * Creates a new, empty vec2
  *
- * @returns {vec2} a new 2D vector
+ * @returns {Float32Array} a new 2D vector
  */
 vec2.create = function() {
     var out = new GLMAT_ARRAY_TYPE(2);
@@ -93,8 +93,8 @@ vec2.create = function() {
 /**
  * Creates a new vec2 initialized with values from an existing vector
  *
- * @param {vec2} a vector to clone
- * @returns {vec2} a new 2D vector
+ * @param {Float32Array} a vector to clone
+ * @returns {Float32Array} a new 2D vector
  */
 vec2.clone = function(a) {
     var out = new GLMAT_ARRAY_TYPE(2);
@@ -161,10 +161,10 @@ vec2.add = function(out, a, b) {
 /**
  * Subtracts vector b from vector a
  *
- * @param {vec2} out the receiving vector
- * @param {vec2} a the first operand
- * @param {vec2} b the second operand
- * @returns {vec2} out
+ * @param {Float32Array} out the receiving vector
+ * @param {Float32Array} a the first operand
+ * @param {Float32Array} b the second operand
+ * @returns {Float32Array} out
  */
 vec2.subtract = function(out, a, b) {
     out[0] = a[0] - b[0];
@@ -965,10 +965,10 @@ vec3.random = function (out, scale) {
  * Transforms the vec3 with a mat4.
  * 4th vector component is implicitly '1'
  *
- * @param {vec3} out the receiving vector
- * @param {vec3} a the vector to transform
- * @param {mat4} m matrix to transform with
- * @returns {vec3} out
+ * @param {Float32Array} out vec3 the receiving vector
+ * @param {Float32Array} a vec3 the vector to transform
+ * @param {Float32Array} m mat4 matrix to transform with
+ * @returns {Float32Array} out vec3
  */
 vec3.transformMat4 = function(out, a, m) {
     var x = a[0], y = a[1], z = a[2];
@@ -1083,7 +1083,7 @@ var vec4 = {};
 /**
  * Creates a new, empty vec4
  *
- * @returns {vec4} a new 4D vector
+ * @returns {Float32Array} a new 4D vector
  */
 vec4.create = function() {
     var out = new GLMAT_ARRAY_TYPE(4);
@@ -1145,12 +1145,12 @@ vec4.copy = function(out, a) {
 /**
  * Set the components of a vec4 to the given values
  *
- * @param {vec4} out the receiving vector
+ * @param {Float32Array} out the receiving vector
  * @param {Number} x X component
  * @param {Number} y Y component
  * @param {Number} z Z component
  * @param {Number} w W component
- * @returns {vec4} out
+ * @returns {Float32Array} out
  */
 vec4.set = function(out, x, y, z, w) {
     out[0] = x;
@@ -1482,10 +1482,10 @@ vec4.random = function (out, scale) {
 /**
  * Transforms the vec4 with a mat4.
  *
- * @param {vec4} out the receiving vector
- * @param {vec4} a the vector to transform
- * @param {mat4} m matrix to transform with
- * @returns {vec4} out
+ * @param {Float32Array} out the receiving vector
+ * @param {Float32Array} a the vector to transform
+ * @param {Float32Array} m matrix to transform with
+ * @returns {Float32Array} out
  */
 vec4.transformMat4 = function(out, a, m) {
     var x = a[0], y = a[1], z = a[2], w = a[3];
@@ -2231,10 +2231,10 @@ mat3.determinant = function (a) {
 /**
  * Multiplies two mat3's
  *
- * @param {mat3} out the receiving matrix
- * @param {mat3} a the first operand
- * @param {mat3} b the second operand
- * @returns {mat3} out
+ * @param {Float32Array} out the receiving matrix
+ * @param {Float32Array} a the first operand
+ * @param {Float32Array} b the second operand
+ * @returns {Float32Array} out
  */
 mat3.multiply = function (out, a, b) {
     var a00 = a[0], a01 = a[1], a02 = a[2],
@@ -2268,10 +2268,10 @@ mat3.mul = mat3.multiply;
 /**
  * Translate a mat3 by the given vector
  *
- * @param {mat3} out the receiving matrix
- * @param {mat3} a the matrix to translate
- * @param {vec2} v vector to translate by
- * @returns {mat3} out
+ * @param {Float32Array} out mat3 the receiving matrix
+ * @param {Float32Array} a mat3 the matrix to translate
+ * @param {Float32Array} v vect vector to translate by
+ * @returns {Float32Array} out mat3
  */
 mat3.translate = function(out, a, v) {
     var a00 = a[0], a01 = a[1], a02 = a[2],
@@ -2326,10 +2326,10 @@ mat3.rotate = function (out, a, rad) {
 /**
  * Scales the mat3 by the dimensions in the given vec2
  *
- * @param {mat3} out the receiving matrix
- * @param {mat3} a the matrix to rotate
- * @param {vec2} v the vec2 to scale the matrix by
- * @returns {mat3} out
+ * @param {Float32Array} out mat3 the receiving matrix
+ * @param {Float32Array} a mat3 the matrix to rotate
+ * @param {Float32Array} v vec2 the vec2 to scale the matrix by
+ * @returns {Float32Array} out mat3
  **/
 mat3.scale = function(out, a, v) {
     var x = v[0], y = v[1];
@@ -2481,7 +2481,7 @@ var mat4 = {};
 /**
  * Creates a new identity mat4
  *
- * @returns {mat4} a new 4x4 matrix
+ * @returns {Float32Array} a new 4x4 matrix
  */
 mat4.create = function() {
     var out = new GLMAT_ARRAY_TYPE(16);
@@ -2534,9 +2534,9 @@ mat4.clone = function(a) {
 /**
  * Copy the values from one mat4 to another
  *
- * @param {mat4} out the receiving matrix
- * @param {mat4} a the source matrix
- * @returns {mat4} out
+ * @param {Float32Array} out the receiving matrix
+ * @param {Float32Array} a the source matrix
+ * @returns {Float32Array} out
  */
 mat4.copy = function(out, a) {
     out[0] = a[0];
@@ -2561,8 +2561,8 @@ mat4.copy = function(out, a) {
 /**
  * Set a mat4 to the identity matrix
  *
- * @param {mat4} out the receiving matrix
- * @returns {mat4} out
+ * @param {Float32Array} out the receiving matrix
+ * @returns {Float32Array} out
  */
 mat4.identity = function(out) {
     out[0] = 1;
@@ -2750,10 +2750,10 @@ mat4.determinant = function (a) {
 /**
  * Multiplies two mat4's
  *
- * @param {mat4} out the receiving matrix
- * @param {mat4} a the first operand
- * @param {mat4} b the second operand
- * @returns {mat4} out
+ * @param {Float32Array} out the receiving matrix
+ * @param {Float32Array} a the first operand
+ * @param {Float32Array} b the second operand
+ * @returns {Float32Array} out
  */
 mat4.multiply = function (out, a, b) {
     var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3],
@@ -2797,10 +2797,10 @@ mat4.mul = mat4.multiply;
 /**
  * Translate a mat4 by the given vector
  *
- * @param {mat4} out the receiving matrix
- * @param {mat4} a the matrix to translate
- * @param {vec3} v vector to translate by
- * @returns {mat4} out
+ * @param {Float32Array} out mat4 the receiving matrix
+ * @param {Float32Array} a mat4 the matrix to translate
+ * @param {Float32Array} v vec3 vector to translate by
+ * @returns {Float32Array} out mat4
  */
 mat4.translate = function (out, a, v) {
     var x = v[0], y = v[1], z = v[2],
@@ -2838,10 +2838,10 @@ mat4.translate = function (out, a, v) {
 /**
  * Scales the mat4 by the dimensions in the given vec3
  *
- * @param {mat4} out the receiving matrix
- * @param {mat4} a the matrix to scale
- * @param {vec3} v the vec3 to scale the matrix by
- * @returns {mat4} out
+ * @param {Float32Array} out mat4 the receiving matrix
+ * @param {Float32Array} a mat4 the matrix to scale
+ * @param {Float32Array} v vec3 the vec3 to scale the matrix by
+ * @returns {Float32Array} out mat4
  **/
 mat4.scale = function(out, a, v) {
     var x = v[0], y = v[1], z = v[2];
@@ -2868,11 +2868,11 @@ mat4.scale = function(out, a, v) {
 /**
  * Rotates a mat4 by the given angle
  *
- * @param {mat4} out the receiving matrix
- * @param {mat4} a the matrix to rotate
+ * @param {Float32Array} out mat4 the receiving matrix
+ * @param {Float32Array} a mat4 the matrix to rotate
  * @param {Number} rad the angle to rotate the matrix by
- * @param {vec3} axis the axis to rotate around
- * @returns {mat4} out
+ * @param {Float32Array} axis vec3 the axis to rotate around
+ * @returns {Float32Array} out mat4
  */
 mat4.rotate = function (out, a, rad, axis) {
     var x = axis[0], y = axis[1], z = axis[2],
@@ -3253,11 +3253,11 @@ mat4.ortho = function (out, left, right, bottom, top, near, far) {
 /**
  * Generates a look-at matrix with the given eye position, focal point, and up axis
  *
- * @param {mat4} out mat4 frustum matrix will be written into
- * @param {vec3} eye Position of the viewer
- * @param {vec3} center Point the viewer is looking at
- * @param {vec3} up vec3 pointing up
- * @returns {mat4} out
+ * @param {Float32Array} out mat4 frustum matrix will be written into
+ * @param {Float32Array} eye vec3 Position of the viewer
+ * @param {Float32Array} center vec3 Point the viewer is looking at
+ * @param {Float32Array} up vec3 pointing up
+ * @returns {Float32Array} out mat4
  */
 mat4.lookAt = function (out, eye, center, up) {
     var x0, x1, x2, y0, y1, y2, z0, z1, z2, len,

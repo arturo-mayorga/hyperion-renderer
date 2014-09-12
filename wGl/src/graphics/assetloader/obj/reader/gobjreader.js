@@ -48,7 +48,7 @@ function GObjReader( path, objStrA, scene, group, observer )
 		this.vertIdx = parseFloat(tokens[0])-1;
 		this.textIdx = parseFloat(tokens[1])-1;
 		this.normIdx = parseFloat(tokens[2])-1;			
-	}
+	};
 
 	this.objGVerts = [];
 	this.objTVerts = [];

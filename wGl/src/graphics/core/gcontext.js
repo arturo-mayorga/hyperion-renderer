@@ -86,9 +86,9 @@ function GContext( canvas )
     }
     
     var _this = this;
-    canvas.onmousedown = function(ev) {_this.handleMouseDown(ev);}
-    document.onmouseup = function(ev) {_this.handleMouseUp(ev);}
-    document.onmousemove = function(ev) {_this.handleMouseMove(ev);}
+    canvas.onmousedown = function(ev) {_this.handleMouseDown(ev);};
+    document.onmouseup = function(ev) {_this.handleMouseUp(ev);};
+    document.onmousemove = function(ev) {_this.handleMouseMove(ev);};
     
     document.addEventListener('touchstart', function(e){_this.handleTouchStart(e);}, false);
     document.addEventListener('touchmove', function(e){_this.handleTouchMove(e);}, false);
@@ -120,7 +120,7 @@ function GContext( canvas )
     this.dom.document = document;
     this.dom.element = this.dom.document.documentElement;
     this.dom.body = this.dom.document.getElementsByTagName('body')[0];
-};
+}
 
 /**
  * @return {boolean} return true if the render level was changed
@@ -399,7 +399,7 @@ GContext.prototype.requestFullScreen = function()
     {
         c.mozRequestFullScreen();
     } 
-}
+};
 
 /**
  * @return {boolean} true if the context is currently in full screen mode

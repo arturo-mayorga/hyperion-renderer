@@ -24,7 +24,7 @@
  */
 function GFrameBuffer( config )
 {
-    var gl = config.gl;
+    /** @type {WebGLRenderingContext} */ var gl = config.gl;
     var framebuffer = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
     

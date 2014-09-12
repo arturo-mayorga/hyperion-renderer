@@ -42,7 +42,7 @@ function GMtlReader( mtlStrA, path )
 		"map_kd":   this.process_mapKd,
 		"map_bump": this.process_mapBump,
 		"bump":     this.process_mapBump
-	}
+	};
 
 	var size = mtlStrA.length;
 	for ( var i = 0; i < size; ++i )

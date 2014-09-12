@@ -21,6 +21,7 @@
 /** 
  * @constructor
  * @extends {GRenderStrategy}
+ * @param {WebGLRenderingContext}
  */
 function GRenderPhongStrategy( gl )
 {

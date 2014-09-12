@@ -71,15 +71,15 @@ Sphere.prototype.updateBufferArrays = function()
     this.normA = [];
     this.indxA = [];
     
-    for ( var i = 0; i < 6*(this.sliceCountMinor-1)*this.sliceCount; ++i )
+    for ( var j = 0; j < 6*(this.sliceCountMinor-1)*this.sliceCount; ++j )
     {
-        this.indxA.push(i);
+        this.indxA.push(j);
          
     }
     
-    for ( var i = 0; i < this.sliceCount-1; ++i )
+    for ( var k = 0; k < this.sliceCount-1; ++k )
     {
-        this.addArraysBetweenSlices( sliceBuffers[i], sliceBuffers[i+1] );
+        this.addArraysBetweenSlices( sliceBuffers[k], sliceBuffers[k+1] );
     }
    
     this.addArraysBetweenSlices( sliceBuffers[this.sliceCount-1], sliceBuffers[0] );

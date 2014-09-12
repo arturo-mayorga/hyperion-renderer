@@ -121,7 +121,7 @@ Mesh.prototype.bindToContext = function(gl_)
         this.indexBuffer.numItems != this.vertBuffer.numItems)
     {
         console.debug("Mesh: index missmatch [" + this.name + "]");
-        _valid = false;
+        this._valid = false;
     }
 };
 

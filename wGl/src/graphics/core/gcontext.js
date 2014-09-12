@@ -120,7 +120,7 @@ function GContext( canvas )
     this.dom.document = document;
     this.dom.element = this.dom.document.documentElement;
     this.dom.body = this.dom.document.getElementsByTagName('body')[0];
-};
+}
 
 /**
  * @return {boolean} return true if the render level was changed

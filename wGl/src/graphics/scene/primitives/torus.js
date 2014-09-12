@@ -79,9 +79,9 @@ Torus.prototype.updateBufferArrays = function()
          
     }
     
-    for ( var i = 0; i < this.sliceCount-1; ++i )
+    for ( var j = 0; j < this.sliceCount-1; ++j )
     {
-        this.addArraysBetweenSlices( sliceBuffers[i], sliceBuffers[i+1] );
+        this.addArraysBetweenSlices( sliceBuffers[j], sliceBuffers[j+1] );
     }
    
     this.addArraysBetweenSlices( sliceBuffers[this.sliceCount-1], sliceBuffers[0] );

@@ -277,9 +277,9 @@ ProfilerExploreState.prototype.update = function ( time )
 	
 	// calculate the standard deviation
 	var variance = 0;
-	for (var i = 0; i < this.msMaPeriod; ++i)
+	for (var j = 0; j < this.msMaPeriod; ++j)
 	{
-        variance += (this.msMaElem[i]-this.msMa) * (this.msMaElem[i]-this.msMa);
+        variance += (this.msMaElem[j]-this.msMa) * (this.msMaElem[j]-this.msMa);
 	}
 	variance /= this.msMaPeriod;
 	var stdev = Math.sqrt(variance);
@@ -290,7 +290,7 @@ ProfilerExploreState.prototype.update = function ( time )
 	if ( undefined !== this.debugLevel )
 	{
 	    while ( this.oData.context.decreaseRenderLevel() ) {}
-	    for ( var i = 0; i < this.debugLevel; ++i )
+	    for ( var j = 0; j < this.debugLevel; ++i )
 	    {
 	        this.oData.context.increaseRenderLevel();
 	    }
@@ -326,7 +326,7 @@ ProfilerExploreState.prototype.update = function ( time )
         
         this.msMa = 0;
         this.msMaElem = [];
-        for (var i = 0; i < this.msMaPeriod; ++i)
+        for (var k = 0; k < this.msMaPeriod; ++k)
         {
             var v = Math.random()*100;
             this.msMa += v;

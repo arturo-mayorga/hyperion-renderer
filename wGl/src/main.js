@@ -130,7 +130,7 @@ function createOrbitingViewerApp()
     lesson.addTransition("Profile", "cleanComplete", "OrbitingViewer");
     lesson.addTransition("OrbitingViewer", "cleanComplete", "OrbitingViewer");
     lesson.setState("Profile");
-};
+}
 
 var _appCreator = 
 {

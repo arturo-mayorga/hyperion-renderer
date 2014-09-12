@@ -507,7 +507,7 @@ Vec3Animator.prototype.update = function( time )
 		this.lapseTime = this.targetLapseTime;
 	}
 	
-	var percent = this.lapseTime / this.targetLapseTime;;
+	var percent = this.lapseTime / this.targetLapseTime;
 	
 	if (percent >= 1)
 	{

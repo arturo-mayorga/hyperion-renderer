@@ -139,7 +139,7 @@ GShader.prototype.bindToContext = function ( gl )
     this.glProgram = shaderProgram;
     this.vShader = vertexShader;
     this.fShader = fragmentShader;
-}
+};
 
 /**
  * This needs to be called when switching to a different shader program to release
@@ -171,7 +171,7 @@ GShader.prototype.deactivate = function()
             gl.disableVertexAttribArray(this.attributes.skinVertexAttribute);
         }
 	}
-}
+};
 
 /**
  * This needs to be called when starting to use this shader program to activate
@@ -202,6 +202,6 @@ GShader.prototype.activate = function()
     {
         gl.enableVertexAttribArray(this.attributes.skinVertexAttribute);
     } 
-}
+};
 
 

@@ -21,10 +21,11 @@
 /** 
  * @constructor
  * @extends {GRenderStrategy}
+ * @param {WebGLRenderingContext} gl
  */
 function GRenderDeferredStrategy( gl )
 {
-    this.gl = gl;
+    /** @type {WebGLRenderingContext} */ this.gl = gl;
     this.configure();
     
     this.extensions = {};
@@ -96,7 +97,7 @@ GRenderDeferredStrategy.prototype.deleteResources = function()
     }
     
     this.deleteScreenVBOs();
-}
+};
 
 /**
  * Free and reload all the resource for this strategy
@@ -127,7 +128,7 @@ GRenderDeferredStrategy.prototype.loadShader = function( srcName )
             _this.shaderSrcMap[srcName] = devS + client.responseText; 
             _this.checkShaderDependencies();
         }
-    }
+    };
     client.send();
 };
 
@@ -376,7 +377,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
    
     var saoBlurPong = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.ssao, this.screen );
     saoBlurPong.setHRec( 0, 0, 1, 1, -3.14159/2 );
-    saoBlurPong.addInputFrameBuffer( this.frameBuffers.blurPing, gl.TEXTURE0 )
+    saoBlurPong.addInputFrameBuffer( this.frameBuffers.blurPing, gl.TEXTURE0 );
     
     var toneMapPassPing = new GPostEffectRenderPassCmd( this.gl, this.programs.toneMap, this.frameBuffers.phongLightPong, this.screen );
     toneMapPassPing.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );
@@ -479,7 +480,7 @@ GRenderDeferredStrategy.prototype.setRenderLevel = function ( newLevel )
     }
     
     return false;
-}
+};
 
 /**
  * Draw the scene and hud elements using this strategy

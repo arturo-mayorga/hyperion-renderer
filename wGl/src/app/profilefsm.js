@@ -221,8 +221,8 @@ function ProfilerExploreState( oData )
     this.msMaElem = [];
     for (var i = 0; i < this.msMaPeriod; ++i)
     {
-        var v = Math.random()*100
-        this.msMa += v
+        var v = Math.random()*100;
+        this.msMa += v;
         this.msMaElem.push(v);
     }
     this.msMa /= this.msMaPeriod;

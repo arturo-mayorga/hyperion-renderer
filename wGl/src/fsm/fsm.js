@@ -135,7 +135,7 @@ function FsmStateTransitions(state)
 FsmStateTransitions.prototype.addSignalTarget = function(signalName, targetStateName)
 {
 	this.transitions[signalName] = targetStateName;
-}
+};
 
 /**
  * @constructor

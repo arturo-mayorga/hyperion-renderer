@@ -144,16 +144,12 @@ Cone.prototype.genSliceBuffer = function( loc )
 {  
     var nAng = Math.atan(this.height/this.radiusOuter);
     
-    var ret = 
-    [
+    return [
         0, this.height, 0, Math.cos( loc )*Math.cos(nAng),Math.sin(nAng),Math.sin( loc )*Math.cos(nAng), loc/(2*Math.PI),0,
         Math.cos( loc )*this.radiusOuter, 0, Math.sin( loc )*this.radiusOuter, Math.cos( loc )*Math.cos(nAng),Math.sin(nAng),Math.sin( loc )*Math.cos(nAng), loc/(2*Math.PI),1,
         Math.cos( loc )*this.radiusOuter, 0, Math.sin( loc )*this.radiusOuter, 0,-1,0, loc/(2*Math.PI),1,
         Math.cos( loc )*this.radiusInner, 0, Math.sin( loc )*this.radiusInner, 0,-1,0, loc/(2*Math.PI),1
     ];
-    
-    return ret;
-        
 };
 
 

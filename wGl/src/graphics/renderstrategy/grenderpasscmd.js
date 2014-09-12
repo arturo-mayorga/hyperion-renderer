@@ -54,7 +54,7 @@ function GLightBasedCamCtrl()
     
     this.lightLocation = vec3.fromValues( 0, 0, 0 );
     this.lookAtDir     = vec3.fromValues( 0, 0, 1 );
-    this.lookAt        = vec3.fromValues( 0, 0, 1 )
+    this.lookAt        = vec3.fromValues( 0, 0, 1 );
     this.upDir         = vec3.fromValues( 0, 1, 0 );
     this.lightIndex = 0;
 }

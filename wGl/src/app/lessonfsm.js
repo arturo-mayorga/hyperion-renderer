@@ -519,7 +519,7 @@ Vec3Animator.prototype.update = function( time )
 	{
 		this.inVector[i] = this.startVec[i] + (this.target[i] - this.startVec[i])*percent;
 	}
-}
+};
 
 /**
  * Determines if the current animation has completed
@@ -528,7 +528,7 @@ Vec3Animator.prototype.update = function( time )
 Vec3Animator.prototype.getIsComplete = function()
 {
 	return this.isComplete;
-}
+};
 
 /**
  * @constructor

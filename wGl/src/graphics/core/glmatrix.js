@@ -54,7 +54,7 @@ var glMatrix = {};
  */
 glMatrix.setMatrixArrayType = function(type) {
     GLMAT_ARRAY_TYPE = type;
-}
+};
 
 
 

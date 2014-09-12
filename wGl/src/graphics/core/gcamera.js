@@ -47,7 +47,7 @@ function GCamera()
  */
 GCamera.prototype.draw = function( ouMvMatrix, shader )
 {
-    var gl = this.gl;
+    /** @type {WebGLRenderingContext} */ var gl = this.gl;
     this.updateMatrices();
     
     mat4.copy(ouMvMatrix, this.mvMatrix);

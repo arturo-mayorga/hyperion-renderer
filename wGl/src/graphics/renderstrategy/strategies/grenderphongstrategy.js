@@ -98,7 +98,7 @@ GRenderPhongStrategy.prototype.deleteResources = function()
     }
     
     this.deleteScreenVBOs();
-}
+};
 
 /**
  * Free and reload all the resource for this strategy
@@ -129,7 +129,7 @@ GRenderPhongStrategy.prototype.loadShader = function(srcName)
             _this.shaderSrcMap[srcName] = devS + client.responseText; 
             _this.checkShaderDependencies();
         }
-    }
+    };
     client.send();
 };
 

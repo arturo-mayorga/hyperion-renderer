@@ -52,7 +52,7 @@ GRenderStrategy.prototype.getRenderLevel = function ()
 GRenderStrategy.prototype.setRenderLevel = function ( newLevel )
 {
     return false;
-}
+};
 
 /**
  * @return {boolean} true if the change was applied

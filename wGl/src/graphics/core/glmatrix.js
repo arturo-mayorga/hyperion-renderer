@@ -570,7 +570,7 @@ var vec3 = {};
 /**
  * Creates a new, empty vec3
  *
- * @returns {vec3} a new 3D vector
+ * @returns {Float32Array} a new 3D vector
  */
 vec3.create = function() {
     var out = new GLMAT_ARRAY_TYPE(3);
@@ -600,7 +600,7 @@ vec3.clone = function(a) {
  * @param {Number} x X component
  * @param {Number} y Y component
  * @param {Number} z Z component
- * @returns {vec3} a new 3D vector
+ * @returns {Float32Array} a new 3D vector
  */
 vec3.fromValues = function(x, y, z) {
     var out = new GLMAT_ARRAY_TYPE(3);

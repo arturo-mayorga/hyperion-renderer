@@ -294,7 +294,7 @@ GContext.prototype.handleMouseMove = function(ev)
 };
 
 /**
- * @param {PointingEvent}
+ * @param {PointingEvent} pev
  * @return {number}
  */
 GContext.prototype.getSceneObjectIdAt = function ( pev )
@@ -306,7 +306,19 @@ GContext.prototype.getSceneObjectIdAt = function ( pev )
 };
 
 /**
- * @param {PointingEvent}
+ * @param {PointingEvent} pev
+ * @return {Float32Array}
+ */
+GContext.prototype.getScene3dPossAt = function ( pev )
+{
+    var x = Math.round(1024*pev.getX());
+    var y = 1024-Math.round(1024*pev.getY());
+
+    return this.renderStrategy.ge3dPositionAt( x, y );
+};
+
+/**
+ * @param {PointingEvent} pev
  * @return {number}
  */
 GContext.prototype.getHudObjectIdAt = function ( pev )

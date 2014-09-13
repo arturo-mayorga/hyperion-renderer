@@ -66,13 +66,28 @@ MouseFpCameraController.prototype.onMouseDown = function( ev )
     
     this.getValuesFromCam();
     
-    vec3.add( this.horizontalAxis, this.eyeRight, this.eyeLookAt );
-    
+
+
+    var clickTarget = context.getScene3dPossAt(ev);
+    var target2Cam = vec3.create();
+    vec3.subtract( target2Cam, this.eyePos, clickTarget );
+    vec3.normalize( target2Cam, target2Cam );
+    vec3.add( this.eyePos, target2Cam, clickTarget );
+    vec3.copy( this.eyeLookAt,  clickTarget );
+
+    vec3.subtract( this.eyeLookAtDir, this.eyeLookAt, this.eyePos );
+    vec3.cross( this.eyeRight, this.eyeLookAtDir, this.eyeUp );
+    vec3.copy( this.horizontalAxis, this.eyeRight )
+
+
     vec3.copy( this.eyePosStart, this.eyePos );
+
+
 
     vec3.copy( this.eyeLookAtStart, this.eyeLookAt )
     vec3.copy( this.eyeUpStart, this.eyeUp );
-    
+
+
     return true;
 };
 
@@ -118,8 +133,7 @@ MouseFpCameraController.prototype.getValuesFromCam = function()
     this.camera.getEye( this.eyePos );
     this.camera.getLookAt( this.eyeLookAt );
     this.camera.getUp( this.eyeUp );
-    vec3.subtract( this.eyeLookAtDir,
-                   this.eyeLookAt, this.eyePos );
+    vec3.subtract( this.eyeLookAtDir, this.eyeLookAt, this.eyePos );
     
     vec3.cross( this.eyeRight, this.eyeLookAtDir, this.eyeUp );
 };
@@ -143,8 +157,9 @@ MouseFpCameraController.prototype.update = function( time )
     mat4.identity( mvMatrix );
 
 
+    ;
 
-    //mat4.translate(mvMatrix, mvMatrix, new Float32Array([this.eyePosStart[0]*-1, this.eyePosStart[1]*-1, this.eyePosStart[2]*-1]) );
+
     vec3.subtract( this.eyeLookAt, this.eyeLookAtStart, this.eyePosStart );
     
     // allways rotate around the y axis
@@ -153,9 +168,6 @@ MouseFpCameraController.prototype.update = function( time )
     // find the horizontal axis
     mat4.rotate( mvMatrix, mvMatrix, this.viewPortDrag[1]*Math.PI, this.horizontalAxis );
 
-   // mat4.translate(mvMatrix, mvMatrix, this.eyePosStart);
-    
-   // vec3.transformMat4(this.eyePos, this.eyePosStart, mvMatrix);
     vec3.transformMat4(this.eyeLookAt, this.eyeLookAt, mvMatrix);
 
     vec3.add( this.eyeLookAt, this.eyeLookAt, this.eyePosStart );

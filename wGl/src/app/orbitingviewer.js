@@ -425,7 +425,6 @@ Toolbar.prototype.enter = function ()
 	this.fullscrBtn.setDrawRec(0.87, -0.87, .1, .1);
 	this.hud.addChild(this.fullscrBtn);
 	this.fullscrBtn.setTexture("fscrbtn.png", "assets/2d/");
-	//this.fullscrBtn.setTexture("noise_256.jpg", "assets/2d/");
 	
 	this.context.addMouseObserver( this );
 };

@@ -21,7 +21,7 @@
 /** 
  * @constructor
  * @extends {GRenderStrategy}
- * @param {WebGLRenderingContext}
+ * @param {WebGLRenderingContext} gl
  */
 function GRenderPhongStrategy( gl )
 {
@@ -296,7 +296,7 @@ GRenderPhongStrategy.prototype.initShaders = function (shaderSrcMap)
 
 /**
  * Draw the screen buffer using the provided shader
- * @param {GShader} Shader to use for drawing the screen buffer
+ * @param {GShader} shader Shader to use for drawing the screen buffer
  */
 GRenderPhongStrategy.prototype.drawScreenBuffer = function(shader)
 {
@@ -346,12 +346,13 @@ GRenderPhongStrategy.prototype.initPassCmds = function()
 
 /**
  * Draw the scene and hud elements using this strategy
- * @param {GScene} Scene to draw with this strategy
- * @param {GHudController} Hud to draw with this strategy
+ * @param {GScene} scene Scene to draw with this strategy
+ * @param {GHudController} hud Hud to draw with this strategy
  */
 GRenderPhongStrategy.prototype.draw = function ( scene, hud )
 {
     var gl = this.gl;
+    gl.disable(gl.BLEND);
     
     for ( var key in this.passes )
     {
@@ -360,9 +361,10 @@ GRenderPhongStrategy.prototype.draw = function ( scene, hud )
     
     this.frameBuffers.color.bindTexture(gl.TEXTURE0, "color");
     this.programs.fxaa.activate();
-    this.drawScreenBuffer(this.programs.fxaa);	
-    
-    
+    this.drawScreenBuffer(this.programs.fxaa);
+
+    gl.enable(gl.BLEND);
+
     if (hud != undefined)
     {
         this.programs.fullScr.activate();
@@ -381,22 +383,21 @@ GRenderPhongStrategy.tempObjIdA = new Uint8Array(4);
 
 /**
  * Get the object id of the object at the provided mouse location
- * @param {number}
- * @param {number}
+ * @param {number} x
+ * @param {number} y
  */
 GRenderPhongStrategy.prototype.getObjectIdAt = function ( x, y )
 {
     this.frameBuffers.objid.getColorValueAt(x, y, GRenderPhongStrategy.tempObjIdA);
     
-    return ( GRenderPhongStrategy.tempObjIdA[0] << 16 |
-             GRenderPhongStrategy.tempObjIdA[1] << 8  |
-             GRenderPhongStrategy.tempObjIdA[2] );
+    return ( GRenderPhongStrategy.tempObjIdA[0] << 8  |
+             GRenderPhongStrategy.tempObjIdA[1] );
 };
 
 /**
  * Get the object id of the object at the provided mouse location
- * @param {number}
- * @param {number}
+ * @param {number} x
+ * @param {number} y
  */
 GRenderPhongStrategy.prototype.getHudObjectIdAt = function ( x, y )
 {

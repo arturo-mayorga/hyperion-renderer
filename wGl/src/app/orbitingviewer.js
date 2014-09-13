@@ -311,7 +311,8 @@ ExploreState.prototype.fireSignal = FsmState.prototype.fireSignal;
 ExploreState.prototype.enter = function () 
 {
 	this.kCamController = new KeyboardDbgCameraController();
-	this.mCamController = new MouseOrbitingCameraController();
+	//this.mCamController = new MouseOrbitingCameraController();
+    this.mCamController = new MouseFpCameraController();
 	this.kCamController.bindCamera( this.scene.getCamera() );
 	this.mCamController.bindCamera( this.scene.getCamera() );
 	

@@ -25,7 +25,6 @@
  */
 function MouseFpCameraController()
 {
-    FsmState.debugEnable = true;
     FsmMachine.call( this );
 
     this.dEyePos = vec3.create();
@@ -43,8 +42,9 @@ function MouseFpCameraController()
 	
 	this.eyePosStart = vec3.create();
     this.eyeLookAtStart = vec3.create();
-    this.eyeUpStart = vec3.create();
 
+    this.targetEyePos = vec3.create();
+    this.targetEyeLookAt = vec3.create();
 
 	this.viewPortOrigin = vec2.create();
 	this.viewPortDrag = vec2.create();
@@ -55,6 +55,8 @@ function MouseFpCameraController()
     this.mouseDown = false;
     this.mouseUp = false;
     this.mouseMove = false;
+
+    this.latestMouseDown = undefined;
 
     this.flyTime = 0;
 
@@ -89,6 +91,12 @@ MouseFpCameraController.prototype.initStateMachine = function ()
 MouseFpCameraController.prototype.observeEnter = function()
 {
     this.mouseUp = false;
+
+    this.getValuesFromCam();
+
+    vec3.copy( this.eyePosStart, this.eyePos );
+    vec3.copy( this.eyeLookAtStart, this.eyeLookAt );
+    vec3.copy( this.horizontalAxis, this.eyeRight );
 };
 
 /**
@@ -126,6 +134,19 @@ MouseFpCameraController.prototype.observeUpdate = function()
 MouseFpCameraController.prototype.flyEnter = function()
 {
     this.flyTime = 0;
+
+    this.getValuesFromCam();
+
+    var clickTarget = context.getScene3dPossAt( this.latestMouseDown );
+    var target2Cam = vec3.create();
+    vec3.subtract( target2Cam, this.eyePos, clickTarget );
+    vec3.normalize( target2Cam, target2Cam );
+    vec3.add( this.targetEyePos, target2Cam, clickTarget );
+    vec3.copy( this.targetEyeLookAt,  clickTarget );
+
+
+    vec3.copy( this.eyePosStart, this.eyePos );
+    vec3.copy( this.eyeLookAtStart, this.eyeLookAt );
 };
 
 /**
@@ -134,12 +155,31 @@ MouseFpCameraController.prototype.flyEnter = function()
  */
 MouseFpCameraController.prototype.flyUpdate = function( time )
 {
-    this.flyTime += time;
+    var timeToFly = 500;
+    var someConstant = 10/timeToFly;
+    var offset = 2;
 
-    if ( 1000 <= this.flyTime )
+    // the limit of atan(x) -> infinity is PI/2 but since it never actually gets there
+    // we have to normalize the end value to avoid any pops to the target positions.
+    var linearProgress = Math.atan( this.flyTime*someConstant - offset)/Math.PI + 0.5;
+    linearProgress /= Math.atan( timeToFly*someConstant - offset)/Math.PI + 0.5;
+
+    if ( timeToFly <= this.flyTime )
     {
         this.fireSignal( "reachedTarget" );
+        linearProgress = 1;
     }
+
+    this.eyePos[0] = this.eyePosStart[0] + (this.targetEyePos[0] - this.eyePosStart[0])*linearProgress;
+    this.eyePos[1] = this.eyePosStart[1] + (this.targetEyePos[1] - this.eyePosStart[1])*linearProgress;
+    this.eyePos[2] = this.eyePosStart[2] + (this.targetEyePos[2] - this.eyePosStart[2])*linearProgress;
+    this.eyeLookAt[0] = this.eyeLookAtStart[0] + (this.targetEyeLookAt[0] - this.eyeLookAtStart[0])*linearProgress;
+    this.eyeLookAt[1] = this.eyeLookAtStart[1] + (this.targetEyeLookAt[1] - this.eyeLookAtStart[1])*linearProgress;
+    this.eyeLookAt[2] = this.eyeLookAtStart[2] + (this.targetEyeLookAt[2] - this.eyeLookAtStart[2])*linearProgress;
+
+    this.setValuesToCam();
+
+    this.flyTime += time;
 };
 
 /**
@@ -192,6 +232,8 @@ MouseFpCameraController.prototype.idleUpdate = function( time )
  */
 MouseFpCameraController.prototype.onMouseDown = function( ev )
 {
+    this.latestMouseDown = ev;
+
      var viewportX = ev.getX();
      var viewportY = ev.getY();
     
@@ -202,28 +244,6 @@ MouseFpCameraController.prototype.onMouseDown = function( ev )
     this.viewPortDrag[0] = 0;
     this.viewPortDrag[1] = 0;
     
-    this.getValuesFromCam();
-    
-
-
-    var clickTarget = context.getScene3dPossAt(ev);
-    var target2Cam = vec3.create();
-    vec3.subtract( target2Cam, this.eyePos, clickTarget );
-    vec3.normalize( target2Cam, target2Cam );
-    vec3.add( this.eyePos, target2Cam, clickTarget );
-    vec3.copy( this.eyeLookAt,  clickTarget );
-
-    vec3.subtract( this.eyeLookAtDir, this.eyeLookAt, this.eyePos );
-    vec3.cross( this.eyeRight, this.eyeLookAtDir, this.eyeUp );
-    vec3.copy( this.horizontalAxis, this.eyeRight );
-
-
-    vec3.copy( this.eyePosStart, this.eyePos );
-
-
-
-    vec3.copy( this.eyeLookAtStart, this.eyeLookAt );
-    vec3.copy( this.eyeUpStart, this.eyeUp );
 
     this.mouseDown = true;
 

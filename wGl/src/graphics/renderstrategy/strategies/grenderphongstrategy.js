@@ -97,6 +97,8 @@ GRenderPhongStrategy.prototype.deleteResources = function()
         this.programs[key].destroy();
         this.programs[key] = undefined;
     }
+
+    this.lastScene = undefined;
     
     this.deleteScreenVBOs();
 };
@@ -351,6 +353,7 @@ GRenderPhongStrategy.prototype.initPassCmds = function()
  */
 GRenderPhongStrategy.prototype.draw = function ( scene, hud )
 {
+    this.lastScene = scene;
     var gl = this.gl;
     gl.disable(gl.BLEND);
     
@@ -380,6 +383,31 @@ GRenderPhongStrategy.prototype.draw = function ( scene, hud )
 }; 
 
 GRenderPhongStrategy.tempObjIdA = new Uint8Array(4);
+
+/**
+ * Get the 3d position of the pixel at the provided mouse location
+ * @param {number} x
+ * @param {number} y
+ * @return {Float32Array}
+ */
+GRenderPhongStrategy.prototype.ge3dPositionAt = function(x, y)
+{
+    this.frameBuffers.objid.getColorValueAt(x, y, GRenderPhongStrategy.tempObjIdA);
+
+    var zVal = ( GRenderPhongStrategy.tempObjIdA[2] + (GRenderPhongStrategy.tempObjIdA[3]/256.0) ) / 256.0;
+    var ret = vec4.fromValues(2*(x/1024.0) - 1.0, 2*(y/1024.0) - 1.0, 2*zVal - 1.0, 1.0);
+
+    if ( undefined !== this.lastScene )
+    {
+        var camera = this.lastScene.getCamera();
+        camera.inverseProject( ret );
+    }
+
+    ret[0] /= ret[3];ret[1] /= ret[3];
+    ret[2] /= ret[3];ret[3] /= ret[3];
+
+    return ret;
+};
 
 /**
  * Get the object id of the object at the provided mouse location

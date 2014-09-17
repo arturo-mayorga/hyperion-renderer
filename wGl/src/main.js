@@ -108,8 +108,7 @@ function createPenApp()
 {
     var profileState = createProfiler(context);
     var penState = PenAssembly.createState(context);
-    
-	
+
     lesson = new FsmMachine();
     lesson.addState("Pen", penState);
     lesson.addState("Profile", profileState);
@@ -122,8 +121,7 @@ function createOrbitingViewerApp()
 {
     var profileState = createProfiler(context);
     var orbitingViewerState = OrbitingViewer.createState(context, _appArgs["h"]);
-    
-	
+
     lesson = new FsmMachine();
     lesson.addState("OrbitingViewer", orbitingViewerState);
     lesson.addState("Profile", profileState);
@@ -136,7 +134,6 @@ function creteFirstPersonViewerApp()
 {
     var profileState = createProfiler(context);
     var firstPersonViewerState = FirstPersonViewer.createState(context, _appArgs["h"]);
-
 
     lesson = new FsmMachine();
     lesson.addState("FirstPersonViewer", firstPersonViewerState);
@@ -169,14 +166,8 @@ function mainLoop()
 	scene   = new GScene();
 	camera  = new GCamera();
 	hud     = new GHudController();
-	
-	
+    
 	scene.setCamera(camera);
-	
-	camera.setLookAt(4.232629776000977*4, 2.6432266235351562*4, 0.2486426830291748*4);
-	camera.setUp(-0.09341227263212204, 0.9805285334587097, 0.17273758351802826);
-	camera.setEye(9.44430160522461*4, 4.382470607757568*4, -3.9111077785491943*4);
-	
 	context.setScene(scene);
 	context.setHud(hud);
 	

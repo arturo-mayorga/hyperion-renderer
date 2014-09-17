@@ -25,17 +25,17 @@ function GObjReaderObserver () {}
 
 /**
  * This function is called whenever a new GeometryTriMesh object is loaded
- * @param {GeometryTriMesh} New object that was just made available
+ * @param {GeometryTriMesh} mesh New object that was just made available
  */
 GObjReaderObserver.prototype.onNewMeshAvailable = function ( mesh ) {};
 
 /**
  * @constructor
- * @param {string} Path to the location of this obj file's resources
- * @param {Array.<string>} Lines of the obj file
- * @param {GScene} Target scene for the loading process
- * @param {GGroup} Target group for the loading process
- * @param {GObjReaderObserver} Observer to the loading process
+ * @param {string} path Path to the location of this obj file's resources
+ * @param {Array.<string>} objStrA Lines of the obj file
+ * @param {GScene} scene Target scene for the loading process
+ * @param {GGroup} group Target group for the loading process
+ * @param {GObjReaderObserver} observer Observer to the loading process
  */
 function GObjReader( path, objStrA, scene, group, observer )
 {
@@ -48,7 +48,7 @@ function GObjReader( path, objStrA, scene, group, observer )
 		this.vertIdx = parseFloat(tokens[0])-1;
 		this.textIdx = parseFloat(tokens[1])-1;
 		this.normIdx = parseFloat(tokens[2])-1;			
-	}
+	};
 
 	this.objGVerts = [];
 	this.objTVerts = [];
@@ -86,7 +86,7 @@ function GObjReader( path, objStrA, scene, group, observer )
 
 /**
  * Advance through the loading process
- * @param {number} Milliseconds since the last update
+ * @param {number} time Milliseconds since the last update
  */
 GObjReader.prototype.update = function (time)
 {
@@ -121,7 +121,7 @@ GObjReader.prototype.update = function (time)
  
 /** 
  * Remove unimportant tokens from the token array
- * @param {Array.<string>} Token array
+ * @param {Array.<string>} stra Token array
  * @return {Array.<string>} Scrubbed token array
  */
 GObjReader.prototype.scrub = function( stra )
@@ -140,15 +140,15 @@ GObjReader.prototype.scrub = function( stra )
 
 /**
  * This function is called while processing a comment line (starting with '#')
- * @param {Array.<string>} 
+ * @param {Array.<string>} lineA
  */
 GObjReader.prototype.process_comment = function( lineA ) {};
 
 /**
  * This function is called while processing a group line (starting with 'o' or 'g')
- * @param {Array.<string>} 
+ * @param {Array.<string>} lineA
  */
-GObjReader.prototype.process_group = function(lineA)
+GObjReader.prototype.process_group = function( lineA )
 {
 	this.invertNormals = false;
 	
@@ -182,7 +182,7 @@ GObjReader.prototype.process_group = function(lineA)
 
 /**
  * This function is called while processing a vertex line (starting with 'v')
- * @param {Array.<string>} 
+ * @param {Array.<string>} lineA
  */
 GObjReader.prototype.process_vert = function( lineA )
 {
@@ -194,7 +194,7 @@ GObjReader.prototype.process_vert = function( lineA )
 
 /**
  * This function is called while processing a texture vertex line (starting with 'tv')
- * @param {Array.<string>} 
+ * @param {Array.<string>} lineA
  */
 GObjReader.prototype.process_texVert = function( lineA )
 {
@@ -206,7 +206,7 @@ GObjReader.prototype.process_texVert = function( lineA )
 
 /**
  * This function is called while processing a comment line (starting with 'vn')
- * @param {Array.<string>} 
+ * @param {Array.<string>} lineA
  */
 GObjReader.prototype.process_normal = function( lineA )
 {
@@ -218,7 +218,7 @@ GObjReader.prototype.process_normal = function( lineA )
 
 /**
  * This function is called while processing a face line (starting with 'f')
- * @param {Array.<string>} 
+ * @param {Array.<string>} lineA
  */
 GObjReader.prototype.process_face = function( lineA )
 {
@@ -254,7 +254,7 @@ GObjReader.prototype.process_face = function( lineA )
 
 /**
  * This function is called while processing a material line (starting with 'mtllib')
- * @param {Array.<string>} 
+ * @param {Array.<string>} lineA
  */
 GObjReader.prototype.process_mtllib = function( lineA )
 {
@@ -264,7 +264,7 @@ GObjReader.prototype.process_mtllib = function( lineA )
 
 /**
  * This function is called while processing a use material line (starting with 'usemtl')
- * @param {Array.<string>} 
+ * @param {Array.<string>} lineA
  */
 GObjReader.prototype.process_usemtl = function( lineA )
 {
@@ -273,7 +273,7 @@ GObjReader.prototype.process_usemtl = function( lineA )
 
 /**
  * This function is called while processing a invert normals line (starting with 'invnv')
- * @param {Array.<string>} 
+ * @param {Array.<string>} lineA
  */
 GObjReader.prototype.process_invnv = function( lineA )
 {

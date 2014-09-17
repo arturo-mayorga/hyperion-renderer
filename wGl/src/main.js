@@ -132,10 +132,25 @@ function createOrbitingViewerApp()
     lesson.setState("Profile");
 }
 
+function creteFirstPersonViewerApp()
+{
+    var profileState = createProfiler(context);
+    var firstPersonViewerState = FirstPersonViewer.createState(context, _appArgs["h"]);
+
+
+    lesson = new FsmMachine();
+    lesson.addState("FirstPersonViewer", firstPersonViewerState);
+    lesson.addState("Profile", profileState);
+    lesson.addTransition("Profile", "cleanComplete", "FirstPersonViewer");
+    lesson.addTransition("FirstPersonViewer", "cleanComplete", "FirstPersonViewer");
+    lesson.setState("Profile");
+}
+
 var _appCreator = 
 {
     "pen":createPenApp,
-    "orbiting":createOrbitingViewerApp
+    "orbiting":createOrbitingViewerApp,
+    "firstperson":creteFirstPersonViewerApp
 };    
 
 function createAppFSM()

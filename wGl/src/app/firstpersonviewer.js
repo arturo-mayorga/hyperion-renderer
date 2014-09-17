@@ -20,7 +20,7 @@
 
 
 // JS namespace...
-var OrbitingViewer = new function()
+var FirstPersonViewer = new function()
 {
     
 /**
@@ -48,7 +48,7 @@ this.createState = function( context, hash )
 	ret.addTransition( "Load", "exitReq", "Clean" );
 	ret.addTransition( "Explore", "exitReq", "Clean" );
 	
-	ret.setName("OrbitingViewer");
+	ret.setName("FirstPersonViewer");
 	ret.setEnterState("Load");
 	return ret;
 };
@@ -66,7 +66,7 @@ function StateOperatingData( context, hash )
 /**
  * @constructor
  * @extends {FsmMachine}
- * @param {OrbitingViewer.StateOperatingData} oData
+ * @param {FirstPersonViewer.StateOperatingData} oData
  */
 function CleanState( oData )
 {
@@ -120,7 +120,7 @@ CleanState.prototype.update = function ( time )
  * @constructor
  * @extends {FsmMachine}
  * @implements {GObjLoaderObserver}
- * @param {OrbitingViewer.StateOperatingData} oData
+ * @param {FirstPersonViewer.StateOperatingData} oData
  */
 function LoadState( oData ) 
 {
@@ -141,8 +141,7 @@ LoadState.prototype.enter = function ()
 	for (var i = 0; i < len; ++i)
 	{
 		this.hud.removeChild(hChildren[i]);
-	} 
-    
+	}
     
     this.loadCount = 0;
     this.officeGroup = new GGroup( "officeGroup" ); 
@@ -155,11 +154,8 @@ LoadState.prototype.enter = function ()
 	
 	this.envLoader = new GObjLoader(this.scene, this.officeGroup);
 	this.envLoader.setObserver(this);
-	this.envLoader.enableAutoMergeByMaterial(); 
-    
-    
-	//this.envLoader.loadObj("assets/3d/apartment/a1/", "sheldon.obj"); 
-	//this.envLoader.loadObj("assets/3d/0f69d966978a46df96cd1c8a9b05da76/", "0f69d966978a46df96cd1c8a9b05da76.obj"); 
+	this.envLoader.enableAutoMergeByMaterial();
+
 	var hash = "bluefalcon";
 	
 	if ( undefined !== this.oData.hash )
@@ -198,6 +194,8 @@ LoadState.prototype.enter = function ()
 	camera.setLookAt(0, 0, 0);
 	camera.setUp(0, 1, 0);
 	camera.setEye(-59, 0, -3);
+    camera.setEye(0, 5, 0);
+    camera.setLookAt(0, 5, -1);
 };
 
 /**
@@ -282,7 +280,7 @@ LoadState.prototype.onObjLoaderProgress = function ( loader, progress )
 /**
  * @constructor
  * @extends {FsmMachine}
- * @param {OrbitingViewer.StateOperatingData} oData
+ * @param {FirstPersonViewer.StateOperatingData} oData
  */
 function ExploreState( oData ) 
 {
@@ -311,9 +309,10 @@ ExploreState.prototype.fireSignal = FsmState.prototype.fireSignal;
 ExploreState.prototype.enter = function () 
 {
 	this.kCamController = new KeyboardDbgCameraController();
-	this.mCamController = new MouseOrbitingCameraController();
+    this.mCamController = new MouseFpCameraController( this.oData.context );
 	this.kCamController.bindCamera( this.scene.getCamera() );
 	this.mCamController.bindCamera( this.scene.getCamera() );
+    this.mCamController.setConstantHeight( 10 );
 	
 	this.toolbar = new Toolbar( this.oData.context );
 	this.toolbar.enter();
@@ -361,14 +360,12 @@ function Toolbar( context )
     this.isMouseOver = false;
     
     this.alphaState = 0;
-    
-    
 }
 
 Toolbar.prototype = Object.create( FsmMachine.prototype );
 
 /**
- * @param {PointingEvent}
+ * @param {PointingEvent} ev
  */
 Toolbar.prototype.onMouseDown = function( ev ) 
 {
@@ -383,7 +380,7 @@ Toolbar.prototype.onMouseDown = function( ev )
 };
 
 /**
- * @param {PointingEvent}
+ * @param {PointingEvent} ev
  */
 Toolbar.prototype.onMouseUp = function( ev ) 
 {
@@ -391,7 +388,7 @@ Toolbar.prototype.onMouseUp = function( ev )
 };
 
 /**
- * @param {PointingEvent}
+ * @param {PointingEvent} ev
  */
 Toolbar.prototype.onMouseMove = function( ev ) 
 {
@@ -439,7 +436,7 @@ Toolbar.prototype.exit = function ()
 
 /**
  * This is the update function for the toolbar state
- * @param {number} number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 Toolbar.prototype.update = function ( time ) 
 {

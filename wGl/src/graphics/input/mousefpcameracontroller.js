@@ -22,23 +22,19 @@
  * @constructor
  * @extends {FsmMachine}
  * @implements {IContextMouseObserver}
+ * @param {GContext} context
  */
-function MouseFpCameraController()
+function MouseFpCameraController( context )
 {
     FsmMachine.call( this );
 
-    this.dEyePos = vec3.create();
-    this.dX = this.dY = this.dZ = undefined;
-    this.dPitch = this.dRoll = this.dYaw = undefined;
+    this.context = context;
     
     this.eyePos = vec3.create();
 	this.eyeLookAtDir = vec3.create();
 	this.eyeUp = vec3.create();
 	this.eyeLookAt = vec3.create();
 	this.eyeRight = vec3.create();
-	this.tempDEyePos = vec3.create();
-	
-	this.isDragging = false;
 	
 	this.eyePosStart = vec3.create();
     this.eyeLookAtStart = vec3.create();
@@ -129,6 +125,15 @@ MouseFpCameraController.prototype.observeUpdate = function()
 };
 
 /**
+ * Set to constant heightMode
+ * @param {number} constantHeight
+ */
+MouseFpCameraController.prototype.setConstantHeight = function ( constantHeight )
+{
+    this.constantHeight = constantHeight;
+};
+
+/**
  * Enter the fly state
  */
 MouseFpCameraController.prototype.flyEnter = function()
@@ -137,16 +142,27 @@ MouseFpCameraController.prototype.flyEnter = function()
 
     this.getValuesFromCam();
 
-    var clickTarget = context.getScene3dPossAt( this.latestMouseDown );
-    var target2Cam = vec3.create();
-    vec3.subtract( target2Cam, this.eyePos, clickTarget );
-    vec3.normalize( target2Cam, target2Cam );
-    vec3.add( this.targetEyePos, target2Cam, clickTarget );
-    vec3.copy( this.targetEyeLookAt,  clickTarget );
 
+
+    var clickTarget = this.context.getScene3dPossAt( this.latestMouseDown );
+    var target2Cam = vec3.create();
 
     vec3.copy( this.eyePosStart, this.eyePos );
     vec3.copy( this.eyeLookAtStart, this.eyeLookAt );
+
+
+    if ( undefined !== this.constantHeight )
+    {
+        clickTarget[1] = this.constantHeight;
+        this.eyePos[1] = this.constantHeight;
+    }
+
+    vec3.subtract( target2Cam, this.eyePos, clickTarget );
+
+
+    vec3.normalize( target2Cam, target2Cam );
+    vec3.add( this.targetEyePos, target2Cam, clickTarget );
+    vec3.copy( this.targetEyeLookAt,  clickTarget );
 };
 
 /**

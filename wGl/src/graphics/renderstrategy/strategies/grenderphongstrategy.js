@@ -20,7 +20,8 @@
 
 /** 
  * @constructor
- * @implements {GRenderStrategy}
+ * @extends {GRenderStrategy}
+ * @param {WebGLRenderingContext}
  */
 function GRenderPhongStrategy( gl )
 {
@@ -39,7 +40,7 @@ GRenderPhongStrategy.prototype = Object.create( GRenderStrategy.prototype );
  * Some devices don't play nice with some extensions eve if the claim support
  * this function returns true if the known hardware support for a particular extension
  * is good enough for the extension in question
- * @param {string}
+ * @param {string} extensionName
  * @return {boolean}
  */
 GRenderPhongStrategy.prototype.checkNavigatorProfile = function( extensionName )
@@ -98,7 +99,7 @@ GRenderPhongStrategy.prototype.deleteResources = function()
     }
     
     this.deleteScreenVBOs();
-}
+};
 
 /**
  * Free and reload all the resource for this strategy
@@ -129,7 +130,7 @@ GRenderPhongStrategy.prototype.loadShader = function(srcName)
             _this.shaderSrcMap[srcName] = devS + client.responseText; 
             _this.checkShaderDependencies();
         }
-    }
+    };
     client.send();
 };
 

@@ -54,7 +54,7 @@ function GLightBasedCamCtrl()
     
     this.lightLocation = vec3.fromValues( 0, 0, 0 );
     this.lookAtDir     = vec3.fromValues( 0, 0, 1 );
-    this.lookAt        = vec3.fromValues( 0, 0, 1 )
+    this.lookAt        = vec3.fromValues( 0, 0, 1 );
     this.upDir         = vec3.fromValues( 0, 1, 0 );
     this.lightIndex = 0;
 }
@@ -233,8 +233,8 @@ function GPostEffectRenderPassCmd( gl, program, frameBuffer, screenGeometry )
 GPostEffectRenderPassCmd.prototype.setHRec = function( x, y, w, h, r )
 {
     mat3.identity( this.hMatrix);
-	mat3.translate( this.hMatrix, this.hMatrix, [x, y] );
-	mat3.scale( this.hMatrix,this.hMatrix, [w, h] ); 
+	mat3.translate( this.hMatrix, this.hMatrix, new Float32Array([x, y]) );
+	mat3.scale( this.hMatrix,this.hMatrix, new Float32Array([w, h]) );
 	mat3.rotate( this.hMatrix,this.hMatrix, r );
 };
 

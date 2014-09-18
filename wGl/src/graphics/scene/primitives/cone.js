@@ -72,15 +72,15 @@ Cone.prototype.updateBufferArrays = function()
     this.normA = [];
     this.indxA = [];
     
-    for ( var i = 0; i < 6*(this.sliceCount); ++i )
+    for ( var j = 0; j < 6*(this.sliceCount); ++j )
     {
-        this.indxA.push(i);
+        this.indxA.push(j);
          
     }
     
-    for ( var i = 0; i < this.sliceCount-1; ++i )
+    for ( var k = 0; k < this.sliceCount-1; ++k )
     {
-        this.addArraysBetweenSlices( sliceBuffers[i], sliceBuffers[i+1] );
+        this.addArraysBetweenSlices( sliceBuffers[k], sliceBuffers[k+1] );
     }
    
     this.addArraysBetweenSlices( sliceBuffers[this.sliceCount-1], sliceBuffers[0] );
@@ -144,16 +144,12 @@ Cone.prototype.genSliceBuffer = function( loc )
 {  
     var nAng = Math.atan(this.height/this.radiusOuter);
     
-    var ret = 
-    [
+    return [
         0, this.height, 0, Math.cos( loc )*Math.cos(nAng),Math.sin(nAng),Math.sin( loc )*Math.cos(nAng), loc/(2*Math.PI),0,
         Math.cos( loc )*this.radiusOuter, 0, Math.sin( loc )*this.radiusOuter, Math.cos( loc )*Math.cos(nAng),Math.sin(nAng),Math.sin( loc )*Math.cos(nAng), loc/(2*Math.PI),1,
         Math.cos( loc )*this.radiusOuter, 0, Math.sin( loc )*this.radiusOuter, 0,-1,0, loc/(2*Math.PI),1,
         Math.cos( loc )*this.radiusInner, 0, Math.sin( loc )*this.radiusInner, 0,-1,0, loc/(2*Math.PI),1
     ];
-    
-    return ret;
-        
 };
 
 

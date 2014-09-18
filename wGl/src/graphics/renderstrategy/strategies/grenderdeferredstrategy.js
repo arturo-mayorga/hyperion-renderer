@@ -20,11 +20,12 @@
 
 /** 
  * @constructor
- * @implements {GRenderStrategy}
+ * @extends {GRenderStrategy}
+ * @param {WebGLRenderingContext} gl
  */
 function GRenderDeferredStrategy( gl )
 {
-    this.gl = gl;
+    /** @type {WebGLRenderingContext} */ this.gl = gl;
     this.configure();
     
     this.extensions = {};
@@ -96,7 +97,7 @@ GRenderDeferredStrategy.prototype.deleteResources = function()
     }
     
     this.deleteScreenVBOs();
-}
+};
 
 /**
  * Free and reload all the resource for this strategy
@@ -127,7 +128,7 @@ GRenderDeferredStrategy.prototype.loadShader = function( srcName )
             _this.shaderSrcMap[srcName] = devS + client.responseText; 
             _this.checkShaderDependencies();
         }
-    }
+    };
     client.send();
 };
 
@@ -368,7 +369,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     
     var saoPass = new GPostEffectRenderPassCmd( this.gl, this.programs.ssao, this.frameBuffers.ssao, this.screen );
     saoPass.addInputFrameBuffer( this.frameBuffers.position, gl.TEXTURE0 );
-    saoPass.addInputTexture( this.gl.randomTexture, gl.TEXTURE1 );
+    saoPass.addInputTexture( this.gl.randomTexture );
     
     var saoBlurPing = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.blurPing, this.screen );
     saoBlurPing.setHRec( 0, 0, 1, 1, 3.14159/2 );
@@ -376,14 +377,14 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
    
     var saoBlurPong = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.ssao, this.screen );
     saoBlurPong.setHRec( 0, 0, 1, 1, -3.14159/2 );
-    saoBlurPong.addInputFrameBuffer( this.frameBuffers.blurPing, gl.TEXTURE0 )
+    saoBlurPong.addInputFrameBuffer( this.frameBuffers.blurPing, gl.TEXTURE0 );
     
     var toneMapPassPing = new GPostEffectRenderPassCmd( this.gl, this.programs.toneMap, this.frameBuffers.phongLightPong, this.screen );
     toneMapPassPing.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );
     toneMapPassPing.addInputFrameBuffer( this.frameBuffers.phongLightPing, gl.TEXTURE1 );
     if ( 0 >= this.renderLevel )
     {
-        toneMapPassPing.addInputTexture( this.gl.whiteTexture, gl.TEXTURE2 );
+        toneMapPassPing.addInputTexture( this.gl.whiteTexture );
     }
     else
     {
@@ -395,7 +396,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     toneMapPassPong.addInputFrameBuffer( this.frameBuffers.phongLightPong, gl.TEXTURE1 );
     if ( 0 >= this.renderLevel )
     {
-        toneMapPassPong.addInputTexture( this.gl.whiteTexture, gl.TEXTURE2 );
+        toneMapPassPong.addInputTexture( this.gl.whiteTexture );
     }
     else
     {
@@ -479,7 +480,7 @@ GRenderDeferredStrategy.prototype.setRenderLevel = function ( newLevel )
     }
     
     return false;
-}
+};
 
 /**
  * Draw the scene and hud elements using this strategy
@@ -614,8 +615,8 @@ GRenderDeferredStrategy.prototype.setHRec = function( x, y, width, height )
 	// the values passed in are meant to be between 0 and 1
 	// currently there are no plans to add debug assertions
     mat3.identity(this.hMatrix);
-	mat3.translate(this.hMatrix, this.hMatrix, [x, y]);
-	mat3.scale(this.hMatrix,this.hMatrix, [width, height]);  
+	mat3.translate(this.hMatrix, this.hMatrix, new Float32Array([x, y]) );
+	mat3.scale(this.hMatrix,this.hMatrix, new Float32Array([width, height]) );
 };
 
 /**

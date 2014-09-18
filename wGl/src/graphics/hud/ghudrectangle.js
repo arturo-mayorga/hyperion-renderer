@@ -20,7 +20,7 @@
 
 /**
  * @constructor
- * @implements {HGHudWidget}
+ * @extends {GHudWidget}
  */
 function GHudRectangle() 
 {
@@ -36,7 +36,7 @@ GHudRectangle.prototype = Object.create( GHudWidget.prototype );
 
 /**
  * This creates a new texture and downloads the resource
- * @param {string} file name
+ * @param {string} name File name
  * @param {string} path
  */
 GHudRectangle.prototype.setTexture = function ( name, path )
@@ -54,7 +54,7 @@ GHudRectangle.prototype.setTexture = function ( name, path )
 /**
  * Set the color for this hud rectangle
  * @param {number} r Red component
- * @param {number] g Green component
+ * @param {number} g Green component
  * @param {number} b Blue component
  * @param {number} a Alpha component
  */
@@ -66,8 +66,8 @@ GHudRectangle.prototype.setColor = function(r, g, b, a)
 
 /**
  * Draw the rectangle
- * @param {Array.<number>} Array of numbers representing a 3 by 3 matrix
- * @param {GShader} Shader program to use for drawing this rectangle
+ * @param {Float32Array} mat Array of numbers representing a 3 by 3 matrix
+ * @param {GShader} shader Shader program to use for drawing this rectangle
  */
 GHudRectangle.prototype.draw = function( mat, shader ) 
 {

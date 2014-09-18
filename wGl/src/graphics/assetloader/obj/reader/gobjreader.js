@@ -113,6 +113,7 @@ GObjReader.prototype.update = function (time)
 	}
 	else
 	{
+        this.process_end_of_file();
 		//console.debug("Loaded " + this.polyCount + " polygons in " + Object.keys(this.groupMap).length + " objects.");
 		this.isLoadComplete = true;
 	}
@@ -279,3 +280,18 @@ GObjReader.prototype.process_invnv = function( lineA )
 {
 	this.invertNormals = true;
 };
+
+/**
+ * This function is called at the end of the file
+ * @param lineA
+ */
+GObjReader.prototype.process_end_of_file = function( lineA )
+{
+    if ( this.currentMesh != undefined )
+    {
+        this.groupMap[this.currentMesh.getName()] = this.currentMesh;
+        this.observer.onNewMeshAvailable(this.currentMesh);
+    }
+};
+
+

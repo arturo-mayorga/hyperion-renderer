@@ -47,12 +47,12 @@ function Cuboid( w, h, d, name )
     var qt = 1.0/4.0;
     var tverts = 
     [
-        1*qt,2*qt, 1*qt,1*qt, 2*qt,2*qt,  1*qt,1*qt, 2*qt,1*qt, 2*qt,2*qt, // front
-        1*qt,1*qt, 1*qt,0*qt, 2*qt,1*qt,  1*qt,0*qt, 2*qt,0*qt, 2*qt,1*qt, // top
-        1*qt,2*qt, 0*qt,1*qt, 1*qt,1*qt,  1*qt,2*qt, 0*qt,2*qt, 0*qt,1*qt, // left
-        2*qt,2*qt, 2*qt,1*qt, 3*qt,1*qt,  2*qt,2*qt, 3*qt,1*qt, 3*qt,2*qt, // right
-        1*qt,2*qt, 2*qt,2*qt, 2*qt,3*qt,  1*qt,2*qt, 2*qt,3*qt, 1*qt,3*qt, // bottom
-        4*qt,2*qt, 3*qt,2*qt, 4*qt,1*qt,  3*qt,2*qt, 4*qt,1*qt, 3*qt,1*qt, // back
+        qt,2*qt, qt,qt, 2*qt,2*qt,  qt,qt, 2*qt,qt, 2*qt,2*qt, // front
+        qt,qt, qt,0, 2*qt,qt,  qt,0, 2*qt,0, 2*qt,qt, // top
+        qt,2*qt, 0,qt, qt,qt,  qt,2*qt, 0,2*qt, 0,qt, // left
+        2*qt,2*qt, 2*qt,qt, 3*qt,qt,  2*qt,2*qt, 3*qt,qt, 3*qt,2*qt, // right
+        qt,2*qt, 2*qt,2*qt, 2*qt,3*qt,  qt,2*qt, 2*qt,3*qt, qt,3*qt, // bottom
+        4*qt,2*qt, 3*qt,2*qt, 4*qt,qt,  3*qt,2*qt, 4*qt,qt, 3*qt,qt, // back
     ];
     
     var normals =

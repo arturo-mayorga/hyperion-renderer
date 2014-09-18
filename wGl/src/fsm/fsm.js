@@ -25,7 +25,7 @@ function FsmSignalObserver() {}
 FsmSignalObserver.prototype.onFsmSignal = function(signal) {};
 
 /**
- * @interface
+ * @constructor
  */
 function FsmState() 
 {
@@ -35,7 +35,7 @@ function FsmState()
 FsmState.debugEnable = false;
 
 /**
- * @param {string}
+ * @param {string} str
  */
 FsmState.debug = function( str )
 {
@@ -119,15 +119,13 @@ FsmState.prototype.fireSignal = function (signal)
 
 /**
  * @constructor
- * @param {FsmState}
+ * @param {FsmState} state
  */
 function FsmStateTransitions(state)
 {
 	this.state = state;
 	this.transitions = {};
 }
-
-
 
 /**
  * Add the target for the given transition
@@ -137,16 +135,16 @@ function FsmStateTransitions(state)
 FsmStateTransitions.prototype.addSignalTarget = function(signalName, targetStateName)
 {
 	this.transitions[signalName] = targetStateName;
-}
+};
 
 /**
  * @constructor
+ * @extends {FsmState}
  * @implements {FsmSignalObserver}
- * @implements {FsmState}
- * @param {FsmState}
- * @param {function()}
- * @param {function( number )}
- * @param {function()}
+ * @param {FsmState} context
+ * @param {function()} enterFn
+ * @param {function( number )} updateFn
+ * @param {function()} exitFn
  */
  function FsmSubStateWrapper( context, enterFn, updateFn, exitFn )
  {
@@ -171,7 +169,7 @@ FsmSubStateWrapper.prototype.onFsmSignal = function( signal )
 
  /**
  * Update the state machine
- * @param {number} Number of milliseconds sine the last update
+ * @param {number} time Number of milliseconds sine the last update
  */
 FsmSubStateWrapper.prototype.update = function ( time ) 
 {
@@ -211,8 +209,8 @@ FsmSubStateWrapper.prototype.exit = function ()
  
 /**
  * @constructor
+ * @extends {FsmState}
  * @implements {FsmSignalObserver}
- * @implements {FsmState}
  */
 function FsmMachine()
 {
@@ -227,14 +225,13 @@ FsmMachine.prototype = Object.create( FsmState.prototype );
 
 /**
  * Add a named state
- * @param {string] name
- * @param {FsmMachine} state
+ * @param {string} name
+ * @param {FsmState} state
  */
 FsmMachine.prototype.addState = function ( name, state ) 
 {
 	state.setSignalObserver(this);
-	var transitions = new FsmStateTransitions(state);
-	this.nameStateMap[name] = transitions;
+	this.nameStateMap[name] = new FsmStateTransitions(state);
 	state.setName( this.name + "/" + name );
 };
 
@@ -253,9 +250,10 @@ FsmMachine.prototype.setName = function( name )
 };
 
 /**
- * @param {function()}
- * @param {function( number )}
- * @param {function()}
+ * @param {string} name
+ * @param {function()} enterFn
+ * @param {function( number )} updateFn
+ * @param {function()} exitFn
  */
 FsmMachine.prototype.createSubState = function ( name, enterFn, updateFn, exitFn )
 {
@@ -315,7 +313,7 @@ FsmMachine.prototype.setEnterState = function ( stateName )
 
 /**
  * Update the state machine
- * @param {number} Number of milliseconds sine the last update
+ * @param {number} time Number of milliseconds sine the last update
  */
 FsmMachine.prototype.update = function ( time ) 
 {
@@ -331,7 +329,7 @@ FsmMachine.prototype.update = function ( time )
 	    var sig = this.signalQueue.shift();
 		var possibleTransitionTarget = 
 			currentStateTransitions.transitions[sig];
-		if ( undefined != possibleTransitionTarget )
+		if ( undefined !== possibleTransitionTarget )
 		{
             FsmState.debug( this.name + "::" + sig + " [consume]" );
 		    
@@ -349,9 +347,9 @@ FsmMachine.prototype.update = function ( time )
 	//     Exit the current state
 	//     Enter the new state
 	//     update the current state name
-	if ( nextStateName != undefined )
+	if ( nextStateName !== undefined )
 	{
-		this.setState( nextStateName );
+		this.setState( nextStateName.toString() );
 	}
 };
 

@@ -78,9 +78,9 @@ Cylinder.prototype.updateBufferArrays = function()
          
     }
     
-    for ( var i = 0; i < this.sliceCount-1; ++i )
+    for ( var j = 0; j < this.sliceCount-1; ++j )
     {
-        this.addArraysBetweenSlices( sliceBuffers[i], sliceBuffers[i+1] );
+        this.addArraysBetweenSlices( sliceBuffers[j], sliceBuffers[j+1] );
     }
    
     this.addArraysBetweenSlices( sliceBuffers[this.sliceCount-1], sliceBuffers[0] );
@@ -142,8 +142,7 @@ Cylinder.prototype.addArraysBetweenSlices = function( bA, bB )
  */
 Cylinder.prototype.genSliceBuffer = function( loc )
 {  
-    var ret = 
-    [
+    return [
         Math.cos( loc )*this.radiusInner, 0.5*this.height, Math.sin( loc )*this.radiusInner, 0,1,0, loc/(2*Math.PI),0,
         Math.cos( loc )*this.radiusOuter, 0.5*this.height, Math.sin( loc )*this.radiusOuter, 0,1,0, loc/(2*Math.PI),0,
         Math.cos( loc )*this.radiusOuter, 0.5*this.height, Math.sin( loc )*this.radiusOuter, Math.cos( loc ),0,Math.sin( loc ), loc/(2*Math.PI),0,
@@ -151,9 +150,6 @@ Cylinder.prototype.genSliceBuffer = function( loc )
         Math.cos( loc )*this.radiusOuter,-0.5*this.height, Math.sin( loc )*this.radiusOuter, 0,-1,0, loc/(2*Math.PI),1,
         Math.cos( loc )*this.radiusInner,-0.5*this.height, Math.sin( loc )*this.radiusInner, 0,-1,0, loc/(2*Math.PI),1
     ];
-    
-    return ret;
-        
 };
 
 

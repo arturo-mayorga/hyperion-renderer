@@ -24,7 +24,7 @@ var PenAssembly = new function()
 
 /**
  * @return {FsmState}
- * @param {GContext}
+ * @param {GContext} contex
  */
 this.createState = function( context )
 {
@@ -32,11 +32,16 @@ this.createState = function( context )
     var hud = context.getHud();
 	var ret = new FsmMachine();
 	var oData = new PenLessonOperatingData( context );
+
+    /** @type {FsmMachine} */ var loadState = new LoadState( oData );
+    /** @type {FsmMachine} */ var exploreState = new ExploreState( oData );
+    /** @type {FsmMachine} */ var asmState = new AsmState( oData );
+    /** @type {FsmMachine} */ var cleanState = new CleanState( oData );
 	
-	ret.addState("Load", new LoadState( oData ));
-	ret.addState("Explore", new ExploreState( oData ));
-	ret.addState("Asm", new AsmState( oData ));
-	ret.addState("Clean", new CleanState( oData ));
+	ret.addState("Load", loadState );
+	ret.addState("Explore", exploreState);
+	ret.addState("Asm", asmState );
+	ret.addState("Clean", cleanState );
 	
 	ret.addTransition( "Load", "loadComplete", "Asm" );
 	//ret.addTransition( "Load", "loadComplete", "Explore" );
@@ -54,7 +59,7 @@ this.createState = function( context )
 
 /**
  * @constructor
- * @param {GContext}
+ * @param {GContext} context
  */
 function PenLessonOperatingData( context )
 {
@@ -63,7 +68,7 @@ function PenLessonOperatingData( context )
 }
  
 /**
- * @param {ArmatureAnimator}
+ * @param {ArmatureAnimator} animator
  */
 PenLessonOperatingData.prototype.setHAnimator = function ( animator )
 {
@@ -81,9 +86,7 @@ PenLessonOperatingData.prototype.getHAnimator = function ()
 /**
  * @constructor
  * @extends {FsmMachine}
- * @implements {GObjLoaderObserver}
- * @implements {ThreejsLoaderObserver}
- * @param {PenLessonOperatingData}
+ * @param {PenAssembly.PenLessonOperatingData} oData
  */
 function CleanState( oData )
 {
@@ -124,7 +127,7 @@ CleanState.prototype.exit = function ()
 
 /**
  * Update this state
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 CleanState.prototype.update = function ( time ) 
 {
@@ -136,7 +139,7 @@ CleanState.prototype.update = function ( time )
  * @extends {FsmMachine}
  * @implements {GObjLoaderObserver}
  * @implements {ThreejsLoaderObserver}
- * @param {PenLessonOperatingData}
+ * @param {PenAssembly.PenLessonOperatingData} oData
  */
 function LoadState( oData ) 
 {
@@ -168,17 +171,17 @@ LoadState.prototype.enter = function ()
 	this.humanoidGroup = new GGroup( "humanoidGroup" );
 	
 	var officeTransform = mat4.create();
-	mat4.scale(officeTransform, officeTransform, [4, 4, 4]);
+	mat4.scale(officeTransform, officeTransform, new Float32Array([4, 4, 4]));
 	this.officeGroup.setMvMatrix(officeTransform);
 	
 	this.penTransform = mat4.create();
-	mat4.translate(this.penTransform, this.penTransform, [1.5, 5.609, 11.5]);
+	mat4.translate(this.penTransform, this.penTransform, new Float32Array([1.5, 5.609, 11.5]));
 	this.penGroup.setMvMatrix(this.penTransform);
 	
 	var humanoidTransform = mat4.create();
-	mat4.scale(humanoidTransform, humanoidTransform, [4, 4, 4]);
-	mat4.rotate(humanoidTransform, humanoidTransform, -2, [0, 1, 0]);
-	mat4.translate(humanoidTransform, humanoidTransform, [30, 0, 25]);
+	mat4.scale(humanoidTransform, humanoidTransform, new Float32Array([4, 4, 4]));
+	mat4.rotate(humanoidTransform, humanoidTransform, -2, new Float32Array([0, 1, 0]));
+	mat4.translate(humanoidTransform, humanoidTransform, new Float32Array([30, 0, 25]));
 	this.humanoidGroup.setMvMatrix(humanoidTransform);
 	
 	this.scene.addChild(this.officeGroup);
@@ -267,7 +270,7 @@ LoadState.prototype.exit = function ()
 	for (var i = 0; i < len; ++i)
 	{    
 	    var penTransform = mat4.create();
-	    mat4.translate(penTransform, penTransform, [0, 0, i*0.1]);
+	    mat4.translate(penTransform, penTransform, new Float32Array([0, 0, i*0.1]));
 	    this.penGroup.children[i].setMvMatrix(penTransform);
 	}
 	
@@ -330,7 +333,7 @@ LoadState.prototype.update = function ( time )
  
  /**
   * This function gets called whenever the observed loader completes the loading process
-  * @param {GObjLoader} Loader object that just finished loading its assets
+  * @param {GObjLoader} loader Loader object that just finished loading its assets
   */
 LoadState.prototype.onObjLoaderCompleted = function ( loader ) 
 {
@@ -352,7 +355,7 @@ LoadState.prototype.onObjLoaderCompleted = function ( loader )
 
 /**
  * This function gets called whenever the observed loader makes progress
- * @param {GObjLoader} Loader object that is being observed
+ * @param {GObjLoader} loader Loader object that is being observed
  * @param {number} progress Progress value
  */
 LoadState.prototype.onObjLoaderProgress = function ( loader, progress ) 
@@ -363,7 +366,7 @@ LoadState.prototype.onObjLoaderProgress = function ( loader, progress )
 
 /**
   * This function gets called whenever the observed loader completes the loading process
-  * @param {ThreejsLoader} Loader object that just finished loading its assets
+  * @param {ThreejsLoader} loader Loader object that just finished loading its assets
   */
 LoadState.prototype.onThreejsLoaderCompleted = function ( loader ) 
 {
@@ -372,7 +375,7 @@ LoadState.prototype.onThreejsLoaderCompleted = function ( loader )
 
 /**
  * This function gets called whenever the observed loader makes progress
- * @param {ThreejsLoader} Loader object that is being observed
+ * @param {ThreejsLoader} loader Loader object that is being observed
  * @param {number} progress Progress value
  */
 LoadState.prototype.onThreejsLoaderProgress = function ( loader, progress ) 
@@ -382,7 +385,7 @@ LoadState.prototype.onThreejsLoaderProgress = function ( loader, progress )
 
 
 /**
- * @param {ArmatureAnimator} New armature animator connected to the loaded mesh
+ * @param {ArmatureAnimator} animator New armature animator connected to the loaded mesh
  */
 LoadState.prototype.onThreejsLoaderArmatureAnimatorLoaded = function ( animator ) 
 {
@@ -395,9 +398,9 @@ LoadState.prototype.onThreejsLoaderArmatureAnimatorLoaded = function ( animator 
 
 /**
  * @constructor
- * @implements {FsmState}
+ * @extends {FsmState}
  * @implements {IContextMouseObserver}
- * @param {PenLessonOperatingData}
+ * @param {PenAssembly.PenLessonOperatingData} oData
  */
 function ExploreState( oData ) 
 {
@@ -423,21 +426,20 @@ ExploreState.prototype.setSignalObserver = FsmState.prototype.setSignalObserver;
 ExploreState.prototype.fireSignal = FsmState.prototype.fireSignal;
 
 /**
- * @param {MouseEvent}
- * @param {number}
+ * @param {MouseEvent} ev
  */
-ExploreState.prototype.onMouseDown = function( ev, objid ) 
+ExploreState.prototype.onMouseDown = function( ev )
 {
     this.fireSignal("exitReq");
 };
 
 /**
- * @param {MouseEvent}
+ * @param {MouseEvent} ev
  */
 ExploreState.prototype.onMouseUp = function( ev ) {};
 
 /**
- * @param {MouseEvent}
+ * @param {MouseEvent} ev
  */
 ExploreState.prototype.onMouseMove = function( ev ) {};
 
@@ -471,7 +473,7 @@ ExploreState.prototype.exit = function ()
 
 /**
  * This is the update function for the explore state
- * @param {number} number of milliseconds since the last update
+ * @param {number} time number of milliseconds since the last update
  */
 ExploreState.prototype.update = function ( time ) 
 {
@@ -505,7 +507,7 @@ Vec3Animator.prototype.update = function( time )
 		this.lapseTime = this.targetLapseTime;
 	}
 	
-	var percent = this.lapseTime / this.targetLapseTime;;
+	var percent = this.lapseTime / this.targetLapseTime;
 	
 	if (percent >= 1)
 	{
@@ -517,7 +519,7 @@ Vec3Animator.prototype.update = function( time )
 	{
 		this.inVector[i] = this.startVec[i] + (this.target[i] - this.startVec[i])*percent;
 	}
-}
+};
 
 /**
  * Determines if the current animation has completed
@@ -526,13 +528,13 @@ Vec3Animator.prototype.update = function( time )
 Vec3Animator.prototype.getIsComplete = function()
 {
 	return this.isComplete;
-}
+};
 
 /**
  * @constructor
  * @extends {FsmMachine}
  * @implements {IContextMouseObserver}
- * @param {PenLessonOperatingData}
+ * @param {PenAssembly.PenLessonOperatingData} oData
  */
 function AsmState( oData ) 
 {
@@ -552,7 +554,7 @@ function AsmState( oData )
 AsmState.prototype = Object.create( FsmMachine.prototype );
 
 /**
- * @param {PointingEvent}
+ * @param {PointingEvent} ev
  */
 AsmState.prototype.onMouseDown = function( ev ) 
 {
@@ -560,17 +562,17 @@ AsmState.prototype.onMouseDown = function( ev )
 };
 
 /**
- * @param {PointingEvent}
+ * @param {PointingEvent} ev
  */
 AsmState.prototype.onMouseUp = function( ev ) {};
 
 /**
- * @param {PointingEvent}
+ * @param {PointingEvent} ev
  */
 AsmState.prototype.onMouseMove = function( ev ) {};
 
 /**
- * @param {number}
+ * @param {number} targetObj
  * @return {boolean}
  */
 AsmState.prototype.stepTransitionCheck = function( targetObj )
@@ -722,7 +724,7 @@ AsmState.prototype.moveCamExit = function()
 
 /**
  * Assembly sub state: move the camera in front of the desk
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 AsmState.prototype.moveCam = function (time)
 {	
@@ -766,7 +768,7 @@ AsmState.prototype.grabInkExit = function()
 };
 /**
  * Assembly sub state: pick up the ink container from the table
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 AsmState.prototype.grabInk = function (time)
 {
@@ -807,7 +809,7 @@ AsmState.prototype.grabSpringExit = function()
 
 /**
  * Assembly sub state: pick up the spring from the table
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 AsmState.prototype.grabSpring = function (time)
 {	
@@ -851,7 +853,7 @@ AsmState.prototype.installSpringExit = function ()
 
 /**
  * Assembly sub state: install the spring on the ink container
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 AsmState.prototype.installSpring = function (time)
 {
@@ -893,7 +895,7 @@ AsmState.prototype.grabAxleExit = function()
 
 /**
  * Assembly sub state: pick up the axle form the table and line up for installation
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 AsmState.prototype.grabAxle = function (time)
 {
@@ -936,7 +938,7 @@ AsmState.prototype.installAxleExit = function()
 
 /**
  * Assembly sub state: Install the axle to the current assembly
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 AsmState.prototype.installAxle = function (time)
 {
@@ -977,7 +979,7 @@ AsmState.prototype.grabHousingExit = function()
 
 /**
  * Assembly sub state: pick up the housin from the table and align it for installation
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 AsmState.prototype.grabHousing = function (time)
 {
@@ -1026,7 +1028,7 @@ AsmState.prototype.installHousingExit = function()
 
 /**
  * Assembly sub state: Install the housing to the current assembly
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 AsmState.prototype.installHousing = function (time)
 {	
@@ -1075,7 +1077,7 @@ AsmState.prototype.grabGripExit = function ()
 
 /**
  * Assembly sub state: pick up the grip from the table and line it up for installation
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 AsmState.prototype.grabGrip = function (time)
 {
@@ -1117,7 +1119,7 @@ AsmState.prototype.installGripExit = function()
 
 /**
  * Assembly sub state: Install the grip to the rest of the assembly
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 AsmState.prototype.installGrip = function (time)
 {	
@@ -1159,7 +1161,7 @@ AsmState.prototype.grabCylinderExit = function()
 
 /**
  * Assembly sub state: Pick up the cylinder from the table and align for installation
- * @param {number} Number of milliseconds since the last update.
+ * @param {number} time Number of milliseconds since the last update.
  */
 AsmState.prototype.grabCylinder = function (time)
 {
@@ -1202,7 +1204,7 @@ AsmState.prototype.installCylinderExit = function()
 
 /**
  * Assembly sub state: Install the cylinder to the assembly
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 AsmState.prototype.installCylinder = function (time)
 {
@@ -1243,7 +1245,7 @@ AsmState.prototype.grabClipExit = function()
 
 /** 
  * Assembly sub state: Pick up the clip from the table
- * @param {number} Number of milliseconds since the last update.
+ * @param {number} time Number of milliseconds since the last update.
  */
 AsmState.prototype.grabClip = function (time)
 {
@@ -1286,7 +1288,7 @@ AsmState.prototype.installClipExit = function()
 
 /**
  * Assembly sub state: Install the clip to the assembly
- * @param {number} Number of milliseconds since the last update.
+ * @param {number} time Number of milliseconds since the last update.
  */
 AsmState.prototype.installClip = function (time)
 {
@@ -1340,7 +1342,7 @@ AsmState.prototype.grabGumExit = function()
 
 /**
  * Assembly sub state: Pick up the gum from the table and align it for isntallation.
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 AsmState.prototype.grabGum = function (time)
 {
@@ -1383,7 +1385,7 @@ AsmState.prototype.installGumExit = function()
 
 /**
  * Assembly sub state: Install the gum to the assembly
- * @param {number} Number of milliseconds since the last update.
+ * @param {number} time Number of milliseconds since the last update.
  */
 AsmState.prototype.installGum = function (time)
 {
@@ -1426,7 +1428,7 @@ AsmState.prototype.testOutExit = function()
 
 /**
  * Assembly sub state: Animate testing of the pen (going out)
- * @param {number} Number of milliseconds since the last update.
+ * @param {number} time Number of milliseconds since the last update.
  */
 AsmState.prototype.testOut = function (time)
 {
@@ -1464,7 +1466,7 @@ AsmState.prototype.holdBeforeTestInExit = function()
 
 /**
  * Assembly sub state: hold the assembly in position.
- * @param {number} Number of milliseconds since the last update.
+ * @param {number} time Number of milliseconds since the last update.
  */
 AsmState.prototype.holdBeforeTestIn = function (time)
 {
@@ -1503,7 +1505,7 @@ AsmState.prototype.testInExit = function()
 
 /**
  * Assembly sub state: Animate testing of the pen (going in)
- * @param {number} Number of milliseconds since the last update.
+ * @param {number} time Number of milliseconds since the last update.
  */
 AsmState.prototype.testIn = function (time)
 {
@@ -1541,7 +1543,7 @@ AsmState.prototype.idleExit = function()
 
 /**
  * Assembly sub state: hold the assembly in position.
- * @param {number} Number of milliseconds since the last update.
+ * @param {number} time Number of milliseconds since the last update.
  */
 AsmState.prototype.idle = function (time)
 {
@@ -1582,7 +1584,7 @@ AsmState.prototype.placeOnTableExit = function()
 /**
  * Assembly sub state: Place the assembly on the table and move the camera away from the desk
  * in preparation for exiting the assembly state
- * @param {number} Number of milliseconds since the last update.
+ * @param {number} time Number of milliseconds since the last update.
  */
 AsmState.prototype.placeOnTable = function (time)
 {
@@ -1644,7 +1646,7 @@ AsmState.prototype.doneExit = function() {};
 
 /**
  * Assembly sub state: Fire the signal to leave the assembly state
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 AsmState.prototype.done = function (time)
 {

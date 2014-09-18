@@ -20,12 +20,12 @@
 
 /**
  * @constructor
- * @implements {SceneDrawable}
- * @param {Array.<number>} Buffer containing the vertices for this object
- * @param {Array.<number>} Buffer containing the texture vertices for this object
- * @param {Array.<number>} Buffer containing the normals for this object
- * @param {Array.<number>} Buffer containing the indices for this object
- * @param {string} Name for this object
+ * @extends {SceneDrawable}
+ * @param {Array.<number>} verts Buffer containing the vertices for this object
+ * @param {Array.<number>} tverts Buffer containing the texture vertices for this object
+ * @param {Array.<number>} normals Buffer containing the normals for this object
+ * @param {Array.<number>} indices Buffer containing the indices for this object
+ * @param {string} name Name for this object
  */
 function Mesh( verts, tverts, normals, indices, name )
 {
@@ -54,7 +54,7 @@ Mesh.prototype = Object.create( SceneDrawable.prototype );
 
 /**
  * Get the name of this object
- * @param {string} The name of this object
+ * @return {string} The name of this object
  */
 Mesh.prototype.getName = function()
 {
@@ -63,7 +63,7 @@ Mesh.prototype.getName = function()
 
 /**
  * Set the material name for this object to use
- * @param {string} name of the material that should be used by this object
+ * @param {string} mName name of the material that should be used by this object
  */
 Mesh.prototype.setMtlName = function( mName )
 {
@@ -73,7 +73,7 @@ Mesh.prototype.setMtlName = function( mName )
 
 /**
  * Set the model view matrix for this object
- * @param {Array.<number>} Array of numbers representing the 4 by 4 model view matrix
+ * @param {Float32Array} mat Array of numbers representing the 4 by 4 model view matrix
  */
 Mesh.prototype.setMvMatrix = function( mat )
 {
@@ -82,7 +82,7 @@ Mesh.prototype.setMvMatrix = function( mat )
    
 /**
  * Called to bind this object to a gl context
- * @param {WebGLRenderingContext} Context to bind to this object
+ * @param {WebGLRenderingContext} gl_ Context to bind to this object
  */
 Mesh.prototype.bindToContext = function(gl_)
 {
@@ -121,7 +121,7 @@ Mesh.prototype.bindToContext = function(gl_)
         this.indexBuffer.numItems != this.vertBuffer.numItems)
     {
         console.debug("Mesh: index missmatch [" + this.name + "]");
-        _valid = false;
+        this._valid = false;
     }
 };
 
@@ -139,10 +139,10 @@ Mesh.prototype.deleteResources = function ()
 
 /**
  * Draw this object
- * @param {Array.<number>} List of numbers representing the parent 4 by 4 view matrix
- * @param {Array.<GMaterial>} List of materials to use for rendering
- * @param {GShader} Shader program to use for rendering
- * @param {number} Draw mode for drawing the VBOs
+ * @param {Float32Array} parentMvMat List of numbers representing the parent 4 by 4 view matrix
+ * @param {Array.<GMaterial>} materials List of materials to use for rendering
+ * @param {GShader} shader Shader program to use for rendering
+ * @param {number} drawMode Draw mode for drawing the VBOs
  */
 Mesh.prototype.draw = function( parentMvMat, materials, shader, drawMode )
 {

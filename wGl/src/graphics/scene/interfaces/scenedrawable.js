@@ -95,7 +95,7 @@ SceneDrawable.prototype.requestDeferredDraw = function( command, conditionCode )
     }
     
     return false;
-}
+};
 
 /**
  * Get the name of this Drawable

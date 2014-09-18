@@ -210,6 +210,8 @@ GObjReader.prototype.process_face = function( lineA )
         this.startNewGroup( "process_face" );
     }
 
+    var tempNorm = [];
+
 	++this.polyCount;
 	for (var i = 1; i <= 3; ++i)
 	{
@@ -234,10 +236,32 @@ GObjReader.prototype.process_face = function( lineA )
 		}
 		
 		this.currentMesh.gVerts.push(vert);
-		this.currentMesh.nVerts.push(norm);
+        if ( undefined !== norm )
+        {   // deffer saving the normal in case we have to calculate our own
+            tempNorm.push(norm);
+        }
 		this.currentMesh.tVerts.push(vtex);
 		this.currentMesh.indices.push(this.currentIndex++);
 	}
+
+    if ( tempNorm.length !== 3 )
+    {
+        // we have to calculate our own normals
+        tempNorm = [];
+        var vLen = this.currentMesh.gVerts.length;
+        var a = vec3.create();
+        var b = vec3.create();
+        var c = vec3.create();
+        vec3.subtract( a, this.currentMesh.gVerts[vLen-2], this.currentMesh.gVerts[vLen-3] );
+        vec3.subtract( b, this.currentMesh.gVerts[vLen-1], this.currentMesh.gVerts[vLen-3] );
+        vec3.cross( c, a, b );
+
+        tempNorm.push(c); tempNorm.push(c); tempNorm.push(c);
+    }
+
+    this.currentMesh.nVerts.push(tempNorm[0]);
+    this.currentMesh.nVerts.push(tempNorm[1]);
+    this.currentMesh.nVerts.push(tempNorm[2]);
 };
 
 /**

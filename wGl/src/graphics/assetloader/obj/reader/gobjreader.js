@@ -90,8 +90,6 @@ function GObjReader( path, objStrA, scene, group, observer )
  */
 GObjReader.prototype.update = function (time)
 {
-   
-	
 	if ( this.updateIndex < this.objStrA.length )
 	{
 		var stra = this.scrub(this.objStrA[this.updateIndex ].split(" "));
@@ -151,32 +149,16 @@ GObjReader.prototype.process_comment = function( lineA ) {};
  */
 GObjReader.prototype.process_group = function( lineA )
 {
-	this.invertNormals = false;
+    this.finalizeCurrentMesh();
+
+    var name = lineA[1];
+
+    for (var i = 2; i < lineA.length; ++i)
+    {
+        name += " " + lineA[i];
+    }
 	
-	if ( this.currentMesh != undefined )
-	{
-		this.groupMap[this.currentMesh.getName()] = this.currentMesh;
-		this.observer.onNewMeshAvailable(this.currentMesh);
-	}
-	
-	this.currentVertIMap = {};
-	this.currentTextIMap = {};
-	
-	var name = lineA[1];
-	
-	
-	for (var i = 2; i < lineA.length; ++i)
-	{
-		name += " " + lineA[i];
-	}
-	
-	while (this.groupMap[name] != undefined)
-	{
-		name += "_";
-	}
-	
-	this.currentMesh = new GeometryTriMesh(name);
-	this.currentIndex = 0;	
+	this.startNewGroup( name );
 	
 	//console.debug("adding group: " + name);
 };
@@ -223,6 +205,11 @@ GObjReader.prototype.process_normal = function( lineA )
  */
 GObjReader.prototype.process_face = function( lineA )
 {
+    if ( this.currentMesh == undefined )
+    {
+        this.startNewGroup( "process_face" );
+    }
+
 	++this.polyCount;
 	for (var i = 1; i <= 3; ++i)
 	{
@@ -269,6 +256,13 @@ GObjReader.prototype.process_mtllib = function( lineA )
  */
 GObjReader.prototype.process_usemtl = function( lineA )
 {
+    if ( this.currentMesh == undefined ||
+         this.currentMesh.gVerts.length !== 0 )
+    {
+        this.finalizeCurrentMesh();
+        this.startNewGroup( lineA[1] );
+    }
+
 	this.currentMesh.setMtlName( lineA[1] );
 };
 
@@ -287,6 +281,17 @@ GObjReader.prototype.process_invnv = function( lineA )
  */
 GObjReader.prototype.process_end_of_file = function( lineA )
 {
+    this.finalizeCurrentMesh();
+};
+
+/**
+ * Finish the current mesh, save it on the hash and notify the observer.
+ * This is a helper function for reading obj files
+ */
+GObjReader.prototype.finalizeCurrentMesh = function()
+{
+    this.invertNormals = false;
+
     if ( this.currentMesh != undefined )
     {
         this.groupMap[this.currentMesh.getName()] = this.currentMesh;
@@ -294,4 +299,21 @@ GObjReader.prototype.process_end_of_file = function( lineA )
     }
 };
 
+/**
+ * Helper function to start a new geometry group
+ * @param name
+ */
+GObjReader.prototype.startNewGroup = function( name )
+{
+    this.currentVertIMap = {};
+    this.currentTextIMap = {};
+
+    while (this.groupMap[name] != undefined)
+    {
+        name += "_";
+    }
+
+    this.currentMesh = new GeometryTriMesh(name);
+    this.currentIndex = 0;
+};
 

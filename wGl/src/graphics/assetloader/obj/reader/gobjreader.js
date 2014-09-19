@@ -77,6 +77,7 @@ function GObjReader( path, objStrA, scene, group, observer )
 		"v"      :this.process_vert,
 		"vt"     :this.process_texVert,
 		"vn"     :this.process_normal,
+        "s"      :this.process_smooth,
 		"f"      :this.process_face,
 		"mtllib" :this.process_mtllib,
 		"usemtl" :this.process_usemtl,
@@ -199,6 +200,22 @@ GObjReader.prototype.process_normal = function( lineA )
 	this.objNormals.push(vec);
 };
 
+GObjReader.prototype.process_smooth = function( lineA )
+{
+    var smoothVal = false;
+
+    if ( "on" === lineA[1] ||
+         "1" === lineA[1] )
+    {
+        smoothVal = true;
+    }
+
+    if ( undefined !== this.currentMesh )
+    {
+        this.currentMesh.setSmoothing( smoothVal );
+    }
+};
+
 /**
  * This function is called while processing a face line (starting with 'f')
  * @param {Array.<string>} lineA
@@ -255,6 +272,7 @@ GObjReader.prototype.process_face = function( lineA )
         vec3.subtract( a, this.currentMesh.gVerts[vLen-2], this.currentMesh.gVerts[vLen-3] );
         vec3.subtract( b, this.currentMesh.gVerts[vLen-1], this.currentMesh.gVerts[vLen-3] );
         vec3.cross( c, a, b );
+        vec3.normalize( c, c );
 
         tempNorm.push(c); tempNorm.push(c); tempNorm.push(c);
     }
@@ -318,6 +336,7 @@ GObjReader.prototype.finalizeCurrentMesh = function()
 
     if ( this.currentMesh != undefined )
     {
+        this.currentMesh.prepareToClose();
         this.groupMap[this.currentMesh.getName()] = this.currentMesh;
         this.observer.onNewMeshAvailable(this.currentMesh);
     }

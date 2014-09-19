@@ -179,7 +179,7 @@ GeometryTriMesh.prototype.smoothenNormals = function()
     var visitedVerts = [];
     var i = 0;
     var j = 0;
-    
+
     var vertCount = this.nVerts.length;
 
     for ( i = 0; i < vertCount; ++i )

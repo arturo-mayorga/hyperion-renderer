@@ -418,8 +418,10 @@ GContext.prototype.requestFullScreen = function()
  */
 GContext.prototype.isFullScreen = function ()
 {
-    var fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
-    var fullscreenEnabled = document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled;
+    // these need to be string-indexed to make sure that the closure compiler doesn't try to optimize them into
+    // shorter variable names
+    var fullscreenElement = document["fullscreenElement"] || document["mozFullScreenElement"] || document["webkitFullscreenElement"];
+    var fullscreenEnabled = document["fullscreenEnabled"] || document["mozFullScreenEnabled"] || document["webkitFullscreenEnabled"];
 
     return fullscreenEnabled && null !== fullscreenElement;
 };

@@ -38,12 +38,15 @@ function GCamera()
 	
 	this.aspect = 1.7777777777777777;
 	this.fovy = 0.8*(3.14159/4);
+
+    this.inverseProjectionReady = false;
+    this.inverseProjectionMatrix = mat4.create();
 }
 	
 /**
  * Draw the current camera and populate the view matrix
- * @param {Array.<number>} Out parameter containing the view matrix
- * @param {GShader} Shader to use for drawing this camera
+ * @param {Float32Array} ouMvMatrix Out parameter containing the view matrix
+ * @param {GShader} shader Shader to use for drawing this camera
  */
 GCamera.prototype.draw = function( ouMvMatrix, shader )
 {
@@ -57,7 +60,7 @@ GCamera.prototype.draw = function( ouMvMatrix, shader )
 
 /**
  * Get the view matrix calculated by this camera
- * @param {Array.<number>} Numbers representing the 4 by 4 view matrix
+ * @param {Float32Array} outMvMatrix Numbers representing the 4 by 4 view matrix
  */
 GCamera.prototype.getMvMatrix = function( outMvMatrix )
 {
@@ -66,7 +69,7 @@ GCamera.prototype.getMvMatrix = function( outMvMatrix )
 
 /**
  * Get the projection matrix calculated by this camera
- * @param {Array.<number>} Numbers representing the 4 by 4 projection matrix
+ * @param {Float32Array} outPMatrix Numbers representing the 4 by 4 projection matrix
  */
 GCamera.prototype.getPMatrix = function ( outPMatrix )
 {
@@ -75,16 +78,16 @@ GCamera.prototype.getPMatrix = function ( outPMatrix )
 
 /**
  * Called to bind this camera to a gl context
- * @param {WebGLRenderingContext} Context to bind to this camera
+ * @param {WebGLRenderingContext} gl Context to bind to this camera
  */
-GCamera.prototype.bindToContext = function(gl_)
+GCamera.prototype.bindToContext = function(gl)
 {
-    this.gl = gl_;
+    this.gl = gl;
 };
 
 /**
  * Set the field of view on the y-axis
- * @param {number} Field of view
+ * @param {number} fovy Field of view along the y axis
  */
 GCamera.prototype.setFovy = function( fovy )
 {
@@ -93,7 +96,7 @@ GCamera.prototype.setFovy = function( fovy )
 
 /**
  * Set the aspect ration for this camera
- * @param {number} Aspect ratio
+ * @param {number} aspect Aspect ratio
  */
 GCamera.prototype.setAspect = function( aspect )
 {
@@ -102,9 +105,9 @@ GCamera.prototype.setAspect = function( aspect )
 
 /**
  * Set the eye value for this camera
- * @param {number} X component of the eye value for this camera.
- * @param {number} Y component of the eye value for this camera.
- * @param {number} Z component of the eye value for this camera.
+ * @param {number} x X component of the eye value for this camera.
+ * @param {number} y Y component of the eye value for this camera.
+ * @param {number} z Z component of the eye value for this camera.
  */
 GCamera.prototype.setEye = function ( x, y, z )
 {
@@ -113,7 +116,7 @@ GCamera.prototype.setEye = function ( x, y, z )
 
 /**
  * Get the up vector for this camera
- * @param {Arra.<number>} This array will be populated with the up value
+ * @param {Float32Array} outA This array will be populated with the up value
  */
 GCamera.prototype.getEye = function ( outA )
 {
@@ -124,9 +127,9 @@ GCamera.prototype.getEye = function ( outA )
 
 /**
  * Set the up value for this camera
- * @param {number} X component of the up value for this camera.
- * @param {number} Y component of the up value for this camera.
- * @param {number} Z component of the up value for this camera.
+ * @param {number} x X component of the up value for this camera.
+ * @param {number} y Y component of the up value for this camera.
+ * @param {number} z Z component of the up value for this camera.
  */
 GCamera.prototype.setUp = function ( x, y, z )
 {
@@ -135,7 +138,7 @@ GCamera.prototype.setUp = function ( x, y, z )
 
 /**
  * Get the up vector for this camera
- * @param {Arra.<number>} This array will be populated with the up value
+ * @param {Float32Array} outA This array will be populated with the up value
  */
 GCamera.prototype.getUp = function ( outA )
 {
@@ -146,9 +149,9 @@ GCamera.prototype.getUp = function ( outA )
 
 /**
  * Set the look at value for this camera.
- * @param {number} X component of the look at value for this camera.
- * @param {number} Y component of the look at value for this camera.
- * @param {number} Z component of the look at value for this camera.
+ * @param {number} x X component of the look at value for this camera.
+ * @param {number} y Y component of the look at value for this camera.
+ * @param {number} z Z component of the look at value for this camera.
  */
 GCamera.prototype.setLookAt = function ( x, y, z )
 {
@@ -157,7 +160,7 @@ GCamera.prototype.setLookAt = function ( x, y, z )
 
 /**
  * Get the look at vector for this camera
- * @param {Arra.<number>} This array will be populated with the look at value
+ * @param {Float32Array} outA This array will be populated with the look at value
  */
 GCamera.prototype.getLookAt = function ( outA )
 {
@@ -170,7 +173,27 @@ GCamera.prototype.getLookAt = function ( outA )
  * Calculate the matrices for the current update cycle
  */
 GCamera.prototype.updateMatrices = function()
-{ 
+{
+    this.inverseProjectionReady = false;
     mat4.lookAt(this.mvMatrix, this.eye, this.lookAt, this.up);
     mat4.perspective(this.pMatrix, this.fovy, this.aspect, 0.1, 100.0);
 };
+
+/**
+ * Transform the incoming vector from 3d screen space to world space coordinates
+ * @param {Float32Array} vector 4D vector to invert
+ */
+GCamera.prototype.inverseProject = function( vector )
+{
+    if ( false === this.inverseProjectionReady )
+    {
+        mat4.copy( this.inverseProjectionMatrix, this.mvMatrix );
+        mat4.multiply( this.inverseProjectionMatrix, this.pMatrix, this.inverseProjectionMatrix);//, this.pMatrix );
+        mat4.invert( this.inverseProjectionMatrix, this.inverseProjectionMatrix );
+
+        this.inverseProjectionReady = true;
+    }
+
+    vec4.transformMat4( vector, vector, this.inverseProjectionMatrix );
+};
+

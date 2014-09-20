@@ -1,6 +1,7 @@
 module.exports = function(grunt) {
     
     var srcList = [
+                    'src/fsm/*.js',
                     'src/graphics/renderstrategy/interfaces/*.js',
                     'src/graphics/renderstrategy/strategies/*.js',
                     'src/graphics/renderstrategy/*.js',
@@ -26,7 +27,6 @@ module.exports = function(grunt) {
                     'src/graphics/input/*.js',
                     'src/graphics/hud/*.js',
                     'src/graphics/*.js',
-                    'src/fsm/*.js',
                     'src/app/*.js',
                     'src/*.js'
                 ];

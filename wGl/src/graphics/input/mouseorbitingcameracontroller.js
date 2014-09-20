@@ -134,8 +134,8 @@ MouseOrbitingCameraController.prototype.update = function( time )
     
     var mvMatrix = mat4.create();
     mat4.identity( mvMatrix );
-    
-    mat4.translate(mvMatrix, mvMatrix, new Float32Array([this.eyeLookAt[0]*-1, this.eyeLookAt[1]*-1, this.eyeLookAt[2]*-1]) );
+
+    vec3.subtract( this.eyePos, this.eyePosStart, this.eyeLookAt );
     
     // allways rotate around the y axis
     mat4.rotate( mvMatrix, mvMatrix, this.viewPortDrag[0]*Math.PI, this.verticalAxis );
@@ -143,9 +143,9 @@ MouseOrbitingCameraController.prototype.update = function( time )
     // find the horizontal axis
     mat4.rotate( mvMatrix, mvMatrix, this.viewPortDrag[1]*Math.PI, this.horizontalAxis );
     
-    mat4.translate(mvMatrix, mvMatrix, this.eyeLookAt);
-    
-    vec3.transformMat4(this.eyePos, this.eyePosStart, mvMatrix);
+    vec3.transformMat4(this.eyePos, this.eyePos, mvMatrix);
+
+    vec3.add( this.eyePos, this.eyePos, this.eyeLookAt );
     
     this.setValuesToCam();
 };

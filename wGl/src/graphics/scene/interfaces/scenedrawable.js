@@ -55,9 +55,11 @@ function SceneDrawable()
     this.observer = undefined;
     var objid_ = SceneDrawable.instanceCounter;
     this.objid_ = objid_;
-    this.objid = [ (0x000000ff & (objid_>>16))/255, 
-                   (0x000000ff & (objid_>>8))/255, 
-                   (0x000000ff & objid_)/255, 1];
+
+    // the first two bytes are used for the instance number
+    // the second two bytes are for the z value in screen space
+    this.objid = [ (0x000000ff & (objid_>>8))/255,
+                   (0x000000ff & objid_)/255, 1, 1];
     SceneDrawable.instanceCounter += 1;
 }
 

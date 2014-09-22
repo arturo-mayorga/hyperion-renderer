@@ -20,8 +20,8 @@
 
 /**
  * @constructor
- * @implements {SceneDrawable}
- * @param {string} Name for this group
+ * @extends {SceneDrawable}
+ * @param {string} name Name for this group
  */
 function GGroup( name )
 {

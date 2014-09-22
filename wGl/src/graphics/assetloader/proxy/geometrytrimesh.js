@@ -26,6 +26,7 @@ function GeometryTriMesh(name)
 {
 	this.name = name;
 	this.matName = "";
+    this.smooth = false;
 	
 	this.gVerts = [];
 	this.nVerts = [];
@@ -50,6 +51,15 @@ GeometryTriMesh.prototype.merge = function( mesh )
 	{
 		this.indices.push( i + prevIdxLen );
 	}
+};
+
+/**
+ * Enable/disable normal smoothing
+ * @param {boolean} useSmooth
+ */
+GeometryTriMesh.prototype.setSmoothing = function ( useSmooth )
+{
+    this.smooth = true === useSmooth;
 };
 	
 /**
@@ -145,3 +155,69 @@ GeometryTriMesh.prototype.getNormBuffer = function()
 	
 	return ret;
 };
+
+/**
+ * To be called by the reader at the end of the loading process and do any
+ * las minute calculations right before notifying observers
+ */
+GeometryTriMesh.prototype.prepareToClose = function()
+{
+    if ( true === this.smooth )
+    {
+        this.smoothenNormals();
+    }
+};
+
+/**
+ * Goes thorugh every vertex and applyies a shared average for all normals sharing
+ * the possitoin
+ */
+GeometryTriMesh.prototype.smoothenNormals = function()
+{
+    var sigma = .000005;
+    var hyp = 2;
+    var visitedVerts = [];
+    var i = 0;
+    var j = 0;
+
+    var vertCount = this.nVerts.length;
+
+    for ( i = 0; i < vertCount; ++i )
+    {
+        visitedVerts[i] = false;
+    }
+
+    for ( i = 0; i < vertCount; ++i )
+    {
+        if ( false === visitedVerts[i] )
+        {
+            var vertsToVisit = [];
+            for ( j = 0; j < vertCount; ++j )
+            {
+                if ( false == visitedVerts[j] &&
+                     vec3.sqrDist(this.gVerts[i], this.gVerts[j]) < sigma &&
+                     vec3.sqrDist(this.nVerts[i], this.nVerts[j]) < hyp )
+                {
+                    vertsToVisit.push(j);
+                    visitedVerts[j] = true;
+                }
+            }
+
+            var visitCount = vertsToVisit.length;
+            var avgNorm = vec3.create();
+            for ( j = 0; j < visitCount; ++j )
+            {
+                vec3.add( avgNorm, avgNorm, this.nVerts[ vertsToVisit[j] ] );
+            }
+
+            vec3.normalize( avgNorm, avgNorm );
+
+            for ( j = 0; j < visitCount; ++j )
+            {
+                this.nVerts[ vertsToVisit[j] ] = avgNorm;
+            }
+        }
+    }
+};
+
+

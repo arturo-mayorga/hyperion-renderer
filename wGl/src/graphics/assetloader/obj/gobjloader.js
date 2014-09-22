@@ -65,7 +65,7 @@ function GObjLoader( scene, group )
  */
 GObjLoader.prototype.enableAutoMergeByMaterial = function()
 {
-    this.autoMergeByMaterial = true;;
+    this.autoMergeByMaterial = true;
 };
 
 /**

@@ -33,8 +33,7 @@ var _appArgs = function ()
       query_string[pair[0]] = pair[1];
     	// If second entry with this name
     } else if (typeof query_string[pair[0]] === "string") {
-      var arr = [ query_string[pair[0]], pair[1] ];
-      query_string[pair[0]] = arr;
+      query_string[pair[0]] = [ query_string[pair[0]], pair[1] ];
     	// If third or later entry with this name
     } else {
       query_string[pair[0]].push(pair[1]);
@@ -109,8 +108,7 @@ function createPenApp()
 {
     var profileState = createProfiler(context);
     var penState = PenAssembly.createState(context);
-    
-	
+
     lesson = new FsmMachine();
     lesson.addState("Pen", penState);
     lesson.addState("Profile", profileState);
@@ -123,20 +121,33 @@ function createOrbitingViewerApp()
 {
     var profileState = createProfiler(context);
     var orbitingViewerState = OrbitingViewer.createState(context, _appArgs["h"]);
-    
-	
+
     lesson = new FsmMachine();
     lesson.addState("OrbitingViewer", orbitingViewerState);
     lesson.addState("Profile", profileState);
     lesson.addTransition("Profile", "cleanComplete", "OrbitingViewer");
     lesson.addTransition("OrbitingViewer", "cleanComplete", "OrbitingViewer");
     lesson.setState("Profile");
-};
+}
+
+function creteFirstPersonViewerApp()
+{
+    var profileState = createProfiler(context);
+    var firstPersonViewerState = FirstPersonViewer.createState(context, _appArgs["h"]);
+
+    lesson = new FsmMachine();
+    lesson.addState("FirstPersonViewer", firstPersonViewerState);
+    lesson.addState("Profile", profileState);
+    lesson.addTransition("Profile", "cleanComplete", "FirstPersonViewer");
+    lesson.addTransition("FirstPersonViewer", "cleanComplete", "FirstPersonViewer");
+    lesson.setState("Profile");
+}
 
 var _appCreator = 
 {
     "pen":createPenApp,
-    "orbiting":createOrbitingViewerApp
+    "orbiting":createOrbitingViewerApp,
+    "firstperson":creteFirstPersonViewerApp
 };    
 
 function createAppFSM()
@@ -155,14 +166,8 @@ function mainLoop()
 	scene   = new GScene();
 	camera  = new GCamera();
 	hud     = new GHudController();
-	
-	
+    
 	scene.setCamera(camera);
-	
-	camera.setLookAt(4.232629776000977*4, 2.6432266235351562*4, 0.2486426830291748*4);
-	camera.setUp(-0.09341227263212204, 0.9805285334587097, 0.17273758351802826);
-	camera.setEye(9.44430160522461*4, 4.382470607757568*4, -3.9111077785491943*4);
-	
 	context.setScene(scene);
 	context.setHud(hud);
 	

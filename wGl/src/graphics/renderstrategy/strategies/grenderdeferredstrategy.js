@@ -20,17 +20,19 @@
 
 /** 
  * @constructor
- * @implements {GRenderStrategy}
+ * @extends {GRenderStrategy}
+ * @param {WebGLRenderingContext} gl
  */
 function GRenderDeferredStrategy( gl )
 {
-    this.gl = gl;
+    /** @type {WebGLRenderingContext} */ this.gl = gl;
     this.configure();
     
     this.extensions = {};
     this.extensions.stdDeriv = gl.getExtension('OES_standard_derivatives');
     
     this.renderLevel = 0;
+    this.lastScene = undefined;
 }
 
 GRenderDeferredStrategy.prototype = Object.create( GRenderStrategy.prototype );
@@ -94,9 +96,11 @@ GRenderDeferredStrategy.prototype.deleteResources = function()
         this.programs[key].destroy();
         this.programs[key] = undefined;
     }
+
+    this.lastScene = undefined;
     
     this.deleteScreenVBOs();
-}
+};
 
 /**
  * Free and reload all the resource for this strategy
@@ -109,7 +113,7 @@ GRenderDeferredStrategy.prototype.reload = function()
 
 /**
  * Start the download process for the requested shader
- * @param {string} source name of the shader that needs to be loaded
+ * @param {string} srcName source name of the shader that needs to be loaded
  */
 GRenderDeferredStrategy.prototype.loadShader = function( srcName )
 {
@@ -127,7 +131,7 @@ GRenderDeferredStrategy.prototype.loadShader = function( srcName )
             _this.shaderSrcMap[srcName] = devS + client.responseText; 
             _this.checkShaderDependencies();
         }
-    }
+    };
     client.send();
 };
 
@@ -269,7 +273,7 @@ GRenderDeferredStrategy.prototype.initShaders = function ()
 
 /**
  * Draw the screen buffer using the provided shader
- * @param {GShader} Shader to use for drawing the screen buffer
+ * @param {GShader} shader Shader to use for drawing the screen buffer
  */
 GRenderDeferredStrategy.prototype.drawScreenBuffer = function( shader )
 {
@@ -368,7 +372,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     
     var saoPass = new GPostEffectRenderPassCmd( this.gl, this.programs.ssao, this.frameBuffers.ssao, this.screen );
     saoPass.addInputFrameBuffer( this.frameBuffers.position, gl.TEXTURE0 );
-    saoPass.addInputTexture( this.gl.randomTexture, gl.TEXTURE1 );
+    saoPass.addInputTexture( this.gl.randomTexture );
     
     var saoBlurPing = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.blurPing, this.screen );
     saoBlurPing.setHRec( 0, 0, 1, 1, 3.14159/2 );
@@ -376,14 +380,14 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
    
     var saoBlurPong = new GPostEffectRenderPassCmd( this.gl, this.programs.blur, this.frameBuffers.ssao, this.screen );
     saoBlurPong.setHRec( 0, 0, 1, 1, -3.14159/2 );
-    saoBlurPong.addInputFrameBuffer( this.frameBuffers.blurPing, gl.TEXTURE0 )
+    saoBlurPong.addInputFrameBuffer( this.frameBuffers.blurPing, gl.TEXTURE0 );
     
     var toneMapPassPing = new GPostEffectRenderPassCmd( this.gl, this.programs.toneMap, this.frameBuffers.phongLightPong, this.screen );
     toneMapPassPing.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );
     toneMapPassPing.addInputFrameBuffer( this.frameBuffers.phongLightPing, gl.TEXTURE1 );
     if ( 0 >= this.renderLevel )
     {
-        toneMapPassPing.addInputTexture( this.gl.whiteTexture, gl.TEXTURE2 );
+        toneMapPassPing.addInputTexture( this.gl.whiteTexture );
     }
     else
     {
@@ -395,7 +399,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     toneMapPassPong.addInputFrameBuffer( this.frameBuffers.phongLightPong, gl.TEXTURE1 );
     if ( 0 >= this.renderLevel )
     {
-        toneMapPassPong.addInputTexture( this.gl.whiteTexture, gl.TEXTURE2 );
+        toneMapPassPong.addInputTexture( this.gl.whiteTexture );
     }
     else
     {
@@ -459,7 +463,7 @@ GRenderDeferredStrategy.prototype.getRenderLevel = function ()
 
 /**
  * Set the render level to use
- * @param {number} the new render level
+ * @param {number} newLevel The new render level
  * @return {boolean} true if the change was applied false otherwise
  */
 GRenderDeferredStrategy.prototype.setRenderLevel = function ( newLevel )
@@ -479,15 +483,17 @@ GRenderDeferredStrategy.prototype.setRenderLevel = function ( newLevel )
     }
     
     return false;
-}
+};
 
 /**
  * Draw the scene and hud elements using this strategy
- * @param {GScene} Scene to draw with this strategy
- * @param {GHudController} Hud to draw with this strategy
+ * @param {GScene} scene Scene to draw with this strategy
+ * @param {GHudController} hud Hud to draw with this strategy
  */
 GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
 {
+    this.lastScene = scene;
+
     var gl = this.gl;
     gl.disable(gl.BLEND);
     var lCount = scene.getLights().length;
@@ -576,22 +582,46 @@ GRenderDeferredStrategy.tempObjIdA = new Uint8Array(4);
 
 /**
  * Get the object id of the object at the provided mouse location
- * @param {number}
- * @param {number}
+ * @param {number} x
+ * @param {number} y
  */
 GRenderDeferredStrategy.prototype.getObjectIdAt = function ( x, y )
 {
     this.frameBuffers.objid.getColorValueAt(x, y, GRenderDeferredStrategy.tempObjIdA);
     
-    return ( GRenderDeferredStrategy.tempObjIdA[0] << 16 |
-             GRenderDeferredStrategy.tempObjIdA[1] << 8  |
-             GRenderDeferredStrategy.tempObjIdA[2] );
+    return ( GRenderDeferredStrategy.tempObjIdA[0] << 8  |
+             GRenderDeferredStrategy.tempObjIdA[1] );
+};
+
+/**
+ * Get the 3d position of the pixel at the provided mouse location
+ * @param {number} x
+ * @param {number} y
+ * @return {Float32Array}
+ */
+GRenderDeferredStrategy.prototype.ge3dPositionAt = function(x, y)
+{
+    this.frameBuffers.objid.getColorValueAt(x, y, GRenderDeferredStrategy.tempObjIdA);
+
+    var zVal = ( GRenderDeferredStrategy.tempObjIdA[2] + (GRenderDeferredStrategy.tempObjIdA[3]/256.0) ) / 256.0;
+    var ret = vec4.fromValues(2*(x/1024.0) - 1.0, 2*(y/1024.0) - 1.0, 2*zVal - 1.0, 1.0);
+
+    if ( undefined !== this.lastScene )
+    {
+        var camera = this.lastScene.getCamera();
+        camera.inverseProject( ret );
+    }
+
+    ret[0] /= ret[3];ret[1] /= ret[3];
+    ret[2] /= ret[3];ret[3] /= ret[3];
+
+    return ret;
 };
 
 /**
  * Get the object id of the object at the provided mouse location
- * @param {number}
- * @param {number}
+ * @param {number} x
+ * @param {number} y
  */
 GRenderDeferredStrategy.prototype.getHudObjectIdAt = function ( x, y )
 {
@@ -604,18 +634,18 @@ GRenderDeferredStrategy.prototype.getHudObjectIdAt = function ( x, y )
 
 /**
  * Set the transformation parameters for rendering full screen
- * @param {number} X component of the rectangle representing the center of the rectangle
- * @param {number} Y component of the rectangle representing the center of the rectangle
- * @param {number} Width component of the rectangle in screen percentage
- * @param {number} Height component of the rectangle in screen percentage
+ * @param {number} x X component of the rectangle representing the center of the rectangle
+ * @param {number} y Y component of the rectangle representing the center of the rectangle
+ * @param {number} width Width component of the rectangle in screen percentage
+ * @param {number} height Height component of the rectangle in screen percentage
  */
 GRenderDeferredStrategy.prototype.setHRec = function( x, y, width, height )
 {
 	// the values passed in are meant to be between 0 and 1
 	// currently there are no plans to add debug assertions
     mat3.identity(this.hMatrix);
-	mat3.translate(this.hMatrix, this.hMatrix, [x, y]);
-	mat3.scale(this.hMatrix,this.hMatrix, [width, height]);  
+	mat3.translate(this.hMatrix, this.hMatrix, new Float32Array([x, y]) );
+	mat3.scale(this.hMatrix,this.hMatrix, new Float32Array([width, height]) );
 };
 
 /**

@@ -86,9 +86,9 @@ function GContext( canvas )
     }
     
     var _this = this;
-    canvas.onmousedown = function(ev) {_this.handleMouseDown(ev);}
-    document.onmouseup = function(ev) {_this.handleMouseUp(ev);}
-    document.onmousemove = function(ev) {_this.handleMouseMove(ev);}
+    canvas.onmousedown = function(ev) {_this.handleMouseDown(ev);};
+    document.onmouseup = function(ev) {_this.handleMouseUp(ev);};
+    document.onmousemove = function(ev) {_this.handleMouseMove(ev);};
     
     document.addEventListener('touchstart', function(e){_this.handleTouchStart(e);}, false);
     document.addEventListener('touchmove', function(e){_this.handleTouchMove(e);}, false);
@@ -120,7 +120,7 @@ function GContext( canvas )
     this.dom.document = document;
     this.dom.element = this.dom.document.documentElement;
     this.dom.body = this.dom.document.getElementsByTagName('body')[0];
-};
+}
 
 /**
  * @return {boolean} return true if the render level was changed
@@ -294,7 +294,7 @@ GContext.prototype.handleMouseMove = function(ev)
 };
 
 /**
- * @param {PointingEvent}
+ * @param {PointingEvent} pev
  * @return {number}
  */
 GContext.prototype.getSceneObjectIdAt = function ( pev )
@@ -306,7 +306,19 @@ GContext.prototype.getSceneObjectIdAt = function ( pev )
 };
 
 /**
- * @param {PointingEvent}
+ * @param {PointingEvent} pev
+ * @return {Float32Array}
+ */
+GContext.prototype.getScene3dPossAt = function ( pev )
+{
+    var x = Math.round(1024*pev.getX());
+    var y = 1024-Math.round(1024*pev.getY());
+
+    return this.renderStrategy.ge3dPositionAt( x, y );
+};
+
+/**
+ * @param {PointingEvent} pev
  * @return {number}
  */
 GContext.prototype.getHudObjectIdAt = function ( pev )
@@ -399,15 +411,17 @@ GContext.prototype.requestFullScreen = function()
     {
         c.mozRequestFullScreen();
     } 
-}
+};
 
 /**
  * @return {boolean} true if the context is currently in full screen mode
  */
 GContext.prototype.isFullScreen = function ()
 {
-    var fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
-    var fullscreenEnabled = document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled;
+    // these need to be string-indexed to make sure that the closure compiler doesn't try to optimize them into
+    // shorter variable names
+    var fullscreenElement = document["fullscreenElement"] || document["mozFullScreenElement"] || document["webkitFullscreenElement"];
+    var fullscreenEnabled = document["fullscreenEnabled"] || document["mozFullScreenEnabled"] || document["webkitFullscreenEnabled"];
 
     return fullscreenEnabled && null !== fullscreenElement;
 };

@@ -1,0 +1,26 @@
+{
+    "plugins": [ "plugins/markdown" ],
+    "markdown": {
+        "parser": "gfm"
+    },
+    "templates": {
+        "cleverLinks": true,
+        "monospaceLinks": false,
+        "default": {
+            "outputSourceFiles": true
+        },
+        "systemName"      : "",
+        "footer"          : "",
+        "copyright"       : "",
+        "navType"         : "vertical",
+        "theme"           : "readable",
+        "linenums"        : true,
+        "collapseSymbols" : false,
+        "inverseNav"      : true
+    },
+    "opts": {
+        "private": true
+    }
+}
+
+

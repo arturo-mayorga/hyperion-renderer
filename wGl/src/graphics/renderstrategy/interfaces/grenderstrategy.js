@@ -26,7 +26,7 @@ function GRenderStrategy()
 }
 
 /**
- * @param {string} new name
+ * @param {string} name New name
  * @return {GRenderStrategy} this.
  */
 GRenderStrategy.prototype.setName = function ( name )
@@ -46,13 +46,13 @@ GRenderStrategy.prototype.getRenderLevel = function ()
 
 /**
  * Set the render level to use
- * @param {number} the new render level
+ * @param {number} newLevel The new render level
  * @return {boolean} true if the change was applied false otherwise
  */
 GRenderStrategy.prototype.setRenderLevel = function ( newLevel )
 {
     return false;
-}
+};
 
 /**
  * @return {boolean} true if the change was applied
@@ -92,15 +92,23 @@ GRenderStrategy.prototype.reload = function() {};
 
 /**
  * Get the object id of the object at the provided mouse location
- * @param {number}
- * @param {number}
+ * @param {number} x
+ * @param {number} y
  */
 GRenderStrategy.prototype.getObjectIdAt = function(x,y) { return -1; };
 
 /**
+ * Get the 3d position of the pixel at the provided mouse location
+ * @param {number} x
+ * @param {number} y
+ * @return {Array<number>}
+ */
+GRenderStrategy.prototype.ge3dPositionAt = function(x, y) { return [0, 0, 0]; };
+
+/**
  * Get the object id of the object at the provided mouse location
- * @param {number}
- * @param {number}
+ * @param {number} x
+ * @param {number} y
  */
 GRenderStrategy.prototype.getHudObjectIdAt = function(x,y) { return -1; };
 

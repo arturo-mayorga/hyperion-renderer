@@ -20,7 +20,7 @@
 
 /**
  * @return {FsmState}
- * @param {GContext}
+ * @param {GContext} context
  */
 function createProfiler( context )
 {
@@ -45,7 +45,7 @@ function createProfiler( context )
 
 /**
  * @constructor
- * @param {GContext}
+ * @param {GContext} context
  */
 function ProfilerOperatingData( context )
 {
@@ -57,9 +57,7 @@ function ProfilerOperatingData( context )
 /**
  * @constructor
  * @extends {FsmMachine}
- * @implements {GObjLoaderObserver}
- * @implements {ThreejsLoaderObserver}
- * @param {ProfilerExploreState}
+ * @param {ProfilerOperatingData} oData
  */
 function ProfilerCleanState( oData )
 {
@@ -111,9 +109,7 @@ ProfilerCleanState.prototype.update = function ( time )
 /**
  * @constructor
  * @extends {FsmMachine}
- * @implements {GObjLoaderObserver}
- * @implements {ThreejsLoaderObserver}
- * @param {ProfilerOperatingData}
+ * @param {ProfilerOperatingData} oData
  */
 function ProfilerLoadState( oData ) 
 {
@@ -169,11 +165,11 @@ ProfilerLoadState.prototype.enter = function ()
     var cone = new Cone(0.5, 2, 50, "cone");
     
     var transform = mat4.create();
-	mat4.translate(transform, transform, [2, 2, 0]);
+	mat4.translate(transform, transform, new Float32Array([2, 2, 0]));
 	cyl.setMvMatrix(transform);
     
     transform = mat4.create();
-	mat4.translate(transform, transform, [0, -2, 2]);
+	mat4.translate(transform, transform, new Float32Array([0, -2, 2]));
 	cone.setMvMatrix(transform);
     
     this.scene.addChild( cube );
@@ -200,7 +196,7 @@ ProfilerLoadState.prototype.exit = function ()
 
 /**
  * Update this state
- * @param {number} Number of milliseconds since the last update
+ * @param {number} time Number of milliseconds since the last update
  */
 ProfilerLoadState.prototype.update = function ( time ) 
 {
@@ -209,9 +205,8 @@ ProfilerLoadState.prototype.update = function ( time )
 
 /**
  * @constructor
- * @implements {FsmState}
- * @implements {IContextMouseObserver}
- * @param {ProfilerOperatingData}
+ * @extends {FsmMachine}
+ * @param {ProfilerOperatingData} oData
  */
 function ProfilerExploreState( oData ) 
 {
@@ -226,8 +221,8 @@ function ProfilerExploreState( oData )
     this.msMaElem = [];
     for (var i = 0; i < this.msMaPeriod; ++i)
     {
-        var v = Math.random()*100
-        this.msMa += v
+        var v = Math.random()*100;
+        this.msMa += v;
         this.msMaElem.push(v);
     }
     this.msMa /= this.msMaPeriod;
@@ -267,7 +262,7 @@ ProfilerExploreState.prototype.exit = function ()
 
 /**
  * This is the update function for the explore state
- * @param {number} number of milliseconds since the last update
+ * @param {number} time number of milliseconds since the last update
  */
 ProfilerExploreState.prototype.update = function ( time ) 
 {	
@@ -282,9 +277,9 @@ ProfilerExploreState.prototype.update = function ( time )
 	
 	// calculate the standard deviation
 	var variance = 0;
-	for (var i = 0; i < this.msMaPeriod; ++i)
+	for (var j = 0; j < this.msMaPeriod; ++j)
 	{
-        variance += (this.msMaElem[i]-this.msMa) * (this.msMaElem[i]-this.msMa);
+        variance += (this.msMaElem[j]-this.msMa) * (this.msMaElem[j]-this.msMa);
 	}
 	variance /= this.msMaPeriod;
 	var stdev = Math.sqrt(variance);
@@ -295,7 +290,7 @@ ProfilerExploreState.prototype.update = function ( time )
 	if ( undefined !== this.debugLevel )
 	{
 	    while ( this.oData.context.decreaseRenderLevel() ) {}
-	    for ( var i = 0; i < this.debugLevel; ++i )
+	    for ( var j = 0; j < this.debugLevel; ++i )
 	    {
 	        this.oData.context.increaseRenderLevel();
 	    }
@@ -329,11 +324,9 @@ ProfilerExploreState.prototype.update = function ( time )
             this.fireSignal("exitReq");
         }
         
-        this.runTime 
-        
         this.msMa = 0;
         this.msMaElem = [];
-        for (var i = 0; i < this.msMaPeriod; ++i)
+        for (var k = 0; k < this.msMaPeriod; ++k)
         {
             var v = Math.random()*100;
             this.msMa += v;

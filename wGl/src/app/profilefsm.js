@@ -286,7 +286,7 @@ ProfilerExploreState.prototype.update = function ( time )
 	
 	//console.debug(this.msMa + ": " + stdev);
 	
-	//this.debugLevel = 2;
+	//this.debugLevel = 0;
 	if ( undefined !== this.debugLevel )
 	{
 	    while ( this.oData.context.decreaseRenderLevel() ) {}

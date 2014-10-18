@@ -26,6 +26,12 @@
 function GRenderDeferredStrategy( gl )
 {
     /** @type {WebGLRenderingContext} */ this.gl = gl;
+
+    if ( this.checkRequiredExtensions() === false )
+    {
+        throw new Error( "Extensions not available for this strategy" );
+    }
+
     this.configure();
     
     this.extensions = {};
@@ -646,6 +652,30 @@ GRenderDeferredStrategy.prototype.setHRec = function( x, y, width, height )
     mat3.identity(this.hMatrix);
 	mat3.translate(this.hMatrix, this.hMatrix, new Float32Array([x, y]) );
 	mat3.scale(this.hMatrix,this.hMatrix, new Float32Array([width, height]) );
+};
+
+/**
+ * @return {boolean} true if the extensions are available to run this strategy,
+ * false otherwise
+ */
+GRenderDeferredStrategy.prototype.checkRequiredExtensions = function()
+{
+     if ( -1 !== navigator.userAgent.toLowerCase().indexOf("iphone") ||
+          -1 !== navigator.userAgent.toLowerCase().indexOf("ipad"))
+    {
+        return false;
+    }
+
+    var tf = this.gl.getExtension("OES_texture_float");
+    var dt = this.gl.getExtension("WEBGL_depth_texture");
+
+    if ( tf === undefined || tf === null ||
+         dt === undefined || dt === null )
+    {
+        return false;
+    }
+
+    return true;
 };
 
 /**

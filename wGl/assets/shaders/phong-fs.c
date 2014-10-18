@@ -106,7 +106,7 @@ float uKsExponent = 100.0;
     mediump vec3 normal = normalize(vNormal.xyz);
 #endif
 
-    mediump float diffuseFactor = max(0.0, dot(normal, lightDirection)); 
+    mediump float diffuseFactor = max(0.2, dot(normal, lightDirection)); 
     
     vec3 E = normalize(-vPosition.xyz);
     vec3 R = reflect(-lightDirection, normal);

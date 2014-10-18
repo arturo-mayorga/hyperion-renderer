@@ -90,10 +90,19 @@ GRenderStrategyFactory.prototype.createPreviousRenderLevel = function ( currentN
 GRenderStrategyFactory.prototype.createByName = function ( name )
 {
     var createFn = this.strategyMap[name];
-    if ( undefined != createFn )
+
+    try
     {
-        return createFn(this.gl);
+        if (undefined != createFn)
+        {
+            return createFn(this.gl);
+        }
     }
+    catch (e)
+    {
+
+    }
+
     
     return null;
 };

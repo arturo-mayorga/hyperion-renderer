@@ -221,5 +221,4 @@ GMaterial.prototype.setMapBump = function( texture )
 GMaterial.prototype.setOpacity = function( opacity )
 {
     this.opacity = opacity;
-    console.debug( this.opacity );
 };

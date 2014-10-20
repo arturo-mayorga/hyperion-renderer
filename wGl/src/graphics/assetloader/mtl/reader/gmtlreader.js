@@ -195,6 +195,5 @@ GMtlReader.prototype.process_mapBump = function( lineA )
  */
 GMtlReader.prototype.process_opacity = function( lineA )
 {
-    console.debug( "found opacity" );
     this.currentMtl.setOpacity( parseFloat(lineA[1]) )
 };

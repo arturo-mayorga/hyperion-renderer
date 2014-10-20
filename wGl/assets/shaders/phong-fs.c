@@ -31,6 +31,7 @@ uniform vec4 uKd;
 varying vec2 vKdMapCoord;
 uniform sampler2D uMapKd;
 uniform vec2 uMapKdScale;
+uniform float uOpacity;
 
 #ifdef HAS_OES_DERIVATIVES
 uniform vec2 uMapNormalScale;
@@ -116,7 +117,7 @@ float uKsExponent = 100.0;
 
     mediump vec3 color = diffuseFactor * materialDiffuseColor + specularFactor * uKs.xyz;
 
-    gl_FragColor = vec4(color, 1); 
+    gl_FragColor = vec4(color, uOpacity); 
 	//gl_FragColor = vec4(normal.x*0.5 + 0.5, normal.y*0.5 + 0.5, normal.z*0.5 + 0.5, 1);
 }
 

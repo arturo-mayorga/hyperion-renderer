@@ -355,7 +355,7 @@ GRenderPhongStrategy.prototype.draw = function ( scene, hud )
 {
     this.lastScene = scene;
     var gl = this.gl;
-    gl.disable(gl.BLEND);
+    gl.enable(gl.BLEND);
     
     for ( var key in this.passes )
     {

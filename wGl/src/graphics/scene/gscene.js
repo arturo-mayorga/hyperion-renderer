@@ -41,11 +41,13 @@ function GScene()
 	this.drawSectionEnum = 
 	{
 	    STATIC: 0,
-	    ARMATURE: 1
+	    ARMATURE: 1,
+        TRASPARENT: 2
 	};
 	
 	this.drawSection = this.drawSectionEnum.STATIC;
 	this.deferredDrawCommands = [];
+    this.transparentDrawCommands = [];
 	
 	this.isVisible = true;
 }
@@ -68,6 +70,12 @@ GScene.prototype.onDeferredDrawRequested = function ( command, conditionCode )
          this.drawSection === this.drawSectionEnum.STATIC )
     {
         this.deferredDrawCommands.push( command );
+        return true;
+    }
+    else if ( conditionCode === SceneDrawableDeferConditionCode.TRANSPARENCY_REQUEST &&
+              this.drawSection !== this.drawSectionEnum.TRASPARENT )
+    {
+        this.transparentDrawCommands.push( command );
         return true;
     }
     
@@ -204,23 +212,39 @@ GScene.prototype.drawThroughCamera = function ( camera, shaderComposite )
     this.drawGeometry( this.tempMatrix, shader );
     
     shader.deactivate();
-    
+
     this.drawSection = this.drawSectionEnum.ARMATURE;
-    
+
     shader = shaderComposite.getArmatureShader();
     shader.activate();
-    
-    camera.draw( this.tempMatrix, shader );
+
+    this.camera.draw( this.eyeMvMatrix, shader );
     this.drawLights( shader );
-    
-    for ( var i in this.deferredDrawCommands )
+
+    for ( i = 0; i < this.deferredDrawCommands.length; ++i )
     {
         this.deferredDrawCommands[i].run( shader );
     }
-    
+
     shader.deactivate();
-    
+
+    this.drawSection = this.drawSectionEnum.TRASPARENT;
+    shader = shaderComposite.getStaticShader();
+    shader.activate();
+
+    this.camera.draw( this.eyeMvMatrix, shader );
+    this.drawLights( shader );
+
+    for ( i = 0; i < this.transparentDrawCommands.length; ++i )
+    {
+        this.transparentDrawCommands[i].run( shader );
+    }
+
+    shader.deactivate();
+
+
     this.deferredDrawCommands = [];
+    this.transparentDrawCommands = [];
 };
 
 /**
@@ -233,6 +257,8 @@ GScene.prototype.draw = function( shaderComposite )
     {
         return;
     }
+
+    var i = 0;
     
     this.drawSection = this.drawSectionEnum.STATIC;
     
@@ -253,14 +279,31 @@ GScene.prototype.draw = function( shaderComposite )
     this.camera.draw( this.eyeMvMatrix, shader );
     this.drawLights( shader );
     
-    for ( var i in this.deferredDrawCommands )
+    for ( i = 0; i < this.deferredDrawCommands.length; ++i )
     {
         this.deferredDrawCommands[i].run( shader );
     }
-    
+
+    shader.deactivate();
+
+    this.drawSection = this.drawSectionEnum.TRASPARENT;
+    shader = shaderComposite.getStaticShader();
+    shader.activate();
+
+    this.camera.draw( this.eyeMvMatrix, shader );
+    this.drawLights( shader );
+
+    for ( i = 0; i < this.transparentDrawCommands.length; ++i )
+    {
+        this.transparentDrawCommands[i].run( shader );
+    }
+
     shader.deactivate();
     
+
+    
     this.deferredDrawCommands = [];
+    this.transparentDrawCommands = [];
 };
 
 /**

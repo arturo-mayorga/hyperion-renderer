@@ -158,7 +158,12 @@ Mesh.prototype.draw = function( parentMvMat, materials, shader, drawMode )
 
     if ( this.material != undefined )
     {
-        this.material.get
+        if ( this.material.getOpacity() !== 1 &&
+             this.requestDeferredDraw( new DrawCommand( this, parentMvMat, materials, drawMode ), SceneDrawableDeferConditionCode.TRANSPARENCY_REQUEST))
+        {
+            return;
+        }
+
         this.material.draw( shader );
     }
    

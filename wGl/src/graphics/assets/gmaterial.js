@@ -222,3 +222,12 @@ GMaterial.prototype.setOpacity = function( opacity )
 {
     this.opacity = opacity;
 };
+
+/**
+ * Get the opacity of this material
+ * @returns {number}
+ */
+GMaterial.prototype.getOpacity = function()
+{
+    return this.opacity;
+};

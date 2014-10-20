@@ -264,6 +264,11 @@ GContext.prototype.handleMouseUp = function(ev)
  */
 GContext.prototype.handleTouchMove = function(ev)
 {
+   if ( ev.preventDefault !== undefined )
+   {
+       ev.preventDefault();
+   }
+
    var x = ev.targetTouches[0].clientX/ev.target.clientWidth;
    var y = ev.targetTouches[0].clientY/ev.target.clientHeight;
    var pev = new PointingEvent( x, y );

@@ -149,6 +149,18 @@ Mesh.prototype.draw = function( parentMvMat, materials, shader, drawMode )
    if ( !this.valid ) return;
    
    var gl = this.gl;
+
+    if ( this.material === undefined &&
+        this.mtlName !== undefined )
+    {
+        this.material = materials[this.mtlName];
+    }
+
+    if ( this.material != undefined )
+    {
+        this.material.get
+        this.material.draw( shader );
+    }
    
     if (shader.attributes.positionVertexAttribute > -1)
     {
@@ -191,17 +203,6 @@ Mesh.prototype.draw = function( parentMvMat, materials, shader, drawMode )
         mat4.transpose(this.normalMatrix, this.normalMatrix);
         
         gl.uniformMatrix4fv(shader.uniforms.nMatrixUniform, false, this.normalMatrix);
-    }
-    
-    if ( this.material === undefined &&
-         this.mtlName !== undefined )
-    {
-        this.material = materials[this.mtlName];
-    }
-    
-    if ( this.material != undefined )
-    {
-        this.material.draw( shader );
     }
     
     if ( null != shader.uniforms.objid )

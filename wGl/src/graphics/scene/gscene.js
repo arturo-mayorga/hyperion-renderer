@@ -213,43 +213,14 @@ GScene.prototype.drawThroughCamera = function ( camera, shaderComposite )
     
     shader.deactivate();
 
-    this.drawSection = this.drawSectionEnum.ARMATURE;
+    this.drawArmatureObjects( shaderComposite );
+    this.drawTransparentObjects( shaderComposite );
 
-    shader = shaderComposite.getArmatureShader();
-    shader.activate();
-
-    this.camera.draw( this.eyeMvMatrix, shader );
-    this.drawLights( shader );
-
-    for ( i = 0; i < this.deferredDrawCommands.length; ++i )
-    {
-        this.deferredDrawCommands[i].run( shader );
-    }
-
-    shader.deactivate();
-
-    this.drawSection = this.drawSectionEnum.TRASPARENT;
-    shader = shaderComposite.getStaticShader();
-    shader.activate();
-
-    this.camera.draw( this.eyeMvMatrix, shader );
-    this.drawLights( shader );
-
-    for ( i = 0; i < this.transparentDrawCommands.length; ++i )
-    {
-        this.transparentDrawCommands[i].run( shader );
-    }
-
-    shader.deactivate();
-
-
-    this.deferredDrawCommands = [];
-    this.transparentDrawCommands = [];
 };
 
 /**
  * Render the scene with the provided shader program
- * @param {ShaderComposite} Shader program to use for rendering
+ * @param {ShaderComposite} shaderComposite Shader program to use for rendering
  */
 GScene.prototype.draw = function( shaderComposite )
 {
@@ -270,25 +241,48 @@ GScene.prototype.draw = function( shaderComposite )
     this.drawGeometry( this.eyeMvMatrix, shader );
     
     shader.deactivate();
-    
+
+    this.drawArmatureObjects( shaderComposite );
+    this.drawTransparentObjects( shaderComposite );
+};
+
+/**
+ * Draw armature objects
+ * @param {ShaderComposite} shaderComposite Shader program to use for rendering
+ */
+GScene.prototype.drawArmatureObjects =  function ( shaderComposite )
+{
     this.drawSection = this.drawSectionEnum.ARMATURE;
-    
-    shader = shaderComposite.getArmatureShader();
+
+    if ( this.deferredDrawCommands.length === 0 ) return;
+
+    var shader = shaderComposite.getArmatureShader();
     shader.activate();
-    
+
     this.camera.draw( this.eyeMvMatrix, shader );
     this.drawLights( shader );
-    
+
     for ( i = 0; i < this.deferredDrawCommands.length; ++i )
     {
         this.deferredDrawCommands[i].run( shader );
     }
-
+    this.deferredDrawCommands = [];
     shader.deactivate();
+};
 
+/**
+ * Draw transparent objects
+ * @param {ShaderComposite} shaderComposite Shader program to use for rendering
+ */
+GScene.prototype.drawTransparentObjects = function( shaderComposite )
+{
     this.drawSection = this.drawSectionEnum.TRASPARENT;
-    shader = shaderComposite.getStaticShader();
+
+    if ( this.transparentDrawCommands.length === 0 ) return;
+
+    var shader = shaderComposite.getStaticShader();
     shader.activate();
+    this.gl.depthMask(0);
 
     this.camera.draw( this.eyeMvMatrix, shader );
     this.drawLights( shader );
@@ -298,12 +292,9 @@ GScene.prototype.draw = function( shaderComposite )
         this.transparentDrawCommands[i].run( shader );
     }
 
-    shader.deactivate();
-    
-
-    
-    this.deferredDrawCommands = [];
+    this.gl.depthMask(1);
     this.transparentDrawCommands = [];
+    shader.deactivate();
 };
 
 /**

@@ -69,6 +69,8 @@ GRenderDeferredStrategy.prototype.configure = function()
         "objid-vs.c":undefined,
         "objidscr-fs.c":undefined,
         "objidscr-vs.c":undefined,
+        "phong-vs.c":undefined,
+        "phong-fs.c":undefined,
         "position-fs.c":undefined,
         "position-vs.c":undefined,
         "shadowmap-vs.c":undefined,
@@ -188,7 +190,7 @@ GRenderDeferredStrategy.prototype.initScreenVBOs = function()
 {
     var gl = this.gl;
     
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(0.0, 0.0, 0.0, 0.0);
     gl.enable(gl.DEPTH_TEST);
     
     
@@ -269,6 +271,7 @@ GRenderDeferredStrategy.prototype.initShaders = function ()
     this.programs.position    = new ShaderComposite( shaderSrcMap["position-vs.c"],    shaderSrcMap["position-fs.c"]    );
     this.programs.depth       = new ShaderComposite( shaderSrcMap["depth-vs.c"],       shaderSrcMap["depth-fs.c"]       );
     this.programs.objid       = new ShaderComposite( shaderSrcMap["objid-vs.c"],       shaderSrcMap["objid-fs.c"]       );
+    this.programs.phong       = new ShaderComposite( shaderSrcMap["phong-vs.c"],       shaderSrcMap["phong-fs.c"]       );
     
 
     for ( var key in this.programs )
@@ -334,6 +337,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     this.lightCamControlers = {};
     
     var colorPass = new GGeometryRenderPassCmd( this.gl, this.programs.colorspec, this.frameBuffers.color );
+    this.transPass = new GTransGeometryRenderPassCmd( this.gl, this.programs.phong, this.frameBuffers.transColor );
     var normalPass = new GGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.normal );
     var positionPass = new GGeometryRenderPassCmd( this.gl, this.programs.position, this.frameBuffers.position );
     var objidPass = new GGeometryRenderPassCmd( this.gl, this.programs.objid, this.frameBuffers.objid );
@@ -399,6 +403,8 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     {
         toneMapPassPing.addInputFrameBuffer( this.frameBuffers.ssao, gl.TEXTURE2 );
     }
+    toneMapPassPing.addInputFrameBuffer( this.frameBuffers.transColor, gl.TEXTURE3 );
+
     
     var toneMapPassPong = new GPostEffectRenderPassCmd( this.gl, this.programs.toneMap, this.frameBuffers.phongLightPing, this.screen );
     toneMapPassPong.addInputFrameBuffer( this.frameBuffers.color, gl.TEXTURE0 );
@@ -411,7 +417,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     {
         toneMapPassPong.addInputFrameBuffer( this.frameBuffers.ssao, gl.TEXTURE2 );
     }
-    
+    toneMapPassPong.addInputFrameBuffer( this.frameBuffers.transColor, gl.TEXTURE3 );
     
     var cmds = [];
     
@@ -508,6 +514,8 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     {
         this.preCmds[i].run( scene );
     }
+
+    this.transPass.run( scene );
     
     for ( var lIdx = 0; lIdx < lCount; ++lIdx )
     {
@@ -533,6 +541,10 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
     }
     
     this.toneMapCmds[(lCount + 1)%2].run( scene );
+
+
+
+
     
     // HUD
     this.gl.disable( this.gl.DEPTH_TEST );
@@ -547,10 +559,21 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
 	{
 	    this.frameBuffers.phongLightPing.bindTexture(gl.TEXTURE0, "color");
     }
-    
+
+
+
     this.setHRec(0, 0, 1, 1);
-    this.drawScreenBuffer(this.programs.fxaa); 
-    
+    this.drawScreenBuffer(this.programs.fxaa);
+
+    /*this.frameBuffers.transColor.bindTexture(gl.TEXTURE0, "color");
+    this.setHRec(0, 0, 1, 1);
+    this.drawScreenBuffer(this.programs.fxaa);*/
+
+   /* gl.enable(gl.BLEND);
+    this.frameBuffers.transColor.bindTexture(gl.TEXTURE0, "color");
+    this.setHRec(0, 0, 1, 1);
+    this.drawScreenBuffer(this.programs.fxaa);*/
+
     /*this.frameBuffers.objid.bindTexture(gl.TEXTURE0, "color");
     this.setHRec(-0.125+0.75, 0.125-0.75, 0.125, 0.125);
     this.drawScreenBuffer(this.programs.fxaa);*/
@@ -730,6 +753,11 @@ GRenderDeferredStrategy.prototype.initTextureFramebuffer = function()
     frameBuffer.addBufferTexture(texCfg);
     frameBuffer.complete();
     this.frameBuffers.color = frameBuffer;
+
+    frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
+    frameBuffer.addBufferTexture(texCfg);
+    frameBuffer.complete();
+    this.frameBuffers.transColor = frameBuffer;
     
     frameBuffer = new GFrameBuffer({ gl: this.gl, width: 1024, height: 1024 });
     frameBuffer.addBufferTexture(texCfgFloat);

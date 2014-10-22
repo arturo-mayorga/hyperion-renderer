@@ -191,6 +191,7 @@ GTransGeometryRenderPassCmd.prototype.run = function( scene )
     var gl = this.gl;
 
     this.frameBuffer.bindBuffer();
+    gl.clear( gl.COLOR_BUFFER_BIT );
     scene.drawTransparentObjects( this.shaderProgram );
     this.frameBuffer.unbindBuffer();
 };
@@ -348,6 +349,11 @@ GPostEffectRenderPassCmd.prototype.drawScreenBuffer = function( shader )
     if ( null != shader.uniforms.mapRandom )
     {
         gl.uniform1i( shader.uniforms.mapRandom, mapIdx++ );
+    }
+
+    if ( null != shader.uniforms.mapTransp )
+    {
+        gl.uniform1i( shader.uniforms.mapTransp, mapIdx++ );
     }
     
     gl.bindBuffer( gl.ARRAY_BUFFER, this.screen.vertBuffer);

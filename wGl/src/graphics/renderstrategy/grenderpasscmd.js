@@ -171,6 +171,33 @@ GGeometryRenderPassCmd.prototype.run = function( scene )
 
 /**
  * @constructor
+ * @param {WebGLRenderingContext} gl Context to use for rendering
+ * @param {ShaderComposite} program Shader program composite to use for this pass
+ * @param {GFrameBuffer} frameBuffer Target frame buffer object for this pass
+ */
+function GTransGeometryRenderPassCmd( gl, program, frameBuffer )
+{
+    this.gl = gl;
+    this.shaderProgram = program;
+    this.frameBuffer = frameBuffer;
+}
+
+/**
+ * Execute this pass
+ * @param {GScene} Scene object to run this pass command against
+ */
+GTransGeometryRenderPassCmd.prototype.run = function( scene )
+{
+    var gl = this.gl;
+
+    this.frameBuffer.bindBuffer();
+    scene.drawTransparentObjects( this.shaderProgram );
+    this.frameBuffer.unbindBuffer();
+};
+
+
+/**
+ * @constructor
  * @param {WebGLRenderingContext} Context to use for rendering
  * @param {ShaderComposite} Shader program composite to use for this pass
  * @param {GFrameBuffer} Target frame buffer object for this pass

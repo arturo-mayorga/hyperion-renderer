@@ -201,6 +201,8 @@ GScene.prototype.drawThroughCamera = function ( camera, shaderComposite )
     {
         return;
     }
+
+    this.transparentDrawCommands = [];
     
     this.drawSection = this.drawSectionEnum.STATIC;
     
@@ -214,8 +216,6 @@ GScene.prototype.drawThroughCamera = function ( camera, shaderComposite )
     shader.deactivate();
 
     this.drawArmatureObjects( shaderComposite );
-    this.drawTransparentObjects( shaderComposite );
-
 };
 
 /**
@@ -229,13 +229,15 @@ GScene.prototype.draw = function( shaderComposite )
         return;
     }
 
+    this.transparentDrawCommands = [];
+
     var i = 0;
     
     this.drawSection = this.drawSectionEnum.STATIC;
     
     var shader = shaderComposite.getStaticShader();
     shader.activate();
-    
+
     this.camera.draw( this.eyeMvMatrix, shader );
     this.drawLights( shader );
     this.drawGeometry( this.eyeMvMatrix, shader );
@@ -243,7 +245,6 @@ GScene.prototype.draw = function( shaderComposite )
     shader.deactivate();
 
     this.drawArmatureObjects( shaderComposite );
-    this.drawTransparentObjects( shaderComposite );
 };
 
 /**

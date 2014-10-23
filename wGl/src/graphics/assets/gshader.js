@@ -141,6 +141,8 @@ GShader.prototype.bindToContext = function ( gl )
     this.glProgram = shaderProgram;
     this.vShader = vertexShader;
     this.fShader = fragmentShader;
+
+    /* @type {Function(GShader)} */ this.activateLamda = function ( shader ) {};
 };
 
 /**
@@ -203,7 +205,18 @@ GShader.prototype.activate = function()
     if ( -1 < this.attributes.skinVertexAttribute)
     {
         gl.enableVertexAttribArray(this.attributes.skinVertexAttribute);
-    } 
+    }
+
+    this.activateLamda( this );
+};
+
+/**
+ * Set shader activate lambda
+ * @param {Function(GShader)} handler
+ */
+GShader.prototype.setActivateShaderLambda = function( handler )
+{
+    this.activateLamda = handler;
 };
 
 

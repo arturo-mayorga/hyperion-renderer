@@ -49,6 +49,16 @@ ShaderComposite.prototype.getArmatureShader = function ()
 };
 
 /**
+ * Set shader activate lambda
+ * @param {Function(GShader)} handler
+ */
+ShaderComposite.prototype.setActivateShaderLambda = function( handler )
+{
+    this.staticS.setActivateShaderLambda( handler );
+    this.armatureS.setActivateShaderLambda( handler );
+};
+
+/**
  * Called to bind the shaders to a gl context
  * @param {WebGLRenderingContext} Context to bind to this object
  */

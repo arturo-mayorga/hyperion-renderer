@@ -69,8 +69,8 @@ GRenderDeferredStrategy.prototype.configure = function()
         "objid-vs.c":undefined,
         "objidscr-fs.c":undefined,
         "objidscr-vs.c":undefined,
-        "phong-vs.c":undefined,
-        "phong-fs.c":undefined,
+        "phong_masked-vs.c":undefined,
+        "phong_masked-fs.c":undefined,
         "position-fs.c":undefined,
         "position-vs.c":undefined,
         "shadowmap-vs.c":undefined,
@@ -271,7 +271,7 @@ GRenderDeferredStrategy.prototype.initShaders = function ()
     this.programs.position    = new ShaderComposite( shaderSrcMap["position-vs.c"],    shaderSrcMap["position-fs.c"]    );
     this.programs.depth       = new ShaderComposite( shaderSrcMap["depth-vs.c"],       shaderSrcMap["depth-fs.c"]       );
     this.programs.objid       = new ShaderComposite( shaderSrcMap["objid-vs.c"],       shaderSrcMap["objid-fs.c"]       );
-    this.programs.phong       = new ShaderComposite( shaderSrcMap["phong-vs.c"],       shaderSrcMap["phong-fs.c"]       );
+    this.programs.phong       = new ShaderComposite( shaderSrcMap["phong_masked-vs.c"],shaderSrcMap["phong_masked-fs.c"]);
     
 
     for ( var key in this.programs )
@@ -337,7 +337,7 @@ GRenderDeferredStrategy.prototype.initPassCmds = function()
     this.lightCamControlers = {};
     
     var colorPass = new GGeometryRenderPassCmd( this.gl, this.programs.colorspec, this.frameBuffers.color );
-    this.transPass = new GTransGeometryRenderPassCmd( this.gl, this.programs.phong, this.frameBuffers.transColor );
+    this.transPass = new GTransMaskGeometryRenderPassCmd( this.gl, this.programs.phong, this.frameBuffers.transColor, this.frameBuffers.normal.getGTexture() );
     var normalPass = new GGeometryRenderPassCmd( this.gl, this.programs.normaldepth, this.frameBuffers.normal );
     var positionPass = new GGeometryRenderPassCmd( this.gl, this.programs.position, this.frameBuffers.position );
     var objidPass = new GGeometryRenderPassCmd( this.gl, this.programs.objid, this.frameBuffers.objid );

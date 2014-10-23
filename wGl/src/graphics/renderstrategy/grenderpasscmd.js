@@ -191,7 +191,50 @@ GTransGeometryRenderPassCmd.prototype.run = function( scene )
     var gl = this.gl;
 
     this.frameBuffer.bindBuffer();
+    scene.drawTransparentObjects( this.shaderProgram );
+    this.frameBuffer.unbindBuffer();
+};
+
+/**
+ * @constructor
+ * @param {WebGLRenderingContext} gl Context to use for rendering
+ * @param {ShaderComposite} program Shader program composite to use for this pass
+ * @param {GFrameBuffer} frameBuffer Target frame buffer object for this pass
+ * @param {GTexture} depthTexture
+ */
+function GTransMaskGeometryRenderPassCmd( gl, program, frameBuffer, depthTexture )
+{
+    this.gl = gl;
+    this.shaderProgram = program;
+    this.frameBuffer = frameBuffer;
+    this.depthTexture = depthTexture;
+
+    program.setActivateShaderLambda
+    (
+        function ( shader )
+        {
+             if ( null != shader.uniforms.mapPosition )
+             {
+                gl.uniform1i( shader.uniforms.mapPosition, 1 );
+
+                 depthTexture.draw( gl.TEXTURE1, null, null );
+             }
+        }
+    );
+}
+
+/**
+ * Execute this pass
+ * @param {GScene} Scene object to run this pass command against
+ */
+GTransMaskGeometryRenderPassCmd.prototype.run = function( scene )
+{
+    var gl = this.gl;
+
+    this.frameBuffer.bindBuffer();
     gl.clear( gl.COLOR_BUFFER_BIT );
+
+
     scene.drawTransparentObjects( this.shaderProgram );
     this.frameBuffer.unbindBuffer();
 };

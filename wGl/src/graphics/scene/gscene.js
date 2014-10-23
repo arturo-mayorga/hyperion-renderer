@@ -263,7 +263,7 @@ GScene.prototype.drawArmatureObjects =  function ( shaderComposite )
     this.camera.draw( this.eyeMvMatrix, shader );
     this.drawLights( shader );
 
-    for ( i = 0; i < this.deferredDrawCommands.length; ++i )
+    for ( var i = 0; i < this.deferredDrawCommands.length; ++i )
     {
         this.deferredDrawCommands[i].run( shader );
     }
@@ -288,7 +288,7 @@ GScene.prototype.drawTransparentObjects = function( shaderComposite )
     this.camera.draw( this.eyeMvMatrix, shader );
     this.drawLights( shader );
 
-    for ( i = 0; i < this.transparentDrawCommands.length; ++i )
+    for ( var i = 0; i < this.transparentDrawCommands.length; ++i )
     {
         this.transparentDrawCommands[i].run( shader );
     }

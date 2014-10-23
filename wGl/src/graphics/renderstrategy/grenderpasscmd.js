@@ -209,6 +209,8 @@ function GTransMaskGeometryRenderPassCmd( gl, program, frameBuffer, depthTexture
     this.frameBuffer = frameBuffer;
     this.depthTexture = depthTexture;
 
+    var _this = this;
+
     program.setActivateShaderLambda
     (
         function ( shader )
@@ -217,7 +219,7 @@ function GTransMaskGeometryRenderPassCmd( gl, program, frameBuffer, depthTexture
              {
                 gl.uniform1i( shader.uniforms.mapPosition, 1 );
 
-                 depthTexture.draw( gl.TEXTURE1, null, null );
+                 _this.depthTexture.draw( gl.TEXTURE1, null, null );
              }
         }
     );

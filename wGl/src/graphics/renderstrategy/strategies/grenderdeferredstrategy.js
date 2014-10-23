@@ -190,7 +190,7 @@ GRenderDeferredStrategy.prototype.initScreenVBOs = function()
 {
     var gl = this.gl;
     
-    gl.clearColor(0.0, 0.0, 0.0, 0.0);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
     
     
@@ -515,7 +515,9 @@ GRenderDeferredStrategy.prototype.draw = function ( scene, hud )
         this.preCmds[i].run( scene );
     }
 
+    gl.clearColor(0.0, 0.0, 0.0, 0.0);
     this.transPass.run( scene );
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
     
     for ( var lIdx = 0; lIdx < lCount; ++lIdx )
     {

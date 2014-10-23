@@ -20,8 +20,8 @@
 
 /**
  * @constructor
- * @param {Array.<string> Contents of the mtl file.  Each element is a new line
- * @param {string} Path to the location of the mtl resources
+ * @param {Array.<string>} mtlStrA Contents of the mtl file.  Each element is a new line
+ * @param {string} path Path to the location of the mtl resources
  */
 function GMtlReader( mtlStrA, path )
 {
@@ -41,7 +41,9 @@ function GMtlReader( mtlStrA, path )
 		"Ks":       this.process_ks,
 		"map_kd":   this.process_mapKd,
 		"map_bump": this.process_mapBump,
-		"bump":     this.process_mapBump
+		"bump":     this.process_mapBump,
+        "d":        this.process_opacity,
+        "tr":       this.process_opacity
 	};
 
 	var size = mtlStrA.length;
@@ -104,13 +106,13 @@ GMtlReader.prototype.getMaterials = function()
 
 /**
  * Called when processing a comment (line starting with '#')
- * @param {Array.<string>} Current line (tokenized).
+ * @param {Array.<string>} lineA Current line (tokenized).
  */
 GMtlReader.prototype.process_comment = function ( lineA ){};
 
 /**
  * Called when processing a new material (line starting with 'newmtl')
- * @param {Array.<string>} Current line (tokenized).
+ * @param {Array.<string>} lineA Current line (tokenized).
  */
 GMtlReader.prototype.process_newmtl = function ( lineA )
 {
@@ -120,7 +122,7 @@ GMtlReader.prototype.process_newmtl = function ( lineA )
 
 /**
  * Called when processing an ambient color property (line starting with 'ka')
- * @param {Array.<string>} Current line (tokenized).
+ * @param {Array.<string>} lineA Current line (tokenized).
  */
 GMtlReader.prototype.process_ka = function( lineA )
 {
@@ -131,7 +133,7 @@ GMtlReader.prototype.process_ka = function( lineA )
 
 /**
  * Called when processing a diffuse color property (line starting with 'kd')
- * @param {Array.<string>} Current line (tokenized).
+ * @param {Array.<string>} lineA Current line (tokenized).
  */
 GMtlReader.prototype.process_kd = function( lineA )
 {
@@ -142,7 +144,7 @@ GMtlReader.prototype.process_kd = function( lineA )
 
 /**
  * Called when processing a specular color (line starting with 'ks')
- * @param {Array.<string>} Current line (tokenized).
+ * @param {Array.<string>} lineA Current line (tokenized).
  */
 GMtlReader.prototype.process_ks = function( lineA )
 {
@@ -153,7 +155,7 @@ GMtlReader.prototype.process_ks = function( lineA )
 
 /**
  * Called when processing a diffuse color texture (line starting with 'map_kd')
- * @param {Array.<string>} Current line (tokenized).
+ * @param {Array.<string>} lineA Current line (tokenized).
  */
 GMtlReader.prototype.process_mapKd = function( lineA )
 {
@@ -171,7 +173,7 @@ GMtlReader.prototype.process_mapKd = function( lineA )
 
 /**
  * Called when processing a bump map texture (line starting with '[map_]bump')
- * @param {Array.<string>} Current line (tokenized).
+ * @param {Array.<string>} lineA Current line (tokenized).
  */
 GMtlReader.prototype.process_mapBump = function( lineA )
 {
@@ -185,4 +187,13 @@ GMtlReader.prototype.process_mapBump = function( lineA )
 	var texture = new GTexture(texArgs, this.path);
 	
 	this.currentMtl.setMapBump(texture);
+};
+
+/**
+ * Called when processing opacity values
+ * @param {Array.<string>} lineA
+ */
+GMtlReader.prototype.process_opacity = function( lineA )
+{
+    this.currentMtl.setOpacity( parseFloat(lineA[1]) )
 };

@@ -171,6 +171,79 @@ GGeometryRenderPassCmd.prototype.run = function( scene )
 
 /**
  * @constructor
+ * @param {WebGLRenderingContext} gl Context to use for rendering
+ * @param {ShaderComposite} program Shader program composite to use for this pass
+ * @param {GFrameBuffer} frameBuffer Target frame buffer object for this pass
+ */
+function GTransGeometryRenderPassCmd( gl, program, frameBuffer )
+{
+    this.gl = gl;
+    this.shaderProgram = program;
+    this.frameBuffer = frameBuffer;
+}
+
+/**
+ * Execute this pass
+ * @param {GScene} Scene object to run this pass command against
+ */
+GTransGeometryRenderPassCmd.prototype.run = function( scene )
+{
+    var gl = this.gl;
+    gl.enable(gl.BLEND);
+    this.frameBuffer.bindBuffer();
+    scene.drawTransparentObjects( this.shaderProgram );
+    this.frameBuffer.unbindBuffer();
+};
+
+/**
+ * @constructor
+ * @param {WebGLRenderingContext} gl Context to use for rendering
+ * @param {ShaderComposite} program Shader program composite to use for this pass
+ * @param {GFrameBuffer} frameBuffer Target frame buffer object for this pass
+ * @param {GTexture} depthTexture
+ */
+function GTransMaskGeometryRenderPassCmd( gl, program, frameBuffer, depthTexture )
+{
+    this.gl = gl;
+    this.shaderProgram = program;
+    this.frameBuffer = frameBuffer;
+    this.depthTexture = depthTexture;
+
+    var _this = this;
+
+    program.setActivateShaderLambda
+    (
+        function ( shader )
+        {
+             if ( null != shader.uniforms.mapPosition )
+             {
+                gl.uniform1i( shader.uniforms.mapPosition, 1 );
+
+                 _this.depthTexture.draw( gl.TEXTURE1, null, null );
+             }
+        }
+    );
+}
+
+/**
+ * Execute this pass
+ * @param {GScene} Scene object to run this pass command against
+ */
+GTransMaskGeometryRenderPassCmd.prototype.run = function( scene )
+{
+    var gl = this.gl;
+
+    this.frameBuffer.bindBuffer();
+    gl.clear( gl.COLOR_BUFFER_BIT );
+
+
+    scene.drawTransparentObjects( this.shaderProgram );
+    this.frameBuffer.unbindBuffer();
+};
+
+
+/**
+ * @constructor
  * @param {WebGLRenderingContext} Context to use for rendering
  * @param {ShaderComposite} Shader program composite to use for this pass
  * @param {GFrameBuffer} Target frame buffer object for this pass
@@ -321,6 +394,11 @@ GPostEffectRenderPassCmd.prototype.drawScreenBuffer = function( shader )
     if ( null != shader.uniforms.mapRandom )
     {
         gl.uniform1i( shader.uniforms.mapRandom, mapIdx++ );
+    }
+
+    if ( null != shader.uniforms.mapTransp )
+    {
+        gl.uniform1i( shader.uniforms.mapTransp, mapIdx++ );
     }
     
     gl.bindBuffer( gl.ARRAY_BUFFER, this.screen.vertBuffer);

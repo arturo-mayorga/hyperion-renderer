@@ -340,9 +340,10 @@ GRenderPhongStrategy.prototype.drawScreenBuffer = function(shader)
 GRenderPhongStrategy.prototype.initPassCmds = function()
 {   
     var colorPass = new GGeometryRenderPassCmd( this.gl, this.programs.phongComposite, this.frameBuffers.color );
+    var transPass = new GTransGeometryRenderPassCmd( this.gl, this.programs.phongComposite, this.frameBuffers.color );
     var objidPass = new GGeometryRenderPassCmd( this.gl, this.programs.objidComposite, this.frameBuffers.objid );
     
-    this.passes = [ colorPass, objidPass ];
+    this.passes = [ objidPass, colorPass, transPass,  ];
 };
     
 

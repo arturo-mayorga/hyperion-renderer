@@ -175,7 +175,7 @@ GeometryTriMesh.prototype.prepareToClose = function()
 GeometryTriMesh.prototype.smoothenNormals = function()
 {
     var sigma = .000005;
-    var hyp = 2;
+    var hyp = 1.5;
     var visitedVerts = [];
     var i = 0;
     var j = 0;

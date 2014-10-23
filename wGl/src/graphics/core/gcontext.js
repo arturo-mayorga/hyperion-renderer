@@ -99,6 +99,7 @@ function GContext( canvas )
     
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.enable(gl.BLEND);
+    gl.enable(gl.CULL_FACE);
     
     gl.viewportWidth = canvas.width;
     gl.viewportHeight = canvas.height;

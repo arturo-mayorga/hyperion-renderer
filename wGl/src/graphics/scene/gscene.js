@@ -41,11 +41,13 @@ function GScene()
 	this.drawSectionEnum = 
 	{
 	    STATIC: 0,
-	    ARMATURE: 1
+	    ARMATURE: 1,
+        TRASPARENT: 2
 	};
 	
 	this.drawSection = this.drawSectionEnum.STATIC;
 	this.deferredDrawCommands = [];
+    this.transparentDrawCommands = [];
 	
 	this.isVisible = true;
 }
@@ -68,6 +70,12 @@ GScene.prototype.onDeferredDrawRequested = function ( command, conditionCode )
          this.drawSection === this.drawSectionEnum.STATIC )
     {
         this.deferredDrawCommands.push( command );
+        return true;
+    }
+    else if ( conditionCode === SceneDrawableDeferConditionCode.TRANSPARENCY_REQUEST &&
+              this.drawSection !== this.drawSectionEnum.TRASPARENT )
+    {
+        this.transparentDrawCommands.push( command );
         return true;
     }
     
@@ -193,6 +201,8 @@ GScene.prototype.drawThroughCamera = function ( camera, shaderComposite )
     {
         return;
     }
+
+    this.transparentDrawCommands = [];
     
     this.drawSection = this.drawSectionEnum.STATIC;
     
@@ -204,28 +214,13 @@ GScene.prototype.drawThroughCamera = function ( camera, shaderComposite )
     this.drawGeometry( this.tempMatrix, shader );
     
     shader.deactivate();
-    
-    this.drawSection = this.drawSectionEnum.ARMATURE;
-    
-    shader = shaderComposite.getArmatureShader();
-    shader.activate();
-    
-    camera.draw( this.tempMatrix, shader );
-    this.drawLights( shader );
-    
-    for ( var i in this.deferredDrawCommands )
-    {
-        this.deferredDrawCommands[i].run( shader );
-    }
-    
-    shader.deactivate();
-    
-    this.deferredDrawCommands = [];
+
+    this.drawArmatureObjects( shaderComposite );
 };
 
 /**
  * Render the scene with the provided shader program
- * @param {ShaderComposite} Shader program to use for rendering
+ * @param {ShaderComposite} shaderComposite Shader program to use for rendering
  */
 GScene.prototype.draw = function( shaderComposite )
 {
@@ -233,34 +228,74 @@ GScene.prototype.draw = function( shaderComposite )
     {
         return;
     }
+
+    this.transparentDrawCommands = [];
+
+    var i = 0;
     
     this.drawSection = this.drawSectionEnum.STATIC;
     
     var shader = shaderComposite.getStaticShader();
     shader.activate();
-    
+
     this.camera.draw( this.eyeMvMatrix, shader );
     this.drawLights( shader );
     this.drawGeometry( this.eyeMvMatrix, shader );
     
     shader.deactivate();
-    
+
+    this.drawArmatureObjects( shaderComposite );
+};
+
+/**
+ * Draw armature objects
+ * @param {ShaderComposite} shaderComposite Shader program to use for rendering
+ */
+GScene.prototype.drawArmatureObjects =  function ( shaderComposite )
+{
     this.drawSection = this.drawSectionEnum.ARMATURE;
-    
-    shader = shaderComposite.getArmatureShader();
+
+    if ( this.deferredDrawCommands.length === 0 ) return;
+
+    var shader = shaderComposite.getArmatureShader();
     shader.activate();
-    
+
     this.camera.draw( this.eyeMvMatrix, shader );
     this.drawLights( shader );
-    
-    for ( var i in this.deferredDrawCommands )
+
+    for ( var i = 0; i < this.deferredDrawCommands.length; ++i )
     {
         this.deferredDrawCommands[i].run( shader );
     }
-    
-    shader.deactivate();
-    
     this.deferredDrawCommands = [];
+    shader.deactivate();
+};
+
+/**
+ * Draw transparent objects
+ * @param {ShaderComposite} shaderComposite Shader program to use for rendering
+ */
+GScene.prototype.drawTransparentObjects = function( shaderComposite )
+{
+    this.drawSection = this.drawSectionEnum.TRASPARENT;
+
+    if ( this.transparentDrawCommands.length === 0 ) return;
+
+    var shader = shaderComposite.getStaticShader();
+    shader.activate();
+    this.gl.depthMask(0);
+
+    this.camera.draw( this.eyeMvMatrix, shader );
+    this.drawLights( shader );
+
+    for ( var i = 0; i < this.transparentDrawCommands.length; ++i )
+    {
+        this.transparentDrawCommands[i].run( shader );
+    }
+
+    this.gl.depthMask(1);
+    this.transparentDrawCommands = [];
+    shader.deactivate();
 };
 
 /**

@@ -114,6 +114,7 @@ GShader.prototype.bindToContext = function ( gl )
     uniforms.mapNormalScale  = gl.getUniformLocation( shaderProgram, "uMapNormalScale" );
     uniforms.normalEmphasis  = gl.getUniformLocation( shaderProgram, "uNormalEmphasis" );
     uniforms.objid           = gl.getUniformLocation( shaderProgram, "uObjid" );
+    uniforms.opacity         = gl.getUniformLocation( shaderProgram, "uOpacity" );
     
     uniforms.mapNormal       = gl.getUniformLocation( shaderProgram, "uMapNormal" );
     uniforms.mapPosition     = gl.getUniformLocation( shaderProgram, "uMapPosition" );
@@ -121,6 +122,7 @@ GShader.prototype.bindToContext = function ( gl )
     uniforms.mapShadow       = gl.getUniformLocation( shaderProgram, "uMapShadow" );
     uniforms.mapPing         = gl.getUniformLocation( shaderProgram, "uMapPing" );
     uniforms.mapRandom       = gl.getUniformLocation( shaderProgram, "uMapRandom" );
+    uniforms.mapTransp       = gl.getUniformLocation( shaderProgram, "uMapTranparents" );
     
     uniforms.lightPosition0  = gl.getUniformLocation( shaderProgram, "uLightPosition0" );
     uniforms.lightPosition1  = gl.getUniformLocation( shaderProgram, "uLightPosition1" );
@@ -139,6 +141,8 @@ GShader.prototype.bindToContext = function ( gl )
     this.glProgram = shaderProgram;
     this.vShader = vertexShader;
     this.fShader = fragmentShader;
+
+    /* @type {Function(GShader)} */ this.activateLamda = function ( shader ) {};
 };
 
 /**
@@ -201,7 +205,18 @@ GShader.prototype.activate = function()
     if ( -1 < this.attributes.skinVertexAttribute)
     {
         gl.enableVertexAttribArray(this.attributes.skinVertexAttribute);
-    } 
+    }
+
+    this.activateLamda( this );
+};
+
+/**
+ * Set shader activate lambda
+ * @param {Function(GShader)} handler
+ */
+GShader.prototype.setActivateShaderLambda = function( handler )
+{
+    this.activateLamda = handler;
 };
 
 

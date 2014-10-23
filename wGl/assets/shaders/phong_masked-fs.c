@@ -41,8 +41,11 @@ uniform float uNormalEmphasis;
 uniform sampler2D uMapNormal;
 #endif
 
+uniform sampler2D uMapPosition;
+
 varying mediump vec4 vNormal;
 varying mediump vec4 vPosition;
+varying mediump vec4 vpPosition;
 
 uniform vec3 uLightPosition0;
 
@@ -116,8 +119,19 @@ float uKsExponent = 100.0;
     float specularFactor = pow(specular, uKsExponent);
 
     mediump vec3 color = diffuseFactor * materialDiffuseColor + specularFactor * uKs.xyz;
+    
+    vec4 mask = texture2D( uMapPosition, vec2( (vpPosition.x/vpPosition.w+1.0)/2.0, (vpPosition.y/vpPosition.w+1.0)/2.0 ) );
+    
+    float opacity = 0.0;
+    
+    if ( mask.w > vpPosition.z/vpPosition.w ||
+         mask.w == 0.0 )
+    {
+        opacity = uOpacity;
+    }
 
-    gl_FragColor = vec4(color, uOpacity); 
+    gl_FragColor = vec4(color, opacity); 
+    //gl_FragColor = vec4(mask.w, mask.w, mask.w, 1.0);
 	//gl_FragColor = vec4(normal.x*0.5 + 0.5, normal.y*0.5 + 0.5, normal.z*0.5 + 0.5, 1);
 }
 

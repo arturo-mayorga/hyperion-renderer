@@ -290,7 +290,7 @@ ProfilerExploreState.prototype.update = function ( time )
 	if ( undefined !== this.debugLevel )
 	{
 	    while ( this.oData.context.decreaseRenderLevel() ) {}
-	    for ( var j = 0; j < this.debugLevel; ++i )
+	    for ( var j = 0; j < this.debugLevel; ++j )
 	    {
 	        this.oData.context.increaseRenderLevel();
 	    }

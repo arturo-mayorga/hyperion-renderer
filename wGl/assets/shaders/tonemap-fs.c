@@ -24,6 +24,7 @@ precision mediump float;
 uniform sampler2D uMapKd;
 uniform sampler2D uMapLight;
 uniform sampler2D uMapShadow;
+uniform sampler2D uMapTranparents;
 varying vec2 vTexCoordinate;
 
 void main(void)
@@ -33,12 +34,17 @@ void main(void)
     vec4 mapC = texture2D(uMapKd, vTexCoordinate);
     vec4 light= texture2D(uMapLight, vTexCoordinate);
     vec4 shad = texture2D(uMapShadow, vTexCoordinate);
+    vec4 trans= texture2D(uMapTranparents, vTexCoordinate);
     
     vec4 ambient = mapC * shad * 0.2;
     
     vec4 lightf = light * toneFactor * shad;
     
-   gl_FragColor = mapC * lightf + light * (light.w - 1.0)*mapC.w*toneFactor + ambient; 
+     vec4 col = mapC * lightf + light * (light.w - 1.0)*mapC.w*toneFactor + ambient; 
+     
+     gl_FragColor = mix (col, trans, trans.a);
+     
+     //gl_FragColor = trans;
 } 
 
 

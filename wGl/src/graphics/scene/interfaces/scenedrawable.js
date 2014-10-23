@@ -24,7 +24,8 @@
  */
 var SceneDrawableDeferConditionCode = 
 {
-    ARMATURE_REQUEST: 0
+    ARMATURE_REQUEST: 0,
+    TRANSPARENCY_REQUEST: 1
 };
  
 /**

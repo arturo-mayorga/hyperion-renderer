@@ -29,6 +29,7 @@ function GMaterial ( name )
 	this.Ka = vec4.create();
 	this.Kd = vec4.create();
 	this.Ks = vec4.create();
+    this.opacity = 1;
 	this.mapKd = undefined;
 	this.mapBump = undefined;
 	
@@ -118,6 +119,11 @@ GMaterial.prototype.draw = function( shader )
     {
         gl.uniform1f( shader.uniforms.normalEmphasis, (this.mapBump === gl.whiteTexture)?0:1 );
     }
+
+    if ( null != shader.uniforms.opacity )
+    {
+        gl.uniform1f( shader.uniforms.opacity, this.opacity );
+    }
     
     
     var mapIdx = 0;
@@ -206,4 +212,22 @@ GMaterial.prototype.setMapKd = function( texture )
 GMaterial.prototype.setMapBump = function( texture )
 {
     this.mapBump = texture;
+};
+
+/**
+ * Set the opacity of this material
+ * @param {number} opacity
+ */
+GMaterial.prototype.setOpacity = function( opacity )
+{
+    this.opacity = opacity;
+};
+
+/**
+ * Get the opacity of this material
+ * @returns {number}
+ */
+GMaterial.prototype.getOpacity = function()
+{
+    return this.opacity;
 };

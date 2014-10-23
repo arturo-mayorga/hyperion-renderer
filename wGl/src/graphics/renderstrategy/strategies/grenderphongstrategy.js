@@ -343,7 +343,7 @@ GRenderPhongStrategy.prototype.initPassCmds = function()
     var transPass = new GTransGeometryRenderPassCmd( this.gl, this.programs.phongComposite, this.frameBuffers.color );
     var objidPass = new GGeometryRenderPassCmd( this.gl, this.programs.objidComposite, this.frameBuffers.objid );
     
-    this.passes = [  colorPass, transPass, objidPass ];
+    this.passes = [ objidPass, colorPass, transPass,  ];
 };
     
 
@@ -356,7 +356,7 @@ GRenderPhongStrategy.prototype.draw = function ( scene, hud )
 {
     this.lastScene = scene;
     var gl = this.gl;
-    gl.enable(gl.BLEND);
+    gl.disable(gl.BLEND);
     
     for ( var key in this.passes )
     {

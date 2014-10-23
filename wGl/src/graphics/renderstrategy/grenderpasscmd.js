@@ -189,7 +189,7 @@ function GTransGeometryRenderPassCmd( gl, program, frameBuffer )
 GTransGeometryRenderPassCmd.prototype.run = function( scene )
 {
     var gl = this.gl;
-
+    gl.enable(gl.BLEND);
     this.frameBuffer.bindBuffer();
     scene.drawTransparentObjects( this.shaderProgram );
     this.frameBuffer.unbindBuffer();
